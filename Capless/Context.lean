@@ -10,6 +10,31 @@ inductive CBinding : Nat -> Nat -> Type where
 | bound : CBinding n k
 | inst : CaptureSet n k -> CBinding n k
 
+def TBinding.rename (b : TBinding n m k) (f : FinFun n n') : TBinding n' m k :=
+  match b with
+  | bound S => bound (S.rename f)
+  | inst S => inst (S.rename f)
+
+def TBinding.trename (b : TBinding n m k) (f : FinFun m m') : TBinding n m' k :=
+  match b with
+  | bound S => bound (S.trename f)
+  | inst S => inst (S.trename f)
+
+def TBinding.crename (b : TBinding n m k) (f : FinFun k k') : TBinding n m k' :=
+  match b with
+  | bound S => bound (S.crename f)
+  | inst S => inst (S.crename f)
+
+def CBinding.rename (b : CBinding n k) (f : FinFun n n') : CBinding n' k :=
+  match b with
+  | bound => bound
+  | inst C => inst (C.rename f)
+
+def CBinding.crename (b : CBinding n k) (f : FinFun k k') : CBinding n k' :=
+  match b with
+  | bound => bound
+  | inst C => inst (C.crename f)
+
 def TBinding.weaken : TBinding n m k -> TBinding (n+1) m k
 | bound S => bound S.weaken
 | inst S => inst S.weaken

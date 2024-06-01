@@ -19,7 +19,8 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Subcapt Γ {x} C
 | evar :
   Context.Bound Γ x (EType.ex (CType.capt C S)) ->
-  Subcapt Γ {x} (C.copen x)
+  Context.CBound Γ c (CBinding.inst {x}) ->
+  Subcapt Γ {x} (C.copen c)
 | cinstl :
   Context.CBound Γ c (CBinding.inst C) ->
   Subcapt Γ C (CaptureSet.csingleton c)

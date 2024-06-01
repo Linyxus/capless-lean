@@ -21,17 +21,17 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
     c1.cvars ⊆ c2.cvars →
     Subset c1 c2
 
-instance : EmptyCollection (CaptureSet n k) where
+instance CaptureSet.empty : EmptyCollection (CaptureSet n k) where
   emptyCollection := ⟨∅, ∅, ∅⟩
 
-instance : Union (CaptureSet n k) where
+instance CaptureSet.union : Union (CaptureSet n k) where
   union c1 c2 :=
     ⟨c1.vars ∪ c2.vars, c1.rvars ∪ c2.rvars, c1.cvars ∪ c2.cvars⟩
 
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
-instance : Singleton (Fin n) (CaptureSet n k) where
+instance CaptureSet.singleton : Singleton (Fin n) (CaptureSet n k) where
   singleton x := ⟨{x}, ∅, ∅⟩
 
 -- instance : Singleton (Fin k) (CaptureSet n k) where
@@ -57,5 +57,31 @@ def CaptureSet.open (C : CaptureSet (n+1) k) (x : Fin n) : CaptureSet n k :=
 
 def CaptureSet.copen (C : CaptureSet n (k+1)) (x : Fin k) : CaptureSet n k :=
   C.crename (FinFun.open x)
+
+theorem CaptureSet.rename_union {C1 C2 : CaptureSet n k} {f : FinFun n n'} :
+  (C1 ∪ C2).rename f = C1.rename f ∪ C2.rename f := by
+  cases C1; cases C2; simp [CaptureSet.rename, CaptureSet.union]
+  simp [Finset.image_union]
+
+theorem CaptureSet.crename_union {C1 C2 : CaptureSet n k} {f : FinFun k k'} :
+  (C1 ∪ C2).crename f = C1.crename f ∪ C2.crename f := by
+  cases C1; cases C2; simp [CaptureSet.crename, CaptureSet.union]
+  simp [Finset.image_union]
+
+theorem CaptureSet.rename_singleton {x : Fin n} {f : FinFun n n'} :
+  ({x} : CaptureSet n k).rename f = {f x} := by
+  simp [CaptureSet.rename, Finset.image_singleton, CaptureSet.singleton]
+
+theorem CaptureSet.rename_csingleton {x : Fin k} {f : FinFun n n'} :
+  (CaptureSet.csingleton x).rename f = CaptureSet.csingleton x := by
+  simp [CaptureSet.rename, CaptureSet.csingleton]
+
+theorem CaptureSet.crename_rename_comm {C : CaptureSet n k} {f : FinFun n n'} {g : FinFun k k'} :
+  (C.rename f).crename g = (C.crename g).rename f := by
+  cases C; simp [CaptureSet.rename, CaptureSet.crename, Finset.image_image]
+
+theorem CaptureSet.copen_rename_comm {C : CaptureSet n (k+1)} {x : Fin k} {f : FinFun n n'} :
+  (C.copen x).rename f = (C.rename f).copen x := by
+  simp [copen, crename_rename_comm]
 
 end Capless
