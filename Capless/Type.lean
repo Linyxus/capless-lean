@@ -132,4 +132,140 @@ def CType.copen (C : CType n m (k+1)) (x : Fin k) : CType n m k :=
 def SType.copen (S : SType n m (k+1)) (x : Fin k) : SType n m k :=
   S.crename (FinFun.open x)
 
+mutual
+
+theorem EType.crename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun k k') :
+  (E.rename f).crename g = (E.crename g).rename f :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.crename_rename_comm T f g.ext
+    simp [EType.rename, EType.crename, ih]
+  | EType.type T => by
+    have ih := CType.crename_rename_comm T f g
+    simp [EType.rename, EType.crename, ih]
+
+theorem CType.crename_rename_comm (C : CType n m k) (f : FinFun n n') (g : FinFun k k') :
+  (C.rename f).crename g = (C.crename g).rename f :=
+  match C with
+  | CType.capt C S => by
+    have ih1 := SType.crename_rename_comm S f g
+    simp [CType.rename, CType.crename, ih1, CaptureSet.crename_rename_comm]
+
+theorem SType.crename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFun k k') :
+  (S.rename f).crename g = (S.crename g).rename f :=
+  match S with
+  | SType.top => by simp [SType.rename, SType.crename]
+  | SType.tvar X => by simp [SType.rename, SType.crename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.crename_rename_comm E1 f g
+    have ih2 := EType.crename_rename_comm E2 f.ext g
+    simp [SType.rename, SType.crename, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.crename_rename_comm S f g
+    have ih2 := EType.crename_rename_comm E f g
+    simp [SType.rename, SType.crename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.crename_rename_comm E f g.ext
+    simp [SType.rename, SType.crename, ih]
+  | SType.box T => by
+    have ih := CType.crename_rename_comm T f g
+    simp [SType.rename, SType.crename, ih]
+
+end
+
+theorem EType.cweaken_rename_comm {E : EType n m k} :
+  E.cweaken.rename f = (E.rename f).cweaken := by
+  simp [cweaken, crename_rename_comm]
+
+mutual
+
+theorem EType.rename_rename (E : EType n m k) (f : FinFun n n') (g : FinFun n' n'') :
+  (E.rename f).rename g = E.rename (g ∘ f) :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.rename_rename T f g
+    simp [EType.rename, ih]
+  | EType.type T => by
+    have ih := CType.rename_rename T f g
+    simp [EType.rename, ih]
+
+theorem CType.rename_rename (T : CType n m k) (f : FinFun n n') (g : FinFun n' n'') :
+  (T.rename f).rename g = T.rename (g ∘ f) :=
+  match T with
+  | CType.capt C S => by
+    have ih1 := CaptureSet.rename_rename (C := C) (f := f) (g := g)
+    have ih2 := SType.rename_rename S f g
+    simp [CType.rename, ih1, ih2]
+
+theorem SType.rename_rename (S : SType n m k) (f : FinFun n n') (g : FinFun n' n'') :
+  (S.rename f).rename g = S.rename (g ∘ f) :=
+  match S with
+  | SType.top => by simp [SType.rename]
+  | SType.tvar X => by simp [SType.rename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.rename_rename E1 f g
+    have ih2 := EType.rename_rename E2 f.ext g.ext
+    simp [SType.rename, ih1, ih2, FinFun.ext_comp_ext]
+  | SType.tforall S E => by
+    have ih1 := SType.rename_rename S f g
+    have ih2 := EType.rename_rename E f g
+    simp [SType.rename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.rename_rename E f g
+    simp [SType.rename, ih]
+  | SType.box T => by
+    have ih := CType.rename_rename T f g
+    simp [SType.rename, ih]
+
+end
+
+theorem EType.weaken_rename {E : EType n m k} :
+  (E.rename f).weaken = E.weaken.rename f.ext := by
+  simp [weaken, rename_rename, FinFun.comp_weaken]
+
+mutual
+
+theorem EType.trename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun m m') :
+  (E.trename g).rename f = (E.rename f).trename g :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.trename_rename_comm T f g
+    simp [EType.trename, EType.rename, ih]
+  | EType.type T => by
+    have ih := CType.trename_rename_comm T f g
+    simp [EType.trename, EType.rename, ih]
+
+theorem CType.trename_rename_comm (T : CType n m k) (f : FinFun n n') (g : FinFun m m') :
+  (T.trename g).rename f = (T.rename f).trename g :=
+  match T with
+  | CType.capt C S => by
+    have ih2 := SType.trename_rename_comm S f g
+    simp [CType.trename, CType.rename, ih2]
+
+theorem SType.trename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFun m m') :
+  (S.trename g).rename f = (S.rename f).trename g :=
+  match S with
+  | SType.top => by simp [SType.trename, SType.rename]
+  | SType.tvar X => by simp [SType.trename, SType.rename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.trename_rename_comm E1 f g
+    have ih2 := EType.trename_rename_comm E2 f.ext g
+    simp [SType.trename, SType.rename, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.trename_rename_comm S f g
+    have ih2 := EType.trename_rename_comm E f g.ext
+    simp [SType.trename, SType.rename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.trename_rename_comm E f g
+    simp [SType.trename, SType.rename, ih]
+  | SType.box T => by
+    have ih := CType.trename_rename_comm T f g
+    simp [SType.trename, SType.rename, ih]
+
+end
+
+def EType.tweaken_rename {E : EType n m k} :
+  E.tweaken.rename f = (E.rename f).tweaken := by
+  simp [tweaken, trename, trename_rename_comm]
+
 end Capless

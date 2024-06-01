@@ -21,4 +21,21 @@ def FinFun.ext (f : FinFun n n') : FinFun (n+1) (n'+1) := by
   case zero => exact 0
   case succ j => exact Fin.succ (f j)
 
+theorem FinFun.comp_weaken {f : FinFun n n'} :
+  weaken ∘ f = f.ext ∘ weaken := by
+  funext i
+  cases n
+  case zero => exact rfl
+  case succ =>
+    cases i using Fin.cases
+    case zero => exact rfl
+    case succ j => exact rfl
+
+theorem FinFun.ext_comp_ext {f : FinFun n n'} {g : FinFun n' n''} :
+  g.ext ∘ f.ext = FinFun.ext (g ∘ f) := by
+  funext i
+  cases i using Fin.cases
+  case zero => exact rfl
+  case succ j => exact rfl
+
 end Capless

@@ -84,4 +84,16 @@ theorem CaptureSet.copen_rename_comm {C : CaptureSet n (k+1)} {x : Fin k} {f : F
   (C.copen x).rename f = (C.rename f).copen x := by
   simp [copen, crename_rename_comm]
 
+theorem CaptureSet.cweaken_rename_comm {C : CaptureSet n k} {f : FinFun n n'} :
+  (C.cweaken).rename f = (C.rename f).cweaken := by
+  simp [cweaken, crename_rename_comm]
+
+theorem CaptureSet.rename_rename {C : CaptureSet n k} :
+  (C.rename f).rename g = C.rename (g ∘ f) := by
+  cases C; simp [CaptureSet.rename, Finset.image_image]
+
+theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
+  (C.rename f).weaken = C.weaken.rename f.ext := by
+  simp [weaken, rename_rename, FinFun.comp_weaken]
+
 end Capless

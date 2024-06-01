@@ -36,12 +36,12 @@ inductive SSubtyp : Context n m k -> SType n m k -> SType n m k -> Prop where
   Context.TBound Γ X (TBinding.inst S) ->
   SSubtyp Γ S (SType.tvar X)
 | tinstr :
-  SSubtyp Γ S (SType.tvar X) ->
+  Context.TBound Γ X (TBinding.inst S) ->
   SSubtyp Γ (SType.tvar X) S
 | boxed :
   CSubtyp Γ T1 T2 ->
   SSubtyp Γ (SType.box T1) (SType.box T2)
-| forall :
+| xforall :
   ESubtyp Γ E2 E1 ->
   ESubtyp (Context.var Γ E2) F1 F2 ->
   SSubtyp Γ (SType.forall E1 F1) (SType.forall E2 F2)
