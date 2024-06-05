@@ -83,6 +83,14 @@ theorem CaptureSet.rename_rsingleton {x : Fin n} {f : FinFun n n'} :
   (CaptureSet.rsingleton x : CaptureSet n k).rename f = CaptureSet.rsingleton (f x) := by
   simp [CaptureSet.rename, CaptureSet.rsingleton]
 
+theorem CaptureSet.crename_singleton {x : Fin n} {f : FinFun k k'} :
+  ({x} : CaptureSet n k).crename f = {x} := by
+  simp [CaptureSet.crename, CaptureSet.singleton]
+
+theorem CaptureSet.crename_csingleton {x : Fin k} {f : FinFun k k'} :
+  (CaptureSet.csingleton x : CaptureSet n k).crename f = CaptureSet.csingleton (f x) := by
+  simp [CaptureSet.crename, CaptureSet.csingleton]
+
 theorem CaptureSet.rename_empty :
   ({} : CaptureSet n k).rename f = {} := by
   simp [CaptureSet.rename, CaptureSet.empty, Finset.image_empty]
@@ -106,6 +114,14 @@ theorem CaptureSet.rename_rename {C : CaptureSet n k} :
 theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
   (C.rename f).weaken = C.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
+
+theorem CaptureSet.crename_crename {C : CaptureSet n k} :
+  (C.crename f).crename g = C.crename (g ∘ f) := by
+  cases C; simp [CaptureSet.crename, Finset.image_image]
+
+theorem CaptureSet.crename_copen {C : CaptureSet n (k+1)} :
+  (C.copen c).crename f = (C.crename f.ext).copen (f c) :=
+  by simp [copen, crename_crename, FinFun.open_comp]
 
 inductive CaptureSet.NonLocal : CaptureSet (n+1) k -> Prop where
 | mk : ∀ {C : CaptureSet (n+1) k},

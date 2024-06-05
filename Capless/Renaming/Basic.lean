@@ -90,4 +90,9 @@ def VarMap.text {Γ : Context n m k} {Δ : Context n' m k}
       constructor
       apply ρ.cmap; assumption
 
+structure CVarMap (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
+  map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
+  tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
+  cmap : ∀ c b, Γ.CBound c b -> Δ.CBound (f c) (b.crename f)
+
 end Capless
