@@ -20,10 +20,11 @@ inductive DropCBinder : CaptureSet n (k+1) -> CaptureSet n k -> Prop where
 | mk :
   DropCBinder C.cweaken C
 
-inductive SealedLet : Term n m k -> CaptureSet n k -> CaptureSet (n+1) k -> Prop where
+inductive SealedLet : Term n m k -> CaptureSet (n+1) k -> Prop where
 | mk :
   Term.IsValue t ->
-  SealedLet t C1 (CaptureSet.weaken C2)
+  CaptureSet.NonLocal C2 ->
+  SealedLet t C2
 
 inductive Captured : Term n m k -> CaptureSet n k -> Prop where
 | var :
@@ -52,13 +53,13 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
 | letin :
   Captured t1 C1 ->
   Captured t2 C2 ->
-  ¬ (SealedLet t1 C1 C2) ->
+  ¬ (SealedLet t1 C2) ->
   DropBinder C2 C2' ->
   Captured (Term.letin t1 t2) (C1 ∪ C2')
 | letin_sealed :
   Captured t1 C1 ->
   Captured t2 (CaptureSet.weaken C2) ->
-  SealedLet t1 C1 (CaptureSet.weaken C2) ->
+  SealedLet t1 (CaptureSet.weaken C2) ->
   Captured (Term.letin t1 t2) C2
 | unbox :
   Captured (Term.unbox C x) (C ∪ {x})
@@ -69,7 +70,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.var x) E
 | exists_elim :
   Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
-  Context.CBound Γ c (CBinding.inst (CaptureSet.csingleton x)) ->
+  Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
   Typed Γ (Term.var x) (EType.type (CType.capt {x} (S.copen c)))
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->

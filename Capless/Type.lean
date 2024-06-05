@@ -177,6 +177,14 @@ theorem EType.cweaken_rename_comm {E : EType n m k} :
   E.cweaken.rename f = (E.rename f).cweaken := by
   simp [cweaken, crename_rename_comm]
 
+theorem SType.copen_rename_comm {S : SType n m (k+1)} :
+  (S.copen x).rename f = (S.rename f).copen x := by
+  simp [copen, crename_rename_comm]
+
+theorem CType.copen_rename_comm {C : CType n m (k+1)} :
+  (C.copen x).rename f = (C.rename f).copen x := by
+  simp [copen, crename_rename_comm]
+
 mutual
 
 theorem EType.rename_rename (E : EType n m k) (f : FinFun n n') (g : FinFun n' n'') :
@@ -267,5 +275,21 @@ end
 def EType.tweaken_rename {E : EType n m k} :
   E.tweaken.rename f = (E.rename f).tweaken := by
   simp [tweaken, trename, trename_rename_comm]
+
+def EType.rename_open :
+  (EType.open E x).rename f = (E.rename f.ext).open (f x) := by
+  simp [EType.open]
+  simp [EType.rename_rename]
+  simp [FinFun.open_comp]
+
+theorem EType.rename_topen :
+  (EType.topen E X).rename f = (E.rename f).topen X := by
+  simp [EType.topen, EType.rename]
+  simp [EType.trename_rename_comm]
+
+theorem EType.rename_copen :
+  (EType.copen E c).rename f = (E.rename f).copen c := by
+  simp [EType.copen, EType.rename]
+  simp [EType.crename_rename_comm]
 
 end Capless

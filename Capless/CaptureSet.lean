@@ -37,6 +37,9 @@ instance CaptureSet.singleton : Singleton (Fin n) (CaptureSet n k) where
 -- instance : Singleton (Fin k) (CaptureSet n k) where
 --   singleton x := ⟨∅, ∅, {x}⟩
 
+def CaptureSet.rsingleton (x : Fin n) : CaptureSet n k :=
+  ⟨∅, {x}, ∅⟩
+
 def CaptureSet.csingleton (x : Fin k) : CaptureSet n k :=
   ⟨∅, ∅, {x}⟩
 
@@ -76,6 +79,14 @@ theorem CaptureSet.rename_csingleton {x : Fin k} {f : FinFun n n'} :
   (CaptureSet.csingleton x).rename f = CaptureSet.csingleton x := by
   simp [CaptureSet.rename, CaptureSet.csingleton]
 
+theorem CaptureSet.rename_rsingleton {x : Fin n} {f : FinFun n n'} :
+  (CaptureSet.rsingleton x : CaptureSet n k).rename f = CaptureSet.rsingleton (f x) := by
+  simp [CaptureSet.rename, CaptureSet.rsingleton]
+
+theorem CaptureSet.rename_empty :
+  ({} : CaptureSet n k).rename f = {} := by
+  simp [CaptureSet.rename, CaptureSet.empty, Finset.image_empty]
+
 theorem CaptureSet.crename_rename_comm {C : CaptureSet n k} {f : FinFun n n'} {g : FinFun k k'} :
   (C.rename f).crename g = (C.crename g).rename f := by
   cases C; simp [CaptureSet.rename, CaptureSet.crename, Finset.image_image]
@@ -95,5 +106,61 @@ theorem CaptureSet.rename_rename {C : CaptureSet n k} :
 theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
   (C.rename f).weaken = C.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
+
+inductive CaptureSet.NonLocal : CaptureSet (n+1) k -> Prop where
+| mk : ∀ {C : CaptureSet (n+1) k},
+  0 ∉ C.vars ->
+  0 ∉ C.rvars ->
+  C.NonLocal
+
+theorem Finset.nonlocal_rename_l
+  (he : xs0 = Finset.image (FinFun.ext f) xs)
+  (h : 0 ∉ xs0) :
+  0 ∉ xs := by
+  intro h0
+  apply h
+  subst he
+  have heq : FinFun.ext f 0 = 0 := by rfl
+  rw [<- heq]
+  apply Finset.mem_image_of_mem
+  trivial
+
+theorem CaptureSet.nonlocal_rename_l
+  (he : C0 = C.rename (FinFun.ext f))
+  (h : NonLocal C0) :
+  NonLocal C := by
+  cases C0; cases C
+  cases h
+  case mk h1 h2 =>
+    simp [CaptureSet.rename] at he
+    simp at *
+    let ⟨he1, he2, he3⟩ := he
+    subst he1 he2
+    constructor <;> simp
+    apply Finset.nonlocal_rename_l rfl h1
+    apply Finset.nonlocal_rename_l rfl h2
+
+theorem Finset.nonlocal_rename_r
+  (h : 0 ∉ xs) :
+  0 ∉ Finset.image (FinFun.ext f) xs := by
+  intro h0
+  apply h
+  rw [Finset.mem_image] at h0
+  let ⟨a0, he, heq⟩ := h0
+  cases a0 using Fin.cases
+  case zero => trivial
+  case succ a1 =>
+    simp [FinFun.ext] at heq
+    cases heq
+
+theorem CaptureSet.nonlocal_rename_r
+  (h : NonLocal C) :
+  NonLocal (C.rename (FinFun.ext f)) := by
+  cases C; cases h
+  case mk h1 h2 =>
+    simp at *
+    constructor <;> simp only [CaptureSet.rename]
+    apply Finset.nonlocal_rename_r h1
+    apply Finset.nonlocal_rename_r h2
 
 end Capless

@@ -38,4 +38,11 @@ theorem FinFun.ext_comp_ext {f : FinFun n n'} {g : FinFun n' n''} :
   case zero => exact rfl
   case succ j => exact rfl
 
+theorem FinFun.open_comp {f : FinFun n n'} {x : Fin n} :
+  f ∘ FinFun.open x = FinFun.open (f x) ∘ f.ext := by
+  funext i
+  cases i using Fin.cases
+  case zero => exact rfl
+  case succ j => exact rfl
+
 end Capless
