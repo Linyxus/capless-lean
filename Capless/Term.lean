@@ -89,4 +89,19 @@ theorem IsValue.rename_r {t : Term n m k}
   (t.rename f).IsValue := by
   cases hv <;> simp [Term.rename] <;> constructor
 
+def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
+
+def Term.tweaken (t : Term n m k) : Term n (m+1) k := t.trename FinFun.weaken
+
+def Term.cweaken (t : Term n m k) : Term n m (k+1) := t.crename FinFun.weaken
+
+def Term.open (t : Term (n+1) m k) (x : Fin n) : Term n m k :=
+  t.rename (FinFun.open x)
+
+def Term.topen (t : Term n (m+1) k) (X : Fin m) : Term n m k :=
+  t.trename (FinFun.open X)
+
+def Term.copen (t : Term n m (k+1)) (c : Fin k) : Term n m k :=
+  t.crename (FinFun.open c)
+
 end Capless
