@@ -230,5 +230,19 @@ theorem Typing.rename
     have ih2 := ih2 (ρ.ext _)
     rw [<- EType.weaken_rename] at ih2
     trivial
+  case bindt ih =>
+    simp [Term.rename]
+    apply Typed.bindt
+    have ih := ih (ρ.text _)
+    simp [Term.rename, TBinding.rename, EType.rename, CType.rename] at ih
+    rw [EType.tweaken_rename] at ih
+    trivial
+  case bindc ih =>
+    simp [Term.rename]
+    apply Typed.bindc
+    have ih := ih (ρ.cext _)
+    simp [Term.rename, CBinding.rename] at ih
+    rw [EType.cweaken_rename_comm] at ih
+    trivial
 
 end Capless

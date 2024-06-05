@@ -111,5 +111,11 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ t1 E1 ->
   Typed (Context.var Γ E1) T2 E2.weaken ->
   Typed Γ (Term.letin t1 t2) E2
+| bindt :
+  Typed (Context.tvar Γ (TBinding.inst S)) t E.tweaken ->
+  Typed Γ (Term.bindt S t) E
+| bindc :
+  Typed (Context.cvar Γ (CBinding.inst C)) t E.cweaken ->
+  Typed Γ (Term.bindc C t) E
 
 end Capless
