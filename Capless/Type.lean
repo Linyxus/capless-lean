@@ -233,6 +233,7 @@ theorem EType.weaken_rename {E : EType n m k} :
 
 mutual
 
+
 theorem EType.trename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun m m') :
   (E.trename g).rename f = (E.rename f).trename g :=
   match E with
@@ -272,6 +273,88 @@ theorem SType.trename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
 
 end
 
+mutual
+
+theorem EType.crename_crename (E : EType n m k) (f : FinFun k k') (g : FinFun k' k'') :
+  (E.crename f).crename g = E.crename (g ∘ f) :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.crename_crename T f.ext g.ext
+    simp [EType.crename, CType.crename, ih, FinFun.ext_comp_ext]
+  | EType.type T => by
+    have ih := CType.crename_crename T f g
+    simp [EType.crename, CType.crename, ih]
+
+theorem CType.crename_crename (T : CType n m k) (f : FinFun k k') (g : FinFun k' k'') :
+  (T.crename f).crename g = T.crename (g ∘ f) :=
+  match T with
+  | CType.capt C S => by
+    have ih2 := SType.crename_crename S f g
+    simp [CType.crename, CaptureSet.crename_crename, ih2]
+
+theorem SType.crename_crename (S : SType n m k) (f : FinFun k k') (g : FinFun k' k'') :
+  (S.crename f).crename g = S.crename (g ∘ f) :=
+  match S with
+  | SType.top => by simp [SType.crename]
+  | SType.tvar X => by simp [SType.crename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.crename_crename E1 f g
+    have ih2 := EType.crename_crename E2 f g
+    simp [SType.crename, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.crename_crename S f g
+    have ih2 := EType.crename_crename E f g
+    simp [SType.crename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.crename_crename E f.ext g.ext
+    simp [SType.crename, ih, FinFun.ext_comp_ext]
+  | SType.box T => by
+    have ih := CType.crename_crename T f g
+    simp [SType.crename, ih]
+
+end
+
+mutual
+
+theorem EType.crename_trename_comm (E : EType n m k) (f : FinFun k k') (g : FinFun m m') :
+  (E.crename f).trename g = (E.trename g).crename f :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.crename_trename_comm T f.ext g
+    simp [EType.crename, EType.trename, ih]
+  | EType.type T => by
+    have ih := CType.crename_trename_comm T f g
+    simp [EType.crename, EType.trename, ih]
+
+theorem CType.crename_trename_comm (T : CType n m k) (f : FinFun k k') (g : FinFun m m') :
+  (T.crename f).trename g = (T.trename g).crename f :=
+  match T with
+  | CType.capt C S => by
+    have ih2 := SType.crename_trename_comm S f g
+    simp [CType.crename, CType.trename, ih2]
+
+theorem SType.crename_trename_comm (S : SType n m k) (f : FinFun k k') (g : FinFun m m') :
+  (S.crename f).trename g = (S.trename g).crename f :=
+  match S with
+  | SType.top => by simp [SType.crename, SType.trename]
+  | SType.tvar X => by simp [SType.crename, SType.trename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.crename_trename_comm E1 f g
+    have ih2 := EType.crename_trename_comm E2 f g
+    simp [SType.crename, SType.trename, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.crename_trename_comm S f g
+    have ih2 := EType.crename_trename_comm E f g.ext
+    simp [SType.crename, SType.trename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.crename_trename_comm E f.ext g
+    simp [SType.crename, SType.trename, ih]
+  | SType.box T => by
+    have ih := CType.crename_trename_comm T f g
+    simp [SType.crename, SType.trename, ih]
+
+end
+
 def EType.tweaken_rename {E : EType n m k} :
   E.tweaken.rename f = (E.rename f).tweaken := by
   simp [tweaken, trename, trename_rename_comm]
@@ -291,5 +374,17 @@ theorem EType.rename_copen :
   (EType.copen E c).rename f = (E.rename f).copen c := by
   simp [EType.copen, EType.rename]
   simp [EType.crename_rename_comm]
+
+theorem EType.cweaken_crename {E : EType n m k} :
+  (E.crename f).cweaken = E.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
+theorem EType.weaken_crename {E : EType n m k} :
+  (E.crename f).weaken = E.weaken.crename f := by
+  simp [weaken, crename_rename_comm]
+
+theorem EType.tweaken_crename {E : EType n m k} :
+  (E.crename f).tweaken = E.tweaken.crename f := by
+  simp [tweaken, crename_trename_comm]
 
 end Capless

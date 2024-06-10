@@ -124,6 +124,26 @@ theorem CBinding.rename_rename {b : CBinding n k} :
   case bound => simp [rename]
   case inst => simp [rename, CaptureSet.rename_rename]
 
+theorem TBinding.crename_crename {b : TBinding n m k} :
+  (b.crename f).crename g = b.crename (g ∘ f) := by
+  cases b
+  case bound => simp [crename, SType.crename_crename]
+  case inst => simp [crename, SType.crename_crename]
+
+theorem CBinding.crename_crename {b : CBinding n k} :
+  (b.crename f).crename g = b.crename (g ∘ f) := by
+  cases b
+  case bound => simp [crename]
+  case inst => simp [crename, CaptureSet.crename_crename]
+
+theorem TBinding.cweaken_crename {b : TBinding n m k} :
+  (b.crename f).cweaken = b.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
+theorem CBinding.cweaken_crename {b : CBinding n k} :
+  (b.crename f).cweaken = b.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
 theorem TBinding.weaken_rename {b : TBinding n m k} :
   (b.rename f).weaken = b.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
@@ -141,5 +161,23 @@ theorem TBinding.trename_rename_comm {b : TBinding n m k} :
 theorem TBinding.tweaken_rename_comm {b : TBinding n m k} :
   b.tweaken.rename f = (b.rename f).tweaken := by
   simp [tweaken, trename_rename_comm]
+
+theorem TBinding.weaken_crename {b : TBinding n m k} :
+  (b.crename f).weaken = b.weaken.crename f := by
+  simp [weaken, crename_rename_comm]
+
+theorem CBinding.weaken_crename {b : CBinding n k} :
+  (b.crename f).weaken = b.weaken.crename f := by
+  simp [weaken, crename_rename_comm]
+
+theorem TBinding.crename_trename_comm {b : TBinding n m k} :
+  (b.trename f).crename g = (b.crename g).trename f := by
+  cases b
+  case bound => simp [trename, crename, SType.crename_trename_comm]
+  case inst => simp [trename, crename, SType.crename_trename_comm]
+
+theorem TBinding.tweaken_crename {b : TBinding n m k} :
+  (b.crename f).tweaken = b.tweaken.crename f := by
+  simp [tweaken, crename_trename_comm]
 
 end Capless

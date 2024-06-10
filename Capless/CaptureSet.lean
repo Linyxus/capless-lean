@@ -115,6 +115,10 @@ theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
   (C.rename f).weaken = C.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
 
+theorem CaptureSet.weaken_crename {C : CaptureSet n k} :
+  (C.crename f).weaken = C.weaken.crename f := by
+  simp [weaken, crename_rename_comm]
+
 theorem CaptureSet.crename_crename {C : CaptureSet n k} :
   (C.crename f).crename g = C.crename (g ∘ f) := by
   cases C; simp [CaptureSet.crename, Finset.image_image]
@@ -178,5 +182,9 @@ theorem CaptureSet.nonlocal_rename_r
     constructor <;> simp only [CaptureSet.rename]
     apply Finset.nonlocal_rename_r h1
     apply Finset.nonlocal_rename_r h2
+
+theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
+  (C.crename f).cweaken = C.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
 
 end Capless
