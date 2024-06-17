@@ -132,4 +132,30 @@ theorem SSubtyp.crename
     apply ih
     apply CVarMap.cext <;> trivial
 
+theorem CSubtyp.crename
+  (h : CSubtyp Γ C1 C2)
+  (ρ : CVarMap Γ f Δ) :
+  CSubtyp Δ (C1.crename f) (C2.crename f) := by
+  cases h
+  case capt hc hs =>
+    simp [CType.crename]
+    apply capt
+    apply Subcapt.crename <;> aesop
+    apply SSubtyp.crename <;> aesop
+
+theorem ESubtyp.crename
+  (h : ESubtyp Γ E1 E2)
+  (ρ : CVarMap Γ f Δ) :
+  ESubtyp Δ (E1.crename f) (E2.crename f) := by
+  cases h
+  case exist hc =>
+    simp [EType.crename]
+    apply ESubtyp.exist
+    apply CSubtyp.crename; trivial
+    apply ρ.cext
+  case type =>
+    simp [EType.crename]
+    apply ESubtyp.type
+    apply CSubtyp.crename <;> trivial
+
 end Capless

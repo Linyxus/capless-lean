@@ -129,7 +129,7 @@ theorem Captured.rename
     simp [Term.rename, CaptureSet.rename_union]
     constructor
 
-theorem Typing.rename
+theorem Typed.rename
   {Γ : Context n m k} {Δ : Context n' m k}
   (h : Typed Γ t E)
   (ρ : VarMap Γ f Δ) :

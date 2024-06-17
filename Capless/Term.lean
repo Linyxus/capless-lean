@@ -84,10 +84,42 @@ theorem IsValue.rename_l {t : Term n m k}
   (hv : (t.rename f).IsValue) :
   t.IsValue := IsValue.rename_l' rfl hv
 
+theorem IsValue.crename_l' {t : Term n m k} {t0 : Term n m k'}
+  (he : t0 = t.crename f)
+  (hv : t0.IsValue) :
+  t.IsValue := by
+  cases hv
+  all_goals (cases t <;> simp [Term.crename] at he; try constructor)
+
+theorem IsValue.crename_l {t : Term n m k}
+  (hv : (t.crename f).IsValue) :
+  t.IsValue := IsValue.crename_l' rfl hv
+
+theorem IsValue.trename_l' {t : Term n m k} {t0 : Term n m' k}
+  (he : t0 = t.trename f)
+  (hv : t0.IsValue) :
+  t.IsValue := by
+  cases hv
+  all_goals (cases t <;> simp [Term.trename] at he; try constructor)
+
+theorem IsValue.trename_l {t : Term n m k}
+  (hv : (t.trename f).IsValue) :
+  t.IsValue := IsValue.trename_l' rfl hv
+
 theorem IsValue.rename_r {t : Term n m k}
   (hv : t.IsValue) :
   (t.rename f).IsValue := by
   cases hv <;> simp [Term.rename] <;> constructor
+
+theorem IsValue.trename_r {t : Term n m k}
+  (hv : t.IsValue) :
+  (t.trename f).IsValue := by
+  cases hv <;> simp [Term.trename] <;> constructor
+
+theorem IsValue.crename_r {t : Term n m k}
+  (hv : t.IsValue) :
+  (t.crename f).IsValue := by
+  cases hv <;> simp [Term.crename] <;> constructor
 
 def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
 

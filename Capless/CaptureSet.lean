@@ -91,9 +91,17 @@ theorem CaptureSet.crename_csingleton {x : Fin k} {f : FinFun k k'} :
   (CaptureSet.csingleton x : CaptureSet n k).crename f = CaptureSet.csingleton (f x) := by
   simp [CaptureSet.crename, CaptureSet.csingleton]
 
+theorem CaptureSet.crename_rsingleton {x : Fin n} {f : FinFun k k'} :
+  (CaptureSet.rsingleton x : CaptureSet n k).crename f = CaptureSet.rsingleton x := by
+  simp [CaptureSet.crename, CaptureSet.rsingleton]
+
 theorem CaptureSet.rename_empty :
   ({} : CaptureSet n k).rename f = {} := by
   simp [CaptureSet.rename, CaptureSet.empty, Finset.image_empty]
+
+theorem CaptureSet.crename_empty :
+  ({} : CaptureSet n k).crename f = {} := by
+  simp [CaptureSet.crename, CaptureSet.empty, Finset.image_empty]
 
 theorem CaptureSet.crename_rename_comm {C : CaptureSet n k} {f : FinFun n n'} {g : FinFun k k'} :
   (C.rename f).crename g = (C.crename g).rename f := by
@@ -160,6 +168,23 @@ theorem CaptureSet.nonlocal_rename_l
     apply Finset.nonlocal_rename_l rfl h1
     apply Finset.nonlocal_rename_l rfl h2
 
+theorem CaptureSet.nonlocal_crename_l
+  (he : C0 = C.crename f)
+  (h : NonLocal C0) :
+  NonLocal C := by
+  cases C0; cases C
+  cases h
+  case mk h1 h2 =>
+    simp [CaptureSet.crename] at he
+    simp at *
+    let ⟨he1, he2, he3⟩ := he
+    subst he1 he2
+    constructor <;> simp
+    assumption
+    assumption
+
+
+
 theorem Finset.nonlocal_rename_r
   (h : 0 ∉ xs) :
   0 ∉ Finset.image (FinFun.ext f) xs := by
@@ -182,6 +207,16 @@ theorem CaptureSet.nonlocal_rename_r
     constructor <;> simp only [CaptureSet.rename]
     apply Finset.nonlocal_rename_r h1
     apply Finset.nonlocal_rename_r h2
+
+theorem CaptureSet.nonlocal_crename_r
+  (h : NonLocal C) :
+  NonLocal (C.crename f) := by
+  cases C; cases h
+  case mk h1 h2 =>
+    simp at *
+    constructor <;> simp only [CaptureSet.crename]
+    assumption
+    assumption
 
 theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
   (C.crename f).cweaken = C.cweaken.crename f.ext := by
