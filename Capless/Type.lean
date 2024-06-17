@@ -460,4 +460,24 @@ theorem EType.cweaken_trename {E : EType n m k} :
   (E.trename f).cweaken = E.cweaken.trename f := by
   simp [cweaken, crename_trename_comm]
 
+theorem EType.trename_copen {E : EType n m (k+1)} :
+  (E.copen c).trename f = (E.trename f).copen c := by
+  simp [copen, crename_trename_comm]
+
+theorem SType.trename_copen {S : SType n m (k+1)} :
+  (S.copen c).trename f = (S.trename f).copen c := by
+  simp [copen, crename_trename_comm]
+
+theorem CType.trename_copen {C : CType n m (k+1)} :
+  (C.copen c).trename f = (C.trename f).copen c := by
+  simp [copen, crename_trename_comm]
+
+theorem EType.trename_open {E : EType (n+1) m k} :
+  (E.open x).trename f = (E.trename f).open x := by
+  simp [EType.open, trename_rename_comm]
+
+theorem EType.trename_topen {E : EType n (m+1) k} :
+  (E.topen X).trename f = (E.trename f.ext).topen (f X) := by
+  simp [EType.topen, EType.trename_trename, FinFun.open_comp]
+
 end Capless
