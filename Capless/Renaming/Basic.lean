@@ -181,4 +181,90 @@ def CVarMap.text {Γ : Context n m k} {Δ : Context n m k'}
       constructor
       apply ρ.cmap; assumption
 
-end Capless
+structure TVarMap (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) where
+  map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.trename f)
+  tmap : ∀ X b, Γ.TBound X b -> Δ.TBound (f X) (b.trename f)
+  cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
+
+def TVarMap.ext {Γ : Context n m k} {Δ : Context n m' k}
+  (ρ : TVarMap Γ f Δ) (E : EType n m k) :
+  TVarMap (Γ.var E) f (Δ.var (E.trename f)) := by
+  constructor
+  case map =>
+    intro x E hb
+    cases hb
+    case here =>
+      rw [<- EType.weaken_trename]
+      constructor
+    case there_var hb0 =>
+      rw [<- EType.weaken_trename]
+      constructor
+      apply ρ.map; assumption
+  case tmap =>
+    intro x b hb
+    cases hb
+    case there_var =>
+      rw [<- TBinding.weaken_trename]
+      constructor
+      apply ρ.tmap; assumption
+  case cmap =>
+    intro c b hb
+    cases hb
+    case there_var =>
+      constructor
+      apply ρ.cmap; assumption
+
+def TVarMap.text {Γ : Context n m k} {Δ : Context n m' k}
+  (ρ : TVarMap Γ f Δ) (b : TBinding n m k) :
+  TVarMap (Γ.tvar b) f.ext (Δ.tvar (b.trename f)) := by
+  constructor
+  case map =>
+    intro x E hb
+    cases hb
+    case there_tvar hb0 =>
+      rw [<- EType.tweaken_trename]
+      constructor
+      apply ρ.map; assumption
+  case tmap =>
+    intro x b hb
+    cases hb
+    case here =>
+      rw [<- TBinding.tweaken_trename]
+      constructor
+    case there_tvar hb0 =>
+      rw [<- TBinding.tweaken_trename]
+      constructor
+      apply ρ.tmap; assumption
+  case cmap =>
+    intro c b hb
+    cases hb
+    case there_tvar hb0 =>
+      constructor
+      apply ρ.cmap; assumption
+
+def TVarMap.cext {Γ : Context n m k} {Δ : Context n m' k}
+  (ρ : TVarMap Γ f Δ) (b : CBinding n k) :
+  TVarMap (Γ.cvar b) f (Δ.cvar b) := by
+  constructor
+  case map =>
+    intro x E hb
+    cases hb
+    case there_cvar hb0 =>
+      rw [<- EType.cweaken_trename]
+      constructor
+      apply ρ.map; assumption
+  case tmap =>
+    intro x b hb
+    cases hb
+    case there_cvar hb0 =>
+      rw [<- TBinding.cweaken_trename]
+      constructor
+      apply ρ.tmap; assumption
+  case cmap =>
+    intro c b hb
+    cases hb
+    case here =>
+      constructor
+    case there_cvar hb0 =>
+      constructor
+      apply ρ.cmap; assumption

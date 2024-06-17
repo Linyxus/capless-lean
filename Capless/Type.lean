@@ -407,4 +407,57 @@ theorem EType.crename_topen {E : EType n (m+1) k} :
   (E.topen X).crename f = (E.crename f).topen X := by
   simp [EType.topen, crename_trename_comm]
 
+theorem EType.weaken_trename {E : EType n m k} :
+  (E.trename f).weaken = E.weaken.trename f := by
+  simp [weaken, trename_rename_comm]
+
+mutual
+
+theorem EType.trename_trename (E : EType n m k) (f : FinFun m m') (g : FinFun m' m'') :
+  (E.trename f).trename g = E.trename (g ∘ f) :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.trename_trename T f g
+    simp [EType.trename, ih]
+  | EType.type T => by
+    have ih := CType.trename_trename T f g
+    simp [EType.trename, ih]
+
+theorem CType.trename_trename (T : CType n m k) (f : FinFun m m') (g : FinFun m' m'') :
+  (T.trename f).trename g = T.trename (g ∘ f) :=
+  match T with
+  | CType.capt C S => by
+    have ih2 := SType.trename_trename S f g
+    simp [CType.trename, ih2]
+
+theorem SType.trename_trename (S : SType n m k) (f : FinFun m m') (g : FinFun m' m'') :
+  (S.trename f).trename g = S.trename (g ∘ f) :=
+  match S with
+  | SType.top => by simp [SType.trename]
+  | SType.tvar X => by simp [SType.trename]
+  | SType.forall E1 E2 => by
+    have ih1 := EType.trename_trename E1 f g
+    have ih2 := EType.trename_trename E2 f g
+    simp [SType.trename, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.trename_trename S f g
+    have ih2 := EType.trename_trename E f.ext g.ext
+    simp [SType.trename, ih1, ih2, FinFun.ext_comp_ext]
+  | SType.cforall E => by
+    have ih := EType.trename_trename E f g
+    simp [SType.trename, ih]
+  | SType.box T => by
+    have ih := CType.trename_trename T f g
+    simp [SType.trename, ih]
+
+end
+
+theorem EType.tweaken_trename {E : EType n m k} :
+  (E.trename f).tweaken = E.tweaken.trename f.ext := by
+  simp [tweaken, trename_trename, FinFun.comp_weaken]
+
+theorem EType.cweaken_trename {E : EType n m k} :
+  (E.trename f).cweaken = E.cweaken.trename f := by
+  simp [cweaken, crename_trename_comm]
+
 end Capless

@@ -136,6 +136,12 @@ theorem CBinding.crename_crename {b : CBinding n k} :
   case bound => simp [crename]
   case inst => simp [crename, CaptureSet.crename_crename]
 
+theorem TBinding.trename_trename {b : TBinding n m k} :
+  (b.trename f).trename g = b.trename (g ∘ f) := by
+  cases b
+  case bound => simp [trename, SType.trename_trename]
+  case inst => simp [trename, SType.trename_trename]
+
 theorem TBinding.cweaken_crename {b : TBinding n m k} :
   (b.crename f).cweaken = b.cweaken.crename f.ext := by
   simp [cweaken, crename_crename, FinFun.comp_weaken]
@@ -179,5 +185,17 @@ theorem TBinding.crename_trename_comm {b : TBinding n m k} :
 theorem TBinding.tweaken_crename {b : TBinding n m k} :
   (b.crename f).tweaken = b.tweaken.crename f := by
   simp [tweaken, crename_trename_comm]
+
+theorem TBinding.tweaken_trename {b : TBinding n m k} :
+  (b.trename f).tweaken = b.tweaken.trename f.ext := by
+  simp [tweaken, trename_trename, FinFun.comp_weaken]
+
+theorem TBinding.weaken_trename {b : TBinding n m k} :
+  (b.trename f).weaken = b.weaken.trename f := by
+  simp [weaken, trename_rename_comm]
+
+theorem TBinding.cweaken_trename {b : TBinding n m k} :
+  (b.trename f).cweaken = b.cweaken.trename f := by
+  simp [cweaken, crename_trename_comm]
 
 end Capless
