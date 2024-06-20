@@ -1,5 +1,6 @@
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Image
+import Mathlib.Data.Finset.PImage
 import Capless.Basic
 namespace Capless
 
@@ -221,5 +222,38 @@ theorem CaptureSet.nonlocal_crename_r
 theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
   (C.crename f).cweaken = C.cweaken.crename f.ext := by
   simp [cweaken, crename_crename, FinFun.comp_weaken]
+
+theorem CaptureSet.subset_refl {C : CaptureSet n k} :
+  C ⊆ C := by
+  cases C
+  constructor <;> (rw [Finset.subset_iff]; intros; trivial)
+
+def Fin.ppred : Fin (n+1) →. Fin n := by
+  intro i
+  constructor
+  case Dom => exact (i ≠ 0)
+  case get =>
+    intro h
+    exact i.pred h
+
+instance : ∀ (x : Fin (n+1)), Decidable (Fin.ppred x).Dom := by
+  intro x
+  simp [Fin.ppred]
+  apply instDecidableNot
+
+def Finset.pred (xs : Finset (Fin (n+1))) : Finset (Fin n) :=
+  xs.pimage Fin.ppred
+
+
+theorem Finset.notin_weaken {xs : Finset (Fin (n+1))} :
+  0 ∉ xs -> (Finset.pred xs).image Fin.succ = xs := by
+  intro h
+  rw [Finset.ext_iff]
+  intro a
+  constructor
+  case mp =>
+    intro he
+    sorry
+  case mpr => sorry
 
 end Capless
