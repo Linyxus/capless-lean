@@ -105,6 +105,9 @@ def CType.cweaken (C : CType n m k) : CType n m (k+1) :=
 def SType.cweaken (S : SType n m k) : SType n m (k+1) :=
   S.crename FinFun.weaken
 
+def SType.cweaken1 (S : SType n m (k+1)) : SType n m (k+2) :=
+  S.crename FinFun.weaken.ext
+
 def EType.open (E : EType (n+1) m k) (x : Fin n) : EType n m k :=
   E.rename (FinFun.open x)
 
@@ -479,5 +482,27 @@ theorem EType.trename_open {E : EType (n+1) m k} :
 theorem EType.trename_topen {E : EType n (m+1) k} :
   (E.topen X).trename f = (E.trename f.ext).topen (f X) := by
   simp [EType.topen, EType.trename_trename, FinFun.open_comp]
+
+theorem EType.cweaken_eq_inv {E : EType n m k}
+  (heq : EType.type (CType.capt C S) = E.cweaken) :
+  ∃ C0 S0, E = EType.type (CType.capt C0 S0) ∧ C0.cweaken = C ∧ S0.cweaken = S := by
+  cases E
+  case ex => simp [cweaken, crename] at heq
+  case type T =>
+    cases T; rename_i C0 S0
+    simp [EType.cweaken, EType.crename, CType.crename] at heq
+    exists C0; exists S0
+    simp [CaptureSet.cweaken, SType.cweaken]; aesop
+
+theorem EType.ex_cweaken_eq_inv {E : EType n m k}
+  (heq : EType.ex (CType.capt C S) = E.cweaken) :
+  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ C0.cweaken1 = C ∧ S0.cweaken1 = S := by
+  cases E
+  case type => simp [cweaken, crename] at heq
+  case ex T =>
+    cases T; rename_i C0 S0
+    simp [EType.cweaken, EType.crename, CType.crename] at heq
+    exists C0, S0
+    simp [CaptureSet.cweaken1, SType.cweaken1]; aesop
 
 end Capless
