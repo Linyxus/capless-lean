@@ -6,6 +6,7 @@ mutual
 
 inductive EType : Nat -> Nat -> Nat -> Type where
 | ex : CType n m (k+1) -> EType n m k
+| exp : Fin k -> CType n m (k+1) -> EType n m k
 | type : CType n m k -> EType n m k
 
 inductive CType : Nat -> Nat -> Nat -> Type where
@@ -25,6 +26,7 @@ mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k
 | EType.ex T, f => EType.ex (T.rename f)
+| EType.exp c T, f => EType.exp c (T.rename f)
 | EType.type T, f => EType.type (T.rename f)
 
 def CType.rename : CType n m k -> FinFun n n' -> CType n' m k
@@ -44,6 +46,7 @@ mutual
 
 def EType.trename : EType n m k -> FinFun m m' -> EType n m' k
 | EType.ex T, f => EType.ex (T.trename f)
+| EType.exp c T, f => EType.exp c (T.trename f)
 | EType.type T, f => EType.type (T.trename f)
 
 def CType.trename : CType n m k -> FinFun m m' -> CType n m' k
@@ -63,6 +66,7 @@ mutual
 
 def EType.crename : EType n m k -> FinFun k k' -> EType n m k'
 | EType.ex T, f => EType.ex (T.crename f.ext)
+| EType.exp c T, f => EType.exp (f c) (T.crename f.ext)
 | EType.type T, f => EType.type (T.crename f)
 
 def CType.crename : CType n m k -> FinFun k k' -> CType n m k'
@@ -143,6 +147,9 @@ theorem EType.crename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFu
   | EType.ex T => by
     have ih := CType.crename_rename_comm T f g.ext
     simp [EType.rename, EType.crename, ih]
+  | EType.exp c T => by
+    have ih := CType.crename_rename_comm T f g.ext
+    simp [EType.rename, EType.crename, ih]
   | EType.type T => by
     have ih := CType.crename_rename_comm T f g
     simp [EType.rename, EType.crename, ih]
@@ -196,6 +203,9 @@ theorem EType.rename_rename (E : EType n m k) (f : FinFun n n') (g : FinFun n' n
   | EType.ex T => by
     have ih := CType.rename_rename T f g
     simp [EType.rename, ih]
+  | EType.exp c T => by
+    have ih := CType.rename_rename T f g
+    simp [EType.rename, ih]
   | EType.type T => by
     have ih := CType.rename_rename T f g
     simp [EType.rename, ih]
@@ -243,6 +253,9 @@ theorem EType.trename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFu
   | EType.ex T => by
     have ih := CType.trename_rename_comm T f g
     simp [EType.trename, EType.rename, ih]
+  | EType.exp c T => by
+    have ih := CType.trename_rename_comm T f g
+    simp [EType.trename, EType.rename, ih]
   | EType.type T => by
     have ih := CType.trename_rename_comm T f g
     simp [EType.trename, EType.rename, ih]
@@ -284,6 +297,9 @@ theorem EType.crename_crename (E : EType n m k) (f : FinFun k k') (g : FinFun k'
   | EType.ex T => by
     have ih := CType.crename_crename T f.ext g.ext
     simp [EType.crename, CType.crename, ih, FinFun.ext_comp_ext]
+  | EType.exp c T => by
+    have ih := CType.crename_crename T f.ext g.ext
+    simp [EType.crename, CType.crename, ih, FinFun.ext_comp_ext]
   | EType.type T => by
     have ih := CType.crename_crename T f g
     simp [EType.crename, CType.crename, ih]
@@ -323,6 +339,9 @@ theorem EType.crename_trename_comm (E : EType n m k) (f : FinFun k k') (g : FinF
   (E.crename f).trename g = (E.trename g).crename f :=
   match E with
   | EType.ex T => by
+    have ih := CType.crename_trename_comm T f.ext g
+    simp [EType.crename, EType.trename, ih]
+  | EType.exp c T => by
     have ih := CType.crename_trename_comm T f.ext g
     simp [EType.crename, EType.trename, ih]
   | EType.type T => by
@@ -422,6 +441,9 @@ theorem EType.trename_trename (E : EType n m k) (f : FinFun m m') (g : FinFun m'
   | EType.ex T => by
     have ih := CType.trename_trename T f g
     simp [EType.trename, ih]
+  | EType.exp c T => by
+    have ih := CType.trename_trename T f g
+    simp [EType.trename, ih]
   | EType.type T => by
     have ih := CType.trename_trename T f g
     simp [EType.trename, ih]
@@ -488,6 +510,7 @@ theorem EType.cweaken_eq_inv {E : EType n m k}
   ∃ C0 S0, E = EType.type (CType.capt C0 S0) ∧ C0.cweaken = C ∧ S0.cweaken = S := by
   cases E
   case ex => simp [cweaken, crename] at heq
+  case exp => simp [cweaken, crename] at heq
   case type T =>
     cases T; rename_i C0 S0
     simp [EType.cweaken, EType.crename, CType.crename] at heq
@@ -499,6 +522,7 @@ theorem EType.ex_cweaken_eq_inv {E : EType n m k}
   ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ C0.cweaken1 = C ∧ S0.cweaken1 = S := by
   cases E
   case type => simp [cweaken, crename] at heq
+  case exp => simp [cweaken, crename] at heq
   case ex T =>
     cases T; rename_i C0 S0
     simp [EType.cweaken, EType.crename, CType.crename] at heq

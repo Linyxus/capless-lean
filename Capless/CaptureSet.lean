@@ -466,5 +466,8 @@ theorem CaptureSet.csingleton_cweaken_eq_inv {C : CaptureSet n k}
     have ⟨c0, h3, h4⟩ := Finset.weaken_eq_singleton_inv h3
     exists c0; simp [csingleton]; aesop
 
+theorem CaptureSet.cweaken_csingleton {c : Fin k} :
+  (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
+  simp [csingleton, cweaken, crename, FinFun.weaken]
 
 end Capless

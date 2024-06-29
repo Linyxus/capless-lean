@@ -1,13 +1,6 @@
 import Mathlib.Init.Function
 namespace Capless
 
-notation "fuckoff" => sorry
-
-syntax "fuckoff" : tactic
-
-macro_rules
-  | `(tactic| fuckoff) => `(tactic| sorry)
-
 def FinFun (n n' : Nat) : Type :=
   Fin n -> Fin n'
 

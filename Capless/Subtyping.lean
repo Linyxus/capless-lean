@@ -10,6 +10,10 @@ inductive ESubtyp : Context n m k -> EType n m k -> EType n m k -> Prop where
 | exist :
   CSubtyp (Context.cvar Γ CBinding.bound) T1 T2 ->
   ESubtyp Γ (EType.ex T1) (EType.ex T2)
+| existp_erase :
+  CSubtyp (Context.cvar Γ CBinding.bound) T T' ->
+  -- ^ Transitivity needs to be encoded manually
+  ESubtyp Γ (EType.exp c T) (EType.ex T')
 | type :
   CSubtyp Γ T1 T2 ->
   ESubtyp Γ (EType.type T1) (EType.type T2)

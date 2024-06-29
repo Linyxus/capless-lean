@@ -43,5 +43,15 @@ theorem Subcapt.crename
     simp [CBinding.rename] at hb1
     apply cinstr
     assumption
+  case reachl hb =>
+    simp [CaptureSet.crename_csingleton, CaptureSet.crename_rsingleton]
+    have hb1 := ρ.map _ _ hb
+    simp [EType.crename] at hb1
+    apply reachl; assumption
+  case reachr hb =>
+    simp [CaptureSet.crename_csingleton, CaptureSet.crename_rsingleton]
+    have hb1 := ρ.map _ _ hb
+    simp [EType.crename] at hb1
+    apply reachr; assumption
 
 end Capless

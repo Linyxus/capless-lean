@@ -101,6 +101,7 @@ theorem Captured.rename
   case pack =>
     simp [Term.rename]
     constructor
+  case unpack => simp [Term.rename]; constructor
   case app =>
     simp [Term.rename, CaptureSet.rename_union, CaptureSet.rename_singleton]
     constructor
@@ -139,12 +140,12 @@ theorem Typed.rename
     simp [Term.rename]
     apply Typed.var
     apply ρ.map; trivial
-  case exists_elim ih =>
+  case unpack ih =>
     simp [EType.rename, CType.rename, CaptureSet.rename_singleton, SType.copen_rename_comm]
     simp [Term.rename]
     have ih := ih ρ
     simp [Term.rename, EType.rename, CType.rename] at ih
-    apply Typed.exists_elim
+    apply Typed.unpack
     exact ih
     rename_i hbc _
     have hbc1 := ρ.cmap _ _ hbc

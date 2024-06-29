@@ -78,6 +78,9 @@ theorem Captured.crename
   case pack =>
     simp [Term.crename, CaptureSet.crename_singleton]
     apply pack
+  case unpack =>
+    simp [Term.crename, CaptureSet.crename_singleton]
+    apply unpack
   case app =>
     simp [Term.crename, CaptureSet.crename_union, CaptureSet.crename_singleton]
     apply app
@@ -112,10 +115,10 @@ theorem Typed.crename
     simp [Term.crename]
     apply var
     apply ρ.map; trivial
-  case exists_elim hb ih =>
+  case unpack hb ih =>
     simp [Term.crename, EType.crename, CType.crename, CaptureSet.crename_singleton]
     rw [SType.crename_copen]
-    apply exists_elim
+    apply unpack
     have ih := ih ρ
     simp [EType.crename, CType.crename] at ih
     exact ih
