@@ -198,4 +198,47 @@ theorem TBinding.cweaken_trename {b : TBinding n m k} :
   (b.trename f).cweaken = b.cweaken.trename f := by
   simp [cweaken, crename_trename_comm]
 
+theorem Context.cvar_bound_var_inv'
+  (he : Γ0 = Context.cvar Γ b)
+  (hb : Context.Bound Γ0 x E) :
+  ∃ E0, Context.Bound Γ x E0 ∧ E = E0.cweaken := by
+  cases hb <;> try (solve | cases he)
+  case there_cvar =>
+    cases he
+    rename_i E0 _
+    exists E0
+
+theorem Context.cvar_bound_var_inv
+  (hb : Context.Bound (Context.cvar Γ b) x E) :
+  ∃ E0, Context.Bound Γ x E0 ∧ E = E0.cweaken :=
+  Context.cvar_bound_var_inv' rfl hb
+
+theorem CBinding.eq_inst_cweaken_inv {b : CBinding n k}
+  (h : CBinding.inst C = b.cweaken) :
+  ∃ C0, b = CBinding.inst C0 := by
+  cases b <;> try (solve | cases h)
+  case inst C0 =>
+    exists C0
+
+theorem Context.cvar_bound_cvar_inst_inv' {Γ : Context n m k}
+  (he1 : Γ' = Context.cvar Γ CBinding.bound)
+  (he2 : b' = CBinding.inst C)
+  (hb : Context.CBound Γ' c b') :
+  ∃ c0 C0, c = c0.succ ∧ C = C0.cweaken ∧ Context.CBound Γ c0 (CBinding.inst C0) := by
+  cases hb <;> try (solve | cases he1)
+  case here =>
+    have h := CBinding.eq_inst_cweaken_inv (Eq.symm he2)
+    have ⟨C0, h⟩ := h
+    subst h; cases he1
+  case there_cvar =>
+    have ⟨C0, h⟩ := CBinding.eq_inst_cweaken_inv (Eq.symm he2)
+    subst h; simp [CBinding.cweaken, CBinding.crename] at he2
+    rename_i x0 _ _ _
+    exists x0, C0; simp [CaptureSet.cweaken]; aesop
+
+theorem Context.cvar_bound_cvar_inst_inv {Γ : Context n m k}
+  (hb : Context.CBound (Context.cvar Γ CBinding.bound) c (CBinding.inst C)) :
+  ∃ c0 C0, c = c0.succ ∧ C = C0.cweaken ∧ Context.CBound Γ c0 (CBinding.inst C0) := by
+  apply Context.cvar_bound_cvar_inst_inv' rfl rfl hb
+
 end Capless

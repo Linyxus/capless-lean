@@ -25,16 +25,13 @@ theorem Subcapt.rename
     have hb1 := ρ.map _ _ hb
     simp [EType.rename, CType.rename] at hb1
     assumption
-  case evar hbx hbc =>
+  case evar hbx =>
     simp [CaptureSet.rename_singleton]
-    rw [CaptureSet.copen_rename_comm]
     have hbx1 := ρ.map _ _ hbx
-    have hbc1 := ρ.cmap _ _ hbc
-    apply evar
     simp [EType.rename, CType.rename] at hbx1
-    assumption
-    simp [CBinding.rename, CaptureSet.rename_singleton] at hbc1
-    assumption
+    rw [CaptureSet.cweaken_rename_comm] at hbx1
+    apply evar
+    trivial
   case cinstl hb =>
     simp [CaptureSet.rename_csingleton]
     have hb1 := ρ.cmap _ _ hb
@@ -47,5 +44,15 @@ theorem Subcapt.rename
     simp [CBinding.rename] at hb1
     apply cinstr
     assumption
+  case reachl hb =>
+    simp [CaptureSet.rename_csingleton, CaptureSet.rename_rsingleton]
+    have hb1 := ρ.map _ _ hb
+    simp [EType.rename] at hb1
+    apply reachl; trivial
+  case reachr hb =>
+    simp [CaptureSet.rename_csingleton, CaptureSet.rename_rsingleton]
+    have hb1 := ρ.map _ _ hb
+    simp [EType.rename] at hb1
+    apply reachr; trivial
 
 end Capless

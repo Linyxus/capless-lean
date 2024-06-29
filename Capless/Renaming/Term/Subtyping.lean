@@ -44,6 +44,14 @@ theorem SSubtyp.rename
     rename_i ih _ _ _ _
     apply ih <;> try assumption
     apply VarMap.cext <;> trivial
+  case existp_erase =>
+    unfold SSubtyp.rename_motive1 SSubtyp.rename_motive2
+    repeat intro
+    simp [EType.rename]
+    apply ESubtyp.existp_erase
+    rename_i ih _ _ _ _
+    apply ih <;> try assumption
+    apply VarMap.cext <;> trivial
   case type ih =>
     unfold rename_motive1 rename_motive2
     repeat intro
@@ -152,10 +160,14 @@ theorem ESubtyp.rename
     constructor
     apply CSubtyp.rename <;> try assumption
     apply VarMap.cext; assumption
+  case existp_erase hs =>
+    simp [EType.rename]
+    constructor
+    apply CSubtyp.rename <;> try assumption
+    apply VarMap.cext; assumption
   case type hc =>
     simp [EType.rename]
     constructor
     apply CSubtyp.rename <;> assumption
-
 
 end Capless

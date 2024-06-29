@@ -1,3 +1,4 @@
+import Mathlib.Init.Function
 namespace Capless
 
 def FinFun (n n' : Nat) : Type :=
@@ -8,6 +9,12 @@ def FinFun.id : FinFun n n :=
 
 def FinFun.weaken : FinFun n (n+1) :=
   Fin.succ
+
+theorem FinFun.weaken_inj {n : Nat} : Function.Injective (weaken (n := n)) := by
+  intro a b h
+  unfold weaken at h
+  simp [Fin.succ_inj] at h
+  trivial
 
 def FinFun.open (x : Fin n) : FinFun (n+1) n := by
   intro i

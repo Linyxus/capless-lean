@@ -44,6 +44,8 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   Captured (Term.boxed x) {}
 | pack :
   Captured (Term.pack c x) {x}
+| unpack :
+  Captured (Term.unpack x) {x}
 | app :
   Captured (Term.app x y) ({x} ∪ {y})
 | tapp :
@@ -68,13 +70,17 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
 | var :
   Context.Bound Γ x E ->
   Typed Γ (Term.var x) E
-| exists_elim :
-  Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
-  Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
-  Typed Γ (Term.var x) (EType.type (CType.capt {x} (S.copen c)))
+-- | exists_elim :
+--   Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
+--   Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
+--   Typed Γ (Term.var x) (EType.type (CType.capt {x} (S.copen c)))
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->
-  Typed Γ (Term.pack c0 x) (EType.ex T)
+  Typed Γ (Term.pack c0 x) (EType.exp c0 T)
+| unpack :
+  Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
+  Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
+  Typed Γ (Term.unpack x) (EType.type (CType.capt {x} (S.copen c)))
 | sub :
   Typed Γ t E1 ->
   ESubtyp Γ E1 E2 ->
