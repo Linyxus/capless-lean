@@ -15,6 +15,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | tapp : Fin n -> Fin m -> Term n m k
 | capp : Fin n -> Fin k -> Term n m k
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
+| letex : Term n m k -> Term (n+1) m (k+1) -> Term n m k
 | bindt : SType n m k -> Term n (m+1) k -> Term n m k
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
 | unbox : CaptureSet n k -> Fin n -> Term n m k
@@ -39,6 +40,7 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.tapp x X => Term.tapp (f x) X
   | Term.capp x c => Term.capp (f x) c
   | Term.letin t u => Term.letin (t.rename f) (u.rename f.ext)
+  | Term.letex t u => Term.letex (t.rename f) (u.rename f.ext)
   | Term.bindt S t => Term.bindt (S.rename f) (t.rename f)
   | Term.bindc c t => Term.bindc (c.rename f) (t.rename f)
   | Term.unbox c x => Term.unbox (c.rename f) (f x)
@@ -56,6 +58,7 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.tapp x X => Term.tapp x (f X)
   | Term.capp x c => Term.capp x c
   | Term.letin t u => Term.letin (t.trename f) (u.trename f)
+  | Term.letex t u => Term.letex (t.trename f) (u.trename f)
   | Term.bindt S t => Term.bindt (S.trename f) (t.trename f.ext)
   | Term.bindc c t => Term.bindc c (t.trename f)
   | Term.unbox c x => Term.unbox c x
@@ -73,6 +76,7 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.tapp x X => Term.tapp x X
   | Term.capp x c => Term.capp x (f c)
   | Term.letin t u => Term.letin (t.crename f) (u.crename f)
+  | Term.letex t u => Term.letex (t.crename f) (u.crename f.ext)
   | Term.bindt S t => Term.bindt (S.crename f) (t.crename f)
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
   | Term.unbox c x => Term.unbox (c.crename f) x
