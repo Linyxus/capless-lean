@@ -12,43 +12,35 @@ namespace Capless
 
 structure CaptureSet (n k : Nat) where
   vars : Finset (Fin n)
-  rvars : Finset (Fin n)
   cvars : Finset (Fin k)
 
 inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
   | mk : ∀ {c1 c2 : CaptureSet n k},
     c1.vars ⊆ c2.vars →
-    c1.rvars ⊆ c2.rvars →
     c1.cvars ⊆ c2.cvars →
     Subset c1 c2
 
 instance CaptureSet.empty : EmptyCollection (CaptureSet n k) where
-  emptyCollection := ⟨∅, ∅, ∅⟩
+  emptyCollection := ⟨∅, ∅⟩
 
 instance CaptureSet.union : Union (CaptureSet n k) where
   union c1 c2 :=
-    ⟨c1.vars ∪ c2.vars, c1.rvars ∪ c2.rvars, c1.cvars ∪ c2.cvars⟩
+    ⟨c1.vars ∪ c2.vars, c1.cvars ∪ c2.cvars⟩
 
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
 instance CaptureSet.singleton : Singleton (Fin n) (CaptureSet n k) where
-  singleton x := ⟨{x}, ∅, ∅⟩
-
--- instance : Singleton (Fin k) (CaptureSet n k) where
---   singleton x := ⟨∅, ∅, {x}⟩
-
-def CaptureSet.rsingleton (x : Fin n) : CaptureSet n k :=
-  ⟨∅, {x}, ∅⟩
+  singleton x := ⟨{x}, ∅⟩
 
 def CaptureSet.csingleton (x : Fin k) : CaptureSet n k :=
-  ⟨∅, ∅, {x}⟩
+  ⟨∅, {x}⟩
 
 def CaptureSet.rename (C : CaptureSet n k) (f : FinFun n n') : CaptureSet n' k :=
-  ⟨Finset.image f C.vars, Finset.image f C.rvars, C.cvars⟩
+  ⟨Finset.image f C.vars, C.cvars⟩
 
 def CaptureSet.crename (C : CaptureSet n k) (f : FinFun k k') : CaptureSet n k' :=
-  ⟨C.vars, C.rvars, Finset.image f C.cvars⟩
+  ⟨C.vars, Finset.image f C.cvars⟩
 
 def CaptureSet.weaken (C : CaptureSet n k) : CaptureSet (n+1) k :=
   C.rename FinFun.weaken
@@ -87,10 +79,6 @@ theorem CaptureSet.rename_csingleton {x : Fin k} {f : FinFun n n'} :
   (CaptureSet.csingleton x).rename f = CaptureSet.csingleton x := by
   simp [CaptureSet.rename, CaptureSet.csingleton]
 
-theorem CaptureSet.rename_rsingleton {x : Fin n} {f : FinFun n n'} :
-  (CaptureSet.rsingleton x : CaptureSet n k).rename f = CaptureSet.rsingleton (f x) := by
-  simp [CaptureSet.rename, CaptureSet.rsingleton]
-
 theorem CaptureSet.crename_singleton {x : Fin n} {f : FinFun k k'} :
   ({x} : CaptureSet n k).crename f = {x} := by
   simp [CaptureSet.crename, CaptureSet.singleton]
@@ -98,10 +86,6 @@ theorem CaptureSet.crename_singleton {x : Fin n} {f : FinFun k k'} :
 theorem CaptureSet.crename_csingleton {x : Fin k} {f : FinFun k k'} :
   (CaptureSet.csingleton x : CaptureSet n k).crename f = CaptureSet.csingleton (f x) := by
   simp [CaptureSet.crename, CaptureSet.csingleton]
-
-theorem CaptureSet.crename_rsingleton {x : Fin n} {f : FinFun k k'} :
-  (CaptureSet.rsingleton x : CaptureSet n k).crename f = CaptureSet.rsingleton x := by
-  simp [CaptureSet.crename, CaptureSet.rsingleton]
 
 theorem CaptureSet.rename_empty :
   ({} : CaptureSet n k).rename f = {} := by
@@ -146,7 +130,6 @@ theorem CaptureSet.crename_copen {C : CaptureSet n (k+1)} :
 inductive CaptureSet.NonLocal : CaptureSet (n+1) k -> Prop where
 | mk : ∀ {C : CaptureSet (n+1) k},
   0 ∉ C.vars ->
-  0 ∉ C.rvars ->
   C.NonLocal
 
 theorem Finset.nonlocal_rename_l
@@ -167,14 +150,13 @@ theorem CaptureSet.nonlocal_rename_l
   NonLocal C := by
   cases C0; cases C
   cases h
-  case mk h1 h2 =>
+  case mk h1 =>
     simp [CaptureSet.rename] at he
     simp at *
-    let ⟨he1, he2, he3⟩ := he
-    subst he1 he2
-    constructor <;> simp
+    let ⟨he1, he3⟩ := he
+    subst he1
+    constructor; simp
     apply Finset.nonlocal_rename_l rfl h1
-    apply Finset.nonlocal_rename_l rfl h2
 
 theorem CaptureSet.nonlocal_crename_l
   (he : C0 = C.crename f)
@@ -182,16 +164,13 @@ theorem CaptureSet.nonlocal_crename_l
   NonLocal C := by
   cases C0; cases C
   cases h
-  case mk h1 h2 =>
+  case mk h1 =>
     simp [CaptureSet.crename] at he
     simp at *
-    let ⟨he1, he2, he3⟩ := he
-    subst he1 he2
-    constructor <;> simp
+    let ⟨he1, he3⟩ := he
+    subst he1
+    constructor; simp
     assumption
-    assumption
-
-
 
 theorem Finset.nonlocal_rename_r
   (h : 0 ∉ xs) :
@@ -210,11 +189,10 @@ theorem CaptureSet.nonlocal_rename_r
   (h : NonLocal C) :
   NonLocal (C.rename (FinFun.ext f)) := by
   cases C; cases h
-  case mk h1 h2 =>
+  case mk h1 =>
     simp at *
-    constructor <;> simp only [CaptureSet.rename]
+    constructor; simp only [CaptureSet.rename]
     apply Finset.nonlocal_rename_r h1
-    apply Finset.nonlocal_rename_r h2
 
 theorem CaptureSet.nonlocal_crename_r
   (h : NonLocal C) :
@@ -222,8 +200,7 @@ theorem CaptureSet.nonlocal_crename_r
   cases C; cases h
   case mk h1 h2 =>
     simp at *
-    constructor <;> simp only [CaptureSet.crename]
-    assumption
+    constructor; simp only [CaptureSet.crename]
     assumption
 
 theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
@@ -307,26 +284,24 @@ theorem CaptureSet.subset_weaken {C : CaptureSet n k}
   ∃ (C0' : CaptureSet n k), C0 = C0'.weaken := by
   cases h; simp [weaken] at *
   cases C; cases C0; simp [CaptureSet.rename] at *
-  rename_i ys3 _ _ _
+  rename_i ys3 _ _
   simp [FinFun.weaken] at *
-  rename_i h1 h2 _
+  rename_i h1 _
   apply Finset.subset_weaken at h1
-  apply Finset.subset_weaken at h2
   let ⟨ys1, he1⟩ := h1
-  let ⟨ys2, he2⟩ := h2
-  exists ⟨ys1, ys2, ys3⟩
+  exists ⟨ys1, ys3⟩
 
 theorem CaptureSet.subset_cweaken {C : CaptureSet n k}
   (h : C0 ⊆ C.cweaken) :
   ∃ (C0' : CaptureSet n k), C0 = C0'.cweaken := by
   cases h; simp [cweaken] at *
   cases C; cases C0; simp [CaptureSet.crename] at *
-  rename_i ys1 ys2 _ _ _ _
+  rename_i ys1 _ _ _
   simp [FinFun.weaken] at *
   rename_i h3
   apply Finset.subset_weaken at h3
   let ⟨ys3, he3⟩ := h3
-  exists ⟨ys1, ys2, ys3⟩
+  exists ⟨ys1, ys3⟩
 
 theorem Finset.weaken_subset_subset {xs ys : Finset (Fin n)}
   (h : xs.image Fin.succ ⊆ ys.image Fin.succ) :
@@ -409,7 +384,7 @@ theorem CaptureSet.notin_cweaken1_weaken_eq {C : CaptureSet n (k+1)}
   (h : 0 ∉ C.cweaken1.cvars) :
   C.cweaken1 = C.cweaken := by
   cases C
-  case mk xs rs cs =>
+  case mk xs cs =>
     simp [cweaken, cweaken1, crename] at *
     symm; apply Finset.weaken1_weaken_eq; aesop
 
@@ -418,7 +393,7 @@ theorem CaptureSet.eq_cweaken_notin {C : CaptureSet n (k+1)} {C0 : CaptureSet n 
   0 ∉ C.cvars := by
   cases C; cases C0
   simp [cweaken, crename] at *
-  have ⟨_, _, h⟩ := h; subst h
+  have ⟨_, h⟩ := h; subst h
   apply Finset.weaken_notin
 
 theorem CaptureSet.cweaken1_cweaken_eq {C D : CaptureSet n (k+1)}
@@ -460,9 +435,9 @@ theorem CaptureSet.csingleton_cweaken_eq_inv {C : CaptureSet n k}
   (h : CaptureSet.csingleton c = C.cweaken) :
   ∃ c0, c = c0.succ ∧ C = CaptureSet.csingleton c0 := by
   match C with
-  | mk xs rs cs =>
+  | mk xs cs =>
     simp [csingleton, cweaken, crename] at h
-    have ⟨h1, h2, h3⟩ := h
+    have ⟨h1, h3⟩ := h
     have ⟨c0, h3, h4⟩ := Finset.weaken_eq_singleton_inv h3
     exists c0; simp [csingleton]; aesop
 
