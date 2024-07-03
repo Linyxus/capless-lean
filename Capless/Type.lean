@@ -112,6 +112,9 @@ def SType.cweaken (S : SType n m k) : SType n m (k+1) :=
 def SType.cweaken1 (S : SType n m (k+1)) : SType n m (k+2) :=
   S.crename FinFun.weaken.ext
 
+def CType.cweaken1 (T : CType n m (k+1)) : CType n m (k+2) :=
+  T.crename FinFun.weaken.ext
+
 def EType.open (E : EType (n+1) m k) (x : Fin n) : EType n m k :=
   E.rename (FinFun.open x)
 
@@ -528,5 +531,15 @@ theorem EType.ex_cweaken_eq_inv {E : EType n m k}
     simp [EType.cweaken, EType.crename, CType.crename] at heq
     exists C0, S0
     simp [CaptureSet.cweaken1, SType.cweaken1]; aesop
+
+theorem EType.exp_cweaken_eq_inv {E : EType n m k}
+  (heq : EType.exp c T = E.cweaken) :
+  ∃ c0 T0, E = EType.exp c0 T0 ∧ c0.succ = c ∧ T0.cweaken1 = T := by
+  cases E <;> try (solve | simp [cweaken, crename] at heq)
+  case exp c T =>
+    simp [cweaken, crename] at heq
+    exists c, T
+    simp [FinFun.weaken, CType.cweaken1] at *
+    aesop
 
 end Capless
