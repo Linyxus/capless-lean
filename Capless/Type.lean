@@ -15,7 +15,7 @@ inductive CType : Nat -> Nat -> Nat -> Type where
 inductive SType : Nat -> Nat -> Nat -> Type where
 | top : SType n m k
 | tvar : Fin m -> SType n m k
-| forall : EType n m k -> EType (n+1) m k -> SType n m k
+| forall : CType n m k -> EType (n+1) m k -> SType n m k
 | tforall : SType n m k -> EType n (m+1) k -> SType n m k
 | cforall : EType n m (k+1) -> SType n m k
 | box : CType n m k -> SType n m k
@@ -170,7 +170,7 @@ theorem SType.crename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
   | SType.top => by simp [SType.rename, SType.crename]
   | SType.tvar X => by simp [SType.rename, SType.crename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.crename_rename_comm E1 f g
+    have ih1 := CType.crename_rename_comm E1 f g
     have ih2 := EType.crename_rename_comm E2 f.ext g
     simp [SType.rename, SType.crename, ih1, ih2]
   | SType.tforall S E => by
@@ -227,7 +227,7 @@ theorem SType.rename_rename (S : SType n m k) (f : FinFun n n') (g : FinFun n' n
   | SType.top => by simp [SType.rename]
   | SType.tvar X => by simp [SType.rename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.rename_rename E1 f g
+    have ih1 := CType.rename_rename E1 f g
     have ih2 := EType.rename_rename E2 f.ext g.ext
     simp [SType.rename, ih1, ih2, FinFun.ext_comp_ext]
   | SType.tforall S E => by
@@ -276,7 +276,7 @@ theorem SType.trename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
   | SType.top => by simp [SType.trename, SType.rename]
   | SType.tvar X => by simp [SType.trename, SType.rename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.trename_rename_comm E1 f g
+    have ih1 := CType.trename_rename_comm E1 f g
     have ih2 := EType.trename_rename_comm E2 f.ext g
     simp [SType.trename, SType.rename, ih1, ih2]
   | SType.tforall S E => by
@@ -320,7 +320,7 @@ theorem SType.crename_crename (S : SType n m k) (f : FinFun k k') (g : FinFun k'
   | SType.top => by simp [SType.crename]
   | SType.tvar X => by simp [SType.crename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.crename_crename E1 f g
+    have ih1 := CType.crename_crename E1 f g
     have ih2 := EType.crename_crename E2 f g
     simp [SType.crename, ih1, ih2]
   | SType.tforall S E => by
@@ -364,7 +364,7 @@ theorem SType.crename_trename_comm (S : SType n m k) (f : FinFun k k') (g : FinF
   | SType.top => by simp [SType.crename, SType.trename]
   | SType.tvar X => by simp [SType.crename, SType.trename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.crename_trename_comm E1 f g
+    have ih1 := CType.crename_trename_comm E1 f g
     have ih2 := EType.crename_trename_comm E2 f g
     simp [SType.crename, SType.trename, ih1, ih2]
   | SType.tforall S E => by
@@ -464,7 +464,7 @@ theorem SType.trename_trename (S : SType n m k) (f : FinFun m m') (g : FinFun m'
   | SType.top => by simp [SType.trename]
   | SType.tvar X => by simp [SType.trename]
   | SType.forall E1 E2 => by
-    have ih1 := EType.trename_trename E1 f g
+    have ih1 := CType.trename_trename E1 f g
     have ih2 := EType.trename_trename E2 f g
     simp [SType.trename, ih1, ih2]
   | SType.tforall S E => by
