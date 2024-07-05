@@ -52,11 +52,11 @@ def CBinding.cweaken (b : CBinding n k) : CBinding n (k+1) :=
 
 inductive Context : Nat -> Nat -> Nat -> Type where
 | empty : Context 0 0 0
-| var : Context n m k -> EType n m k -> Context (n+1) m k
+| var : Context n m k -> CType n m k -> Context (n+1) m k
 | tvar : Context n m k -> TBinding n m k -> Context n (m+1) k
 | cvar : Context n m k -> CBinding n k -> Context n m (k+1)
 
-inductive Context.Bound : Context n m k -> Fin n -> EType n m k -> Prop where
+inductive Context.Bound : Context n m k -> Fin n -> CType n m k -> Prop where
 | here : Bound (var Γ0 E) 0 E.weaken
 | there_var :
   Bound Γ x E ->

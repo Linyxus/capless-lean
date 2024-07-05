@@ -21,11 +21,20 @@ inductive Store : Nat -> Nat -> Nat -> Type where
   CaptureSet n k ->
   Store n m (k+1)
 
+-- inductive Cont : Nat -> Nat -> Nat -> Type where
+-- | top : Cont 1 0 0
+-- | cons :
+--   (t : Term n m k) ->
+
+-- structure State where
+--   σ : Store n m k
+--   cont : Cont n m k
+
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
   TypedStore σ Γ ->
-  Typed Γ t E ->
+  Typed Γ t (EType.type E) ->
   (hv : t.IsValue) ->
   TypedStore (Store.val σ t hv) (Γ.var E)
 | tval :
@@ -34,6 +43,8 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | cval :
   TypedStore σ Γ ->
   TypedStore (Store.cval σ C) (Γ.cvar (CBinding.inst C))
+
+-- inductive TypedCont : Context n m k -> Cont n m k -> EType n m k -> Prop where
 
 inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
 | here :

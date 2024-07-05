@@ -46,7 +46,7 @@ inductive SSubtyp : Context n m k -> SType n m k -> SType n m k -> Prop where
   CSubtyp Γ T1 T2 ->
   SSubtyp Γ (SType.box T1) (SType.box T2)
 | xforall :
-  ESubtyp Γ E2 E1 ->
+  CSubtyp Γ E2 E1 ->
   ESubtyp (Context.var Γ E2) F1 F2 ->
   SSubtyp Γ (SType.forall E1 F1) (SType.forall E2 F2)
 | tforall :

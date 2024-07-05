@@ -5,6 +5,12 @@ import Capless.Term
 
 namespace Capless
 
+/-*
+
+TODO: Add the cv and typing rule for letex
+
+*-/
+
 inductive DropBinderFree : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
 | mk :
   DropBinderFree C.weaken C
@@ -44,8 +50,6 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   Captured (Term.boxed x) {}
 | pack :
   Captured (Term.pack c x) {x}
-| unpack :
-  Captured (Term.unpack x) {x}
 | app :
   Captured (Term.app x y) ({x} ∪ {y})
 | tapp :
@@ -68,19 +72,11 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
 
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
 | var :
-  Context.Bound Γ x E ->
-  Typed Γ (Term.var x) E
--- | exists_elim :
---   Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
---   Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
---   Typed Γ (Term.var x) (EType.type (CType.capt {x} (S.copen c)))
+  Context.Bound Γ x T ->
+  Typed Γ (Term.var x) (EType.type T)
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->
   Typed Γ (Term.pack c0 x) (EType.exp c0 T)
-| unpack :
-  Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
-  Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
-  Typed Γ (Term.unpack x) (EType.type (CType.capt {x} (S.copen c)))
 | sub :
   Typed Γ t E1 ->
   ESubtyp Γ E1 E2 ->
@@ -98,8 +94,8 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Captured (Term.clam t) C ->
   Typed Γ (Term.clam t) (EType.type (CType.capt C (SType.cforall E)))
 | app :
-  Typed Γ (Term.var x) (EType.type (CType.capt C (SType.forall E F))) ->
-  Typed Γ (Term.var y) E ->
+  Typed Γ (Term.var x) (EType.type (CType.capt C (SType.forall T F))) ->
+  Typed Γ (Term.var y) (EType.type T) ->
   Typed Γ (Term.app x y) (F.open y)
 | tapp :
   Typed Γ (Term.var x) (EType.type (CType.capt C (SType.tforall (SType.tvar X) E))) ->
@@ -114,7 +110,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ->
   Typed Γ (Term.unbox C x) (EType.type (CType.capt C S))
 | letin :
-  Typed Γ t1 E1 ->
+  Typed Γ t1 (EType.type E1) ->
   Typed (Context.var Γ E1) T2 E2.weaken ->
   Typed Γ (Term.letin t1 t2) E2
 | bindt :

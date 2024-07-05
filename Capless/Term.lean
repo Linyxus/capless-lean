@@ -5,12 +5,11 @@ namespace Capless
 
 inductive Term : Nat -> Nat -> Nat -> Type where
 | var : Fin n -> Term n m k
-| lam : EType n m k -> Term (n+1) m k -> Term n m k
+| lam : CType n m k -> Term (n+1) m k -> Term n m k
 | tlam : SType n m k -> Term n (m+1) k -> Term n m k
 | clam : Term n m (k+1) -> Term n m k
 | boxed : Fin n -> Term n m k
 | pack : Fin k -> Fin n -> Term n m k
-| unpack : Fin n -> Term n m k
 | app : Fin n -> Fin n -> Term n m k
 | tapp : Fin n -> Fin m -> Term n m k
 | capp : Fin n -> Fin k -> Term n m k
@@ -35,7 +34,6 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.clam t => Term.clam (t.rename f)
   | Term.boxed x => Term.boxed (f x)
   | Term.pack c x => Term.pack c (f x)
-  | Term.unpack x => Term.unpack (f x)
   | Term.app x y => Term.app (f x) (f y)
   | Term.tapp x X => Term.tapp (f x) X
   | Term.capp x c => Term.capp (f x) c
@@ -53,7 +51,6 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.clam t => Term.clam (t.trename f)
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack c x
-  | Term.unpack x => Term.unpack x
   | Term.app x y => Term.app x y
   | Term.tapp x X => Term.tapp x (f X)
   | Term.capp x c => Term.capp x c
@@ -71,7 +68,6 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.clam t => Term.clam (t.crename f.ext)
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack (f c) x
-  | Term.unpack x => Term.unpack x
   | Term.app x y => Term.app x y
   | Term.tapp x X => Term.tapp x X
   | Term.capp x c => Term.capp x (f c)
