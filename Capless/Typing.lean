@@ -87,7 +87,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.var x) (EType.type T)
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->
-  Typed Γ (Term.pack c0 x) (EType.exp c0 T)
+  Typed Γ (Term.pack c0 x) (EType.ex T)
 | sub :
   Typed Γ t E1 ->
   ESubtyp Γ E1 E2 ->
