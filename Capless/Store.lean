@@ -21,14 +21,21 @@ inductive Store : Nat -> Nat -> Nat -> Type where
   CaptureSet n k ->
   Store n m (k+1)
 
--- inductive Cont : Nat -> Nat -> Nat -> Type where
--- | top : Cont 1 0 0
--- | cons :
---   (t : Term n m k) ->
+inductive Cont : Nat -> Nat -> Nat -> Type where
+| none : Cont n m k
+| cons :
+  (t : Term (n+1) m k) ->
+  (cont : Cont n m k) ->
+  Cont n m k
+| conse :
+  (t : Term (n+1) m (k+1)) ->
+  (cont : Cont n m k) ->
+  Cont n m k
 
--- structure State where
---   σ : Store n m k
---   cont : Cont n m k
+structure State (n : Nat) (m : Nat) (k : Nat) where
+  σ : Store n m k
+  cont : Cont n m k
+  t : Term n m k
 
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
@@ -44,7 +51,24 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
   TypedStore σ Γ ->
   TypedStore (Store.cval σ C) (Γ.cvar (CBinding.inst C))
 
--- inductive TypedCont : Context n m k -> Cont n m k -> EType n m k -> Prop where
+inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> Prop where
+| none :
+  TypedCont Γ E Cont.none E
+| cons :
+  Typed (Γ.var T) t (EType.weaken E) ->
+  TypedCont Γ E cont E' ->
+  TypedCont Γ (EType.type T) (Cont.cons t cont) E'
+| conse :
+  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) ->
+  TypedCont Γ E cont E' ->
+  TypedCont Γ (EType.ex T) (Cont.conse t cont) E'
+
+inductive TypedState : State n m k -> EType n m k -> Prop where
+| mk :
+  TypedStore σ Γ ->
+  Typed Γ t E ->
+  TypedCont Γ E cont E' ->
+  TypedState (State.mk σ cont t) E'
 
 inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
 | here :
