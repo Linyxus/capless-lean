@@ -132,6 +132,11 @@ inductive CaptureSet.NonLocal : CaptureSet (n+1) k -> Prop where
   0 ∉ C.vars ->
   C.NonLocal
 
+inductive CaptureSet.CNonLocal : CaptureSet n (k+1) -> Prop where
+| mk : ∀ {C : CaptureSet n (k+1)},
+  0 ∉ C.cvars ->
+  C.CNonLocal
+
 theorem Finset.nonlocal_rename_l
   (he : xs0 = Finset.image (FinFun.ext f) xs)
   (h : 0 ∉ xs0) :

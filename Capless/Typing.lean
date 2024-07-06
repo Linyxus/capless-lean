@@ -62,11 +62,22 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   ¬ (SealedLet t1 C2) ->
   DropBinder C2 C2' ->
   Captured (Term.letin t1 t2) (C1 ∪ C2')
+| letex :
+  Captured t1 C1 ->
+  Captured t2 (CaptureSet.cweaken C2) ->
+  ¬ (SealedLet t1 C2) ->
+  DropBinder C2 C2' ->
+  Captured (Term.letex t1 t2) (C1 ∪ C2')
 | letin_sealed :
   Captured t1 C1 ->
   Captured t2 (CaptureSet.weaken C2) ->
   SealedLet t1 (CaptureSet.weaken C2) ->
   Captured (Term.letin t1 t2) C2
+| letex_sealed :
+  Captured t1 C1 ->
+  Captured t2 (CaptureSet.weaken (CaptureSet.cweaken C2)) ->
+  SealedLet t1 (CaptureSet.weaken C2) ->
+  Captured (Term.letex t1 t2) C2
 | unbox :
   Captured (Term.unbox C x) (C ∪ {x})
 
@@ -112,6 +123,10 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
 | letin :
   Typed Γ t1 (EType.type E1) ->
   Typed (Context.var Γ E1) T2 E2.weaken ->
+  Typed Γ (Term.letin t1 t2) E2
+| letex :
+  Typed Γ t1 (EType.ex T1) ->
+  Typed ((Γ.cvar CBinding.bound).var T1) T2 E2.cweaken.weaken ->
   Typed Γ (Term.letin t1 t2) E2
 | bindt :
   Typed (Context.tvar Γ (TBinding.inst S)) t E.tweaken ->
