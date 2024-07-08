@@ -5,12 +5,6 @@ import Capless.Term
 
 namespace Capless
 
-/-*
-
-TODO: Add the cv and typing rule for letex
-
-*-/
-
 inductive DropBinderFree : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
 | mk :
   DropBinderFree C.weaken C

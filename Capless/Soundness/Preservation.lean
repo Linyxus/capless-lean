@@ -23,7 +23,7 @@ theorem preservation
   Preserve E state' := by
   cases hr
   case apply hl => sorry
-  case tapply  hl=> sorry
+  case tapply  hl => sorry
   case capply hl => sorry
   case unbox hl => sorry
   case push => sorry

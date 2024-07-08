@@ -183,6 +183,10 @@ theorem EType.cweaken_rename_comm {E : EType n m k} :
   E.cweaken.rename f = (E.rename f).cweaken := by
   simp [cweaken, crename_rename_comm]
 
+theorem CType.cweaken_rename_comm {C : CType n m k} :
+  C.cweaken.rename f = (C.rename f).cweaken := by
+  simp [cweaken, crename_rename_comm]
+
 theorem SType.copen_rename_comm {S : SType n m (k+1)} :
   (S.copen x).rename f = (S.rename f).copen x := by
   simp [copen, crename_rename_comm]
@@ -235,6 +239,10 @@ end
 
 theorem EType.weaken_rename {E : EType n m k} :
   (E.rename f).weaken = E.weaken.rename f.ext := by
+  simp [weaken, rename_rename, FinFun.comp_weaken]
+
+theorem CType.weaken_rename {C : CType n m k} :
+  (C.rename f).weaken = C.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
 
 mutual
@@ -365,6 +373,10 @@ def EType.tweaken_rename {E : EType n m k} :
   E.tweaken.rename f = (E.rename f).tweaken := by
   simp [tweaken, trename, trename_rename_comm]
 
+theorem CType.tweaken_rename {C : CType n m k} :
+  C.tweaken.rename f = (C.rename f).tweaken := by
+  simp [tweaken, trename, trename_rename_comm]
+
 def EType.rename_open :
   (EType.open E x).rename f = (E.rename f.ext).open (f x) := by
   simp [EType.open]
@@ -385,12 +397,24 @@ theorem EType.cweaken_crename {E : EType n m k} :
   (E.crename f).cweaken = E.cweaken.crename f.ext := by
   simp [cweaken, crename_crename, FinFun.comp_weaken]
 
+theorem CType.cweaken_crename {C : CType n m k} :
+  (C.crename f).cweaken = C.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
 theorem EType.weaken_crename {E : EType n m k} :
   (E.crename f).weaken = E.weaken.crename f := by
   simp [weaken, crename_rename_comm]
 
+theorem CType.weaken_crename {C : CType n m k} :
+  (C.crename f).weaken = C.weaken.crename f := by
+  simp [weaken, crename_rename_comm]
+
 theorem EType.tweaken_crename {E : EType n m k} :
   (E.crename f).tweaken = E.tweaken.crename f := by
+  simp [tweaken, crename_trename_comm]
+
+theorem CType.tweaken_crename {C : CType n m k} :
+  (C.crename f).tweaken = C.tweaken.crename f := by
   simp [tweaken, crename_trename_comm]
 
 theorem EType.crename_copen {E : EType n m (k+1)} :
@@ -415,6 +439,10 @@ theorem EType.crename_topen {E : EType n (m+1) k} :
 
 theorem EType.weaken_trename {E : EType n m k} :
   (E.trename f).weaken = E.weaken.trename f := by
+  simp [weaken, trename_rename_comm]
+
+theorem CType.weaken_trename {C : CType n m k} :
+  (C.trename f).weaken = C.weaken.trename f := by
   simp [weaken, trename_rename_comm]
 
 mutual
@@ -462,7 +490,15 @@ theorem EType.tweaken_trename {E : EType n m k} :
   (E.trename f).tweaken = E.tweaken.trename f.ext := by
   simp [tweaken, trename_trename, FinFun.comp_weaken]
 
+theorem CType.tweaken_trename {C : CType n m k} :
+  (C.trename f).tweaken = C.tweaken.trename f.ext := by
+  simp [tweaken, trename_trename, FinFun.comp_weaken]
+
 theorem EType.cweaken_trename {E : EType n m k} :
+  (E.trename f).cweaken = E.cweaken.trename f := by
+  simp [cweaken, crename_trename_comm]
+
+theorem CType.cweaken_trename {E : CType n m k} :
   (E.trename f).cweaken = E.cweaken.trename f := by
   simp [cweaken, crename_trename_comm]
 
