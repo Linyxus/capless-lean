@@ -127,9 +127,15 @@ theorem IsValue.crename_r {t : Term n m k}
 
 def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
 
+def Term.weaken1 (t : Term (n+1) m k) : Term (n+2) m k :=
+  t.rename FinFun.weaken.ext
+
 def Term.tweaken (t : Term n m k) : Term n (m+1) k := t.trename FinFun.weaken
 
 def Term.cweaken (t : Term n m k) : Term n m (k+1) := t.crename FinFun.weaken
+
+def Term.cweaken1 (t : Term n m (k+1)) : Term n m (k+2) :=
+  t.crename FinFun.weaken.ext
 
 def Term.open (t : Term (n+1) m k) (x : Fin n) : Term n m k :=
   t.rename (FinFun.open x)

@@ -109,5 +109,19 @@ inductive Store.CBound : Store n m k -> (Fin k) -> CaptureSet n k -> Prop where
   Store.CBound σ x C ->
   Store.CBound (Store.cval σ C') (Fin.succ x) C.cweaken
 
+def Cont.weaken : Cont n m k -> Cont (n+1) m k
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
+| Cont.conse t cont => Cont.conse t.weaken1 cont.weaken
+
+def Cont.tweaken : Cont n m k -> Cont n (m+1) k
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.tweaken cont.tweaken
+| Cont.conse t cont => Cont.conse t.tweaken cont.tweaken
+
+def Cont.cweaken : Cont n m k -> Cont n m (k+1)
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.cweaken cont.cweaken
+| Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 
 end Capless
