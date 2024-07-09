@@ -24,9 +24,17 @@ theorem Subcapt.subst
     simp [EType.rename, CType.rename] at ht
     have h := Typing.inv_subcapt ht
     simp [CaptureSet.rename_singleton]; trivial
-  case evar hb =>
-    have ht := σ.map _ _ hb
-    simp [EType.rename, CType.rename] at ht
-    sorry
+  case cinstl hb =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CaptureSet.rename_csingleton]
+    apply cinstl
+    simp [CBinding.rename] at hb1
+    trivial
+  case cinstr hb =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CaptureSet.rename_csingleton]
+    apply cinstr
+    simp [CBinding.rename] at hb1
+    trivial
 
 end Capless

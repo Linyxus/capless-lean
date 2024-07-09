@@ -3,24 +3,21 @@ import Capless.Renaming.Basic
 import Capless.Renaming.Term.Subtyping
 namespace Capless
 
-theorem DropBinderFree.rename
-  (h : DropBinderFree C1 C2) :
-  DropBinderFree (C1.rename f.ext) (C2.rename f) := by
-  cases h
-  rw [<- CaptureSet.weaken_rename]
-  constructor
-
 theorem DropBinder.rename
   (h : DropBinder C1 C2) :
   DropBinder (C1.rename f.ext) (C2.rename f) := by
   cases h
-  case drop_free =>
-    constructor; apply DropBinderFree.rename; assumption
-  case drop =>
-    simp [CaptureSet.rename_union]
-    simp [CaptureSet.rename_singleton, FinFun.ext]
-    rw [<- CaptureSet.weaken_rename]
-    apply DropBinder.drop
+  simp [CaptureSet.rename]
+  constructor
+  apply Finset.DropBinder.rename; trivial
+
+theorem DropBothBinder.rename
+  (h : DropBothBinder C1 C2) :
+  DropBothBinder (C1.rename f.ext) (C2.rename f) := by
+  cases h
+  simp [CaptureSet.rename]; constructor
+  apply Finset.DropBinder.rename; trivial
+  trivial
 
 theorem DropCBinder.rename
   (h : DropCBinder C1 C2) :
@@ -126,8 +123,12 @@ theorem Captured.rename
     apply ih2
     rw [CaptureSet.weaken_rename]
     apply SealedLet.rename; assumption
-  case letex ih1 ih2 => sorry
-  case letex_sealed ih1 ih2 => sorry
+  case letex ih1 ih2 =>
+    simp [Term.rename, CaptureSet.rename_union]
+    constructor
+    apply ih1
+    apply ih2
+    apply DropBothBinder.rename; assumption
   case unbox =>
     simp [Term.rename, CaptureSet.rename_union]
     constructor
@@ -196,7 +197,7 @@ theorem Typed.rename
     simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
     exact ih1
     have ih2 := ih2 ρ
-    simp [Term.rename] at ih2
+    simp [Term.rename, EType.rename] at ih2
     exact ih2
   case tapp ih =>
     simp [Term.rename]
@@ -229,9 +230,20 @@ theorem Typed.rename
     simp [Term.rename]
     apply Typed.letin
     have ih1 := ih1 ρ
+    simp [EType.rename] at ih1
     exact ih1
     have ih2 := ih2 (ρ.ext _)
     rw [<- EType.weaken_rename] at ih2
+    trivial
+  case letex ih1 ih2 =>
+    simp [Term.rename]
+    apply letex
+    have ih1 := ih1 ρ
+    simp [EType.rename] at ih1
+    exact ih1
+    have ih2 := ih2 ((ρ.cext _).ext _)
+    rw [<- EType.cweaken_rename_comm]
+    rw [EType.weaken_rename]
     trivial
   case bindt ih =>
     simp [Term.rename]

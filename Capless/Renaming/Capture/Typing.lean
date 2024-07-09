@@ -3,25 +3,20 @@ import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subtyping
 namespace Capless
 
-theorem DropBinderFree.crename
-  (h : DropBinderFree C1 C2) :
-  DropBinderFree (C1.crename f) (C2.crename f) := by
-  cases h
-  rw [<- CaptureSet.weaken_crename]
-  constructor
-
 theorem DropBinder.crename
   (h : DropBinder C1 C2) :
   DropBinder (C1.crename f) (C2.crename f) := by
   cases h
-  case drop_free =>
-    constructor
-    apply DropBinderFree.crename; trivial
-  case drop =>
-    simp [CaptureSet.crename_union]
-    simp [CaptureSet.crename_singleton]
-    rw [<- CaptureSet.weaken_crename]
-    apply drop
+  simp [CaptureSet.crename]
+  constructor; trivial
+
+theorem DropBothBinder.crename
+  (h : DropBothBinder C1 C2) :
+  DropBothBinder (C1.crename f.ext) (C2.crename f) := by
+  cases h
+  constructor; trivial
+  simp
+  apply Finset.DropBinder.rename; trivial
 
 theorem DropCBinder.crename
   (h : DropCBinder C1 C2) :
@@ -41,7 +36,7 @@ theorem SealedLet.neg_crename
     apply IsValue.crename_l hv
     apply CaptureSet.nonlocal_crename_l rfl hl
 
-theorem SealedLet.rename
+theorem SealedLet.crename
   (h : SealedLet t C2) :
   SealedLet (t.crename f) (C2.crename f) := by
   cases h
@@ -78,9 +73,6 @@ theorem Captured.crename
   case pack =>
     simp [Term.crename, CaptureSet.crename_singleton]
     apply pack
-  case unpack =>
-    simp [Term.crename, CaptureSet.crename_singleton]
-    apply unpack
   case app =>
     simp [Term.crename, CaptureSet.crename_union, CaptureSet.crename_singleton]
     apply app
@@ -103,7 +95,13 @@ theorem Captured.crename
     simp [Term.crename]
     apply letin_sealed; aesop; aesop
     rw [CaptureSet.weaken_crename]
-    apply SealedLet.rename; trivial
+    apply SealedLet.crename; trivial
+  case letex =>
+    simp [Term.crename, CaptureSet.crename_union]
+    apply letex
+    aesop
+    aesop
+    apply DropBothBinder.crename; trivial
 
 theorem Typed.crename
   {Γ : Context n m k} {Δ : Context n m k'}
@@ -112,19 +110,19 @@ theorem Typed.crename
   Typed Δ (t.crename f) (E.crename f) := by
   induction h generalizing k'
   case var =>
-    simp [Term.crename]
+    simp [Term.crename, EType.crename]
     apply var
     apply ρ.map; trivial
-  case unpack hb ih =>
-    simp [Term.crename, EType.crename, CType.crename, CaptureSet.crename_singleton]
-    rw [SType.crename_copen]
-    apply unpack
-    have ih := ih ρ
-    simp [EType.crename, CType.crename] at ih
-    exact ih
-    have hb1 := ρ.cmap _ _ hb
-    simp [CBinding.crename, CaptureSet.crename_rsingleton] at hb1
-    exact hb1
+  -- case unpack hb ih =>
+  --   simp [Term.crename, EType.crename, CType.crename, CaptureSet.crename_singleton]
+  --   rw [SType.crename_copen]
+  --   apply unpack
+  --   have ih := ih ρ
+  --   simp [EType.crename, CType.crename] at ih
+  --   exact ih
+  --   have hb1 := ρ.cmap _ _ hb
+  --   simp [CBinding.crename, CaptureSet.crename_rsingleton] at hb1
+  --   exact hb1
   case pack ih =>
     simp [Term.crename, EType.crename]
     apply pack
@@ -194,9 +192,20 @@ theorem Typed.crename
     simp [Term.crename]
     apply letin
     have ih1 := ih1 ρ
+    simp [EType.crename] at ih1
     exact ih1
     have ih2 := ih2 (ρ.ext _)
     rw [<- EType.weaken_crename] at ih2
+    exact ih2
+  case letex ih1 ih2 =>
+    simp [Term.crename]
+    apply letex
+    have ih1 := ih1 ρ
+    simp [EType.crename] at ih1
+    exact ih1
+    have ih2 := ih2 ((ρ.cext _).ext _)
+    rw [EType.cweaken_crename]
+    rw [EType.weaken_crename]
     exact ih2
   case bindt ih =>
     simp [Term.crename]

@@ -115,6 +115,10 @@ theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
   (C.rename f).weaken = C.weaken.rename f.ext := by
   simp [weaken, rename_rename, FinFun.comp_weaken]
 
+theorem Finset.weaken_rename {xs : Finset (Fin n)} :
+  (xs.image f).image FinFun.weaken = (xs.image FinFun.weaken).image (FinFun.ext f) := by
+  simp [Finset.image_image, FinFun.comp_weaken]
+
 theorem CaptureSet.weaken_crename {C : CaptureSet n k} :
   (C.crename f).weaken = C.weaken.crename f := by
   simp [weaken, crename_rename_comm]

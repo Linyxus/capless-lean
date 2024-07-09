@@ -16,12 +16,12 @@ theorem Typing.inv_subcapt'
   Subcapt Γ {x} C := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var =>
-    cases he1; subst he2
+    cases he1; cases he2
     apply Subcapt.var
     trivial
-  case exists_elim =>
-    cases he1; cases he2
-    apply Subcapt.refl
+  -- case exists_elim =>
+  --   cases he1; cases he2
+  --   apply Subcapt.refl
   case sub hsub ih =>
     subst he1 he2
     have h := ESubtyp.type_inv_subcapt hsub
@@ -35,19 +35,19 @@ theorem Typing.inv_subcapt
   Subcapt Γ {x} C :=
   Typing.inv_subcapt' rfl rfl h
 
-theorem Typing.inv_var_exists'
-  (he1 : t0 = Term.var x) (he2 : E0 = EType.ex (CType.capt C.cweaken S))
-  (h : Typed Γ t0 E0) :
-  Subcapt Γ {x} C := by
-  induction h <;> try (solve | cases he1 | cases he2)
-  case var =>
-    cases he1; subst he2; apply Subcapt.evar; trivial
-  case sub hs ih =>
-    subst he1 he2
-    sorry
+-- theorem Typing.inv_var_exists'
+--   (he1 : t0 = Term.var x) (he2 : E0 = EType.ex (CType.capt C.cweaken S))
+--   (h : Typed Γ t0 E0) :
+--   Subcapt Γ {x} C := by
+--   induction h <;> try (solve | cases he1 | cases he2)
+--   case var =>
+--     cases he1; subst he2; apply Subcapt.evar; trivial
+--   case sub hs ih =>
+--     subst he1 he2
+--     sorry
 
-theorem Typing.inv_var_exists
-  (h : Typed Γ (Term.var x) (EType.ex (CType.capt C.cweaken S))) :
-  Subcapt Γ {x} C := sorry
+-- theorem Typing.inv_var_exists
+--   (h : Typed Γ (Term.var x) (EType.ex (CType.capt C.cweaken S))) :
+--   Subcapt Γ {x} C := sorry
 
 end Capless
