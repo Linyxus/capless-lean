@@ -5,16 +5,28 @@ import Capless.Term
 
 namespace Capless
 
-inductive DropBinderFree : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
+inductive Finset.DropBinderFree : Finset (Fin (n+1)) -> Finset (Fin n) -> Prop where
 | mk :
-  DropBinderFree C.weaken C
+  Finset.DropBinderFree (Finset.image FinFun.weaken xs) xs
+
+inductive Finset.DropBinder : Finset (Fin (n+1)) -> Finset (Fin n) -> Prop where
+| drop_free :
+  Finset.DropBinderFree xs ys ->
+  Finset.DropBinder xs ys
+| drop :
+  Finset.DropBinderFree xs ys ->
+  Finset.DropBinder (xs ∪ {0}) ys
 
 inductive DropBinder : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
-| drop_free :
-  DropBinderFree C C' ->
-  DropBinder C C'
-| drop {C : CaptureSet n k}:
-  DropBinder (C.weaken ∪ {0}) C
+| mk :
+  Finset.DropBinder xs xs' ->
+  DropBinder ⟨xs, cs⟩ ⟨xs', cs⟩
+
+inductive DropBothBinder : CaptureSet (n+1) (k+1) -> CaptureSet n k -> Prop where
+| mk :
+  Finset.DropBinder xs xs' ->
+  Finset.DropBinder ys ys' ->
+  DropBothBinder ⟨xs, ys⟩ ⟨xs', ys'⟩
 
 inductive DropCBinder : CaptureSet n (k+1) -> CaptureSet n k -> Prop where
 | mk :
@@ -56,22 +68,16 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   ¬ (SealedLet t1 C2) ->
   DropBinder C2 C2' ->
   Captured (Term.letin t1 t2) (C1 ∪ C2')
-| letex :
-  Captured t1 C1 ->
-  Captured t2 (CaptureSet.cweaken C2) ->
-  ¬ (SealedLet t1 C2) ->
-  DropBinder C2 C2' ->
-  Captured (Term.letex t1 t2) (C1 ∪ C2')
 | letin_sealed :
   Captured t1 C1 ->
   Captured t2 (CaptureSet.weaken C2) ->
   SealedLet t1 (CaptureSet.weaken C2) ->
   Captured (Term.letin t1 t2) C2
-| letex_sealed :
+| letex :
   Captured t1 C1 ->
-  Captured t2 (CaptureSet.weaken (CaptureSet.cweaken C2)) ->
-  SealedLet t1 (CaptureSet.weaken C2) ->
-  Captured (Term.letex t1 t2) C2
+  Captured t2 C2 ->
+  DropBothBinder C2 C2' ->
+  Captured (Term.letex t1 t2) (C1 ∪ C2')
 | unbox :
   Captured (Term.unbox C x) (C ∪ {x})
 
