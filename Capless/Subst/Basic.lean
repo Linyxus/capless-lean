@@ -12,6 +12,20 @@ structure VarSubst (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) 
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.rename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c (b.rename f)
 
+structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) where
+  map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.trename f)
+  tmap : ∀ X S, Γ.TBound X (TBinding.bound S) ->
+    SSubtyp Δ (SType.tvar (f X)) (S.trename f)
+  tmap_inst : ∀ X S, Γ.TBound X (TBinding.inst S) ->
+    SSubtyp Δ (SType.tvar (f X)) (S.trename f)
+  cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
+
+structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
+  map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
+  tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
+  cmap_inst : ∀ c C, Γ.CBound c (CBinding.inst C) ->
+    Subcapt Δ (CaptureSet.csingleton (f c)) (C.crename f)
+
 def VarSubst.ext {Γ : Context n m k}
   (σ : VarSubst Γ f Δ)
   (T : CType n m k) :
