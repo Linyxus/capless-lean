@@ -74,6 +74,12 @@ theorem Captured.trename
     aesop
     aesop
     apply SealedLet.trename; trivial
+  case letex =>
+    simp [Term.trename]
+    apply letex
+    aesop
+    aesop
+    trivial
 
 theorem Typed.trename
   {Γ : Context n m k} {Δ : Context n m' k}
@@ -82,19 +88,19 @@ theorem Typed.trename
   Typed Δ (t.trename f) (E.trename f) := by
   induction h generalizing m'
   case var =>
-    simp [Term.trename]
+    simp [Term.trename, EType.trename]
     apply var
     apply ρ.map; trivial
-  case exists_elim ih =>
-    simp [Term.trename, EType.trename, CType.trename]
-    rw [SType.trename_copen]
-    apply exists_elim
-    have ih := ih ρ
-    simp [Term.trename, EType.trename, CType.trename] at ih
-    exact ih
-    rename_i hb
-    have hb1 := ρ.cmap _ _ hb
-    exact hb1
+  -- case exists_elim ih =>
+  --   simp [Term.trename, EType.trename, CType.trename]
+  --   rw [SType.trename_copen]
+  --   apply exists_elim
+  --   have ih := ih ρ
+  --   simp [Term.trename, EType.trename, CType.trename] at ih
+  --   exact ih
+  --   rename_i hb
+  --   have hb1 := ρ.cmap _ _ hb
+  --   exact hb1
   case pack ih =>
     simp [Term.trename, EType.trename]
     apply pack
@@ -122,7 +128,7 @@ theorem Typed.trename
     simp [EType.trename, CType.trename, SType.trename, Term.trename] at ih1
     trivial
     have ih2 := ih2 ρ
-    simp [Term.trename] at ih2
+    simp [Term.trename, EType.trename] at ih2
     trivial
   case tabs hcv ih =>
     simp [Term.trename, EType.trename, CType.trename, SType.trename]
@@ -169,9 +175,19 @@ theorem Typed.trename
   case letin ih1 ih2 =>
     simp [Term.trename]
     apply letin
+    simp [EType.trename] at ih1
     aesop
     have ih2 := ih2 (ρ.ext _)
     rw [<- EType.weaken_trename] at ih2
+    trivial
+  case letex ih1 ih2 =>
+    simp [Term.trename]
+    apply letex
+    simp [EType.trename] at ih1
+    aesop
+    have ih2 := ih2 ((ρ.cext _).ext _)
+    rw [<- EType.weaken_trename] at ih2
+    rw [<- EType.cweaken_trename] at ih2
     trivial
   case bindt ih =>
     simp [Term.trename]

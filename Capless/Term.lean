@@ -5,16 +5,16 @@ namespace Capless
 
 inductive Term : Nat -> Nat -> Nat -> Type where
 | var : Fin n -> Term n m k
-| lam : EType n m k -> Term (n+1) m k -> Term n m k
+| lam : CType n m k -> Term (n+1) m k -> Term n m k
 | tlam : SType n m k -> Term n (m+1) k -> Term n m k
 | clam : Term n m (k+1) -> Term n m k
 | boxed : Fin n -> Term n m k
 | pack : Fin k -> Fin n -> Term n m k
-| unpack : Fin n -> Term n m k
 | app : Fin n -> Fin n -> Term n m k
 | tapp : Fin n -> Fin m -> Term n m k
 | capp : Fin n -> Fin k -> Term n m k
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
+| letex : Term n m k -> Term (n+1) m (k+1) -> Term n m k
 | bindt : SType n m k -> Term n (m+1) k -> Term n m k
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
 | unbox : CaptureSet n k -> Fin n -> Term n m k
@@ -34,11 +34,11 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.clam t => Term.clam (t.rename f)
   | Term.boxed x => Term.boxed (f x)
   | Term.pack c x => Term.pack c (f x)
-  | Term.unpack x => Term.unpack (f x)
   | Term.app x y => Term.app (f x) (f y)
   | Term.tapp x X => Term.tapp (f x) X
   | Term.capp x c => Term.capp (f x) c
   | Term.letin t u => Term.letin (t.rename f) (u.rename f.ext)
+  | Term.letex t u => Term.letex (t.rename f) (u.rename f.ext)
   | Term.bindt S t => Term.bindt (S.rename f) (t.rename f)
   | Term.bindc c t => Term.bindc (c.rename f) (t.rename f)
   | Term.unbox c x => Term.unbox (c.rename f) (f x)
@@ -51,11 +51,11 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.clam t => Term.clam (t.trename f)
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack c x
-  | Term.unpack x => Term.unpack x
   | Term.app x y => Term.app x y
   | Term.tapp x X => Term.tapp x (f X)
   | Term.capp x c => Term.capp x c
   | Term.letin t u => Term.letin (t.trename f) (u.trename f)
+  | Term.letex t u => Term.letex (t.trename f) (u.trename f)
   | Term.bindt S t => Term.bindt (S.trename f) (t.trename f.ext)
   | Term.bindc c t => Term.bindc c (t.trename f)
   | Term.unbox c x => Term.unbox c x
@@ -68,11 +68,11 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.clam t => Term.clam (t.crename f.ext)
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack (f c) x
-  | Term.unpack x => Term.unpack x
   | Term.app x y => Term.app x y
   | Term.tapp x X => Term.tapp x X
   | Term.capp x c => Term.capp x (f c)
   | Term.letin t u => Term.letin (t.crename f) (u.crename f)
+  | Term.letex t u => Term.letex (t.crename f) (u.crename f.ext)
   | Term.bindt S t => Term.bindt (S.crename f) (t.crename f)
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
   | Term.unbox c x => Term.unbox (c.crename f) x
@@ -127,9 +127,15 @@ theorem IsValue.crename_r {t : Term n m k}
 
 def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
 
+def Term.weaken1 (t : Term (n+1) m k) : Term (n+2) m k :=
+  t.rename FinFun.weaken.ext
+
 def Term.tweaken (t : Term n m k) : Term n (m+1) k := t.trename FinFun.weaken
 
 def Term.cweaken (t : Term n m k) : Term n m (k+1) := t.crename FinFun.weaken
+
+def Term.cweaken1 (t : Term n m (k+1)) : Term n m (k+2) :=
+  t.crename FinFun.weaken.ext
 
 def Term.open (t : Term (n+1) m k) (x : Fin n) : Term n m k :=
   t.rename (FinFun.open x)

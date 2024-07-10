@@ -1,6 +1,7 @@
 import Capless.Basic
 import Capless.Context
 import Capless.CaptureSet
+import Capless.Typing
 namespace Capless
 
 -- def VarRename (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) : Prop :=
@@ -17,7 +18,7 @@ def VarMap.cext {Γ : Context n m k} {Δ : Context n' m k}
   constructor
   · intros x E hb
     cases hb
-    simp [EType.cweaken_rename_comm]
+    simp [CType.cweaken_rename_comm]
     constructor
     apply ρ.map; assumption
   · intros X B hb
@@ -36,16 +37,16 @@ def VarMap.cext {Γ : Context n m k} {Δ : Context n' m k}
       apply ρ.cmap; assumption
 
 def VarMap.ext {Γ : Context n m k} {Δ : Context n' m k}
-  (ρ : VarMap Γ f Δ) (E : EType n m k) :
+  (ρ : VarMap Γ f Δ) (E : CType n m k) :
   VarMap (Γ.var E) f.ext (Δ.var (E.rename f)) := by
   constructor
   · intros x E' hb
     cases hb
     case here =>
-      rw [<- EType.weaken_rename]
+      rw [<- CType.weaken_rename]
       constructor
     case there_var =>
-      rw [<- EType.weaken_rename]
+      rw [<- CType.weaken_rename]
       simp [FinFun.ext]
       constructor
       apply ρ.map; trivial
@@ -70,7 +71,7 @@ def VarMap.text {Γ : Context n m k} {Δ : Context n' m k}
     intros x E hb
     cases hb
     case there_tvar =>
-      rw [EType.tweaken_rename]
+      rw [CType.tweaken_rename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -103,7 +104,7 @@ def CVarMap.cext {Γ : Context n m k} {Δ : Context n m k'}
     intro x E hb
     cases hb
     case there_cvar hb0 =>
-      rw [<- EType.cweaken_crename]
+      rw [<- CType.cweaken_crename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -125,17 +126,17 @@ def CVarMap.cext {Γ : Context n m k} {Δ : Context n m k'}
       apply ρ.cmap; assumption
 
 def CVarMap.ext {Γ : Context n m k} {Δ : Context n m k'}
-  (ρ : CVarMap Γ f Δ) (E : EType n m k) :
+  (ρ : CVarMap Γ f Δ) (E : CType n m k) :
   CVarMap (Γ.var E) f (Δ.var (E.crename f)) := by
   constructor
   case map =>
     intro x E hb
     cases hb
     case here =>
-      rw [<- EType.weaken_crename]
+      rw [<- CType.weaken_crename]
       constructor
     case there_var hb0 =>
-      rw [<- EType.weaken_crename]
+      rw [<- CType.weaken_crename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -161,7 +162,7 @@ def CVarMap.text {Γ : Context n m k} {Δ : Context n m k'}
     intro x E hb
     cases hb
     case there_tvar hb0 =>
-      rw [<- EType.tweaken_crename]
+      rw [<- CType.tweaken_crename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -187,17 +188,17 @@ structure TVarMap (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) w
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
 
 def TVarMap.ext {Γ : Context n m k} {Δ : Context n m' k}
-  (ρ : TVarMap Γ f Δ) (E : EType n m k) :
+  (ρ : TVarMap Γ f Δ) (E : CType n m k) :
   TVarMap (Γ.var E) f (Δ.var (E.trename f)) := by
   constructor
   case map =>
     intro x E hb
     cases hb
     case here =>
-      rw [<- EType.weaken_trename]
+      rw [<- CType.weaken_trename]
       constructor
     case there_var hb0 =>
-      rw [<- EType.weaken_trename]
+      rw [<- CType.weaken_trename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -222,7 +223,7 @@ def TVarMap.text {Γ : Context n m k} {Δ : Context n m' k}
     intro x E hb
     cases hb
     case there_tvar hb0 =>
-      rw [<- EType.tweaken_trename]
+      rw [<- CType.tweaken_trename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -250,7 +251,7 @@ def TVarMap.cext {Γ : Context n m k} {Δ : Context n m' k}
     intro x E hb
     cases hb
     case there_cvar hb0 =>
-      rw [<- EType.cweaken_trename]
+      rw [<- CType.cweaken_trename]
       constructor
       apply ρ.map; assumption
   case tmap =>
@@ -268,3 +269,24 @@ def TVarMap.cext {Γ : Context n m k} {Δ : Context n m' k}
     case there_cvar hb0 =>
       constructor
       apply ρ.cmap; assumption
+
+theorem Finset.DropBinderFree.rename
+  (h : Finset.DropBinderFree xs ys) :
+  Finset.DropBinderFree (xs.image (FinFun.ext f)) (ys.image f) := by
+  cases h
+  rw [<- Finset.weaken_rename]
+  constructor
+
+theorem Finset.DropBinder.rename
+  (h : Finset.DropBinder xs ys) :
+  Finset.DropBinder (xs.image (FinFun.ext f)) (ys.image f) := by
+  cases h
+  case drop_free =>
+    constructor
+    apply Finset.DropBinderFree.rename; assumption
+  case drop =>
+    simp [Finset.image_union]
+    apply drop
+    apply DropBinderFree.rename; assumption
+
+end Capless

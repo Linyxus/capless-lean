@@ -5,16 +5,28 @@ import Capless.Term
 
 namespace Capless
 
-inductive DropBinderFree : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
+inductive Finset.DropBinderFree : Finset (Fin (n+1)) -> Finset (Fin n) -> Prop where
 | mk :
-  DropBinderFree C.weaken C
+  Finset.DropBinderFree (Finset.image FinFun.weaken xs) xs
+
+inductive Finset.DropBinder : Finset (Fin (n+1)) -> Finset (Fin n) -> Prop where
+| drop_free :
+  Finset.DropBinderFree xs ys ->
+  Finset.DropBinder xs ys
+| drop :
+  Finset.DropBinderFree xs ys ->
+  Finset.DropBinder (xs ∪ {0}) ys
 
 inductive DropBinder : CaptureSet (n+1) k -> CaptureSet n k -> Prop where
-| drop_free :
-  DropBinderFree C C' ->
-  DropBinder C C'
-| drop {C : CaptureSet n k}:
-  DropBinder (C.weaken ∪ {0}) C
+| mk :
+  Finset.DropBinder xs xs' ->
+  DropBinder ⟨xs, cs⟩ ⟨xs', cs⟩
+
+inductive DropBothBinder : CaptureSet (n+1) (k+1) -> CaptureSet n k -> Prop where
+| mk :
+  Finset.DropBinder xs xs' ->
+  Finset.DropBinder ys ys' ->
+  DropBothBinder ⟨xs, ys⟩ ⟨xs', ys'⟩
 
 inductive DropCBinder : CaptureSet n (k+1) -> CaptureSet n k -> Prop where
 | mk :
@@ -44,8 +56,6 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   Captured (Term.boxed x) {}
 | pack :
   Captured (Term.pack c x) {x}
-| unpack :
-  Captured (Term.unpack x) {x}
 | app :
   Captured (Term.app x y) ({x} ∪ {y})
 | tapp :
@@ -63,24 +73,21 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
   Captured t2 (CaptureSet.weaken C2) ->
   SealedLet t1 (CaptureSet.weaken C2) ->
   Captured (Term.letin t1 t2) C2
+| letex :
+  Captured t1 C1 ->
+  Captured t2 C2 ->
+  DropBothBinder C2 C2' ->
+  Captured (Term.letex t1 t2) (C1 ∪ C2')
 | unbox :
   Captured (Term.unbox C x) (C ∪ {x})
 
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
 | var :
-  Context.Bound Γ x E ->
-  Typed Γ (Term.var x) E
--- | exists_elim :
---   Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
---   Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
---   Typed Γ (Term.var x) (EType.type (CType.capt {x} (S.copen c)))
+  Context.Bound Γ x T ->
+  Typed Γ (Term.var x) (EType.type T)
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->
-  Typed Γ (Term.pack c0 x) (EType.exp c0 T)
-| unpack :
-  Typed Γ (Term.var x) (EType.ex (CType.capt C S)) ->
-  Context.CBound Γ c (CBinding.inst (CaptureSet.rsingleton x)) ->
-  Typed Γ (Term.unpack x) (EType.type (CType.capt {x} (S.copen c)))
+  Typed Γ (Term.pack c0 x) (EType.ex T)
 | sub :
   Typed Γ t E1 ->
   ESubtyp Γ E1 E2 ->
@@ -98,8 +105,8 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Captured (Term.clam t) C ->
   Typed Γ (Term.clam t) (EType.type (CType.capt C (SType.cforall E)))
 | app :
-  Typed Γ (Term.var x) (EType.type (CType.capt C (SType.forall E F))) ->
-  Typed Γ (Term.var y) E ->
+  Typed Γ (Term.var x) (EType.type (CType.capt C (SType.forall T F))) ->
+  Typed Γ (Term.var y) (EType.type T) ->
   Typed Γ (Term.app x y) (F.open y)
 | tapp :
   Typed Γ (Term.var x) (EType.type (CType.capt C (SType.tforall (SType.tvar X) E))) ->
@@ -114,8 +121,12 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ->
   Typed Γ (Term.unbox C x) (EType.type (CType.capt C S))
 | letin :
-  Typed Γ t1 E1 ->
+  Typed Γ t1 (EType.type E1) ->
   Typed (Context.var Γ E1) T2 E2.weaken ->
+  Typed Γ (Term.letin t1 t2) E2
+| letex :
+  Typed Γ t1 (EType.ex T1) ->
+  Typed ((Γ.cvar CBinding.bound).var T1) T2 E2.cweaken.weaken ->
   Typed Γ (Term.letin t1 t2) E2
 | bindt :
   Typed (Context.tvar Γ (TBinding.inst S)) t E.tweaken ->

@@ -21,11 +21,27 @@ inductive Store : Nat -> Nat -> Nat -> Type where
   CaptureSet n k ->
   Store n m (k+1)
 
+inductive Cont : Nat -> Nat -> Nat -> Type where
+| none : Cont n m k
+| cons :
+  (t : Term (n+1) m k) ->
+  (cont : Cont n m k) ->
+  Cont n m k
+| conse :
+  (t : Term (n+1) m (k+1)) ->
+  (cont : Cont n m k) ->
+  Cont n m k
+
+structure State (n : Nat) (m : Nat) (k : Nat) where
+  σ : Store n m k
+  cont : Cont n m k
+  t : Term n m k
+
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
   TypedStore σ Γ ->
-  Typed Γ t E ->
+  Typed Γ t (EType.type E) ->
   (hv : t.IsValue) ->
   TypedStore (Store.val σ t hv) (Γ.var E)
 | tval :
@@ -34,6 +50,25 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | cval :
   TypedStore σ Γ ->
   TypedStore (Store.cval σ C) (Γ.cvar (CBinding.inst C))
+
+inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> Prop where
+| none :
+  TypedCont Γ E Cont.none E
+| cons :
+  Typed (Γ.var T) t (EType.weaken E) ->
+  TypedCont Γ E cont E' ->
+  TypedCont Γ (EType.type T) (Cont.cons t cont) E'
+| conse :
+  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) ->
+  TypedCont Γ E cont E' ->
+  TypedCont Γ (EType.ex T) (Cont.conse t cont) E'
+
+inductive TypedState : State n m k -> EType n m k -> Prop where
+| mk :
+  TypedStore σ Γ ->
+  Typed Γ t E ->
+  TypedCont Γ E cont E' ->
+  TypedState (State.mk σ cont t) E'
 
 inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
 | here :
@@ -74,5 +109,19 @@ inductive Store.CBound : Store n m k -> (Fin k) -> CaptureSet n k -> Prop where
   Store.CBound σ x C ->
   Store.CBound (Store.cval σ C') (Fin.succ x) C.cweaken
 
+def Cont.weaken : Cont n m k -> Cont (n+1) m k
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
+| Cont.conse t cont => Cont.conse t.weaken1 cont.weaken
+
+def Cont.tweaken : Cont n m k -> Cont n (m+1) k
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.tweaken cont.tweaken
+| Cont.conse t cont => Cont.conse t.tweaken cont.tweaken
+
+def Cont.cweaken : Cont n m k -> Cont n m (k+1)
+| Cont.none => Cont.none
+| Cont.cons t cont => Cont.cons t.cweaken cont.cweaken
+| Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 
 end Capless
