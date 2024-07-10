@@ -126,8 +126,8 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.letin t1 t2) E2
 | letex :
   Typed Γ t1 (EType.ex T1) ->
-  Typed ((Γ.cvar CBinding.bound).var T1) T2 E2.cweaken.weaken ->
-  Typed Γ (Term.letin t1 t2) E2
+  Typed ((Γ.cvar CBinding.bound).var T1) t2 E2.cweaken.weaken ->
+  Typed Γ (Term.letex t1 t2) E2
 | bindt :
   Typed (Context.tvar Γ (TBinding.inst S)) t E.tweaken ->
   Typed Γ (Term.bindt S t) E
