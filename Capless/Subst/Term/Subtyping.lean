@@ -3,7 +3,7 @@ import Capless.Subtyping
 import Capless.Subst.Term.Subcapturing
 namespace Capless
 
-def SSubtyp.rename_motive1
+def SSubtyp.subst_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
   (E2 : EType n m k)
@@ -11,7 +11,7 @@ def SSubtyp.rename_motive1
   ∀ {n'} (f : FinFun n n') (Δ : Context n' m k) (ρ : VarSubst Γ f Δ),
   ESubtyp Δ (E1.rename f) (E2.rename f)
 
-def SSubtyp.rename_motive2
+def SSubtyp.subst_motive2
   (Γ : Context n m k)
   (C1 : CType n m k)
   (C2 : CType n m k)
@@ -19,7 +19,7 @@ def SSubtyp.rename_motive2
   ∀ {n'} (f : FinFun n n') (Δ : Context n' m k) (ρ : VarSubst Γ f Δ),
   CSubtyp Δ (C1.rename f) (C2.rename f)
 
-def SSubtyp.rename_motive3
+def SSubtyp.subst_motive3
   (Γ : Context n m k)
   (S1 : SType n m k)
   (S2 : SType n m k)
@@ -27,17 +27,17 @@ def SSubtyp.rename_motive3
   ∀ {n'} (f : FinFun n n') (Δ : Context n' m k) (ρ : VarSubst Γ f Δ),
   SSubtyp Δ (S1.rename f) (S2.rename f)
 
-theorem SSubtyp.rename
+theorem SSubtyp.subst
   (h : SSubtyp Γ S1 S2)
   (σ : VarSubst Γ f Δ) :
   SSubtyp Δ (S1.rename f) (S2.rename f) := by
   apply SSubtyp.rec
-    (motive_1 := fun Γ E1 E2 h => SSubtyp.rename_motive1 Γ E1 E2)
-    (motive_2 := fun Γ C1 C2 h => SSubtyp.rename_motive2 Γ C1 C2)
-    (motive_3 := fun Γ S1 S2 h => SSubtyp.rename_motive3 Γ S1 S2)
+    (motive_1 := fun Γ E1 E2 h => SSubtyp.subst_motive1 Γ E1 E2)
+    (motive_2 := fun Γ C1 C2 h => SSubtyp.subst_motive2 Γ C1 C2)
+    (motive_3 := fun Γ S1 S2 h => SSubtyp.subst_motive3 Γ S1 S2)
     (t := h) (ρ := σ)
   case exist =>
-    unfold rename_motive1 rename_motive2
+    unfold subst_motive1 subst_motive2
     repeat intro
     simp [EType.rename]
     apply ESubtyp.exist
