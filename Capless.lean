@@ -34,3 +34,6 @@ import «Capless».Renaming.Capture.Typing
 import «Capless».Subst.Term.Subcapturing
 import «Capless».Subst.Term.Subtyping
 import «Capless».Subst.Term.Typing
+
+-- Soundness
+import «Capless».Soundness.Preservation
