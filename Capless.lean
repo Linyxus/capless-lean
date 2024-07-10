@@ -33,3 +33,4 @@ import «Capless».Renaming.Capture.Typing
 --- Term
 import «Capless».Subst.Term.Subcapturing
 import «Capless».Subst.Term.Subtyping
+import «Capless».Subst.Term.Typing

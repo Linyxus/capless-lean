@@ -43,18 +43,119 @@ theorem SSubtyp.subst
     apply ESubtyp.exist
     rename_i ih _ _ _ _
     apply ih <;> try assumption
-    sorry
-  case type => sorry
-  case capt => sorry
-  case top => sorry
-  case refl => sorry
-  case trans => sorry
-  case tvar => sorry
-  case tinstl => sorry
-  case tinstr => sorry
-  case boxed => sorry
-  case xforall => sorry
-  case tforall => sorry
-  case cforall => sorry
+    apply VarSubst.cext; trivial
+  case type =>
+    unfold subst_motive1 subst_motive2
+    repeat intro
+    simp [EType.rename]
+    apply ESubtyp.type
+    aesop
+  case capt =>
+    unfold subst_motive2 subst_motive3
+    repeat intro
+    simp [CType.rename]
+    apply CSubtyp.capt
+    apply Subcapt.subst <;> trivial
+    aesop
+  case top =>
+    unfold subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply top
+  case refl =>
+    unfold subst_motive3
+    repeat intro
+    apply refl
+  case trans =>
+    unfold subst_motive3
+    repeat intro
+    apply trans
+    { aesop }
+    { aesop }
+  case tvar =>
+    unfold subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply tvar
+    rename_i hb _ _ _ σ
+    have hb1 := σ.tmap _ _ hb
+    simp [TBinding.rename] at hb1
+    exact hb1
+  case tinstl =>
+    unfold subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply tinstl
+    rename_i hb _ _ _ σ
+    have hb1 := σ.tmap _ _ hb
+    simp [TBinding.rename] at hb1
+    exact hb1
+  case tinstr =>
+    unfold subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply tinstr
+    rename_i hb _ _ _ σ
+    have hb1 := σ.tmap _ _ hb
+    simp [TBinding.rename] at hb1
+    exact hb1
+  case boxed =>
+    unfold subst_motive2 subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply boxed
+    aesop
+  case xforall =>
+    unfold subst_motive1 subst_motive2 subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply xforall
+    { aesop }
+    { rename_i ih _ _ _ σ
+      apply ih <;> try assumption
+      apply VarSubst.ext; trivial }
+  case tforall =>
+    unfold subst_motive1 subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply tforall
+    { aesop }
+    { rename_i ih _ _ _ σ
+      apply ih <;> try assumption
+      apply VarSubst.text; trivial }
+  case cforall =>
+    unfold subst_motive1 subst_motive3
+    repeat intro
+    simp [SType.rename]
+    apply cforall
+    { rename_i ih _ _ _ σ
+      apply ih <;> try assumption
+      apply VarSubst.cext; trivial }
+
+theorem CSubtyp.subst
+  (h : CSubtyp Γ T1 T2)
+  (σ : VarSubst Γ f Δ) :
+  CSubtyp Δ (T1.rename f) (T2.rename f) := by
+  cases h
+  case capt hc hs =>
+    simp [CType.rename]
+    apply CSubtyp.capt
+    { apply hc.subst; trivial }
+    { apply hs.subst; trivial }
+
+theorem ESubtyp.subst
+  (h : ESubtyp Γ E1 E2)
+  (σ : VarSubst Γ f Δ) :
+  ESubtyp Δ (E1.rename f) (E2.rename f) := by
+  cases h
+  case exist hs =>
+    simp [EType.rename]
+    apply ESubtyp.exist
+    { apply hs.subst
+      apply σ.cext }
+  case type hs =>
+    simp [EType.rename]
+    apply ESubtyp.type
+    apply hs.subst; trivial
 
 end Capless

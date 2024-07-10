@@ -202,4 +202,11 @@ theorem Typed.trename
     rw [EType.cweaken_trename]
     trivial
 
+def Typed.tweaken
+  (h : Typed Γ t E) :
+  Typed (Γ.tvar b) t.tweaken E.tweaken := by
+  simp [Term.tweaken, EType.tweaken]
+  apply h.trename
+  apply TVarMap.weaken
+
 end Capless
