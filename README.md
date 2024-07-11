@@ -69,8 +69,8 @@ These are the actual substitution theorem that the preservation proof relies on.
     - [ ] Subtyping
     - [ ] Typing
 - [ ] Store lookup
-  - [ ] Lookup inversion
-  - [ ] Canonical forms
+  - [x] Lookup inversion
+  - [ ] Canonical forms (WIP)
     - [ ] Term abstraction
     - [ ] Type abstraction
     - [ ] Capture abstraction
