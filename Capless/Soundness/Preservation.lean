@@ -22,7 +22,10 @@ theorem preservation
   (ht : TypedState state E) :
   Preserve E state' := by
   cases hr
-  case apply hl => sorry
+  case apply hl =>
+    cases ht
+    case mk hs ht hc =>
+      sorry
   case tapply  hl => sorry
   case capply hl => sorry
   case unbox hl => sorry

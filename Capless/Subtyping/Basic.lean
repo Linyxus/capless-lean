@@ -31,4 +31,44 @@ theorem ESubtyp.ex_inv_subcapt
     rfl
     trivial
 
+theorem CSubtyp.refl :
+  CSubtyp Γ T T := by
+  cases T; apply capt
+  { apply Subcapt.refl }
+  { apply SSubtyp.refl }
+
+theorem ESubtyp.refl :
+  ESubtyp Γ E E := by
+  cases E
+  case ex =>
+    apply exist
+    apply CSubtyp.refl
+  case type =>
+    apply type
+    apply CSubtyp.refl
+
+theorem CSubtyp.trans
+  (h1 : CSubtyp Γ T1 T2)
+  (h2 : CSubtyp Γ T2 T3) :
+  CSubtyp Γ T1 T3 := by
+  cases h1; cases h2
+  rename_i _ _ hc1 hs1 _ _ hc2 hs2
+  constructor
+  apply Subcapt.trans <;> trivial
+  apply SSubtyp.trans <;> trivial
+
+theorem ESubtyp.trans
+  (h1 : ESubtyp Γ E1 E2)
+  (h2 : ESubtyp Γ E2 E3) :
+  ESubtyp Γ E1 E3 := by
+  cases h1 <;> cases h2
+  { apply exist
+    apply CSubtyp.trans
+    { trivial }
+    { trivial } }
+  { apply type
+    apply CSubtyp.trans
+    { trivial }
+    { trivial } }
+
 end Capless
