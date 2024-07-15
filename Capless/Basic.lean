@@ -52,4 +52,16 @@ theorem FinFun.open_comp {f : FinFun n n'} {x : Fin n} :
   case zero => exact rfl
   case succ j => exact rfl
 
+theorem FinFun.open_comp_weaken :
+  (FinFun.open x) ∘ weaken = id := by
+  funext i
+  simp [weaken, FinFun.open, id]
+
+theorem FinFun.id_ext :
+  (FinFun.ext (n := n) id) = id := by
+  funext i
+  cases i using Fin.cases
+  case zero => simp [FinFun.ext, id]
+  case succ i0 => simp [FinFun.ext, id]
+
 end Capless

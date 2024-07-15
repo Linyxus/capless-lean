@@ -5,7 +5,7 @@ namespace Capless
 inductive Reduce : State n m k -> State n' m' k' -> Prop where
 | apply {σ : Store n m k} :
   σ.Bound x (Term.lam T t) ->
-  Reduce ⟨σ, cont, Term.app x y⟩ ⟨σ, cont, t.open x⟩
+  Reduce ⟨σ, cont, Term.app x y⟩ ⟨σ, cont, t.open y⟩
 | tapply {σ : Store n m k} :
   σ.Bound x (Term.tlam S t) ->
   Reduce ⟨σ, cont, Term.tapp x X⟩ ⟨σ, cont, t.topen X⟩

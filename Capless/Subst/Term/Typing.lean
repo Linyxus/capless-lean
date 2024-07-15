@@ -119,4 +119,14 @@ theorem Typed.subst
     simp [CBinding.rename] at ih
     exact ih
 
+theorem Typed.open
+  (h : Typed (Γ.var P) t E)
+  (hx : Typed Γ (Term.var x) (EType.type P)) :
+  Typed Γ (t.open x) (E.open x) := by
+  simp [Term.open, EType.open]
+  apply Typed.subst
+  { exact h }
+  { apply VarSubst.open
+    trivial }
+
 end Capless

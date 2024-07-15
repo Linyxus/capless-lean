@@ -454,4 +454,10 @@ theorem CaptureSet.cweaken_csingleton {c : Fin k} :
   (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
   simp [csingleton, cweaken, crename, FinFun.weaken]
 
+theorem CaptureSet.rename_id {C : CaptureSet n k} :
+  C.rename FinFun.id = C := by
+  cases C
+  unfold FinFun.id
+  simp [CaptureSet.rename]
+
 end Capless

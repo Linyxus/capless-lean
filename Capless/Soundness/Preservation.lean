@@ -1,6 +1,9 @@
 import Capless.Store
 import Capless.Type
 import Capless.Reduction
+import Capless.Inversion.Typing
+import Capless.Inversion.Lookup
+import Capless.Subst.Term.Typing
 namespace Capless
 
 inductive Preserve : EType n m k -> State n' m' k' -> Prop where
@@ -25,8 +28,19 @@ theorem preservation
   case apply hl =>
     cases ht
     case mk hs ht hc =>
-      sorry
-  case tapply  hl => sorry
+      have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
+      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hv
+      constructor
+      constructor
+      { trivial }
+      { apply Typed.sub
+        { apply Typed.open (h := hcft)
+          exact hy }
+        { subst he1
+          trivial } }
+      trivial
+  case tapply hl => sorry
   case capply hl => sorry
   case unbox hl => sorry
   case push => sorry

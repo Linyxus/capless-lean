@@ -2,6 +2,7 @@ import Capless.Basic
 import Capless.Context
 import Capless.CaptureSet
 import Capless.Typing
+import Capless.Typing.Basic
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
@@ -124,5 +125,38 @@ def VarSubst.cext {Γ : Context n m k}
       have hb1 := σ.cmap _ _ hb0
       rw [CBinding.cweaken_rename_comm]
       constructor; trivial
+
+def VarSubst.open
+  (hx : Typed Γ (Term.var x) (EType.type T)) :
+  VarSubst (Γ.var T) (FinFun.open x) Γ := by
+  constructor
+  case map =>
+    intro x P hb
+    cases hb
+    case here =>
+      simp [FinFun.open]
+      simp [CType.weaken, CType.rename_rename, FinFun.open_comp_weaken]
+      simp [CType.rename_id]
+      trivial
+    case there_var hb0 =>
+      simp [FinFun.open]
+      simp [CType.weaken, CType.rename_rename, FinFun.open_comp_weaken]
+      simp [CType.rename_id]
+      apply Typed.bound_typing
+      trivial
+  case tmap =>
+    intro X b hb
+    cases hb
+    case there_var hb0 =>
+      simp [TBinding.weaken, TBinding.rename_rename, FinFun.open_comp_weaken]
+      simp [TBinding.rename_id]
+      trivial
+  case cmap =>
+    intro c b hb
+    cases hb
+    case there_var hb0 =>
+      simp [CBinding.weaken, CBinding.rename_rename, FinFun.open_comp_weaken]
+      simp [CBinding.rename_id]
+      trivial
 
 end Capless

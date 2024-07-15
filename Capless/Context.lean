@@ -198,6 +198,18 @@ theorem TBinding.cweaken_trename {b : TBinding n m k} :
   (b.trename f).cweaken = b.cweaken.trename f := by
   simp [cweaken, crename_trename_comm]
 
+theorem TBinding.rename_id {b : TBinding n m k} :
+  b.rename FinFun.id = b := by
+  cases b
+  case bound => simp [rename, SType.rename_id]
+  case inst => simp [rename, SType.rename_id]
+
+theorem CBinding.rename_id {b : CBinding n k} :
+  b.rename FinFun.id = b := by
+  cases b
+  case bound => simp [rename]
+  case inst => simp [rename, CaptureSet.rename_id]
+
 theorem Context.cvar_bound_var_inv'
   (he : Γ0 = Context.cvar Γ b)
   (hb : Context.Bound Γ0 x E) :

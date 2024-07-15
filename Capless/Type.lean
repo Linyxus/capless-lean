@@ -543,3 +543,47 @@ theorem EType.ex_cweaken_eq_inv {E : EType n m k}
     simp [EType.cweaken, EType.crename, CType.crename] at heq
     exists C0, S0
     simp [CaptureSet.cweaken1, SType.cweaken1]; aesop
+
+mutual
+
+theorem EType.rename_id {E : EType n m k} :
+  E.rename FinFun.id = E :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.rename_id (T := T)
+    simp [EType.rename, ih]
+  | EType.type T => by
+    have ih := CType.rename_id (T := T)
+    simp [EType.rename, ih]
+
+theorem CType.rename_id {T : CType n m k} :
+  T.rename FinFun.id = T :=
+  match T with
+  | CType.capt C S => by
+    have ih1 := CaptureSet.rename_id (C := C)
+    have ih2 := SType.rename_id (S := S)
+    simp [CType.rename, ih1, ih2]
+
+theorem SType.rename_id {S : SType n m k} :
+  S.rename FinFun.id = S :=
+  match S with
+  | SType.top => by simp [SType.rename]
+  | SType.tvar X => by simp [SType.rename]
+  | SType.forall E1 E2 => by
+    have ih1 := CType.rename_id (T := E1)
+    have ih2 := EType.rename_id (E := E2)
+    simp [SType.rename, FinFun.id_ext, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.rename_id (S := S)
+    have ih2 := EType.rename_id (E := E)
+    simp [SType.rename, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.rename_id (E := E)
+    simp [SType.rename, ih]
+  | SType.box T => by
+    have ih := CType.rename_id (T := T)
+    simp [SType.rename, ih]
+
+end
+
+end Capless

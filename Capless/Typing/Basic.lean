@@ -50,4 +50,9 @@ theorem Typing.inv_subcapt
 --   (h : Typed Γ (Term.var x) (EType.ex (CType.capt C.cweaken S))) :
 --   Subcapt Γ {x} C := sorry
 
+theorem Typed.bound_typing
+  (hb : Context.Bound Γ x T) :
+  Typed Γ (Term.var x) (EType.type T) :=
+  Typed.var hb
+
 end Capless
