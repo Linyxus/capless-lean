@@ -84,6 +84,8 @@ inductive Captured : Term n m k -> CaptureSet n k -> Prop where
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
 | var :
   Context.Bound Γ x T ->
+  /- TODO Apparently I made a mistake here, fix it afterwards
+   -   so that it will not disturb the on-going proof -/
   Typed Γ (Term.var x) (EType.type T)
 | pack :
   Typed Γ (Term.var x) (EType.type (CType.copen T c0)) ->
