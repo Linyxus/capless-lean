@@ -3,9 +3,10 @@ import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
 import Capless.Inversion.Context
+import Capless.Inversion.Typing
 namespace Capless
 
-def Store.lookup_inv_typing
+def Store.lookup_inv_bound
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
   (hb : Context.Bound Γ x T) :
@@ -43,5 +44,16 @@ def Store.lookup_inv_typing
     have ih := ih.cweaken (b := CBinding.inst C)
     simp [EType.cweaken, EType.crename, CType.cweaken] at *
     exact ih
+
+theorem Store.lookup_inv_typing
+  (hl : Store.Bound σ x v)
+  (ht : TypedStore σ Γ)
+  (hx : Typed Γ (Term.var x) (EType.type T)) :
+  Typed Γ v (EType.type T) := by
+  have ⟨T0, hb, hsub⟩ := Typed.var_inv hx
+  have hv := Store.lookup_inv_bound hl ht hb
+  apply Typed.sub
+  { trivial }
+  { apply ESubtyp.type; trivial }
 
 end Capless

@@ -124,4 +124,25 @@ def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.cons t cont => Cont.cons t.cweaken cont.cweaken
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 
+inductive Context.IsTight : Context n m k -> Prop where
+| empty : Context.IsTight Context.empty
+| var :
+  Context.IsTight Γ ->
+  Context.IsTight (Γ.var T)
+| tvar :
+  Context.IsTight Γ ->
+  Context.IsTight (Γ.tvar (TBinding.inst S))
+| cvar :
+  Context.IsTight Γ ->
+  Context.IsTight (Γ.cvar (CBinding.inst C))
+
+theorem TypedStore.is_tight
+  (h : TypedStore σ Γ) :
+  Γ.IsTight := by
+  induction h
+  case empty => constructor
+  case val ih => constructor; trivial
+  case tval ih => constructor; trivial
+  case cval ih => constructor; trivial
+
 end Capless
