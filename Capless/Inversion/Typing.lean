@@ -1,6 +1,8 @@
+import Capless.Tactics
 import Capless.Typing
 import Capless.Subtyping.Basic
 import Capless.Inversion.Subtyping
+import Capless.Subst.Term.Typing
 namespace Capless
 
 theorem Typed.app_inv'
@@ -87,10 +89,15 @@ theorem Typed.canonical_form_lam'
     have ⟨hs2, ht2⟩ := h
     apply And.intro
     { apply! CSubtyp.trans }
+    { apply? Typed.sub
+      apply! Typed.narrow }
 
 theorem Typed.canonical_form_lam
+  (ht : Γ.IsTight)
   (h : Typed Γ (Term.lam T t) (EType.type (CType.capt Cf (SType.forall T' E)))) :
   CSubtyp Γ T' T ∧
-  Typed (Γ.var T') t E := sorry
+  Typed (Γ.var T') t E := by
+  apply? Typed.canonical_form_lam'
+  constructor
 
 end Capless
