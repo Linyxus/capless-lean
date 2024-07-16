@@ -28,9 +28,10 @@ theorem preservation
   case apply hl =>
     cases ht
     case mk hs ht hc =>
+      have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
       have hv := Store.lookup_inv_typing hl hs hx
-      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hv
+      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv
       constructor
       constructor
       { trivial }
@@ -40,7 +41,11 @@ theorem preservation
         { subst he1
           trivial } }
       trivial
-  case tapply hl => sorry
+  case tapply hl =>
+    cases ht
+    case mk hs ht hc =>
+      have hg := TypedStore.is_tight hs
+      sorry
   case capply hl => sorry
   case unbox hl => sorry
   case push => sorry
@@ -50,6 +55,5 @@ theorem preservation
   case lift hv => sorry
   case tlift => sorry
   case clift => sorry
-
 
 end Capless

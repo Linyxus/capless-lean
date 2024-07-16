@@ -73,6 +73,36 @@ theorem Context.tinst_tbound_bound_inv
     ∧ X = X0.succ :=
   Context.tinst_tbound_bound_inv' rfl rfl hb
 
+theorem Context.tbound_tbound_inst_inv'
+  (he1 : Γ0 = Γ.tvar (TBinding.bound P))
+  (he2 : b0 = TBinding.inst S)
+  (hb : Context.TBound Γ0 X b0) :
+  ∃ X0 S0, Context.TBound Γ X0 (TBinding.inst S0)
+    ∧ S = SType.tweaken S0
+    ∧ X = X0.succ := by
+  cases hb <;> try (solve | cases he1 | cases he2)
+  case here =>
+    cases he1
+    simp [TBinding.tweaken, TBinding.trename] at he2
+  case there_tvar hb0 =>
+    cases he1
+    rename_i X0 b0
+    cases b0 <;> simp [TBinding.tweaken, TBinding.trename] at he2
+    case inst S0 =>
+      apply Exists.intro X0
+      apply Exists.intro S0
+      constructor <;> try constructor
+      { trivial }
+      { simp [SType.tweaken]; aesop }
+      { trivial }
+
+theorem Context.tbound_tbound_inst_inv
+  (hb : Context.TBound (Γ.tvar (TBinding.bound P)) X (TBinding.inst S)) :
+  ∃ X0 S0, Context.TBound Γ X0 (TBinding.inst S0)
+    ∧ S = SType.tweaken S0
+    ∧ X = X0.succ :=
+  Context.tbound_tbound_inst_inv' rfl rfl hb
+
 theorem Context.cvar_tbound_inv'
   (he : Γ0 = Γ.cvar p)
   (hb : Context.TBound Γ0 X b) :

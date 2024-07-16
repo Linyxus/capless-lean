@@ -586,4 +586,45 @@ theorem SType.rename_id {S : SType n m k} :
 
 end
 
+mutual
+
+theorem EType.trename_id {E : EType n m k} :
+  E.trename FinFun.id = E :=
+  match E with
+  | EType.ex T => by
+    have ih := CType.trename_id (T := T)
+    simp [EType.trename, ih]
+  | EType.type T => by
+    have ih := CType.trename_id (T := T)
+    simp [EType.trename, ih]
+
+theorem CType.trename_id {T : CType n m k} :
+  T.trename FinFun.id = T :=
+  match T with
+  | CType.capt C S => by
+    have ih2 := SType.trename_id (S := S)
+    simp [CType.trename, ih2]
+
+theorem SType.trename_id {S : SType n m k} :
+  S.trename FinFun.id = S :=
+  match S with
+  | SType.top => by simp [SType.trename]
+  | SType.tvar X => by simp [SType.trename, FinFun.id]
+  | SType.forall E1 E2 => by
+    have ih1 := CType.trename_id (T := E1)
+    have ih2 := EType.trename_id (E := E2)
+    simp [SType.trename, FinFun.id_ext, ih1, ih2]
+  | SType.tforall S E => by
+    have ih1 := SType.trename_id (S := S)
+    have ih2 := EType.trename_id (E := E)
+    simp [SType.trename, FinFun.id_ext, ih1, ih2]
+  | SType.cforall E => by
+    have ih := EType.trename_id (E := E)
+    simp [SType.trename, ih]
+  | SType.box T => by
+    have ih := CType.trename_id (T := T)
+    simp [SType.trename, ih]
+
+end
+
 end Capless

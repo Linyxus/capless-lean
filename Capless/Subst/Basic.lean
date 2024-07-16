@@ -4,9 +4,11 @@ import Capless.CaptureSet
 import Capless.Typing
 import Capless.Typing.Basic
 import Capless.Renaming.Term.Subtyping
+import Capless.Renaming.Type.Subtyping
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
+import Capless.Inversion.Context
 namespace Capless
 
 structure VarSubst (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) where
@@ -192,5 +194,46 @@ def VarSubst.narrow
     case there_var hb0 =>
       simp [CBinding.rename_id]
       constructor; trivial
+
+def TVarSubst.narrow
+  (hs : SSubtyp Γ S' S) :
+  TVarSubst
+    (Γ.tvar (TBinding.bound S))
+    FinFun.id
+    (Γ.tvar (TBinding.bound S')) := by
+  constructor
+  case map =>
+    intro x T hb
+    simp [CType.trename_id]
+    cases hb
+    constructor
+    trivial
+  case tmap =>
+    intro X S hb
+    cases X using Fin.cases
+    case zero =>
+      cases hb
+      simp [SType.trename_id, FinFun.id]
+      apply SSubtyp.trans
+      { apply SSubtyp.tvar
+        { constructor } }
+      { apply! SSubtyp.tweaken }
+    case succ X0 => sorry
+  case tmap_inst =>
+    intro X S hb
+    simp [FinFun.id, SType.trename_id]
+    have ⟨X0, S0, hb0, he1, he2⟩ := Context.tbound_tbound_inst_inv hb
+    subst_vars
+    apply SSubtyp.tinstr
+    have h : (TBinding.inst S0).tweaken = TBinding.inst (S0.tweaken) := by
+      simp [TBinding.tweaken, TBinding.trename, SType.tweaken]
+    rw [<- h]
+    constructor
+    trivial
+  case cmap =>
+    intro c b hb
+    cases hb
+    constructor
+    trivial
 
 end Capless

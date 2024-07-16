@@ -35,6 +35,36 @@ theorem Typed.app_inv
     ∧ ESubtyp Γ E0 E :=
   Typed.app_inv' rfl h
 
+theorem Typed.tapp_inv'
+  (he : t0 = Term.tapp x X)
+  (h : Typed Γ t0 E) :
+  ∃ Cf F E0,
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F)))
+    ∧ E0 = F.topen X
+    ∧ ESubtyp Γ E0 E := by
+  induction h <;> try (solve | cases he)
+  case tapp =>
+    cases he
+    repeat (apply Exists.intro)
+    apply And.intro
+    { trivial }
+    apply And.intro
+    { trivial }
+    { apply ESubtyp.refl }
+  case sub ht hs ih =>
+    have ih := ih he
+    have ⟨Cf, F, E0, hx, he0, hs0⟩ := ih
+    have h := ESubtyp.trans hs0 hs
+    aesop
+
+theorem Typed.tapp_inv
+  (h : Typed Γ (Term.tapp x X) E) :
+  ∃ Cf F E0,
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F)))
+    ∧ E0 = F.topen X
+    ∧ ESubtyp Γ E0 E :=
+  Typed.tapp_inv' rfl h
+
 theorem Typed.var_inv'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type T)
@@ -99,5 +129,28 @@ theorem Typed.canonical_form_lam
   Typed (Γ.var T') t E := by
   apply? Typed.canonical_form_lam'
   constructor
+
+theorem Typed.canonical_form_tlam'
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.tforall S' E))
+  (he1 : t0 = Term.tlam S t)
+  (he2 : E0 = EType.type (CType.capt Cf S0))
+  (h : Typed Γ t0 E0) :
+  SSubtyp Γ S' S ∧
+  Typed (Γ.tvar (TBinding.bound S')) t E := by
+  induction h <;> try (solve | cases he1 | cases he2)
+  case tabs =>
+    cases he1; cases he2
+    cases hd
+    constructor
+    apply SSubtyp.refl
+    trivial
+  case sub => sorry
+
+theorem Typed.canonical_form_tlam
+  (ht : Γ.IsTight)
+  (h : Typed Γ (Term.tlam S t) (EType.type (CType.capt Cf (SType.tforall S' E)))) :
+  SSubtyp Γ S' S ∧
+  Typed (Γ.tvar (TBinding.bound S')) t E := by sorry
 
 end Capless
