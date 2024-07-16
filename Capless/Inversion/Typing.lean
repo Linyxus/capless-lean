@@ -80,7 +80,13 @@ theorem Typed.canonical_form_lam'
     rename_i hs
     cases hs
     rename_i hsc hs
-    sorry
+    have ⟨T1, E1, hd3⟩ := SSubtyp.dealias_right_forall hs ht hd2
+    have ih := ih ht he1 hd3 rfl
+    have h := SSubtyp.sub_dealias_forall_inv ht hd3 hd2 hs
+    have ⟨hs1, ht1⟩ := ih
+    have ⟨hs2, ht2⟩ := h
+    apply And.intro
+    { apply! CSubtyp.trans }
 
 theorem Typed.canonical_form_lam
   (h : Typed Γ (Term.lam T t) (EType.type (CType.capt Cf (SType.forall T' E)))) :

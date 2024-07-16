@@ -146,4 +146,38 @@ def Term.topen (t : Term n (m+1) k) (X : Fin m) : Term n m k :=
 def Term.copen (t : Term n m (k+1)) (c : Fin k) : Term n m k :=
   t.crename (FinFun.open c)
 
+theorem Term.rename_id {t : Term n m k} :
+  t.rename FinFun.id = t := by
+  induction t
+  case var => simp [Term.rename, FinFun.id]
+  case lam =>
+    simp [Term.rename, CType.rename_id, FinFun.id_ext]
+    trivial
+  case tlam =>
+    simp [Term.rename, SType.rename_id]
+    trivial
+  case clam =>
+    simp [Term.rename, SType.rename_id]
+    trivial
+  case boxed =>
+    simp [Term.rename, FinFun.id]
+  case unbox =>
+    simp [Term.rename, CaptureSet.rename_id, FinFun.id]
+  case pack =>
+    simp [Term.rename, CaptureSet.rename_id, FinFun.id]
+  case app =>
+    simp [Term.rename, FinFun.id]
+  case tapp =>
+    simp [Term.rename, FinFun.id]
+  case capp =>
+    simp [Term.rename, FinFun.id]
+  case letin ih1 ih2 =>
+    simp [Term.rename, FinFun.id_ext, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [Term.rename, FinFun.id_ext, ih1, ih2]
+  case bindt ih =>
+    simp [Term.rename, SType.rename_id, ih]
+  case bindc ih =>
+    simp [Term.rename, CaptureSet.rename_id, ih]
+
 end Capless
