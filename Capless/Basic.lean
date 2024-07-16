@@ -1,8 +1,6 @@
 import Mathlib.Init.Function
 namespace Capless
 
-macro "apply!" e:term : tactic => `(tactic| apply $e <;> trivial)
-
 def FinFun (n n' : Nat) : Type :=
   Fin n -> Fin n'
 
