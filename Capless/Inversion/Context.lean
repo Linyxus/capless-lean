@@ -73,9 +73,31 @@ theorem Context.tinst_tbound_bound_inv
     ∧ X = X0.succ :=
   Context.tinst_tbound_bound_inv' rfl rfl hb
 
+theorem Context.cvar_tbound_inv'
+  (he : Γ0 = Γ.cvar p)
+  (hb : Context.TBound Γ0 X b) :
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.cweaken := by
+  cases hb <;> try (solve | cases he)
+  case there_cvar b0 hb0 =>
+    cases he
+    exists b0
+
 theorem Context.cvar_tbound_inv
   (hb : Context.TBound (Γ.cvar p) X b) :
-  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.cweaken := sorry
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.cweaken :=
+  Context.cvar_tbound_inv' rfl hb
+
+theorem Context.cvar_tbound_inv_bound
+  (hb : Context.TBound (Γ.cvar p) X (TBinding.bound S)) :
+  ∃ S0, Context.TBound Γ X (TBinding.bound S0) ∧ S = S0.cweaken := by
+  have ⟨b0, hb0, he0⟩ := Context.cvar_tbound_inv hb
+  cases b0
+  case bound S0 =>
+    simp [TBinding.cweaken, TBinding.crename] at he0
+    apply Exists.intro S0
+    aesop
+  case inst =>
+    simp [TBinding.cweaken, TBinding.crename] at he0
 
 theorem Context.tight_bound_tvar_absurd
   (ht : Context.IsTight Γ)
@@ -88,6 +110,51 @@ theorem Context.tight_bound_tvar_absurd
   case tvar =>
     have ⟨X0, S0, hb0, hs0, hx0⟩ := Context.tinst_tbound_bound_inv hb
     aesop
-  case cvar => sorry
+  case cvar =>
+    have ⟨S0, hb0, he0⟩ := Context.cvar_tbound_inv_bound hb
+    aesop
+
+theorem Context.tvar_tbound_succ_inv'
+  (he1 : Γ0 = Γ.tvar p) (he2 : X0 = Fin.succ X)
+  (hb : Context.TBound Γ0 X0 b) :
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.tweaken := by
+  cases hb <;> try (solve | cases he1 | cases he2)
+  case there_tvar hb0 =>
+    rw [Fin.succ_inj] at he2
+    cases he1; subst he2
+    aesop
+
+theorem Context.tvar_tbound_succ_inv
+  (hb : Context.TBound (Γ.tvar p) (Fin.succ X) b) :
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.tweaken :=
+  Context.tvar_tbound_succ_inv' rfl rfl hb
+
+theorem Context.tbound_inj
+  (h1 : Context.TBound Γ X b1)
+  (h2 : Context.TBound Γ X b2) : b1 = b2 := by
+  induction Γ
+  case empty => cases h1
+  case var Γ0 P ih =>
+    cases h1
+    cases h2
+    rename_i h1 _ h2
+    have ih := ih h1 h2
+    aesop
+  case tvar Γ0 b ih =>
+    cases h1
+    case here =>
+      cases h2
+      trivial
+    case there_tvar h1 =>
+      have h := Context.tvar_tbound_succ_inv h2
+      have ⟨b0, h2, he2⟩ := h
+      have ih := ih h1 h2
+      aesop
+  case cvar Γ0 b ih =>
+    cases h1
+    cases h2
+    rename_i h1 _ h2
+    have ih := ih h1 h2
+    aesop
 
 end Capless

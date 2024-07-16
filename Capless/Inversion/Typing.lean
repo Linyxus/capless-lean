@@ -61,17 +61,26 @@ theorem Typed.var_inv
   apply Typed.var_inv' rfl rfl h
 
 theorem Typed.canonical_form_lam'
-  (he1 : t0 = Term.lam T t) (he2 : E0 = EType.type (CType.capt Cf (SType.forall T' E)))
+  (ht : Γ.IsTight)
+  (he1 : t0 = Term.lam T t) (hd2 : SType.Dealias Γ S0 (SType.forall T' E))
+  (he2 : E0 = EType.type (CType.capt Cf S0))
   (h : Typed Γ t0 E0) :
   CSubtyp Γ T' T ∧
   Typed (Γ.var T') t E := by
   induction h <;> try (solve | cases he1 | cases he2)
   case abs =>
     cases he1; cases he2
+    cases hd2
     constructor
     { apply CSubtyp.refl }
-    { trivial }
-  case sub hs ih => sorry
+    { aesop }
+  case sub hs ih =>
+    subst he2
+    cases hs
+    rename_i hs
+    cases hs
+    rename_i hsc hs
+    sorry
 
 theorem Typed.canonical_form_lam
   (h : Typed Γ (Term.lam T t) (EType.type (CType.capt Cf (SType.forall T' E)))) :

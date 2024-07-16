@@ -3,6 +3,7 @@ import Capless.Context
 import Capless.CaptureSet
 import Capless.Typing
 import Capless.Typing.Basic
+import Capless.Renaming.Term.Subtyping
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
@@ -158,5 +159,38 @@ def VarSubst.open
       simp [CBinding.weaken, CBinding.rename_rename, FinFun.open_comp_weaken]
       simp [CBinding.rename_id]
       trivial
+
+def VarSubst.narrow
+  (hs : CSubtyp Γ T' T) :
+  VarSubst (Γ.var T) FinFun.id (Γ.var T') := by
+  constructor
+  case map =>
+    intro x Q hb
+    cases hb
+    case here =>
+      simp [FinFun.id]
+      simp [CType.rename_id]
+      apply Typed.sub
+      apply Typed.var; constructor
+      apply ESubtyp.type
+      apply hs.weaken
+    case there_var hb0 =>
+      simp [FinFun.id]
+      simp [CType.rename_id]
+      apply Typed.var
+      constructor
+      trivial
+  case tmap =>
+    intro X b hb
+    cases hb
+    case there_var hb0 =>
+      simp [TBinding.rename_id]
+      constructor; trivial
+  case cmap =>
+    intro c b hb
+    cases hb
+    case there_var hb0 =>
+      simp [CBinding.rename_id]
+      constructor; trivial
 
 end Capless
