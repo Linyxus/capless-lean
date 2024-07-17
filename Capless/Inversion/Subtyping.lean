@@ -455,5 +455,6 @@ theorem SSubtyp.sub_dealias_tforall_inv
     have ⟨hs1, he1⟩ := ih1 ht hd1 hd3
     have ⟨hs2, he2⟩ := ih2 ht hd3 hd2
     sorry
+  all_goals sorry
 
 end Capless
