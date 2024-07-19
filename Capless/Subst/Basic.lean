@@ -1,6 +1,7 @@
 import Capless.Basic
 import Capless.Context
 import Capless.CaptureSet
+import Capless.Type.Basic
 import Capless.Typing
 import Capless.Typing.Basic
 import Capless.Renaming.Term.Subtyping
@@ -218,7 +219,17 @@ def TVarSubst.narrow
       { apply SSubtyp.tvar
         { constructor } }
       { apply! SSubtyp.tweaken }
-    case succ X0 => sorry
+    case succ X0 =>
+      simp [FinFun.id, SType.trename_id]
+      have ⟨b0, hb0, he0⟩ := Context.tvar_tbound_succ_inv hb
+      cases b0
+      case bound =>
+        simp [TBinding.tweaken, TBinding.trename] at he0
+        subst_vars
+        rw [<- SType.tvar_tweaken_succ]
+        apply SSubtyp.tweaken
+        apply! SSubtyp.tvar
+      case inst => simp [TBinding.tweaken, TBinding.trename] at he0
   case tmap_inst =>
     intro X S hb
     simp [FinFun.id, SType.trename_id]

@@ -3,6 +3,7 @@ import Capless.Typing
 import Capless.Subtyping.Basic
 import Capless.Inversion.Subtyping
 import Capless.Subst.Term.Typing
+import Capless.Subst.Type.Typing
 namespace Capless
 
 theorem Typed.app_inv'
@@ -145,12 +146,28 @@ theorem Typed.canonical_form_tlam'
     constructor
     apply SSubtyp.refl
     trivial
-  case sub => sorry
+  case sub hs ih =>
+    subst he2
+    cases hs
+    rename_i hs
+    cases hs
+    rename_i hsc hs
+    have ⟨S1, E1, hd3⟩ := SSubtyp.dealias_right_tforall hs ht hd
+    have ih := ih ht hd3 he1 rfl
+    have h := SSubtyp.sub_dealias_tforall_inv ht hd3 hd hs
+    have ⟨hs1, ht1⟩ := ih
+    have ⟨hs2, ht2⟩ := h
+    apply And.intro
+    { apply! SSubtyp.trans }
+    { apply? Typed.sub
+      apply! Typed.tnarrow }
 
 theorem Typed.canonical_form_tlam
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.tlam S t) (EType.type (CType.capt Cf (SType.tforall S' E)))) :
   SSubtyp Γ S' S ∧
-  Typed (Γ.tvar (TBinding.bound S')) t E := by sorry
+  Typed (Γ.tvar (TBinding.bound S')) t E := by
+  apply? Typed.canonical_form_tlam'
+  constructor
 
 end Capless

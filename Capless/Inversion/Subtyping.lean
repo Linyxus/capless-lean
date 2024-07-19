@@ -4,6 +4,7 @@ import Capless.Inversion.Basic
 import Capless.Inversion.Context
 import Capless.Subtyping.Basic
 import Capless.Subst.Term.Subtyping
+import Capless.Subst.Type.Subtyping
 namespace Capless
 
 theorem ESubtyp.sub_type_inv'
@@ -454,7 +455,68 @@ theorem SSubtyp.sub_dealias_tforall_inv
     have ⟨T3, E3, hd3⟩ := h
     have ⟨hs1, he1⟩ := ih1 ht hd1 hd3
     have ⟨hs2, he2⟩ := ih2 ht hd3 hd2
-    sorry
-  all_goals sorry
+    apply And.intro
+    { apply! SSubtyp.trans }
+    { apply? ESubtyp.trans
+      apply? he1.tnarrow }
+  case tvar =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd _
+    cases hd
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+  case tinstl =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+    rename_i hd1 hd2
+    have h := SType.dealias_tforall_inj hd1 hd2
+    cases h
+    subst_vars
+    constructor
+    { apply SSubtyp.refl }
+    { apply ESubtyp.refl }
+  case tinstr =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd _
+    cases hd
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+    rename_i hd1 hd2
+    have h := SType.dealias_tforall_inj hd1 hd2
+    cases h
+    subst_vars
+    constructor
+    { apply SSubtyp.refl }
+    { apply ESubtyp.refl }
+  case boxed =>
+    unfold dealias_tforall_inv.cmotive dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case xforall =>
+    unfold dealias_tforall_inv.emotive dealias_tforall_inv.cmotive dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case tforall =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd1 hd2
+    cases hd1; cases hd2
+    aesop
+  case cforall =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd1 hd2
+    cases hd1
 
 end Capless

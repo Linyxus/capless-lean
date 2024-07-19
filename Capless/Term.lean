@@ -180,4 +180,41 @@ theorem Term.rename_id {t : Term n m k} :
   case bindc ih =>
     simp [Term.rename, CaptureSet.rename_id, ih]
 
+theorem Term.trename_id {t : Term n m k} :
+  t.trename FinFun.id = t := by
+  induction t
+  case var =>
+    simp [Term.trename]
+  case lam ih =>
+    simp [Term.trename, CType.trename_id]
+    exact ih
+  case tlam ih =>
+    simp [Term.trename, SType.trename_id, FinFun.id_ext]
+    exact ih
+  case clam ih =>
+    simp [Term.trename]
+    exact ih
+  case boxed =>
+    simp [Term.trename]
+  case pack =>
+    simp [Term.trename]
+  case app =>
+    simp [Term.trename]
+  case tapp =>
+    simp [Term.trename, FinFun.id]
+  case capp =>
+    simp [Term.trename]
+  case letin ih1 ih2 =>
+    simp [Term.trename, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [Term.trename, ih1, ih2]
+  case bindt ih =>
+    simp [Term.trename, SType.trename_id, FinFun.id_ext]
+    exact ih
+  case bindc ih =>
+    simp [Term.trename]
+    exact ih
+  case unbox =>
+    simp [Term.trename]
+
 end Capless
