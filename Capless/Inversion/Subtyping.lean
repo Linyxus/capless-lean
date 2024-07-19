@@ -519,4 +519,240 @@ theorem SSubtyp.sub_dealias_tforall_inv
     rename_i hd1 hd2
     cases hd1
 
+def SSubtyp.dealias_right_cforall.emotive
+  (Γ : Context n m k)
+  (E1 : EType n m k)
+  (E2 : EType n m k)
+  : Prop := True
+
+def SSubtyp.dealias_right_cforall.cmotive
+  (Γ : Context n m k)
+  (C1 : CType n m k)
+  (C2 : CType n m k)
+  : Prop := True
+
+def SSubtyp.dealias_right_cforall.smotive
+  (Γ : Context n m k)
+  (S1 : SType n m k)
+  (S2 : SType n m k)
+  : Prop :=
+  ∀ {E2} (ht : Γ.IsTight) (hd : SType.Dealias Γ S2 (SType.cforall E2)),
+    ∃ E1, SType.Dealias Γ S1 (SType.cforall E1)
+
+theorem SSubtyp.dealias_right_cforall
+  (h : SSubtyp Γ S1 S2) (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S2 (SType.cforall E2)) :
+  ∃ E1, SType.Dealias Γ S1 (SType.cforall E1) := by
+  apply SSubtyp.rec
+    (motive_1 := fun Γ E1 E2 h => SSubtyp.dealias_right_cforall.emotive Γ E1 E2)
+    (motive_2 := fun Γ C1 C2 h => SSubtyp.dealias_right_cforall.cmotive Γ C1 C2)
+    (motive_3 := fun Γ S1 S2 h => SSubtyp.dealias_right_cforall.smotive Γ S1 S2)
+    (t := h) (hd := hd) (ht := ht)
+  case exist => unfold dealias_right_cforall.emotive dealias_right_cforall.cmotive; aesop
+  case type => unfold dealias_right_cforall.emotive dealias_right_cforall.cmotive; aesop
+  case capt => unfold dealias_right_cforall.cmotive; aesop
+  case top =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case refl =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i E2 _ _
+    exists E2
+  case trans =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i ih1 ih2 E3 ht3 hd3
+    have ih2 := ih2 ht3 hd3
+    have ⟨E2, hd2⟩ := ih2
+    have ih1 := ih1 ht3 hd2
+    exact ih1
+  case tvar =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i hb _ ht _
+    exfalso
+    apply Context.tight_bound_tvar_absurd ht hb
+  case tinstl =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+    case step hb0 hd0 =>
+      rename_i hb1 _ _ _
+      have h := Context.tbound_inj hb0 hb1
+      cases h
+      aesop
+  case tinstr =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    constructor; constructor
+    trivial
+    trivial
+  case boxed =>
+    unfold dealias_right_cforall.cmotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case xforall =>
+    unfold dealias_right_cforall.emotive dealias_right_cforall.cmotive dealias_right_cforall.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case tforall =>
+    unfold dealias_right_cforall.smotive dealias_right_cforall.emotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case cforall =>
+    unfold dealias_right_cforall.smotive dealias_right_cforall.emotive
+    repeat intro
+    rename_i hd
+    repeat (apply Exists.intro)
+    apply SType.Dealias.refl
+
+theorem SType.dealias_cforall_inj'
+  (he1 : S1 = SType.cforall E1) (he2 : S2 = SType.cforall E2)
+  (h1 : SType.Dealias Γ S S1)
+  (h2 : SType.Dealias Γ S S2) :
+  E1 = E2 := by
+  induction h1 generalizing E2
+  case refl =>
+    subst he1
+    cases h2
+    aesop
+  case step hb1 hd1 ih =>
+    cases h2
+    case refl => cases he2
+    case step hb2 hd2 =>
+      apply ih
+      { trivial }
+      { trivial }
+      { have h := Context.tbound_inj hb1 hb2
+        cases h
+        trivial }
+
+theorem SType.dealias_cforall_inj
+  (h1 : SType.Dealias Γ S (SType.cforall E1))
+  (h2 : SType.Dealias Γ S (SType.cforall E2)) :
+  E1 = E2 :=
+  SType.dealias_cforall_inj' rfl rfl h1 h2
+
+def SSubtyp.dealias_cforall_inv.emotive
+  (Γ : Context n m k)
+  (E1 : EType n m k)
+  (E2 : EType n m k)
+  : Prop := True
+
+def SSubtyp.dealias_cforall_inv.cmotive
+  (Γ : Context n m k)
+  (C1 : CType n m k)
+  (C2 : CType n m k)
+  : Prop := True
+
+def SSubtyp.dealias_cforall_inv.smotive
+  (Γ : Context n m k)
+  (S1 : SType n m k)
+  (S2 : SType n m k)
+  : Prop :=
+  ∀ {E1 E2}
+    (ht : Γ.IsTight)
+    (h1 : SType.Dealias Γ S1 (SType.cforall E1))
+    (h2 : SType.Dealias Γ S2 (SType.cforall E2)),
+    ESubtyp (Γ.cvar CBinding.bound) E1 E2
+
+theorem SSubtyp.sub_dealias_cforall_inv
+  (ht : Γ.IsTight)
+  (h1 : SType.Dealias Γ S1 (SType.cforall E1))
+  (h2 : SType.Dealias Γ S2 (SType.cforall E2))
+  (hs : SSubtyp Γ S1 S2) :
+  ESubtyp (Γ.cvar CBinding.bound) E1 E2 := by
+  apply SSubtyp.rec
+    (motive_1 := fun Γ E1 E2 h => SSubtyp.dealias_cforall_inv.emotive Γ E1 E2)
+    (motive_2 := fun Γ C1 C2 h => SSubtyp.dealias_cforall_inv.cmotive Γ C1 C2)
+    (motive_3 := fun Γ S1 S2 h => SSubtyp.dealias_cforall_inv.smotive Γ S1 S2)
+    (t := hs) (h1 := h1) (h2 := h2) (ht := ht)
+  case exist => aesop
+  case type => aesop
+  case capt => unfold dealias_cforall_inv.cmotive; aesop
+  case top =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd2
+    cases hd2
+  case refl =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd1 hd2
+    have h := SType.dealias_cforall_inj hd1 hd2
+    cases h; subst_vars
+    apply ESubtyp.refl
+  case trans =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hs1 hs2 ih1 ih2 E1 E2 ht hd1 hd2
+    have h := SSubtyp.dealias_right_cforall hs2 ht hd2
+    have ⟨E3, hd3⟩ := h
+    have he1 := ih1 ht hd1 hd3
+    have he2 := ih2 ht hd3 hd2
+    apply ESubtyp.trans <;> trivial
+  case tinstl =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+    rename_i hb1 _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+    rename_i hd1 hd2
+    have h := SType.dealias_cforall_inj hd1 hd2
+    cases h
+    subst_vars
+    apply ESubtyp.refl
+  case tinstr =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd _
+    cases hd
+    rename_i hb1 _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+    rename_i hd1 hd2
+    have h := SType.dealias_cforall_inj hd1 hd2
+    cases h
+    subst_vars
+    apply ESubtyp.refl
+  case tvar =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd _
+    cases hd
+    rename_i hb1 _ _ _ _ _ hb2 _
+    have h := Context.tbound_inj hb1 hb2
+    cases h
+  case boxed =>
+    unfold dealias_cforall_inv.cmotive dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case xforall =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case tforall =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case cforall =>
+    unfold dealias_cforall_inv.emotive dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd1 hd2
+    cases hd1; cases hd2
+    rename_i ih _ _
+    trivial
+
 end Capless

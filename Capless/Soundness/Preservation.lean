@@ -58,7 +58,21 @@ theorem preservation
         { subst he0
           trivial } }
       trivial
-  case capply hl => sorry
+  case capply hl =>
+    cases ht
+    case mk hs ht hc =>
+      have hg := TypedStore.is_tight hs
+      have ⟨Cf, F, E0, hx, he1, hs1⟩ := Typed.capp_inv ht
+      have hv := Store.lookup_inv_typing hl hs hx
+      have hct := Typed.canonical_form_clam hg hv
+      constructor
+      constructor
+      { trivial }
+      { apply Typed.sub
+        { apply Typed.copen hct }
+        { subst he1
+          exact hs1 } }
+      trivial
   case unbox hl => sorry
   case push => sorry
   case push_ex => sorry
