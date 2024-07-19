@@ -247,4 +247,47 @@ def TVarSubst.narrow
     constructor
     trivial
 
+def TVarSubst.open :
+  TVarSubst
+    (Γ.tvar (TBinding.bound (SType.tvar X)))
+    (FinFun.open X)
+    Γ :=
+  { map := fun x E hb => by
+      cases hb
+      case there_tvar hb0 =>
+        simp [CType.tweaken, CType.trename_trename, FinFun.open_comp_weaken]
+        simp [CType.trename_id]
+        trivial
+  , tmap := fun Y S hb => by
+      cases Y using Fin.cases
+      case zero =>
+        cases hb
+        simp [FinFun.open, SType.trename_trename, FinFun.open_comp_weaken]
+        simp [SType.trename_id]
+        constructor
+      case succ =>
+        have ⟨b0, hb0, he0⟩ := Context.tvar_tbound_succ_inv hb
+        cases b0
+        case bound =>
+          simp [TBinding.tweaken, TBinding.trename] at he0
+          subst_vars
+          simp [SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
+          apply! SSubtyp.tvar
+        case inst =>
+          simp [TBinding.tweaken, TBinding.trename] at he0
+  , tmap_inst := fun Y S hb => by
+      cases Y using Fin.cases
+      case zero => cases hb
+      case succ Y0 =>
+        have ⟨X0, S0, hb0, he1, he2⟩ := Context.tbound_tbound_inst_inv hb
+        subst_vars
+        simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
+        rw [Fin.succ_inj] at he2
+        subst_vars
+        apply! SSubtyp.tinstr
+  , cmap := fun c b hb => by
+      cases hb
+      trivial
+  }
+
 end Capless

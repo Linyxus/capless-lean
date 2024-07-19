@@ -4,6 +4,8 @@ import Capless.Reduction
 import Capless.Inversion.Typing
 import Capless.Inversion.Lookup
 import Capless.Subst.Term.Typing
+import Capless.Subst.Type.Typing
+import Capless.Subst.Capture.Typing
 namespace Capless
 
 inductive Preserve : EType n m k -> State n' m' k' -> Prop where
@@ -45,7 +47,17 @@ theorem preservation
     cases ht
     case mk hs ht hc =>
       have hg := TypedStore.is_tight hs
-      sorry
+      have ⟨Cf, F, E0, hx, he0, hs0⟩ := Typed.tapp_inv ht
+      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨hs1, hft⟩ := Typed.canonical_form_tlam hg hv
+      constructor
+      constructor
+      { trivial }
+      { apply Typed.sub
+        { apply Typed.topen (h := hft) }
+        { subst he0
+          trivial } }
+      trivial
   case capply hl => sorry
   case unbox hl => sorry
   case push => sorry

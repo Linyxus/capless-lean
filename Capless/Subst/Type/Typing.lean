@@ -15,4 +15,10 @@ theorem Typed.tnarrow
   apply? Typed.tsubst
   apply? TVarSubst.narrow
 
+theorem Typed.topen
+  (h : Typed (Γ.tvar (TBinding.bound (SType.tvar X))) t E) :
+  Typed Γ (t.topen X) (E.topen X) := by
+  apply? Typed.tsubst
+  apply? TVarSubst.open
+
 end Capless
