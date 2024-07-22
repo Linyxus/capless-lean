@@ -22,7 +22,7 @@ structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k)
   tmap : ∀ X S, Γ.TBound X (TBinding.bound S) ->
     SSubtyp Δ (SType.tvar (f X)) (S.trename f)
   tmap_inst : ∀ X S, Γ.TBound X (TBinding.inst S) ->
-    SSubtyp Δ (SType.tvar (f X)) (S.trename f)
+    Δ.TBound (f X) (TBinding.inst (S.trename f))
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
 
 structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
@@ -235,7 +235,6 @@ def TVarSubst.narrow
     simp [FinFun.id, SType.trename_id]
     have ⟨X0, S0, hb0, he1, he2⟩ := Context.tbound_tbound_inst_inv hb
     subst_vars
-    apply SSubtyp.tinstr
     have h : (TBinding.inst S0).tweaken = TBinding.inst (S0.tweaken) := by
       simp [TBinding.tweaken, TBinding.trename, SType.tweaken]
     rw [<- h]
@@ -284,7 +283,7 @@ def TVarSubst.open :
         simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
         rw [Fin.succ_inj] at he2
         subst_vars
-        apply! SSubtyp.tinstr
+        trivial
   , cmap := fun c b hb => by
       cases hb
       trivial
