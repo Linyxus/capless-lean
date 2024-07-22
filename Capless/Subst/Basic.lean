@@ -28,7 +28,7 @@ structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k)
 structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
-  cmap_inst : ∀ c C, Γ.CBound c (CBinding.inst C) ->
+  cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Subcapt Δ (CaptureSet.csingleton (f c)) (C.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
@@ -289,5 +289,24 @@ def TVarSubst.open :
       cases hb
       trivial
   }
+
+def CVarSubst.open :
+  CVarSubst
+    (Γ.cvar CBinding.bound)
+    (FinFun.open c)
+    Γ := by
+  constructor
+  case map =>
+    intro x T hb
+    cases hb
+    simp [CType.cweaken, CType.crename_crename, FinFun.open_comp_weaken]
+    simp [CType.crename_id]
+    trivial
+  case tmap =>
+    intro X b hb
+    cases hb
+    simp [TBinding.cweaken, TBinding.crename_crename, FinFun.open_comp_weaken]
+    sorry
+  case cmap => sorry
 
 end Capless

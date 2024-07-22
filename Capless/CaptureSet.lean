@@ -460,4 +460,10 @@ theorem CaptureSet.rename_id {C : CaptureSet n k} :
   unfold FinFun.id
   simp [CaptureSet.rename]
 
+theorem CaptureSet.crename_id {C : CaptureSet n k} :
+  C.crename FinFun.id = C := by
+  cases C
+  unfold FinFun.id
+  simp [CaptureSet.crename]
+
 end Capless
