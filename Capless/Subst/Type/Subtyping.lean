@@ -42,9 +42,38 @@ theorem Context.cvar_tbound_tvar_inv --TODO move
   ∃ T0, Context.TBound Γ X T0 ∧ T = T0.cweaken :=
   Context.cvar_tbound_tvar_inv' rfl hb
 
+theorem Context.tvar_tbound_inv' -- TODO move
+  (he1 : Γ0 = Γ.tvar p)
+  (hb : Context.TBound Γ0 X0 b) :
+  (X0 = 0 ∧ b = p.tweaken) ∨
+  (∃ b0 X, Context.TBound Γ X b0 ∧ b = b0.tweaken ∧ X0 = (Fin.succ X)) := by
+  cases X0 using Fin.cases
+  case zero =>
+    left
+    cases hb <;> try (solve | cases he1 | cases he2 | aesop)
+  case succ n =>
+    right
+    rw [he1] at hb
+    apply Context.tvar_tbound_succ_inv at hb
+    aesop
+
+theorem Context.tvar_tbound_inv -- TODO move
+  (hb : Context.TBound (Γ.tvar p) X b) :
+  (X = 0 ∧ b = p.tweaken) ∨
+  (∃ b0 X0, Context.TBound Γ X0 b0 ∧ b = b0.tweaken ∧ X = (Fin.succ X0)) :=
+  Context.tvar_tbound_inv' rfl hb
+
 theorem SType.cweaken_trename {S : SType n m k} : --TODO move
   (S.trename f).cweaken = S.cweaken.trename f := by
   simp [cweaken, crename_trename_comm]
+
+theorem SType.weaken_trename {S : SType n m k} : --TODO move
+  (S.trename f).weaken = S.weaken.trename f := by
+  simp [weaken, SType.trename_rename_comm]
+
+theorem SType.tweaken_trename {S : SType n m k} :
+  (S.trename f).tweaken = S.tweaken.trename f.ext := by
+  simp [tweaken, trename_trename, FinFun.comp_weaken]
 
 theorem SSubtyp.cweaken -- TODO: move weakening lemmas into separate package?
   (h : SSubtyp Γ S1 S2) :
@@ -53,6 +82,40 @@ theorem SSubtyp.cweaken -- TODO: move weakening lemmas into separate package?
   simp [SType.cweaken]
   apply? SSubtyp.crename
   apply CVarMap.weaken
+
+theorem SSubtyp.weaken
+  (h : SSubtyp Γ S1 S2) :
+  ∀ b, SSubtyp (Γ.var b) S1.weaken S2.weaken := by
+  intro b
+  simp [SType.weaken]
+  apply? SSubtyp.rename
+  apply VarMap.weaken
+
+@[simp]
+lemma TBinding.tweaken_bound: (TBinding.bound T).tweaken = TBinding.bound (T.tweaken) := by aesop
+
+@[simp]
+lemma TBinding.tweaken_inst: (TBinding.inst T).tweaken = TBinding.inst (T.tweaken) := by aesop
+
+@[simp]
+lemma TBinding.cweaken_bound: (TBinding.bound T).cweaken = TBinding.bound (T.cweaken) := by aesop
+
+@[simp]
+lemma TBinding.cweaken_inst: (TBinding.inst T).cweaken = TBinding.inst (T.cweaken) := by aesop
+
+@[simp]
+lemma TBinding.weaken_bound: (TBinding.bound T).weaken = TBinding.bound (T.weaken) := by aesop
+
+@[simp]
+lemma TBinding.weaken_inst: (TBinding.inst T).weaken = TBinding.inst (T.weaken) := by aesop
+
+lemma FinFun.comp_succ {f : FinFun n n'}: Fin.succ ∘ f = (FinFun.ext f) ∘ Fin.succ := by --TODO move
+  funext i
+  cases n
+  case zero =>
+    aesop
+  case succ n =>
+    simp [FinFun.ext]
 
 def TVarSubst.cext {Γ : Context n m k} -- TODO move
   (σ : TVarSubst Γ f Δ) :
@@ -73,35 +136,25 @@ def TVarSubst.cext {Γ : Context n m k} -- TODO move
     cases hb''
     case bound S' =>
       have h0 := σ.tmap _ _ hb'''
-      rw [heq] at hb
-      simp [TBinding.cweaken, TBinding.crename] at heq
+      simp at heq
       rw [heq]
-      have heq' : (S'.crename FinFun.weaken) = S'.cweaken := rfl
-      rw [heq']
       rw [<-SType.cweaken_trename]
       have hb'' := h0.cweaken b
       simp [SType.cweaken, SType.crename] at *
       exact hb''
     case inst S' =>
-      have h0 := σ.tmap_inst _ _ hb'''
-      rw [heq] at hb
-      simp [TBinding.cweaken, TBinding.crename] at heq
+      simp at heq
   case tmap_inst =>
     intros X S hb
     have hb' := Context.cvar_tbound_tvar_inv hb
     obtain ⟨hb'',  hb''', heq⟩ := hb'
     cases hb''
     case bound S' =>
-      have h0 := σ.tmap _ _ hb'''
-      rw [heq] at hb
-      simp [TBinding.cweaken, TBinding.crename] at heq
+      simp at heq
     case inst S' =>
       have h0 := σ.tmap_inst _ _ hb'''
-      rw [heq] at hb
-      simp [TBinding.cweaken, TBinding.crename] at heq
+      simp at heq
       rw [heq]
-      have heq' : (S'.crename FinFun.weaken) = S'.cweaken := rfl
-      rw [heq']
       rw [<-SType.cweaken_trename]
       have hb'' := h0.cweaken b
       simp [SType.cweaken, SType.crename] at *
@@ -118,12 +171,139 @@ def TVarSubst.cext {Γ : Context n m k} -- TODO move
 def TVarSubst.ext {Γ : Context n m k} -- TODO move
   (σ : TVarSubst Γ f Δ)
   (T : CType n m k) :
-  TVarSubst (Γ.var T) f (Δ.var (T.trename f)) := sorry
+  TVarSubst (Γ.var T) f (Δ.var (T.trename f)) := by
+  constructor
+  case map =>
+    intros x T hb
+    cases hb
+    case here =>
+      rw [<-CType.weaken_trename]
+      constructor
+    case there_var hb0 =>
+      have h0 := σ.map _ _ hb0
+      rw [<-CType.weaken_trename]
+      constructor
+      exact h0
+  case tmap =>
+    intros X S hb
+    have hb' := Context.var_tbound_inv hb
+    obtain ⟨hb'',  hb''', heq⟩ := hb'
+    cases hb''
+    case bound S' =>
+      have h0 := σ.tmap _ _ hb'''
+      simp at heq
+      rw [heq]
+      rw [<-SType.weaken_trename]
+      have hb'' := h0.weaken (T.trename f)
+      simp [SType.weaken, SType.rename] at *
+      exact hb''
+    case inst S' =>
+      simp at heq
+  case tmap_inst =>
+    intros X S hb
+    have hb' := Context.var_tbound_inv hb
+    obtain ⟨hb'',  hb''', heq⟩ := hb'
+    cases hb''
+    case bound S' =>
+      simp at heq
+    case inst S' =>
+      have h0 := σ.tmap_inst _ _ hb'''
+      simp at heq
+      rw [heq]
+      rw [<-SType.weaken_trename]
+      have hb'' := h0.weaken (T.trename f)
+      simp [SType.weaken, SType.rename] at *
+      exact hb''
+  case cmap =>
+    intros c b' hb
+    cases hb
+    case there_var x b' hb' =>
+      have hb'' := σ.cmap _ _ hb'
+      constructor
+      exact hb''
 
 def TVarSubst.text {Γ : Context n m k} -- TODO move
   (σ : TVarSubst Γ f Δ)
   (T : TBinding n m k) :
-  TVarSubst (Γ.tvar T) f.ext (Δ.tvar (T.trename f)) := sorry
+  TVarSubst (Γ.tvar T) f.ext (Δ.tvar (T.trename f)) := by
+    constructor
+    case map =>
+      intros x T hb
+      cases hb
+      case there_tvar hb0 =>
+        have h0 := σ.map _ _ hb0
+        rw [<-CType.tweaken_trename]
+        constructor
+        exact h0
+    case tmap =>
+      intros X S hb
+      have hb' := Context.tvar_tbound_inv hb
+      cases hb'
+      case inl hb' =>
+        obtain ⟨ hz , hbnd ⟩ := hb'
+        rw [hz, hbnd] at hb
+        rw [hz]
+        simp [FinFun.ext]
+        apply SSubtyp.tvar
+        cases T
+        case bound T =>
+          simp at hbnd
+          rw [hbnd]
+          rw [<-SType.tweaken_trename]
+          constructor
+        case inst T =>
+          simp at hbnd
+      case inr hb' =>
+        obtain ⟨T', X',  hb', heq, heq'⟩ := hb'
+        rw [heq'] at hb
+        cases T'
+        case bound T' =>
+          simp at heq
+          rw [heq,heq']
+          have h0 := σ.tmap _ _ hb'
+          apply (@SSubtyp.tweaken _ _ _ _  _ _ (T.trename f)) at h0
+          simp [SType.tweaken, SType.trename, SType.trename_trename,FinFun.ext,FinFun.weaken,FinFun.comp_succ] at *
+          trivial
+        case inst S' =>
+          simp at heq
+    case tmap_inst =>
+      intros X S hb
+      have hb' := Context.tvar_tbound_inv hb
+      cases hb'
+      case inl hb' =>
+        obtain ⟨ hz , hbnd ⟩ := hb'
+        rw [hz, hbnd] at hb
+        rw [hz]
+        simp [FinFun.ext]
+        apply SSubtyp.tinstr
+        cases T
+        case bound T =>
+          simp at hbnd
+        case inst T =>
+          simp at hbnd
+          rw [hbnd]
+          rw [<-SType.tweaken_trename]
+          constructor
+      case inr hb' =>
+        obtain ⟨T', X',  hb', heq, heq'⟩ := hb'
+        rw [heq'] at hb
+        cases T'
+        case bound T' =>
+          simp at heq
+        case inst S' =>
+          simp at heq
+          rw [heq,heq']
+          have h0 := σ.tmap_inst _ _ hb'
+          apply (@SSubtyp.tweaken _ _ _ _  _ _ (T.trename f)) at h0
+          simp [SType.tweaken, SType.trename, SType.trename_trename,FinFun.ext,FinFun.weaken,FinFun.comp_succ] at *
+          trivial
+    case cmap =>
+      intros c b' hb
+      cases hb
+      case there_tvar x hb' =>
+        have hb'' := σ.cmap _ _ hb'
+        constructor
+        exact hb''
 
 lemma SSubtyp.tinstl' (h : SSubtyp Γ (SType.tvar X) S) : SSubtyp Δ S (SType.tvar X) := by -- TODO move
   sorry
