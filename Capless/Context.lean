@@ -210,6 +210,24 @@ theorem CBinding.rename_id {b : CBinding n k} :
   case bound => simp [rename]
   case inst => simp [rename, CaptureSet.rename_id]
 
+theorem TBinding.trename_id {b : TBinding n m k} :
+  b.trename FinFun.id = b := by
+  cases b
+  case bound => simp [trename, SType.trename_id]
+  case inst => simp [trename, SType.trename_id]
+
+theorem TBinding.crename_id {b : TBinding n m k} :
+  b.crename FinFun.id = b := by
+  cases b
+  case bound => simp [crename, SType.crename_id]
+  case inst => simp [crename, SType.crename_id]
+
+theorem CBinding.crename_id {b : CBinding n k} :
+  b.crename FinFun.id = b := by
+  cases b
+  case bound => simp [crename]
+  case inst => simp [crename, CaptureSet.crename_id]
+
 theorem Context.cvar_bound_var_inv'
   (he : Γ0 = Context.cvar Γ b)
   (hb : Context.Bound Γ0 x E) :

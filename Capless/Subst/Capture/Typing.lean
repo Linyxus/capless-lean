@@ -9,6 +9,9 @@ theorem Typed.csubst
 
 theorem Typed.copen
   (h : Typed (Γ.cvar CBinding.bound) t E) :
-  Typed Γ (t.copen c) (E.copen c) := by sorry
+  Typed Γ (t.copen c) (E.copen c) := by
+  simp [Term.copen, EType.copen]
+  apply? Typed.csubst
+  apply? CVarSubst.open
 
 end Capless

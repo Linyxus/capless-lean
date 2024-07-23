@@ -305,7 +305,16 @@ def CVarSubst.open :
     intro X b hb
     cases hb
     simp [TBinding.cweaken, TBinding.crename_crename, FinFun.open_comp_weaken]
-    sorry
-  case cmap => sorry
+    simp [TBinding.crename_id]
+    trivial
+  case cmap =>
+    intro c b hb
+    have ⟨c0, C0, he1, he2, hb0⟩ := Context.cvar_bound_cvar_inst_inv hb
+    subst_vars
+    simp [FinFun.open, CaptureSet.cweaken]
+    simp [CaptureSet.crename_crename]
+    simp [FinFun.open_comp_weaken]
+    simp [CaptureSet.crename_id]
+    apply! Subcapt.cinstr
 
 end Capless
