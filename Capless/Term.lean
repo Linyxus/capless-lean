@@ -217,4 +217,40 @@ theorem Term.trename_id {t : Term n m k} :
   case unbox =>
     simp [Term.trename]
 
+theorem Term.crename_id {t : Term n m k} :
+  t.crename FinFun.id = t := by
+  induction t
+  case var =>
+    simp [Term.crename]
+  case lam ih =>
+    simp [Term.crename]
+    simp [ih, CType.crename_id]
+  case tlam ih =>
+    simp [Term.crename]
+    simp [ih, SType.crename_id]
+  case clam ih =>
+    simp [Term.crename, ih, FinFun.id_ext]
+  case boxed =>
+    simp [Term.crename]
+  case pack =>
+    simp [Term.crename, CaptureSet.crename_id]
+  case app =>
+    simp [Term.crename]
+  case tapp =>
+    simp [Term.crename]
+  case capp =>
+    simp [Term.crename, FinFun.id]
+  case letin ih1 ih2 =>
+    simp [Term.crename, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [Term.crename, ih1, ih2, FinFun.id_ext]
+  case bindt ih =>
+    simp [Term.crename]
+    simp [ih, SType.crename_id]
+  case bindc ih =>
+    simp [Term.crename]
+    simp [CaptureSet.crename_id, FinFun.id_ext, ih]
+  case unbox =>
+    simp [Term.crename, CaptureSet.crename_id]
+
 end Capless

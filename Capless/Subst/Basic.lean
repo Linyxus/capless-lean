@@ -317,4 +317,37 @@ def CVarSubst.open :
     simp [CaptureSet.crename_id]
     apply! Subcapt.cinstr
 
+def CVarSubst.instantiate {Γ : Context n m k} :
+  CVarSubst
+    (Γ.cvar CBinding.bound)
+    FinFun.id
+    (Γ.cvar (CBinding.inst C)) := by
+  constructor
+  case map =>
+    intro x T hb
+    cases hb
+    simp [CType.crename_id]
+    constructor; trivial
+  case tmap =>
+    intro X b hb
+    cases hb
+    simp [TBinding.crename_id]
+    constructor; trivial
+  case cmap =>
+    intro c C hb
+    simp [FinFun.id, CaptureSet.crename_id]
+    have ⟨c0, C0, he1, he2, hb0⟩ := Context.cvar_bound_cvar_inst_inv hb
+    subst_vars
+    apply Subcapt.cinstr
+    have heq : (CBinding.inst C0).cweaken = CBinding.inst (C0.cweaken) := by
+      simp [CBinding.cweaken, CBinding.crename, CaptureSet.cweaken]
+    rw [<- heq]
+    constructor
+    trivial
+
+def CVarSubst.ext {Γ : Context n m k}
+  (σ : CVarSubst Γ f Δ)
+  (T : CType n m k) :
+  CVarSubst (Γ.var T) f (Δ.var (T.crename f)) := by sorry
+
 end Capless

@@ -262,6 +262,18 @@ theorem Typed.letex_inv {Γ : Context n m k}
     ESubtyp Γ E0 E :=
   Typed.letex_inv' rfl h
 
+theorem Typed.bindt_inv {Γ : Context n m k}
+  (h : Typed Γ (Term.bindt T t) E) :
+  ∃ E0,
+    Typed (Γ.tvar (TBinding.inst T)) t E0.tweaken ∧
+    ESubtyp Γ E0 E := sorry
+
+theorem Typed.bindc_inv {Γ : Context n m k}
+  (h : Typed Γ (Term.bindc C t) E) :
+  ∃ E0,
+    Typed (Γ.cvar (CBinding.inst C)) t E0.cweaken ∧
+    ESubtyp Γ E0 E := sorry
+
 theorem Typed.canonical_form_clam'
   (ht : Γ.IsTight)
   (hd : SType.Dealias Γ S0 (SType.cforall E))
@@ -297,9 +309,9 @@ theorem Typed.canonical_form_boxed
   (h : Typed Γ (Term.boxed x) (EType.type (CType.capt {} (SType.box (CType.capt C S))))) :
   Typed Γ (Term.var x) (EType.type (CType.capt C S)) := sorry
 
--- theorem Typed.canonical_form_pack
---   (ht : Γ.IsTight)
---   (h : Typed Γ (Term.pack c x) (EType.ex T)) :
---   Typed Γ (Term.var x) (EType.type (CType.copen T0 c)) := sorry
+theorem Typed.canonical_form_pack
+  (ht : Γ.IsTight)
+  (h : Typed Γ (Term.pack C x) (EType.ex T)) :
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) := sorry
 
 end Capless

@@ -4,11 +4,24 @@ import Capless.Reduction
 import Capless.Inversion.Typing
 import Capless.Inversion.Lookup
 import Capless.Renaming.Term.Subtyping
+import Capless.Renaming.Type.Subtyping
 import Capless.Renaming.Capture.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
 namespace Capless
+
+theorem TypedCont.cweaken
+  (h : TypedCont Γ E t E') :
+  TypedCont (Γ.cvar b) E.cweaken t.cweaken E'.cweaken := sorry
+
+theorem TypedCont.weaken
+  (h : TypedCont Γ E t E') :
+  TypedCont (Γ.var T) E.weaken t.weaken E'.weaken := sorry
+
+theorem TypedCont.tweaken
+  (h : TypedCont Γ E t E') :
+  TypedCont (Γ.tvar S) E.tweaken t.tweaken E'.tweaken := sorry
 
 inductive Preserve : EType n m k -> State n' m' k' -> Prop where
 | mk :
@@ -130,9 +143,49 @@ theorem preservation
       cases hc
       case conse hu hc0 =>
         have hg := TypedStore.is_tight hs
-        sorry
-  case lift hv => sorry
-  case tlift => sorry
-  case clift => sorry
+        have hx := Typed.canonical_form_pack hg ht
+        rename_i C _ _ _ _
+        have hu1 := hu.cinstantiate_extvar (C := C)
+        have hu2 := hu1.open hx
+        simp [EType.weaken, EType.open, EType.rename_rename] at hu2
+        simp [FinFun.open_comp_weaken] at hu2
+        simp [EType.rename_id] at hu2
+        apply Preserve.mk_cweaken
+        constructor
+        { constructor; exact hs }
+        { exact hu2 }
+        { apply TypedCont.cweaken; exact hc0 }
+  case lift hv =>
+    cases ht
+    case mk hs ht hc =>
+      cases hc
+      case cons hu hc0 =>
+        apply Preserve.mk_weaken
+        constructor
+        { constructor; exact hs; exact ht }
+        { exact hu }
+        { apply TypedCont.weaken; exact hc0 }
+  case tlift =>
+    cases ht
+    case mk hs ht hc =>
+      apply Preserve.mk_tweaken
+      have ⟨E0, ht, hsub⟩ := Typed.bindt_inv ht
+      constructor
+      { constructor; exact hs }
+      { apply Typed.sub
+        exact ht
+        apply ESubtyp.tweaken; exact hsub }
+      { apply TypedCont.tweaken; exact hc }
+  case clift =>
+    cases ht
+    case mk hs ht hc =>
+      apply Preserve.mk_cweaken
+      have ⟨E0, ht, hsub⟩ := Typed.bindc_inv ht
+      constructor
+      { constructor; exact hs }
+      { apply Typed.sub
+        exact ht
+        apply ESubtyp.cweaken; exact hsub }
+      { apply TypedCont.cweaken; exact hc }
 
 end Capless
