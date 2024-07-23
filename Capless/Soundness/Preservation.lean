@@ -3,6 +3,7 @@ import Capless.Type
 import Capless.Reduction
 import Capless.Inversion.Typing
 import Capless.Inversion.Lookup
+import Capless.Renaming.Term.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
@@ -85,7 +86,18 @@ theorem preservation
       { trivial }
       { exact hct }
       subst_vars; exact hc
-  case push => sorry
+  case push =>
+    cases ht
+    case mk hs ht hc =>
+      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letin_inv ht
+      constructor
+      constructor
+      { trivial }
+      { exact htt }
+      { constructor
+        apply? Typed.sub
+        apply! ESubtyp.weaken
+        trivial }
   case push_ex => sorry
   case rename => sorry
   case rename_ex => sorry

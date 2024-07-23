@@ -206,6 +206,34 @@ theorem Typed.unbox_inv
     Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ∧
     E = EType.type (CType.capt C S) := sorry
 
+theorem Typed.letin_inv' {Γ : Context n m k}
+  (he : t0 = Term.letin t u)
+  (h : Typed Γ t0 E) :
+  ∃ T E0,
+    Typed Γ t (EType.type T) ∧
+    Typed (Γ.var T) u E0.weaken ∧
+    ESubtyp Γ E0 E := by
+  induction h <;> try (solve | cases he)
+  case letin =>
+    cases he
+    repeat apply Exists.intro
+    constructor; trivial
+    constructor; trivial
+    apply ESubtyp.refl
+  case sub hs ih =>
+    have ih := ih he
+    obtain ⟨T, E0, ht, hu, hs0⟩ := ih
+    have hs1 := ESubtyp.trans hs0 hs
+    aesop
+
+theorem Typed.letin_inv {Γ : Context n m k}
+  (h : Typed Γ (Term.letin t u) E) :
+  ∃ T E0,
+    Typed Γ t (EType.type T) ∧
+    Typed (Γ.var T) u E0.weaken ∧
+    ESubtyp Γ E0 E :=
+  Typed.letin_inv' rfl h
+
 theorem Typed.canonical_form_clam'
   (ht : Γ.IsTight)
   (hd : SType.Dealias Γ S0 (SType.cforall E))

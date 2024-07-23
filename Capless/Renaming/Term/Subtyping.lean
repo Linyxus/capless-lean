@@ -178,4 +178,12 @@ theorem CSubtyp.weaken
   { apply h }
   { apply VarMap.weaken }
 
+theorem ESubtyp.weaken
+  (h : ESubtyp Γ E1 E2) :
+  ESubtyp (Γ.var T) E1.weaken E2.weaken := by
+  simp [EType.weaken]
+  apply ESubtyp.rename
+  { apply h }
+  { apply VarMap.weaken }
+
 end Capless
