@@ -38,11 +38,11 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
     ⟨σ.cval C, cont.cweaken, u.open x⟩
 | tlift :
   Reduce
-    ⟨σ, Cont.cons u cont, Term.bindt S t⟩
+    ⟨σ, cont, Term.bindt S t⟩
     ⟨σ.tval S, cont.tweaken, t⟩
 | clift :
   Reduce
-    ⟨σ, Cont.cons u cont, Term.bindc C t⟩
+    ⟨σ, cont, Term.bindc C t⟩
     ⟨σ.cval C, cont.cweaken, t⟩
 
 end Capless
