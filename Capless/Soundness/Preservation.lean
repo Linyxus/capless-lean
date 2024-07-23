@@ -4,6 +4,7 @@ import Capless.Reduction
 import Capless.Inversion.Typing
 import Capless.Inversion.Lookup
 import Capless.Renaming.Term.Subtyping
+import Capless.Renaming.Capture.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
@@ -98,7 +99,19 @@ theorem preservation
         apply? Typed.sub
         apply! ESubtyp.weaken
         trivial }
-  case push_ex => sorry
+  case push_ex =>
+    cases ht
+    case mk hs ht hc =>
+      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
+      constructor
+      constructor
+      { trivial }
+      { exact htt }
+      { constructor
+        apply? Typed.sub
+        apply? ESubtyp.weaken
+        apply ESubtyp.cweaken; exact hsub
+        exact hc }
   case rename => sorry
   case rename_ex => sorry
   case lift hv => sorry

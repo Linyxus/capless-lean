@@ -1,3 +1,4 @@
+import Capless.Tactics
 import Capless.Subtyping
 import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subcapturing
@@ -170,5 +171,11 @@ theorem ESubtyp.crename
     simp [EType.crename]
     apply ESubtyp.type
     apply CSubtyp.crename <;> trivial
+
+theorem ESubtyp.cweaken
+  (h : ESubtyp Γ E1 E2) :
+  ESubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
+  apply? ESubtyp.crename
+  apply CVarMap.weaken
 
 end Capless
