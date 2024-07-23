@@ -27,15 +27,15 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   Reduce
     ⟨σ, Cont.cons u cont, Term.var x⟩
     ⟨σ, cont, u.open x⟩
-| rename_ex :
-  Reduce
-    ⟨σ, Cont.conse u cont, Term.pack c x⟩
-    ⟨σ, cont, (u.open x).copen c⟩
 | lift :
   (hv : Term.IsValue v) ->
   Reduce
     ⟨σ, Cont.cons u cont, v⟩
     ⟨σ.val v hv, cont.weaken, u⟩
+| lift_ex :
+  Reduce
+    ⟨σ, Cont.conse u cont, Term.pack C x⟩
+    ⟨σ.cval C, cont.cweaken, u.open x⟩
 | tlift :
   Reduce
     ⟨σ, Cont.cons u cont, Term.bindt S t⟩

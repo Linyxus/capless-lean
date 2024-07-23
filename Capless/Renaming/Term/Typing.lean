@@ -157,9 +157,8 @@ theorem Typed.rename
   case pack ih =>
     simp [Term.rename, EType.rename]
     apply Typed.pack
-    have ih := ih ρ
+    have ih := ih (ρ.cext _)
     simp [Term.rename, EType.rename] at ih
-    rw [CType.copen_rename_comm] at ih
     exact ih
   case sub hs ih =>
     apply Typed.sub

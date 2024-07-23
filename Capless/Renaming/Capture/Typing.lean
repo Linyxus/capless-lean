@@ -113,21 +113,10 @@ theorem Typed.crename
     simp [Term.crename, EType.crename]
     apply var
     apply ρ.map; trivial
-  -- case unpack hb ih =>
-  --   simp [Term.crename, EType.crename, CType.crename, CaptureSet.crename_singleton]
-  --   rw [SType.crename_copen]
-  --   apply unpack
-  --   have ih := ih ρ
-  --   simp [EType.crename, CType.crename] at ih
-  --   exact ih
-  --   have hb1 := ρ.cmap _ _ hb
-  --   simp [CBinding.crename, CaptureSet.crename_rsingleton] at hb1
-  --   exact hb1
   case pack ih =>
     simp [Term.crename, EType.crename]
     apply pack
-    rw [<- CType.crename_copen]
-    have ih := ih ρ
+    have ih := ih (ρ.cext _)
     simp [Term.crename, EType.crename] at ih
     exact ih
   case sub hsub ih =>

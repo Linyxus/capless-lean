@@ -91,22 +91,11 @@ theorem Typed.trename
     simp [Term.trename, EType.trename]
     apply var
     apply ρ.map; trivial
-  -- case exists_elim ih =>
-  --   simp [Term.trename, EType.trename, CType.trename]
-  --   rw [SType.trename_copen]
-  --   apply exists_elim
-  --   have ih := ih ρ
-  --   simp [Term.trename, EType.trename, CType.trename] at ih
-  --   exact ih
-  --   rename_i hb
-  --   have hb1 := ρ.cmap _ _ hb
-  --   exact hb1
   case pack ih =>
     simp [Term.trename, EType.trename]
     apply pack
-    have ih := ih ρ
+    have ih := ih (ρ.cext _)
     simp [Term.trename, EType.trename] at ih
-    rw [<- CType.trename_copen]
     trivial
   case sub hs ih =>
     apply sub

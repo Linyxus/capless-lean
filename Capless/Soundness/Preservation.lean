@@ -124,13 +124,12 @@ theorem preservation
         simp [EType.rename_id] at hu1
         constructor
         apply TypedState.mk hs hu1 hc0
-  case rename_ex =>
+  case lift_ex =>
     cases ht
     case mk hs ht hc =>
       cases hc
       case conse hu hc0 =>
         have hg := TypedStore.is_tight hs
-        have ⟨T0, hx, hsub0⟩ := Typed.canonical_form_pack hg ht
         sorry
   case lift hv => sorry
   case tlift => sorry

@@ -297,9 +297,9 @@ theorem Typed.canonical_form_boxed
   (h : Typed Γ (Term.boxed x) (EType.type (CType.capt {} (SType.box (CType.capt C S))))) :
   Typed Γ (Term.var x) (EType.type (CType.capt C S)) := sorry
 
-theorem Typed.canonical_form_pack
-  (ht : Γ.IsTight)
-  (h : Typed Γ (Term.pack c x) (EType.ex T)) :
-  Typed Γ (Term.var x) (EType.type (CType.copen T0 c)) := sorry
+-- theorem Typed.canonical_form_pack
+--   (ht : Γ.IsTight)
+--   (h : Typed Γ (Term.pack c x) (EType.ex T)) :
+--   Typed Γ (Term.var x) (EType.type (CType.copen T0 c)) := sorry
 
 end Capless
