@@ -112,8 +112,26 @@ theorem preservation
         apply? ESubtyp.weaken
         apply ESubtyp.cweaken; exact hsub
         exact hc }
-  case rename => sorry
-  case rename_ex => sorry
+  case rename =>
+    cases ht
+    case mk hs hx hc =>
+      cases hc
+      case cons hu hc0 =>
+        have hu1 := hu.open hx
+        simp [EType.weaken, EType.open] at hu1
+        simp [EType.rename_rename] at hu1
+        simp [FinFun.open_comp_weaken] at hu1
+        simp [EType.rename_id] at hu1
+        constructor
+        apply TypedState.mk hs hu1 hc0
+  case rename_ex =>
+    cases ht
+    case mk hs ht hc =>
+      cases hc
+      case conse hu hc0 =>
+        have hg := TypedStore.is_tight hs
+        have ⟨T0, hx, hsub0⟩ := Typed.canonical_form_pack hg ht
+        sorry
   case lift hv => sorry
   case tlift => sorry
   case clift => sorry
