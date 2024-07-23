@@ -155,10 +155,9 @@ def TVarSubst.cext {Γ : Context n m k} -- TODO move
       have h0 := σ.tmap_inst _ _ hb'''
       simp at heq
       rw [heq]
-      rw [<-SType.cweaken_trename]
-      have hb'' := h0.cweaken b
-      simp [SType.cweaken, SType.crename] at *
-      exact hb''
+      rw [<-SType.cweaken_trename,<-TBinding.cweaken_inst]
+      constructor
+      trivial
   case cmap =>
     intros c b' hb
     cases hb
@@ -210,10 +209,9 @@ def TVarSubst.ext {Γ : Context n m k} -- TODO move
       have h0 := σ.tmap_inst _ _ hb'''
       simp at heq
       rw [heq]
-      rw [<-SType.weaken_trename]
-      have hb'' := h0.weaken (T.trename f)
-      simp [SType.weaken, SType.rename] at *
-      exact hb''
+      rw [<-SType.weaken_trename,<-TBinding.weaken_inst]
+      constructor
+      trivial
   case cmap =>
     intros c b' hb
     cases hb
@@ -275,7 +273,6 @@ def TVarSubst.text {Γ : Context n m k} -- TODO move
         rw [hz, hbnd] at hb
         rw [hz]
         simp [FinFun.ext]
-        apply SSubtyp.tinstr
         cases T
         case bound T =>
           simp at hbnd
@@ -294,8 +291,9 @@ def TVarSubst.text {Γ : Context n m k} -- TODO move
           simp at heq
           rw [heq,heq']
           have h0 := σ.tmap_inst _ _ hb'
-          apply (@SSubtyp.tweaken _ _ _ _  _ _ (T.trename f)) at h0
-          simp [SType.tweaken, SType.trename, SType.trename_trename,FinFun.ext,FinFun.weaken,FinFun.comp_succ] at *
+          simp [FinFun.ext]
+          rw [<-SType.tweaken_trename, <-TBinding.tweaken_inst]
+          constructor
           trivial
     case cmap =>
       intros c b' hb
@@ -305,17 +303,14 @@ def TVarSubst.text {Γ : Context n m k} -- TODO move
         constructor
         exact hb''
 
-lemma SSubtyp.tinstl' (h : SSubtyp Γ (SType.tvar X) S) : SSubtyp Δ S (SType.tvar X) := by -- TODO move
-  sorry
-
 theorem SSubtyp.tsubst
   (h : SSubtyp Γ S1 S2)
   (σ : TVarSubst Γ f Δ) :
   SSubtyp Δ (S1.trename f) (S2.trename f) := by
     apply SSubtyp.rec
-      (motive_1 := fun Γ E1 E2 h => SSubtyp.tsubst_motive1 Γ E1 E2)
-      (motive_2 := fun Γ C1 C2 h => SSubtyp.tsubst_motive2 Γ C1 C2)
-      (motive_3 := fun Γ S1 S2 h => SSubtyp.tsubst_motive3 Γ S1 S2)
+      (motive_1 := fun Γ E1 E2 _ => SSubtyp.tsubst_motive1 Γ E1 E2)
+      (motive_2 := fun Γ C1 C2 _ => SSubtyp.tsubst_motive2 Γ C1 C2)
+      (motive_3 := fun Γ S1 S2 _ => SSubtyp.tsubst_motive3 Γ S1 S2)
       (t := h) (ρ := σ)
     case exist =>
       unfold tsubst_motive1 tsubst_motive2
@@ -366,7 +361,7 @@ theorem SSubtyp.tsubst
       rename_i hb _ _ Δ σ
       have hb1 := σ.tmap_inst _ _ hb
       simp [SType.trename]
-      apply SSubtyp.tinstl'
+      apply SSubtyp.tinstl
       trivial
     case tinstr =>
       unfold tsubst_motive3
@@ -374,6 +369,7 @@ theorem SSubtyp.tsubst
       rename_i hb _ _ Δ σ
       have hb1 := σ.tmap_inst _ _ hb
       simp [SType.trename]
+      apply SSubtyp.tinstr
       trivial
     case boxed =>
       unfold tsubst_motive2 tsubst_motive3
@@ -408,22 +404,31 @@ theorem SSubtyp.tsubst
         apply ih ; try assumption
         apply TVarSubst.cext; trivial }
 
-
 theorem CSubtyp.tsubst
-  (h : CSubtyp Γ S1 S2)
+  (h : CSubtyp Γ T1 T2)
   (σ : TVarSubst Γ f Δ) :
-  CSubtyp Δ (S1.trename f) (S2.trename f) := by
+  CSubtyp Δ (T1.trename f) (T2.trename f) := by
   cases h
   case capt hc hs =>
     simp [CType.trename]
     apply CSubtyp.capt
-    { apply! Subcapt.tsubst }
-    { apply! SSubtyp.tsubst }
+    { apply hc.tsubst; trivial }
+    { apply hs.tsubst; trivial }
 
 theorem ESubtyp.tsubst
-  (h : ESubtyp Γ S1 S2)
+  (h : ESubtyp Γ E1 E2)
   (σ : TVarSubst Γ f Δ) :
-  ESubtyp Δ (S1.trename f) (S2.trename f) := sorry
+  ESubtyp Δ (E1.trename f) (E2.trename f) := by
+  cases h
+  case exist hs =>
+    simp [EType.trename]
+    apply ESubtyp.exist
+    { apply hs.tsubst
+      apply σ.cext }
+  case type hs =>
+    simp [EType.trename]
+    apply ESubtyp.type
+    apply hs.tsubst; trivial
 
 theorem ESubtyp.tnarrow
   (h : ESubtyp (Γ.tvar (TBinding.bound S)) E1 E2)
