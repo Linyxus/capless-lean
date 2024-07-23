@@ -73,7 +73,18 @@ theorem preservation
         { subst he1
           exact hs1 } }
       trivial
-  case unbox hl => sorry
+  case unbox hl =>
+    cases ht
+    case mk hs ht hc =>
+      have hg := TypedStore.is_tight hs
+      have ⟨S0, hx, he0⟩ := Typed.unbox_inv ht
+      have hv := Store.lookup_inv_typing hl hs hx
+      have hct := Typed.canonical_form_boxed hg hv
+      constructor
+      constructor
+      { trivial }
+      { exact hct }
+      subst_vars; exact hc
   case push => sorry
   case push_ex => sorry
   case rename => sorry

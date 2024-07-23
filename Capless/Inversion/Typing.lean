@@ -200,6 +200,12 @@ theorem Typed.capp_inv
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
 
+theorem Typed.unbox_inv
+  (h : Typed Γ (Term.unbox C x) E) :
+  ∃ S,
+    Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ∧
+    E = EType.type (CType.capt C S) := sorry
+
 theorem Typed.canonical_form_clam'
   (ht : Γ.IsTight)
   (hd : SType.Dealias Γ S0 (SType.cforall E))
@@ -229,5 +235,10 @@ theorem Typed.canonical_form_clam
   Typed (Γ.cvar CBinding.bound) t E := by
   apply? Typed.canonical_form_clam'
   constructor
+
+theorem Typed.canonical_form_boxed
+  (ht : Γ.IsTight)
+  (h : Typed Γ (Term.boxed x) (EType.type (CType.capt {} (SType.box (CType.capt C S))))) :
+  Typed Γ (Term.var x) (EType.type (CType.capt C S)) := sorry
 
 end Capless
