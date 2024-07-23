@@ -124,7 +124,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> Prop where
   Typed Γ (Term.unbox C x) (EType.type (CType.capt C S))
 | letin :
   Typed Γ t1 (EType.type E1) ->
-  Typed (Context.var Γ E1) T2 E2.weaken ->
+  Typed (Context.var Γ E1) t2 E2.weaken ->
   Typed Γ (Term.letin t1 t2) E2
 | letex :
   Typed Γ t1 (EType.ex T1) ->
