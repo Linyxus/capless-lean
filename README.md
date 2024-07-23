@@ -70,10 +70,10 @@ These are the actual substitution theorem that the preservation proof relies on.
     - [ ] Typing
 - [ ] Store lookup
   - [x] Lookup inversion
-  - [ ] Canonical forms (WIP)
-    - [ ] Term abstraction
-    - [ ] Type abstraction
-    - [ ] Capture abstraction
+  - [x] Canonical forms (WIP)
+    - [x] Term abstraction
+    - [x] Type abstraction
+    - [x] Capture abstraction
     - [ ] Box
     - [ ] Pack
 - [ ] Soundness
