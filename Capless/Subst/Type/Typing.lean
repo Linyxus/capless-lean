@@ -15,13 +15,11 @@ theorem Typed.tsubst
       apply σ.map
       trivial
     case pack ih =>
-      sorry -- will change in latest iteration of the calculus
-      --simp [Term.trename, EType.trename]
-      --apply pack
-      --have ih := ih σ
-      --simp [EType.trename] at ih
-      --rw [CType.copen_rename_comm] at ih
-      --exact ih
+      simp [Term.trename, EType.trename]
+      apply pack
+      have ih := ih σ.cext
+      simp [EType.trename] at ih
+      exact ih
     case sub hs ih =>
       apply sub
       { apply ih; trivial }

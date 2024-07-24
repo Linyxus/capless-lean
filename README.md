@@ -1,6 +1,6 @@
-# A Lean Mechanisation of Capless
+# A Lean Mechanization of Capless
 
-This mechanisation takes a extrinsically-typed and debruijn-indexed representation. `Capless.lean` is the index file.
+This mechanization takes a extrinsically-typed and DeBruijn-indexed representation. `Capless.lean` is the index file.
 
 ## Well-Scoped Terms
 
@@ -38,7 +38,7 @@ The second layer is the actual substitution, whose relevant proof scripts are lo
 (2) a substitution morphism `σ : VarSubst Γ f Δ`, which basically says that for any `x : E ∈ Γ` one could derive `Δ ⊢ x : E` in the mapped context,
 then it can be derived that `Δ ⊢ t.rename f : E.rename f`.
 
-These are the actual substitution theorem that the preservation proof relies on. This layer depends on the first one.
+These are the actual substitution theorems that the preservation proof relies on. This layer depends on the first one.
 
 ## Roadmap
 
@@ -60,10 +60,10 @@ These are the actual substitution theorem that the preservation proof relies on.
     - [x] Subcapturing
     - [x] Subtyping
     - [x] Typing
-  - [ ] Type
-    - [ ] Subcapturing
-    - [ ] Subtyping
-    - [ ] Typing
+  - [X] Type
+    - [X] Subcapturing
+    - [X] Subtyping
+    - [X] Typing
   - [ ] Capture
     - [ ] Subcapturing
     - [ ] Subtyping
