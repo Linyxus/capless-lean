@@ -170,6 +170,15 @@ theorem ESubtyp.rename
     constructor
     apply CSubtyp.rename <;> assumption
 
+theorem SSubtyp.weaken
+  (h : SSubtyp Γ S1 S2) :
+  ∀ b, SSubtyp (Γ.var b) S1.weaken S2.weaken := by
+  intro b
+  simp [SType.weaken]
+  apply SSubtyp.rename
+  { apply h }
+  { apply VarMap.weaken }
+
 theorem CSubtyp.weaken
   (h : CSubtyp Γ E1 E2) :
   CSubtyp (Γ.var T) E1.weaken E2.weaken := by

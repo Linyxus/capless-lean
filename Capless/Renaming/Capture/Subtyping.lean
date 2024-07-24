@@ -178,4 +178,12 @@ theorem ESubtyp.cweaken
   apply? ESubtyp.crename
   apply CVarMap.weaken
 
+theorem SSubtyp.cweaken -- TODO: move weakening lemmas into separate package?
+  (h : SSubtyp Γ S1 S2) :
+  ∀ b, SSubtyp (Γ.cvar b) S1.cweaken S2.cweaken := by
+  intro b
+  simp [SType.cweaken]
+  apply? SSubtyp.crename
+  apply CVarMap.weaken
+
 end Capless

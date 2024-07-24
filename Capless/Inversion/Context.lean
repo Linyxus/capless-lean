@@ -159,6 +159,42 @@ theorem Context.tvar_tbound_succ_inv
   ∃ b0, Context.TBound Γ X b0 ∧ b = b0.tweaken :=
   Context.tvar_tbound_succ_inv' rfl rfl hb
 
+theorem Context.cvar_tbound_tvar_inv'
+  (he : Γ0 = Context.cvar Γ b)
+  (hb : Context.TBound Γ0 X T) :
+  ∃ T0, Context.TBound Γ X T0 ∧ T = T0.cweaken := by
+  cases hb <;> try (solve | cases he)
+  case there_cvar =>
+    cases he
+    rename_i E0 _
+    exists E0
+
+theorem Context.cvar_tbound_tvar_inv
+  (hb : Context.TBound (Context.cvar Γ b) X T) :
+  ∃ T0, Context.TBound Γ X T0 ∧ T = T0.cweaken :=
+  Context.cvar_tbound_tvar_inv' rfl hb
+
+theorem Context.tvar_tbound_inv'
+  (he1 : Γ0 = Γ.tvar p)
+  (hb : Context.TBound Γ0 X0 b) :
+  (X0 = 0 ∧ b = p.tweaken) ∨
+  (∃ b0 X, Context.TBound Γ X b0 ∧ b = b0.tweaken ∧ X0 = (Fin.succ X)) := by
+  cases X0 using Fin.cases
+  case zero =>
+    left
+    cases hb <;> try (solve | cases he1 | cases he2 | aesop)
+  case succ n =>
+    right
+    rw [he1] at hb
+    apply Context.tvar_tbound_succ_inv at hb
+    aesop
+
+theorem Context.tvar_tbound_inv
+  (hb : Context.TBound (Γ.tvar p) X b) :
+  (X = 0 ∧ b = p.tweaken) ∨
+  (∃ b0 X0, Context.TBound Γ X0 b0 ∧ b = b0.tweaken ∧ X = (Fin.succ X0)) :=
+  Context.tvar_tbound_inv' rfl hb
+
 theorem Context.tbound_inj
   (h1 : Context.TBound Γ X b1)
   (h2 : Context.TBound Γ X b2) : b1 = b2 := by
