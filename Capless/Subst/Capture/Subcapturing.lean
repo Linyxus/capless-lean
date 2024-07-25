@@ -2,24 +2,6 @@ import Capless.Subcapturing
 import Capless.Subst.Basic
 namespace Capless
 
-theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'} -- TODO move
-  (h : C1 ⊆ C2) :
-  C1.crename f ⊆ C2.crename f := by
-    cases h
-    cases C1; cases C2
-    simp at *
-    constructor
-    trivial
-    apply Finset.image_subset_image
-    trivial
-
-theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k} -- TODO move
-  (h : C1 ⊆ C2) :
-  C1.cweaken ⊆ C2.cweaken := by
-    simp [CaptureSet.cweaken]
-    apply CaptureSet.crename_monotone
-    trivial
-
 theorem Subcapt.csubst
   (h : Subcapt Γ C1 C2)
   (σ : CVarSubst Γ f Δ) :

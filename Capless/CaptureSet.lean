@@ -466,4 +466,22 @@ theorem CaptureSet.crename_id {C : CaptureSet n k} :
   unfold FinFun.id
   simp [CaptureSet.crename]
 
+theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
+  (h : C1 ⊆ C2) :
+  C1.crename f ⊆ C2.crename f := by
+    cases h
+    cases C1; cases C2
+    simp at *
+    constructor
+    trivial
+    apply Finset.image_subset_image
+    trivial
+
+theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
+  (h : C1 ⊆ C2) :
+  C1.cweaken ⊆ C2.cweaken := by
+    simp [CaptureSet.cweaken]
+    apply CaptureSet.crename_monotone
+    trivial
+
 end Capless
