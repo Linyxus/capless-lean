@@ -1,6 +1,6 @@
-# A Lean Mechanization of Capless
+# A Lean Mechanisation of Capless
 
-This mechanization takes a extrinsically-typed and DeBruijn-indexed representation. `Capless.lean` is the index file.
+This mechanisation takes a extrinsically-typed and DeBruijn-indexed representation. `Capless.lean` is the index file.
 
 ## Well-Scoped Terms
 
