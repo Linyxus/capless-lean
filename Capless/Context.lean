@@ -290,4 +290,14 @@ lemma TBinding.weaken_bound: (TBinding.bound T).weaken = TBinding.bound (T.weake
 @[simp]
 lemma TBinding.weaken_inst: (TBinding.inst T).weaken = TBinding.inst (T.weaken) := by aesop
 
+@[simp]
+lemma CBinding.cweaken_inst: (CBinding.inst T).cweaken = CBinding.inst (T.cweaken) := by aesop
+
+@[simp]
+lemma CBinding.weaken_inst: (CBinding.inst T).weaken = CBinding.inst (T.weaken) := by aesop
+
+lemma TBinding.crename_bound: (TBinding.bound T).crename f = TBinding.bound (T.crename f) := by aesop
+
+lemma CBinding.crename_inst: (CBinding.inst T).crename f = CBinding.inst (T.crename f) := by aesop
+
 end Capless
