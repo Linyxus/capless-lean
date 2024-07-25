@@ -26,7 +26,7 @@ structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k')
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
-    Subcapt Δ (CaptureSet.csingleton (f c)) (C.crename f)
+    Δ.CBound (f c) (CBinding.inst (C.crename f))
 
 def VarSubst.ext {Γ : Context n m k}
   (σ : VarSubst Γ f Δ)
