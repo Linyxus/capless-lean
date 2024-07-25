@@ -38,14 +38,14 @@ theorem Subcapt.csubst
     have ht := σ.map _ _ hb
     simp [EType.crename, CType.crename] at ht
     apply var <;> aesop
-  case cinstl hb => --FIXME fishy
+  case cinstl hb =>
     have hb1 := σ.cmap _ _ hb
     apply cinstl
-    sorry
-  case cinstr hb => --FIXME fishy
+    trivial
+  case cinstr hb =>
     have hb1 := σ.cmap _ _ hb
     apply cinstr
-    sorry
+    trivial
 
 
 end Capless
