@@ -9,19 +9,8 @@ import Capless.Renaming.Capture.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
+import Capless.Weakening.TypedCont
 namespace Capless
-
-theorem TypedCont.cweaken
-  (h : TypedCont Γ E t E') :
-  TypedCont (Γ.cvar b) E.cweaken t.cweaken E'.cweaken := sorry
-
-theorem TypedCont.weaken
-  (h : TypedCont Γ E t E') :
-  TypedCont (Γ.var T) E.weaken t.weaken E'.weaken := sorry
-
-theorem TypedCont.tweaken
-  (h : TypedCont Γ E t E') :
-  TypedCont (Γ.tvar S) E.tweaken t.tweaken E'.tweaken := sorry
 
 inductive Preserve : EType n m k -> State n' m' k' -> Prop where
 | mk :
