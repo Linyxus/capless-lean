@@ -19,10 +19,6 @@ theorem Subcapt.trename
     have hb1 := ρ.map _ _ hb
     simp [EType.trename, CType.trename] at hb1
     exact hb1
-  -- case evar hbx =>
-  --   have hbx1 := ρ.map _ _ hbx
-  --   simp [EType.trename, CType.trename] at hbx1
-  --   apply evar; trivial
   case cinstl hb =>
     apply cinstl
     have hb1 := ρ.cmap _ _ hb

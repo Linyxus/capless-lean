@@ -44,14 +44,6 @@ theorem SSubtyp.rename
     rename_i ih _ _ _ _
     apply ih <;> try assumption
     apply VarMap.cext <;> trivial
-  -- case existp_erase =>
-  --   unfold SSubtyp.rename_motive1 SSubtyp.rename_motive2
-  --   repeat intro
-  --   simp [EType.rename]
-  --   apply ESubtyp.existp_erase
-  --   rename_i ih _ _ _ _
-  --   apply ih <;> try assumption
-  --   apply VarMap.cext <;> trivial
   case type ih =>
     unfold rename_motive1 rename_motive2
     repeat intro
@@ -160,39 +152,10 @@ theorem ESubtyp.rename
     constructor
     apply CSubtyp.rename <;> try assumption
     apply VarMap.cext; assumption
-  -- case existp_erase hs =>
-  --   simp [EType.rename]
-  --   constructor
-  --   apply CSubtyp.rename <;> try assumption
-  --   apply VarMap.cext; assumption
   case type hc =>
     simp [EType.rename]
     constructor
     apply CSubtyp.rename <;> assumption
 
-theorem SSubtyp.weaken
-  (h : SSubtyp Γ S1 S2) :
-  ∀ b, SSubtyp (Γ.var b) S1.weaken S2.weaken := by
-  intro b
-  simp [SType.weaken]
-  apply SSubtyp.rename
-  { apply h }
-  { apply VarMap.weaken }
-
-theorem CSubtyp.weaken
-  (h : CSubtyp Γ E1 E2) :
-  CSubtyp (Γ.var T) E1.weaken E2.weaken := by
-  simp [CType.weaken]
-  apply CSubtyp.rename
-  { apply h }
-  { apply VarMap.weaken }
-
-theorem ESubtyp.weaken
-  (h : ESubtyp Γ E1 E2) :
-  ESubtyp (Γ.var T) E1.weaken E2.weaken := by
-  simp [EType.weaken]
-  apply ESubtyp.rename
-  { apply h }
-  { apply VarMap.weaken }
 
 end Capless

@@ -25,12 +25,6 @@ theorem Subcapt.crename
     have hb1 := ρ.map _ _ hb
     simp [EType.crename, CType.crename] at hb1
     assumption
-  -- case evar hbx =>
-  --   simp [CaptureSet.crename_singleton]
-  --   have hbx1 := ρ.map _ _ hbx
-  --   simp [EType.crename, CType.crename] at hbx1
-  --   rw [<- CaptureSet.cweaken_crename] at hbx1
-  --   apply evar; trivial
   case cinstl hb =>
     simp [CaptureSet.crename_csingleton]
     have hb1 := ρ.cmap _ _ hb
@@ -43,15 +37,5 @@ theorem Subcapt.crename
     simp [CBinding.rename] at hb1
     apply cinstr
     assumption
-  -- case reachl hb =>
-  --   simp [CaptureSet.crename_csingleton, CaptureSet.crename_rsingleton]
-  --   have hb1 := ρ.map _ _ hb
-  --   simp [EType.crename] at hb1
-  --   apply reachl; assumption
-  -- case reachr hb =>
-  --   simp [CaptureSet.crename_csingleton, CaptureSet.crename_rsingleton]
-  --   have hb1 := ρ.map _ _ hb
-  --   simp [EType.crename] at hb1
-  --   apply reachr; assumption
 
 end Capless

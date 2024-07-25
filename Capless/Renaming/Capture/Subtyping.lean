@@ -45,14 +45,6 @@ theorem SSubtyp.crename
     rename_i ih _ _ _ _
     apply ih; try assumption
     apply CVarMap.cext <;> trivial
-  -- case existp_erase =>
-  --   unfold crename_motive1 crename_motive2
-  --   repeat intro
-  --   simp [EType.crename]
-  --   apply ESubtyp.existp_erase
-  --   rename_i ih _ _ _ _
-  --   apply ih; try assumption
-  --   apply CVarMap.cext <;> trivial
   case type =>
     unfold crename_motive2 crename_motive1
     repeat intro
@@ -162,28 +154,9 @@ theorem ESubtyp.crename
     apply ESubtyp.exist
     apply CSubtyp.crename; trivial
     apply ρ.cext
-  -- case existp_erase =>
-  --   simp [EType.crename]
-  --   apply existp_erase
-  --   apply CSubtyp.crename; trivial
-  --   apply ρ.cext
   case type =>
     simp [EType.crename]
     apply ESubtyp.type
     apply CSubtyp.crename <;> trivial
-
-theorem ESubtyp.cweaken
-  (h : ESubtyp Γ E1 E2) :
-  ESubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
-  apply? ESubtyp.crename
-  apply CVarMap.weaken
-
-theorem SSubtyp.cweaken -- TODO: move weakening lemmas into separate package?
-  (h : SSubtyp Γ S1 S2) :
-  ∀ b, SSubtyp (Γ.cvar b) S1.cweaken S2.cweaken := by
-  intro b
-  simp [SType.cweaken]
-  apply? SSubtyp.crename
-  apply CVarMap.weaken
 
 end Capless

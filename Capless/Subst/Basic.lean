@@ -4,11 +4,8 @@ import Capless.CaptureSet
 import Capless.Type.Basic
 import Capless.Typing
 import Capless.Typing.Basic
-import Capless.Renaming.Term.Subtyping
-import Capless.Renaming.Type.Subtyping
-import Capless.Renaming.Term.Typing
-import Capless.Renaming.Type.Typing
-import Capless.Renaming.Capture.Typing
+import Capless.Weakening.Subtyping
+import Capless.Weakening.Typing
 import Capless.Inversion.Context
 namespace Capless
 

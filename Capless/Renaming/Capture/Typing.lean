@@ -209,11 +209,4 @@ theorem Typed.crename
     rw [<- EType.cweaken_crename] at ih
     exact ih
 
-def Typed.cweaken
-  (h : Typed Γ t E) :
-  Typed (Γ.cvar b) t.cweaken E.cweaken := by
-  simp [Term.cweaken, EType.cweaken]
-  apply h.crename
-  apply CVarMap.weaken
-
 end Capless

@@ -153,18 +153,4 @@ theorem ESubtyp.trename
     apply ESubtyp.type
     apply CSubtyp.trename <;> trivial
 
-theorem SSubtyp.tweaken
-  (h : SSubtyp Γ S1 S2) :
-  SSubtyp (Γ.tvar b) S1.tweaken S2.tweaken := by
-  simp [SType.tweaken]
-  apply? SSubtyp.trename
-  apply TVarMap.weaken
-
-theorem ESubtyp.tweaken
-  (h : ESubtyp Γ E1 E2) :
-  ESubtyp (Γ.tvar b) E1.tweaken E2.tweaken := by
-  simp [EType.tweaken]
-  apply? ESubtyp.trename
-  apply TVarMap.weaken
-
 end Capless

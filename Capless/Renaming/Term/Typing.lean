@@ -259,11 +259,4 @@ theorem Typed.rename
     rw [EType.cweaken_rename_comm] at ih
     trivial
 
-theorem Typed.weaken
-  (h : Typed Γ t E) :
-  Typed (Γ.var T) t.weaken E.weaken := by
-  simp [Term.weaken, EType.weaken]
-  apply Typed.rename h
-  apply VarMap.weaken
-
 end Capless
