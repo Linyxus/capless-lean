@@ -1,4 +1,6 @@
 import Mathlib.Init.Function
+import Aesop
+
 namespace Capless
 
 def FinFun (n n' : Nat) : Type :=
@@ -63,5 +65,13 @@ theorem FinFun.id_ext :
   cases i using Fin.cases
   case zero => simp [FinFun.ext, id]
   case succ i0 => simp [FinFun.ext, id]
+
+lemma FinFun.comp_succ {f : FinFun n n'}: Fin.succ ∘ f = (FinFun.ext f) ∘ Fin.succ := by
+  funext i
+  cases n
+  case zero =>
+    aesop
+  case succ n =>
+    simp [FinFun.ext]
 
 end Capless

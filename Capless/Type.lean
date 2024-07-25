@@ -486,6 +486,18 @@ theorem SType.trename_trename (S : SType n m k) (f : FinFun m m') (g : FinFun m'
 
 end
 
+theorem SType.cweaken_trename {S : SType n m k} :
+  (S.trename f).cweaken = S.cweaken.trename f := by
+  simp [cweaken, crename_trename_comm]
+
+theorem SType.weaken_trename {S : SType n m k} :
+  (S.trename f).weaken = S.weaken.trename f := by
+  simp [weaken, SType.trename_rename_comm]
+
+theorem SType.tweaken_trename {S : SType n m k} :
+  (S.trename f).tweaken = S.tweaken.trename f.ext := by
+  simp [tweaken, trename_trename, FinFun.comp_weaken]
+
 theorem EType.tweaken_trename {E : EType n m k} :
   (E.trename f).tweaken = E.tweaken.trename f.ext := by
   simp [tweaken, trename_trename, FinFun.comp_weaken]

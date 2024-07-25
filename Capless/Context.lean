@@ -271,4 +271,23 @@ theorem Context.cvar_bound_cvar_inst_inv {Γ : Context n m k}
   ∃ c0 C0, c = c0.succ ∧ C = C0.cweaken ∧ Context.CBound Γ c0 (CBinding.inst C0) := by
   apply Context.cvar_bound_cvar_inst_inv' rfl rfl hb
 
+
+@[simp]
+lemma TBinding.tweaken_bound: (TBinding.bound T).tweaken = TBinding.bound (T.tweaken) := by aesop
+
+@[simp]
+lemma TBinding.tweaken_inst: (TBinding.inst T).tweaken = TBinding.inst (T.tweaken) := by aesop
+
+@[simp]
+lemma TBinding.cweaken_bound: (TBinding.bound T).cweaken = TBinding.bound (T.cweaken) := by aesop
+
+@[simp]
+lemma TBinding.cweaken_inst: (TBinding.inst T).cweaken = TBinding.inst (T.cweaken) := by aesop
+
+@[simp]
+lemma TBinding.weaken_bound: (TBinding.bound T).weaken = TBinding.bound (T.weaken) := by aesop
+
+@[simp]
+lemma TBinding.weaken_inst: (TBinding.inst T).weaken = TBinding.inst (T.weaken) := by aesop
+
 end Capless
