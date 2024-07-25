@@ -498,7 +498,7 @@ def CVarSubst.open :
     simp [CaptureSet.crename_crename]
     simp [FinFun.open_comp_weaken]
     simp [CaptureSet.crename_id]
-    apply! Subcapt.cinstr
+    trivial
 
 def CVarSubst.instantiate {Γ : Context n m k} :
   CVarSubst
@@ -521,7 +521,6 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     simp [FinFun.id, CaptureSet.crename_id]
     have ⟨c0, C0, he1, he2, hb0⟩ := Context.cvar_bound_cvar_inst_inv hb
     subst_vars
-    apply Subcapt.cinstr
     have heq : (CBinding.inst C0).cweaken = CBinding.inst (C0.cweaken) := by
       simp [CBinding.cweaken, CBinding.crename, CaptureSet.cweaken]
     rw [<- heq]
