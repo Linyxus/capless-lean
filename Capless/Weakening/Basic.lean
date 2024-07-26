@@ -30,4 +30,12 @@ def TVarMap.weaken {Γ : Context n m k} :
   TVarMap Γ FinFun.weaken (Γ.tvar b) := by
   constructor <;> (intros; constructor; trivial)
 
+def TVarMap.weaken_ext {Γ : Context n m k} :
+  TVarMap
+    (Γ.var T)
+    FinFun.weaken
+    ((Γ.tvar b).var T.tweaken) := by
+  apply TVarMap.ext
+  apply TVarMap.weaken
+
 end Capless

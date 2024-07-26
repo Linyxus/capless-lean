@@ -30,6 +30,12 @@ def Typed.tweaken
   apply h.trename
   apply TVarMap.weaken
 
+theorem Typed.tweaken_ext {Γ : Context n m k}
+  (h : Typed (Γ.var T) t E) :
+  Typed ((Γ.tvar b).var T.tweaken) t.tweaken E.tweaken := by
+  simp [Term.tweaken, EType.tweaken]
+  apply h.trename TVarMap.weaken_ext
+
 def Typed.cweaken
   (h : Typed Γ t E) :
   Typed (Γ.cvar b) t.cweaken E.cweaken := by
