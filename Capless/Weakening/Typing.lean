@@ -36,6 +36,12 @@ theorem Typed.tweaken_ext {Γ : Context n m k}
   simp [Term.tweaken, EType.tweaken]
   apply h.trename TVarMap.weaken_ext
 
+theorem Typed.tweaken_cext_ext {Γ : Context n m k}
+  (h : Typed ((Γ.cvar CBinding.bound).var T) t E) :
+  Typed (((Γ.tvar b).cvar CBinding.bound).var T.tweaken) t.tweaken E.tweaken := by
+  simp [Term.tweaken, EType.tweaken]
+  apply h.trename TVarMap.weaken_cext_ext
+
 def Typed.cweaken
   (h : Typed Γ t E) :
   Typed (Γ.cvar b) t.cweaken E.cweaken := by

@@ -38,4 +38,13 @@ def TVarMap.weaken_ext {Γ : Context n m k} :
   apply TVarMap.ext
   apply TVarMap.weaken
 
+def TVarMap.weaken_cext_ext {Γ : Context n m k} :
+  TVarMap
+    ((Γ.cvar CBinding.bound).var T)
+    FinFun.weaken
+    (((Γ.tvar b).cvar CBinding.bound).var T.tweaken) := by
+  apply TVarMap.ext
+  apply TVarMap.cext
+  apply TVarMap.weaken
+
 end Capless
