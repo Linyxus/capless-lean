@@ -157,5 +157,12 @@ theorem ESubtyp.csubst
     apply ESubtyp.type
     apply hs.csubst; trivial
 
+theorem CSubtyp.cinstantiate {Γ : Context n m k}
+  (h : CSubtyp (Γ.cvar CBinding.bound) T1 T2) :
+  CSubtyp (Γ.cvar (CBinding.inst C)) T1 T2 := by
+  rw [<- CType.crename_id (T := T1), <- CType.crename_id (T := T2)]
+  apply? CSubtyp.csubst
+  apply? CVarSubst.instantiate
+
 
 end Capless

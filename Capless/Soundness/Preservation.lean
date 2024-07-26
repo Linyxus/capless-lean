@@ -87,8 +87,10 @@ theorem preservation
       constructor
       constructor
       { trivial }
-      { exact hct }
-      subst_vars; exact hc
+      { apply Typed.sub
+        exact hct
+        apply he0 }
+      exact hc
   case push =>
     cases ht
     case mk hs ht hc =>

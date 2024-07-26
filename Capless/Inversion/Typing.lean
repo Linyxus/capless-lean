@@ -4,6 +4,7 @@ import Capless.Subtyping.Basic
 import Capless.Inversion.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
+import Capless.Subst.Capture.Subtyping
 namespace Capless
 
 theorem Typed.app_inv'
@@ -200,11 +201,31 @@ theorem Typed.capp_inv
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
 
+theorem Typed.unbox_inv'
+  (he : t0 = Term.unbox C x)
+  (h : Typed Γ t0 E) :
+  ∃ S,
+    Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ∧
+    ESubtyp Γ (EType.type (CType.capt C S)) E := by
+  induction h <;> try (solve | cases he)
+  case unbox =>
+    cases he
+    apply Exists.intro
+    constructor; trivial
+    apply ESubtyp.refl
+  case sub hs ih =>
+    have ih1 := ih he
+    obtain ⟨S, hx, hsub⟩ := ih1
+    apply Exists.intro S
+    constructor; trivial
+    apply? ESubtyp.trans
+
 theorem Typed.unbox_inv
   (h : Typed Γ (Term.unbox C x) E) :
   ∃ S,
     Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) ∧
-    E = EType.type (CType.capt C S) := sorry
+    ESubtyp Γ (EType.type (CType.capt C S)) E :=
+  Typed.unbox_inv' rfl h
 
 theorem Typed.letin_inv' {Γ : Context n m k}
   (he : t0 = Term.letin t u)
@@ -262,17 +283,58 @@ theorem Typed.letex_inv {Γ : Context n m k}
     ESubtyp Γ E0 E :=
   Typed.letex_inv' rfl h
 
+
+theorem Typed.bindt_inv' {Γ : Context n m k}
+  (he : t0 = Term.bindt T t)
+  (h : Typed Γ t0 E) :
+  ∃ E0,
+    Typed (Γ.tvar (TBinding.inst T)) t E0.tweaken ∧
+    ESubtyp Γ E0 E := by
+  induction h <;> try (solve | cases he)
+  case bindt =>
+    cases he
+    apply Exists.intro
+    constructor; trivial
+    apply ESubtyp.refl
+  case sub hs ih =>
+    have ih := ih he
+    obtain ⟨E0, ht, hs0⟩ := ih
+    apply Exists.intro E0
+    constructor; trivial
+    apply? ESubtyp.trans
+
 theorem Typed.bindt_inv {Γ : Context n m k}
   (h : Typed Γ (Term.bindt T t) E) :
   ∃ E0,
     Typed (Γ.tvar (TBinding.inst T)) t E0.tweaken ∧
-    ESubtyp Γ E0 E := sorry
+    ESubtyp Γ E0 E :=
+  Typed.bindt_inv' rfl h
+
+theorem Typed.bindc_inv' {Γ : Context n m k}
+  (he : t0 = Term.bindc C t)
+  (h : Typed Γ t0 E) :
+  ∃ E0,
+    Typed (Γ.cvar (CBinding.inst C)) t E0.cweaken ∧
+    ESubtyp Γ E0 E := by
+  induction h <;> try (solve | cases he)
+  case bindc =>
+    cases he
+    apply Exists.intro
+    constructor; trivial
+    apply ESubtyp.refl
+  case sub hs ih =>
+    have ih := ih he
+    obtain ⟨E0, ht, hs0⟩ := ih
+    apply Exists.intro E0
+    constructor; trivial
+    apply? ESubtyp.trans
 
 theorem Typed.bindc_inv {Γ : Context n m k}
   (h : Typed Γ (Term.bindc C t) E) :
   ∃ E0,
     Typed (Γ.cvar (CBinding.inst C)) t E0.cweaken ∧
-    ESubtyp Γ E0 E := sorry
+    ESubtyp Γ E0 E :=
+  Typed.bindc_inv' rfl h
 
 theorem Typed.canonical_form_clam'
   (ht : Γ.IsTight)
@@ -304,14 +366,61 @@ theorem Typed.canonical_form_clam
   apply? Typed.canonical_form_clam'
   constructor
 
+theorem Typed.canonical_form_boxed'
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.box (CType.capt C S)))
+  (he1 : t0 = Term.boxed x)
+  (he2 : E0 = EType.type (CType.capt Cf S0))
+  (h : Typed Γ t0 E0) :
+  Typed Γ (Term.var x) (EType.type (CType.capt C S)) := by
+  induction h <;> try (solve | cases he1 | cases he2)
+  case box =>
+    cases he1; cases he2; cases hd
+    trivial
+  case sub hs ih =>
+    subst he2
+    cases hs
+    rename_i hs
+    cases hs
+    rename_i hsc hs
+    have ⟨T1, hd3⟩ := SSubtyp.dealias_right_boxed hs ht hd
+    cases T1
+    have ih := ih ht hd3 he1 rfl
+    have h := SSubtyp.sub_dealias_boxed_inv ht hd3 hd hs
+    apply Typed.sub
+    exact ih
+    constructor; trivial
+
 theorem Typed.canonical_form_boxed
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.boxed x) (EType.type (CType.capt {} (SType.box (CType.capt C S))))) :
-  Typed Γ (Term.var x) (EType.type (CType.capt C S)) := sorry
+  Typed Γ (Term.var x) (EType.type (CType.capt C S)) :=
+  Typed.canonical_form_boxed' ht (by constructor) rfl rfl h
+
+theorem Typed.canonical_form_pack'
+  (ht : Γ.IsTight)
+  (he1 : t0 = Term.pack C x)
+  (he2 : E0 = EType.ex T)
+  (h : Typed Γ t0 E0) :
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) := by
+  induction h <;> try (solve | cases he1 | cases he2)
+  case pack =>
+    cases he1; cases he2
+    trivial
+  case sub hs ih =>
+    subst he2
+    cases hs
+    rename_i hs
+    have ih := ih ht he1 rfl
+    apply Typed.sub
+    exact ih
+    constructor
+    apply hs.cinstantiate
 
 theorem Typed.canonical_form_pack
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.pack C x) (EType.ex T)) :
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) := sorry
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) :=
+  Typed.canonical_form_pack' ht rfl rfl h
 
 end Capless
