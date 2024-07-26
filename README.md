@@ -55,7 +55,7 @@ These are the actual substitution theorems that the preservation proof relies on
     - [x] Subcapturing
     - [x] Subtyping
     - [x] Typing
-- [ ] Substitution
+- [X] Substitution
   - [x] Term
     - [x] Subcapturing
     - [x] Subtyping
@@ -64,10 +64,10 @@ These are the actual substitution theorems that the preservation proof relies on
     - [X] Subcapturing
     - [X] Subtyping
     - [X] Typing
-  - [ ] Capture
-    - [ ] Subcapturing
-    - [ ] Subtyping
-    - [ ] Typing
+  - [X] Capture
+    - [X] Subcapturing
+    - [X] Subtyping
+    - [X] Typing
 - [ ] Store lookup
   - [x] Lookup inversion
   - [x] Canonical forms (WIP)
