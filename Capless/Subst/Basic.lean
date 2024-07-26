@@ -38,8 +38,8 @@ def VarSubst.ext {Γ : Context n m k}
     cases hb
     case here =>
       simp [FinFun.ext]
-      apply Typed.var
       rw [<- CType.weaken_rename]
+      apply Typed.bound_typing
       constructor
     case there_var hb0 =>
       simp [FinFun.ext]
@@ -478,13 +478,13 @@ def VarSubst.narrow
       simp [FinFun.id]
       simp [CType.rename_id]
       apply Typed.sub
-      apply Typed.var; constructor
+      apply Typed.bound_typing; constructor
       apply ESubtyp.type
       apply hs.weaken
     case there_var hb0 =>
       simp [FinFun.id]
       simp [CType.rename_id]
-      apply Typed.var
+      apply Typed.bound_typing
       constructor
       trivial
   case tmap =>

@@ -11,8 +11,11 @@ theorem Typed.subst
   Typed Δ (t.rename f) (E.rename f) := by
   induction h generalizing n'
   case var hb =>
-    simp [Term.rename, EType.rename]
-    apply σ.map
+    simp [Term.rename, EType.rename, CType.rename]
+    have hb1 := σ.map _ _ hb
+    simp [CType.rename] at hb1
+    simp [CaptureSet.rename_singleton]
+    apply Typed.precise_capture
     trivial
   case pack ih =>
     simp [Term.rename, EType.rename]

@@ -36,7 +36,7 @@ theorem preservation
     case mk hs ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
-      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨Cv, hv⟩ := Store.lookup_inv_typing hl hs hx
       have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv
       constructor
       constructor
@@ -52,7 +52,7 @@ theorem preservation
     case mk hs ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨Cf, F, E0, hx, he0, hs0⟩ := Typed.tapp_inv ht
-      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨Cv, hv⟩ := Store.lookup_inv_typing hl hs hx
       have ⟨hs1, hft⟩ := Typed.canonical_form_tlam hg hv
       constructor
       constructor
@@ -67,7 +67,7 @@ theorem preservation
     case mk hs ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨Cf, F, E0, hx, he1, hs1⟩ := Typed.capp_inv ht
-      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨Cv, hv⟩ := Store.lookup_inv_typing hl hs hx
       have hct := Typed.canonical_form_clam hg hv
       constructor
       constructor
@@ -82,7 +82,7 @@ theorem preservation
     case mk hs ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨S0, hx, he0⟩ := Typed.unbox_inv ht
-      have hv := Store.lookup_inv_typing hl hs hx
+      have ⟨Cv, hv⟩ := Store.lookup_inv_typing hl hs hx
       have hct := Typed.canonical_form_boxed hg hv
       constructor
       constructor

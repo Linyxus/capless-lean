@@ -17,8 +17,7 @@ theorem Typing.inv_subcapt'
   induction h <;> try (solve | cases he1 | cases he2)
   case var =>
     cases he1; cases he2
-    apply Subcapt.var
-    trivial
+    apply Subcapt.refl
   -- case exists_elim =>
   --   cases he1; cases he2
   --   apply Subcapt.refl
@@ -52,7 +51,39 @@ theorem Typing.inv_subcapt
 
 theorem Typed.bound_typing
   (hb : Context.Bound Γ x T) :
-  Typed Γ (Term.var x) (EType.type T) :=
-  Typed.var hb
+  Typed Γ (Term.var x) (EType.type T) := by
+  cases T
+  apply Typed.sub
+  apply Typed.var hb
+  constructor
+  constructor
+  apply Subcapt.var; trivial
+  apply SSubtyp.refl
+
+theorem Typed.precise_capture'
+  (he1 : t0 = Term.var x)
+  (he2 : E0 = EType.type (CType.capt C S))
+  (h : Typed Γ t0 E0) :
+  Typed Γ (Term.var x) (EType.type (CType.capt {x} S)) := by
+  induction h <;> try (solve | cases he1 | cases he2)
+  case var => cases he1; cases he2; apply Typed.var; trivial
+  case sub hsub ih =>
+    subst_vars
+    cases hsub
+    rename_i hsub
+    cases hsub
+    rename_i hsc hss
+    have ih := ih rfl rfl
+    apply Typed.sub
+    { exact ih }
+    { constructor
+      constructor
+      apply Subcapt.refl
+      trivial }
+
+theorem Typed.precise_capture
+  (h : Typed Γ (Term.var x) (EType.type (CType.capt C S))) :
+  Typed Γ (Term.var x) (EType.type (CType.capt {x} S)) :=
+  Typed.precise_capture' rfl rfl h
 
 end Capless

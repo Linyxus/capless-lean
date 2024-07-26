@@ -71,11 +71,12 @@ theorem Typed.var_inv'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type T)
   (h : Typed Γ t0 E0) :
-  ∃ T0, Γ.Bound x T0 ∧ CSubtyp Γ T0 T := by
+  ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x} S0) T := by
   induction h <;> try (solve | cases he1 | cases he2)
-  case var T0 hb =>
+  case var C0 S0 hb =>
     cases he1; cases he2
-    apply Exists.intro T0
+    apply Exists.intro C0
+    apply Exists.intro S0
     constructor
     { trivial }
     { apply CSubtyp.refl }
@@ -83,15 +84,16 @@ theorem Typed.var_inv'
     have h := ESubtyp.sub_type_inv' he2 hs
     have ⟨T1, he, hs1⟩ := h
     have ih := ih he1 he
-    have ⟨T0, hb, hs0⟩ := ih
-    apply Exists.intro T0
+    have ⟨C0, S0, hb, hs0⟩ := ih
+    apply Exists.intro C0
+    apply Exists.intro S0
     constructor
     { trivial }
     { apply CSubtyp.trans <;> trivial }
 
 theorem Typed.var_inv
   (h : Typed Γ (Term.var x) (EType.type T)) :
-  ∃ T0, Γ.Bound x T0 ∧ CSubtyp Γ T0 T := by
+  ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x} S0) T := by
   apply Typed.var_inv' rfl rfl h
 
 theorem Typed.canonical_form_lam'
@@ -393,7 +395,7 @@ theorem Typed.canonical_form_boxed'
 
 theorem Typed.canonical_form_boxed
   (ht : Γ.IsTight)
-  (h : Typed Γ (Term.boxed x) (EType.type (CType.capt {} (SType.box (CType.capt C S))))) :
+  (h : Typed Γ (Term.boxed x) (EType.type (CType.capt Cb (SType.box (CType.capt C S))))) :
   Typed Γ (Term.var x) (EType.type (CType.capt C S)) :=
   Typed.canonical_form_boxed' ht (by constructor) rfl rfl h
 

@@ -10,10 +10,11 @@ theorem Typed.csubst
   Typed Δ (t.crename f) (E.crename f) := by
     induction h generalizing k'
     case var hb =>
-      simp [Term.crename, EType.crename]
-      apply var
-      apply σ.map
-      trivial
+      simp [Term.crename, EType.crename, CType.crename]
+      have hb1 := σ.map _ _ hb
+      simp [CType.crename] at hb1
+      simp [CaptureSet.crename_singleton]
+      apply Typed.var; trivial
     case pack ih =>
       simp [Term.crename, EType.crename]
       apply pack

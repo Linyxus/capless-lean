@@ -140,20 +140,11 @@ theorem Typed.rename
   Typed Δ (t.rename f) (E.rename f) := by
   induction h generalizing n'
   case var hb =>
-    simp [Term.rename, EType.rename]
+    simp [Term.rename, EType.rename, CType.rename]
     apply Typed.var
-    apply ρ.map; trivial
-  -- case unpack ih =>
-  --   simp [EType.rename, CType.rename, CaptureSet.rename_singleton, SType.copen_rename_comm]
-  --   simp [Term.rename]
-  --   have ih := ih ρ
-  --   simp [Term.rename, EType.rename, CType.rename] at ih
-  --   apply Typed.unpack
-  --   exact ih
-  --   rename_i hbc _
-  --   have hbc1 := ρ.cmap _ _ hbc
-  --   simp [CaptureSet.rename_rsingleton] at hbc1
-  --   trivial
+    have hb1 := ρ.map _ _ hb
+    simp [CType.rename] at hb1
+    trivial
   case pack ih =>
     simp [Term.rename, EType.rename]
     apply Typed.pack

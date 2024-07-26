@@ -48,12 +48,18 @@ def Store.lookup_inv_bound
 theorem Store.lookup_inv_typing
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
-  (hx : Typed Γ (Term.var x) (EType.type T)) :
-  Typed Γ v (EType.type T) := by
-  have ⟨T0, hb, hsub⟩ := Typed.var_inv hx
+  (hx : Typed Γ (Term.var x) (EType.type (CType.capt C S))) :
+  ∃ Cv, Typed Γ v (EType.type (CType.capt Cv S)) := by
+  have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx
   have hv := Store.lookup_inv_bound hl ht hb
+  cases hsub
+  rename_i hsc hss
+  constructor
   apply Typed.sub
-  { trivial }
-  { apply ESubtyp.type; trivial }
+  exact hv
+  constructor
+  constructor
+  apply Subcapt.refl
+  trivial
 
 end Capless

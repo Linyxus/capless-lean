@@ -88,9 +88,12 @@ theorem Typed.trename
   Typed Δ (t.trename f) (E.trename f) := by
   induction h generalizing m'
   case var =>
-    simp [Term.trename, EType.trename]
+    simp [Term.trename, EType.trename, CType.trename]
     apply var
-    apply ρ.map; trivial
+    rename_i hb
+    have hb1 := ρ.map _ _ hb
+    simp [CType.trename] at hb1
+    trivial
   case pack ih =>
     simp [Term.trename, EType.trename]
     apply pack
