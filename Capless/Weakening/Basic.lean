@@ -26,6 +26,28 @@ def CVarMap.weaken {Γ : Context n m k} :
   CVarMap Γ FinFun.weaken (Γ.cvar b) := by
   constructor <;> (intros; constructor; trivial)
 
+def CVarMap.weaken_ext {Γ : Context n m k} :
+  CVarMap
+    (Γ.var T)
+    FinFun.weaken
+    ((Γ.cvar b).var T.cweaken) := by
+  apply CVarMap.ext
+  apply CVarMap.weaken
+
+theorem CBinding.cweaken_bound :
+  (CBinding.bound : CBinding n k).cweaken = CBinding.bound := by
+  simp [CBinding.cweaken, CBinding.crename]
+
+def CVarMap.weaken_cext_ext {Γ : Context n m k} :
+  CVarMap
+    ((Γ.cvar CBinding.bound).var T)
+    FinFun.weaken.ext
+    (((Γ.cvar b).cvar CBinding.bound).var T.cweaken1) := by
+  rw [<- CBinding.cweaken_bound]
+  apply CVarMap.ext
+  apply CVarMap.cext
+  apply CVarMap.weaken
+
 def TVarMap.weaken {Γ : Context n m k} :
   TVarMap Γ FinFun.weaken (Γ.tvar b) := by
   constructor <;> (intros; constructor; trivial)

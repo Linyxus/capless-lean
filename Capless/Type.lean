@@ -114,6 +114,9 @@ def SType.cweaken1 (S : SType n m (k+1)) : SType n m (k+2) :=
 def CType.cweaken1 (T : CType n m (k+1)) : CType n m (k+2) :=
   T.crename FinFun.weaken.ext
 
+def EType.cweaken1 (E : EType n m (k+1)) : EType n m (k+2) :=
+  E.crename FinFun.weaken.ext
+
 def EType.open (E : EType (n+1) m k) (x : Fin n) : EType n m k :=
   E.rename (FinFun.open x)
 

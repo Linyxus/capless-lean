@@ -49,4 +49,16 @@ def Typed.cweaken
   apply h.crename
   apply CVarMap.weaken
 
+def Typed.cweaken_ext {Γ : Context n m k}
+  (h : Typed (Γ.var T) t E) :
+  Typed ((Γ.cvar b).var T.cweaken) t.cweaken E.cweaken := by
+  simp [Term.cweaken, EType.cweaken]
+  apply h.crename CVarMap.weaken_ext
+
+def Typed.cweaken_cext_ext {Γ : Context n m k}
+  (h : Typed ((Γ.cvar CBinding.bound).var T) t E) :
+  Typed (((Γ.cvar b).cvar CBinding.bound).var T.cweaken1) t.cweaken1 E.cweaken1 := by
+  simp [Term.cweaken, EType.cweaken1]
+  apply h.crename CVarMap.weaken_cext_ext
+
 end Capless
