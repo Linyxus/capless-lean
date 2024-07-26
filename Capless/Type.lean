@@ -81,6 +81,9 @@ end
 def EType.weaken (E : EType n m k) : EType (n+1) m k :=
   E.rename FinFun.weaken
 
+def EType.weaken1 (E : EType (n+1) m k) : EType (n+2) m k :=
+  E.rename FinFun.weaken.ext
+
 def CType.weaken (C : CType n m k) : CType (n+1) m k :=
   C.rename FinFun.weaken
 

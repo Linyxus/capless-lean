@@ -11,6 +11,18 @@ theorem Typed.weaken
   apply Typed.rename h
   apply VarMap.weaken
 
+theorem Typed.weaken_ext {Γ : Context n m k}
+  (h : Typed (Γ.var T) t E) :
+  Typed ((Γ.var P).var T.weaken) t.weaken1 E.weaken1 := by
+  simp [Term.weaken1, EType.weaken1]
+  apply h.rename VarMap.weaken_ext
+
+theorem Typed.weaken_cext_ext {Γ : Context n m k}
+  (h : Typed ((Γ.cvar CBinding.bound).var T) t E) :
+  Typed (((Γ.var P).cvar CBinding.bound).var T.weaken) t.weaken1 E.weaken1 := by
+  simp [Term.weaken1, EType.weaken1]
+  apply h.rename VarMap.weaken_cext_ext
+
 def Typed.tweaken
   (h : Typed Γ t E) :
   Typed (Γ.tvar b) t.tweaken E.tweaken := by
@@ -24,6 +36,5 @@ def Typed.cweaken
   simp [Term.cweaken, EType.cweaken]
   apply h.crename
   apply CVarMap.weaken
-
 
 end Capless
