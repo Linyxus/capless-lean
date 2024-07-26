@@ -15,7 +15,8 @@ theorem TypedCont.weaken
       simp [EType.weaken, EType.rename, CType.weaken]
     rw [heq]
     apply cons
-    { sorry }
+    { rename_i ht _
+      sorry }
     { exact ih }
   case conse ih => sorry
 

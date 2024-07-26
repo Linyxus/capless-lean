@@ -1,3 +1,4 @@
+import Capless.Weakening.Basic
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
