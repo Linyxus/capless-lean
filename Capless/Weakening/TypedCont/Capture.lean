@@ -1,5 +1,6 @@
 import Capless.Store
 import Capless.Weakening.Typing
+import Capless.Weakening.Subtyping
 namespace Capless
 
 theorem EType.cweaken_ex (T : CType n m (k+1)) :
@@ -30,6 +31,7 @@ theorem TypedCont.cweaken
   case none =>
     simp [Cont.cweaken]
     apply none
+    apply? ESubtyp.cweaken
   case cons ht _ ih =>
     simp [Cont.cweaken, EType.cweaken_type]
     apply cons

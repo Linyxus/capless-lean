@@ -112,7 +112,7 @@ theorem preservation
       { trivial }
       { exact htt }
       { constructor
-        apply? Typed.sub
+        apply Typed.sub; exact htu
         apply? ESubtyp.weaken
         apply ESubtyp.cweaken; exact hsub
         exact hc }

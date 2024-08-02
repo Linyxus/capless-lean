@@ -53,7 +53,8 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
 
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> Prop where
 | none :
-  TypedCont Γ E Cont.none E
+  ESubtyp Γ E E' ->
+  TypedCont Γ E Cont.none E'
 | cons :
   Typed (Γ.var T) t (EType.weaken E) ->
   TypedCont Γ E cont E' ->
