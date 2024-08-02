@@ -426,4 +426,105 @@ theorem Typed.canonical_form_pack
   Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) :=
   Typed.canonical_form_pack' ht rfl rfl h
 
+theorem Typed.forall_inv' {v : Term n m k}
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.forall T E))
+  (he : E0 = EType.type (CType.capt Cv S0))
+  (hv : v.IsValue)
+  (ht : Typed Γ v E0) :
+  ∃ T0 t, v = Term.lam T0 t := by
+  induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
+  case sub hsub ih =>
+    subst he
+    cases hsub
+    rename_i hsub
+    cases hsub
+    rename_i hsc hss
+    have ⟨T1, E1, hd1⟩ := SSubtyp.dealias_right_forall hss ht hd
+    aesop
+  case abs => aesop
+
+theorem Typed.forall_inv {v : Term n m k}
+  (hg : Γ.IsTight)
+  (hv : v.IsValue)
+  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.forall T E)))) :
+  ∃ T0 t, v = Term.lam T0 t :=
+  Typed.forall_inv' hg (by constructor) rfl hv ht
+
+theorem Typed.tforall_inv' {v : Term n m k}
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.tforall X E))
+  (he : E0 = EType.type (CType.capt Cv S0))
+  (hv : v.IsValue)
+  (ht : Typed Γ v E0) :
+  ∃ X t, v = Term.tlam X t := by
+  induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
+  case sub hsub ih =>
+    subst he
+    cases hsub
+    rename_i hsub
+    cases hsub
+    rename_i hsc hss
+    have ⟨T1, E1, hd1⟩ := SSubtyp.dealias_right_tforall hss ht hd
+    aesop
+  case tabs => aesop
+
+theorem Typed.tforall_inv {v : Term n m k}
+  (hg : Γ.IsTight)
+  (hv : v.IsValue)
+  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.tforall X E)))) :
+  ∃ X t, v = Term.tlam X t :=
+  Typed.tforall_inv' hg (by constructor) rfl hv ht
+
+theorem Typed.cforall_inv' {v : Term n m k}
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.cforall E))
+  (he : E0 = EType.type (CType.capt Cv S0))
+  (hv : v.IsValue)
+  (ht : Typed Γ v E0) :
+  ∃ t, v = Term.clam t := by
+  induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
+  case sub hsub ih =>
+    subst he
+    cases hsub
+    rename_i hsub
+    cases hsub
+    rename_i hsc hss
+    have ⟨E1, hd1⟩ := SSubtyp.dealias_right_cforall hss ht hd
+    aesop
+  case cabs => aesop
+
+theorem Typed.cforall_inv {v : Term n m k}
+  (hg : Γ.IsTight)
+  (hv : v.IsValue)
+  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.cforall E)))) :
+  ∃ t, v = Term.clam t :=
+  Typed.cforall_inv' hg (by constructor) rfl hv ht
+
+theorem Typed.boxed_inv' {v : Term n m k}
+  (ht : Γ.IsTight)
+  (hd : SType.Dealias Γ S0 (SType.box (CType.capt C S)))
+  (he : E0 = EType.type (CType.capt Cv S0))
+  (hv : v.IsValue)
+  (ht : Typed Γ v E0) :
+  ∃ t, v = Term.boxed t := by
+  induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
+  case sub hsub ih =>
+    subst he
+    cases hsub
+    rename_i hsub
+    cases hsub
+    rename_i hsc hss
+    have ⟨T1, hd1⟩ := SSubtyp.dealias_right_boxed hss ht hd
+    cases T1
+    aesop
+  case box => aesop
+
+theorem Typed.boxed_inv {v : Term n m k}
+  (hg : Γ.IsTight)
+  (hv : v.IsValue)
+  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.box (CType.capt C S))))):
+  ∃ t, v = Term.boxed t :=
+  Typed.boxed_inv' hg (by constructor) rfl hv ht
+
 end Capless
