@@ -76,9 +76,9 @@ These are the actual substitution theorems that the preservation proof relies on
     - [x] Capture abstraction
     - [x] Box
     - [x] Pack
-- [ ] Soundness
+- [x] Soundness
   - [x] Preservation
-  - [ ] Progress
+  - [x] Progress
 
 
 
