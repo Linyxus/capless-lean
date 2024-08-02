@@ -1,4 +1,5 @@
 import Capless.Reduction
+import Capless.Narrowing.TypedCont
 namespace Capless
 
 inductive Progress : State n m k -> Prop where
@@ -31,14 +32,38 @@ theorem progress
         apply Reduce.lift_ex
     case sub hsub ih _ _ =>
       apply ih <;> try trivial
-      sorry
-    case abs => sorry
-    case tabs => sorry
-    case cabs => sorry
+      apply! TypedCont.narrow
+    case abs =>
+      cases hc
+      case none => apply Progress.halt_value; constructor
+      case cons =>
+        apply Progress.step
+        apply Reduce.lift
+        constructor
+    case tabs =>
+      cases hc
+      case none => apply Progress.halt_value; constructor
+      case cons =>
+        apply Progress.step
+        apply Reduce.lift
+        constructor
+    case cabs =>
+      cases hc
+      case none => apply Progress.halt_value; constructor
+      case cons =>
+        apply Progress.step
+        apply Reduce.lift
+        constructor
     case app => sorry
     case tapp => sorry
     case capp => sorry
-    case box => sorry
+    case box =>
+      cases hc
+      case none => apply Progress.halt_value; constructor
+      case cons =>
+        apply Progress.step
+        apply Reduce.lift
+        constructor
     case unbox => sorry
     case letin => sorry
     case letex => sorry

@@ -5,6 +5,7 @@ import Capless.Inversion.Subtyping
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Subtyping
+import Capless.Narrowing.Typing
 namespace Capless
 
 theorem Typed.app_inv'
