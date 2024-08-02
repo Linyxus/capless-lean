@@ -84,3 +84,4 @@ import «Capless».Inversion.Typing
 
 -- Soundness
 import «Capless».Soundness.Preservation
+import «Capless».Soundness.Progress
