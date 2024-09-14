@@ -64,12 +64,12 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   TypedCont Γ E cont E' ->
   TypedCont Γ (EType.ex T) (Cont.conse t cont) E'
 
-inductive TypedState : State n m k -> EType n m k -> Prop where
+inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
 | mk :
   TypedStore σ Γ ->
   Typed Γ t E ->
   TypedCont Γ E cont E' ->
-  TypedState (State.mk σ cont t) E'
+  TypedState (State.mk σ cont t) Γ E'
 
 inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
 | here :
