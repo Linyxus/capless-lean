@@ -12,24 +12,24 @@ import Capless.Subst.Capture.Typing
 import Capless.Weakening.TypedCont
 namespace Capless
 
-inductive Preserve : EType n m k -> State n' m' k' -> Prop where
+inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
 | mk :
-  TypedState state E ->
-  Preserve E state
+  TypedState state Γ E ->
+  Preserve Γ E state
 | mk_weaken :
-  TypedState state E.weaken ->
-  Preserve E state
+  TypedState state (Γ.var P) E.weaken ->
+  Preserve Γ E state
 | mk_tweaken :
-  TypedState state E.tweaken ->
-  Preserve E state
+  TypedState state (Γ.tvar b) E.tweaken ->
+  Preserve Γ E state
 | mk_cweaken :
-  TypedState state E.cweaken ->
-  Preserve E state
+  TypedState state (Γ.cvar b) E.cweaken ->
+  Preserve Γ E state
 
 theorem preservation
   (hr : Reduce state state')
-  (ht : TypedState state E) :
-  Preserve E state' := by
+  (ht : TypedState state Γ E) :
+  Preserve Γ E state' := by
   cases hr
   case apply hl =>
     cases ht
@@ -135,7 +135,7 @@ theorem preservation
       case conse hu hc0 =>
         have hg := TypedStore.is_tight hs
         have hx := Typed.canonical_form_pack hg ht
-        rename_i C _ _ _ _
+        rename_i C _ _ _
         have hu1 := hu.cinstantiate_extvar (C := C)
         have hu2 := hu1.open hx
         simp [EType.weaken, EType.open, EType.rename_rename] at hu2
