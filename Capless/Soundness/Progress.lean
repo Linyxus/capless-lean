@@ -44,7 +44,7 @@ inductive Progress : State n m k -> Prop where
   Progress ⟨σ, Cont.none, Term.var x⟩
 
 theorem progress
-  (ht : TypedState state E) :
+  (ht : TypedState state Γ E) :
   Progress state := by
   cases ht
   case mk hs ht hc =>
