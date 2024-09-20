@@ -16,12 +16,14 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Subcapt Γ (C1 ∪ C2) C3
 | var :
   Context.Bound Γ x (CType.capt C S) ->
-  Subcapt Γ {x} C
+  Subcapt Γ {x=x} C
 | cinstl :
   Context.CBound Γ c (CBinding.inst C) ->
-  Subcapt Γ C (CaptureSet.csingleton c)
+  Subcapt Γ C {c=c}
 | cinstr :
   Context.CBound Γ c (CBinding.inst C) ->
-  Subcapt Γ (CaptureSet.csingleton c) C
+  Subcapt Γ {c=c} C
+
+notation:50 Γ " ⊢ " C1 "<:c" C2 => Subcapt Γ C1 C2
 
 end Capless

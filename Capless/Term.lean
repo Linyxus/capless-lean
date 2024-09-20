@@ -19,6 +19,15 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
 | unbox : CaptureSet n k -> Fin n -> Term n m k
 
+notation:50 "λ(x:" T ")" t => Term.lam T t
+notation:50 "λ[X<:" S "]" t => Term.tlam S t
+notation:50 "λ[c]" t => Term.clam t
+notation:50 C " o- " x => Term.unbox C x
+notation:40 "let x=" t "in" u => Term.letin t u
+notation:40 "let (c,x)=" t "in" u => Term.letex t u
+notation:40 "let X=" S "in" t => Term.bindt S t
+notation:40 "let c=" C "in" t => Term.bindc C t
+
 inductive Term.IsValue : Term n m k -> Prop where
 | lam : Term.IsValue (lam E t)
 | tlam : Term.IsValue (tlam S t)

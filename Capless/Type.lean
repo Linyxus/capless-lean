@@ -21,6 +21,16 @@ inductive SType : Nat -> Nat -> Nat -> Type where
 
 end
 
+notation "⊤" => SType.top
+notation:50 "∀(x:" T ")" U => SType.forall T U
+notation:50 "∀[X<:" S "]" T => SType.tforall S T
+notation:50 "∀[c]" T => SType.cforall T
+notation:max S " ^ " C => CType.capt C S
+notation:40 "∃c." T => EType.ex T
+
+instance : Coe (CType n m k) (EType n m k) where
+  coe T := EType.type T
+
 mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k
