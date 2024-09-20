@@ -2,6 +2,7 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.PImage
 import Capless.Basic
+import Capless.Tactics
 namespace Capless
 
 /-!
@@ -221,14 +222,12 @@ theorem CaptureSet.crename_copen {C : CaptureSet n (k+1)} :
 --     constructor; simp only [CaptureSet.crename]
 --     assumption
 
--- theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
---   (C.crename f).cweaken = C.cweaken.crename f.ext := by
---   simp [cweaken, crename_crename, FinFun.comp_weaken]
+theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
+  (C.crename f).cweaken = C.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
 
--- theorem CaptureSet.subset_refl {C : CaptureSet n k} :
---   C ⊆ C := by
---   cases C
---   constructor <;> (rw [Finset.subset_iff]; intros; trivial)
+theorem CaptureSet.subset_refl {C : CaptureSet n k} :
+  C ⊆ C := by constructor
 
 -- def Fin.ppred : Fin (n+1) →. Fin n := by
 --   intro i
@@ -459,38 +458,32 @@ theorem CaptureSet.crename_copen {C : CaptureSet n (k+1)} :
 --     have ⟨c0, h3, h4⟩ := Finset.weaken_eq_singleton_inv h3
 --     exists c0; simp [csingleton]; aesop
 
--- theorem CaptureSet.cweaken_csingleton {c : Fin k} :
---   (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
---   simp [csingleton, cweaken, crename, FinFun.weaken]
+theorem CaptureSet.cweaken_csingleton {c : Fin k} :
+  (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
+  simp [csingleton, cweaken, crename, FinFun.weaken]
 
--- theorem CaptureSet.rename_id {C : CaptureSet n k} :
---   C.rename FinFun.id = C := by
---   cases C
---   unfold FinFun.id
---   simp [CaptureSet.rename]
+theorem CaptureSet.rename_id {C : CaptureSet n k} :
+  C.rename FinFun.id = C := by
+  induction C <;> aesop
 
--- theorem CaptureSet.crename_id {C : CaptureSet n k} :
---   C.crename FinFun.id = C := by
---   cases C
---   unfold FinFun.id
---   simp [CaptureSet.crename]
+theorem CaptureSet.crename_id {C : CaptureSet n k} :
+  C.crename FinFun.id = C := by
+  induction C <;> aesop
 
--- theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
---   (h : C1 ⊆ C2) :
---   C1.crename f ⊆ C2.crename f := by
---     cases h
---     cases C1; cases C2
---     simp at *
---     constructor
---     trivial
---     apply Finset.image_subset_image
---     trivial
+theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
+  (h : C1 ⊆ C2) :
+  C1.crename f ⊆ C2.crename f := by
+  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
+  case union_rr =>
+    simp
+    apply! Subset.union_rr
 
--- theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
---   (h : C1 ⊆ C2) :
---   C1.cweaken ⊆ C2.cweaken := by
---     simp [CaptureSet.cweaken]
---     apply CaptureSet.crename_monotone
---     trivial
+theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
+  (h : C1 ⊆ C2) :
+  C1.cweaken ⊆ C2.cweaken := by
+  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
+  case union_rr =>
+    simp
+    apply! Subset.union_rr
 
--- end Capless
+end Capless
