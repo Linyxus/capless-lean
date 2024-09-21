@@ -6,15 +6,14 @@ namespace Capless
 
 theorem Typed.subst
   {Γ : Context n m k} {Δ : Context n' m k}
-  (h : Typed Γ t E)
+  (h : Typed Γ t E Ct)
   (σ : VarSubst Γ f Δ) :
-  Typed Δ (t.rename f) (E.rename f) := by
+  Typed Δ (t.rename f) (E.rename f) (Ct.rename f) := by
   induction h generalizing n'
   case var hb =>
     simp [Term.rename, EType.rename, CType.rename]
     have hb1 := σ.map _ _ hb
     simp [CType.rename] at hb1
-    simp [CaptureSet.rename_singleton]
     apply Typed.precise_capture
     trivial
   case pack ih =>
@@ -23,34 +22,29 @@ theorem Typed.subst
     have ih := ih σ.cext
     simp [EType.rename] at ih
     exact ih
-  case sub hs ih =>
+  case sub hsc hs ih =>
     apply sub
     { apply ih; trivial }
-    { apply hs.subst; trivial }
+    { apply! hsc.subst }
+    { apply! hs.subst }
   case abs hc ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply abs
-    { apply ih
+    { rw [CaptureSet.weaken_rename]
+      rw [<- CaptureSet.ext_rename_singleton_zero (f := f)]
+      apply ih
       apply σ.ext }
-    { have hc1 := hc.rename (f := f)
-      simp [Term.rename] at hc1
-      exact hc1 }
   case tabs hc ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply tabs
     { apply ih
       apply σ.text }
-    { have hc1 := hc.rename (f := f)
-      simp [Term.rename] at hc1
-      exact hc1 }
   case cabs hc ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply cabs
-    { apply ih
+    { rw [<- CaptureSet.cweaken_rename_comm]
+      apply ih
       apply σ.cext }
-    { have hc1 := hc.rename (f := f)
-      simp [Term.rename] at hc1
-      exact hc1 }
   case app ih1 ih2 =>
     simp [Term.rename]
     rw [EType.rename_open]
@@ -95,6 +89,7 @@ theorem Typed.subst
       exact ih1 }
     { have ih2 := ih2 (σ.ext _)
       rw [<- EType.weaken_rename] at ih2
+      rw [CaptureSet.weaken_rename]
       exact ih2 }
   case letex ih1 ih2 =>
     simp [Term.rename]
@@ -105,6 +100,8 @@ theorem Typed.subst
     { have ih2 := ih2 (σ.cext.ext _)
       rw [<- EType.weaken_rename] at ih2
       rw [EType.cweaken_rename_comm] at ih2
+      rw [<- CaptureSet.cweaken_rename_comm]
+      rw [CaptureSet.weaken_rename]
       exact ih2 }
   case bindt ih =>
     simp [Term.rename]
@@ -119,12 +116,13 @@ theorem Typed.subst
     have ih := ih σ.cext
     rw [EType.cweaken_rename_comm] at ih
     simp [CBinding.rename] at ih
+    rw [<- CaptureSet.cweaken_rename_comm]
     exact ih
 
 theorem Typed.open
-  (h : Typed (Γ.var P) t E)
-  (hx : Typed Γ (Term.var x) (EType.type P)) :
-  Typed Γ (t.open x) (E.open x) := by
+  (h : Typed (Γ,x: P) t E Ct)
+  (hx : Typed Γ (Term.var x) (EType.type P) Cx) :
+  Typed Γ (t.open x) (E.open x) (Ct.open x) := by
   simp [Term.open, EType.open]
   apply Typed.subst
   { exact h }

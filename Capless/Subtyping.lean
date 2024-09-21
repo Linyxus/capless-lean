@@ -55,8 +55,8 @@ inductive SSubtyp : Context n m k -> SType n m k -> SType n m k -> Prop where
 
 end
 
-notation:50 Γ " ⊢ " E1 "<:e" E2 => ESubtyp Γ E1 E2
-notation:50 Γ " ⊢ " T1 "<:s" T2 => SSubtyp Γ T1 T2
-notation:50 Γ " ⊢ " T1 "<:" T2 => CSubtyp Γ T1 T2
+notation:50 Γ " ⊢ " E1 " <:e " E2 => ESubtyp Γ E1 E2
+notation:50 Γ " ⊢ " T1 " <:s " T2 => SSubtyp Γ T1 T2
+notation:50 Γ " ⊢ " T1 " <: " T2 => CSubtyp Γ T1 T2
 
 end Capless

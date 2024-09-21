@@ -435,7 +435,7 @@ def CVarSubst.cext {Γ : Context n m k}
         trivial
 
 def VarSubst.open
-  (hx : Typed Γ (Term.var x) (EType.type T)) :
+  (hx : Typed Γ (Term.var x) (EType.type T) Cx) :
   VarSubst (Γ.var T) (FinFun.open x) Γ := by
   constructor
   case map =>
@@ -445,7 +445,7 @@ def VarSubst.open
       simp [FinFun.open]
       simp [CType.weaken, CType.rename_rename, FinFun.open_comp_weaken]
       simp [CType.rename_id]
-      trivial
+      apply Typed.precise_cv; trivial
     case there_var hb0 =>
       simp [FinFun.open]
       simp [CType.weaken, CType.rename_rename, FinFun.open_comp_weaken]
@@ -479,6 +479,7 @@ def VarSubst.narrow
       simp [CType.rename_id]
       apply Typed.sub
       apply Typed.bound_typing; constructor
+      apply Subcapt.refl
       apply ESubtyp.type
       apply hs.weaken
     case there_var hb0 =>

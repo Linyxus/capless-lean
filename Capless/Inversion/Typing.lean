@@ -10,9 +10,9 @@ namespace Capless
 
 theorem Typed.app_inv'
   (he : t0 = Term.app x y)
-  (h : Typed Γ t0 E) :
-  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F)))
-    ∧ Typed Γ (Term.var y) (EType.type T)
+  (h : Typed Γ t0 E Ct0) :
+  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x}
+    ∧ Typed Γ (Term.var y) (EType.type T) {x=y}
     ∧ E0 = F.open y
     ∧ ESubtyp Γ E0 E := by
     induction h <;> try (solve | cases he)

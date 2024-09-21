@@ -5,9 +5,9 @@ namespace Capless
 
 theorem Typed.tsubst
   {Γ : Context n m k} {Δ : Context n m' k}
-  (h : Typed Γ t E)
+  (h : Typed Γ t E Ct)
   (σ : TVarSubst Γ f Δ) :
-  Typed Δ (t.trename f) (E.trename f) := by
+  Typed Δ (t.trename f) (E.trename f) Ct := by
     induction h generalizing m'
     case var hb =>
       simp [Term.trename, EType.trename, CType.trename]
@@ -20,34 +20,26 @@ theorem Typed.tsubst
       have ih := ih σ.cext
       simp [EType.trename] at ih
       exact ih
-    case sub hs ih =>
+    case sub hsc hs ih =>
       apply sub
       { apply ih; trivial }
-      { apply hs.tsubst; trivial }
-    case abs hc ih =>
+      { apply! hsc.tsubst  }
+      { apply! hs.tsubst }
+    case abs ih =>
       simp [Term.trename, EType.trename, CType.trename, SType.trename]
       apply abs
       { apply ih
         apply σ.ext }
-      { have hc1 := hc.trename (f := f)
-        simp [Term.trename] at hc1
-        exact hc1 }
-    case tabs hc ih =>
+    case tabs ih =>
       simp [Term.trename, EType.trename, CType.trename, SType.trename]
       apply tabs
       { apply ih
         apply σ.text }
-      { have hc1 := hc.trename (f := f)
-        simp [Term.trename] at hc1
-        exact hc1 }
-    case cabs hc ih =>
+    case cabs ih =>
       simp [Term.trename, EType.trename, CType.trename, SType.trename]
       apply cabs
       { apply ih
         apply σ.cext }
-      { have hc1 := hc.trename (f := f)
-        simp [Term.trename] at hc1
-        exact hc1 }
     case app ih1 ih2 =>
       simp [Term.trename]
       rw [EType.trename_open]
@@ -118,16 +110,16 @@ theorem Typed.tsubst
       trivial
 
 theorem Typed.tnarrow
-  (h : Typed (Γ.tvar (TBinding.bound S)) t E)
+  (h : Typed (Γ,X<: S) t E Ct)
   (hs : SSubtyp Γ S' S) :
-  Typed (Γ.tvar (TBinding.bound S')) t E := by
+  Typed (Γ,X<: S') t E Ct := by
   rw [<- Term.trename_id (t := t), <- EType.trename_id (E := E)]
   apply? Typed.tsubst
   apply? TVarSubst.narrow
 
 theorem Typed.topen
-  (h : Typed (Γ.tvar (TBinding.bound (SType.tvar X))) t E) :
-  Typed Γ (t.topen X) (E.topen X) := by
+  (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :
+  Typed Γ (t.topen X) (E.topen X) Ct := by
   apply? Typed.tsubst
   apply? TVarSubst.open
 

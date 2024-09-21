@@ -64,4 +64,21 @@ theorem Typed.precise_capture
   Typed Γ (Term.var x) (EType.type (CType.capt {x=x} S)) {x=x} :=
   Typed.precise_capture' rfl rfl h
 
+theorem Typed.precise_cv'
+  (he : t0 = Term.var x)
+  (h : Typed Γ t0 E C0) :
+  Typed Γ (Term.var x) E {x=x} := by
+  induction h <;> try (solve | cases he)
+  case var => cases he; apply Typed.var; trivial
+  case sub ih =>
+    apply Typed.sub
+    { apply! ih }
+    { apply Subcapt.refl }
+    { trivial }
+
+theorem Typed.precise_cv
+  (h : Typed Γ (Term.var x) E C0) :
+  Typed Γ (Term.var x) E {x=x} :=
+  Typed.precise_cv' rfl h
+
 end Capless
