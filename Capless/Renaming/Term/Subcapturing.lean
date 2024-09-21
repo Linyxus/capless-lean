@@ -3,6 +3,12 @@ import Capless.Renaming.Basic
 import Mathlib.Data.Finset.Image
 namespace Capless
 
+theorem CaptureSet.Subset.rename {C1 C2 : CaptureSet n k}
+  (h : C1 ⊆ C2) :
+  C1.rename f ⊆ C2.rename f := by
+  induction h <;> try (solve | simp | constructor <;> try trivial)
+  apply CaptureSet.Subset.union_rr; trivial
+
 theorem Subcapt.rename
   (h : Subcapt Γ C1 C2)
   (ρ : VarMap Γ f Δ) :
@@ -11,11 +17,7 @@ theorem Subcapt.rename
   case trans ih1 ih2 => apply trans <;> aesop
   case subset hsub =>
     apply subset
-    rename_i D1 D2 _
-    cases D1; cases D2
-    cases hsub; simp at *
-    constructor <;> simp [CaptureSet.rename] <;>
-      try (solve | apply Finset.image_subset_image; assumption | assumption)
+    apply CaptureSet.Subset.rename; trivial
   case union ih1 ih2 =>
     simp [CaptureSet.rename_union]
     apply union <;> aesop

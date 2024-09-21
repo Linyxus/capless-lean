@@ -24,6 +24,6 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.inst C) ->
   Subcapt Γ {c=c} C
 
-notation:50 Γ " ⊢ " C1 "<:c" C2 => Subcapt Γ C1 C2
+notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 
 end Capless

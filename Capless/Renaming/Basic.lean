@@ -4,9 +4,6 @@ import Capless.CaptureSet
 import Capless.Typing
 namespace Capless
 
--- def VarRename (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) : Prop :=
---   ∀ x E, Γ.Bound x E -> Δ.Bound (f x) (E.rename f)
-
 structure VarMap (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound (f x) (E.rename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.rename f)
@@ -269,24 +266,5 @@ def TVarMap.cext {Γ : Context n m k} {Δ : Context n m' k}
     case there_cvar hb0 =>
       constructor
       apply ρ.cmap; assumption
-
-theorem Finset.DropBinderFree.rename
-  (h : Finset.DropBinderFree xs ys) :
-  Finset.DropBinderFree (xs.image (FinFun.ext f)) (ys.image f) := by
-  cases h
-  rw [<- Finset.weaken_rename]
-  constructor
-
-theorem Finset.DropBinder.rename
-  (h : Finset.DropBinder xs ys) :
-  Finset.DropBinder (xs.image (FinFun.ext f)) (ys.image f) := by
-  cases h
-  case drop_free =>
-    constructor
-    apply Finset.DropBinderFree.rename; assumption
-  case drop =>
-    simp [Finset.image_union]
-    apply drop
-    apply DropBinderFree.rename; assumption
 
 end Capless
