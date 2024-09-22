@@ -89,7 +89,7 @@ theorem progress
       rename_i x _ _ _ _ hx _ _ _ σ _
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
-      have ⟨Cv, htv⟩ := Store.lookup_inv_typing hb0 hs hx
+      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
       have ⟨U0, t0, he⟩ := Typed.forall_inv hg hv0 htv
       subst he
       apply Progress.step
@@ -98,7 +98,7 @@ theorem progress
     case tapp x _ _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
-      have ⟨Cv, htv⟩ := Store.lookup_inv_typing hb0 hs hx
+      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
       have ⟨U0, t0, he⟩ := Typed.tforall_inv hg hv0 htv
       subst he
       apply Progress.step
@@ -107,7 +107,7 @@ theorem progress
     case capp x _ _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
-      have ⟨Cv, htv⟩ := Store.lookup_inv_typing hb0 hs hx
+      have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
       have ⟨t0, he⟩ := Typed.cforall_inv hg hv0 htv
       subst he
       apply Progress.step
@@ -123,7 +123,7 @@ theorem progress
     case unbox x _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
-      have ⟨Cv, htv⟩ := Store.lookup_inv_typing hb0 hs hx
+      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
       have ⟨t0, he⟩ := Typed.boxed_inv hg hv0 htv
       subst he
       apply Progress.step
