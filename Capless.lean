@@ -82,6 +82,9 @@ Main results:
 -/
 import «Capless».Inversion.Typing
 
--- Soundness
+/-
+## Soundness
+The standard progress and preservation theorems.
+-/
 import «Capless».Soundness.Preservation
 import «Capless».Soundness.Progress
