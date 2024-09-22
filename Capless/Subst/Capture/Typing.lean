@@ -5,15 +5,14 @@ namespace Capless
 
 theorem Typed.csubst
   {Γ : Context n m k} {Δ : Context n m k'}
-  (h : Typed Γ t E)
+  (h : Typed Γ t E Ct)
   (σ : CVarSubst Γ f Δ) :
-  Typed Δ (t.crename f) (E.crename f) := by
+  Typed Δ (t.crename f) (E.crename f) (Ct.crename f) := by
     induction h generalizing k'
     case var hb =>
       simp [Term.crename, EType.crename, CType.crename]
       have hb1 := σ.map _ _ hb
       simp [CType.crename] at hb1
-      simp [CaptureSet.crename_singleton]
       apply Typed.var; trivial
     case pack ih =>
       simp [Term.crename, EType.crename]
@@ -21,34 +20,28 @@ theorem Typed.csubst
       have ih := ih σ.cext
       simp [EType.crename] at ih
       exact ih
-    case sub hs ih =>
+    case sub hsc hs ih =>
       apply sub
       { apply ih; trivial }
-      { apply hs.csubst; trivial }
-    case abs hc ih =>
+      { apply! hsc.csubst }
+      { apply! hs.csubst }
+    case abs ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply abs
-      { apply ih
+      { rw [CaptureSet.weaken_crename]
+        apply ih
         apply σ.ext }
-      { have hc1 := hc.crename (f := f)
-        simp [Term.crename] at hc1
-        exact hc1 }
     case tabs hc ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply tabs
       { apply ih
         apply σ.text }
-      { have hc1 := hc.crename (f := f)
-        simp [Term.crename] at hc1
-        exact hc1 }
     case cabs hc ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply cabs
-      { apply ih
+      { rw [CaptureSet.cweaken_crename]
+        apply ih
         apply σ.cext }
-      { have hc1 := hc.crename (f := f)
-        simp [Term.crename] at hc1
-        exact hc1 }
     case app ih1 ih2 =>
       simp [Term.crename]
       rw [EType.crename_open]
@@ -93,6 +86,7 @@ theorem Typed.csubst
         exact ih1 }
       { have ih2 := ih2 (σ.ext _)
         rw [<- EType.weaken_crename] at ih2
+        rw [CaptureSet.weaken_crename]
         exact ih2 }
     case letex ih1 ih2 =>
       simp [Term.crename]
@@ -101,41 +95,46 @@ theorem Typed.csubst
         simp [EType.crename] at ih1
         exact ih1 }
       { have ih2 := ih2 (σ.cext.ext _)
-        rw [<-EType.weaken_crename] at ih2
-        rw [<-EType.cweaken_crename] at ih2
+        rw [<- EType.weaken_crename] at ih2
+        rw [<- EType.cweaken_crename] at ih2
+        rw [CaptureSet.cweaken_crename]
+        rw [CaptureSet.weaken_crename]
         exact ih2 }
     case bindt ih =>
       simp [Term.crename]
       apply bindt
       have ih := ih σ.text
-      rw [<-EType.tweaken_crename] at ih
+      rw [<- EType.tweaken_crename] at ih
       simp [TBinding.crename] at ih
       exact ih
     case bindc ih =>
       simp [Term.crename]
       apply bindc
       have ih := ih σ.cext
-      rw [<-EType.cweaken_crename] at ih
+      rw [<- EType.cweaken_crename] at ih
+      rw [CaptureSet.cweaken_crename]
       trivial
 
 theorem Typed.copen
-  (h : Typed (Γ.cvar CBinding.bound) t E) :
-  Typed Γ (t.copen c) (E.copen c) := by
+  (h : Typed (Γ,c:CapSet) t E Ct) :
+  Typed Γ (t.copen c) (E.copen c) (Ct.copen c) := by
   simp [Term.copen, EType.copen]
   apply? Typed.csubst
   apply? CVarSubst.open
 
 theorem Typed.cinstantiate {Γ : Context n m k}
-  (h : Typed (Γ.cvar CBinding.bound) t E) :
-  Typed (Γ.cvar (CBinding.inst C)) t E := by
+  (h : Typed (Γ,c:CapSet) t E Ct) :
+  Typed (Γ,c:= C) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
+  rw [<- CaptureSet.crename_id (C := Ct)]
   apply? Typed.csubst
   apply? CVarSubst.instantiate
 
 theorem Typed.cinstantiate_extvar {Γ : Context n m k}
-  (h : Typed ((Γ.cvar CBinding.bound).var P) t E) :
-  Typed ((Γ.cvar (CBinding.inst C)).var P) t E := by
+  (h : Typed ((Γ,c:CapSet).var P) t E Ct) :
+  Typed ((Γ,c:=C).var P) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
+  rw [<- CaptureSet.crename_id (C := Ct)]
   apply? Typed.csubst
   conv =>
     arg 3

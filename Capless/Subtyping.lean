@@ -16,7 +16,7 @@ inductive ESubtyp : Context n m k -> EType n m k -> EType n m k -> Prop where
 
 inductive CSubtyp : Context n m k -> CType n m k -> CType n m k -> Prop where
 | capt :
-  Subcapt Γ C1 C2 ->
+  (Γ ⊢ C1 <:c C2) ->
   SSubtyp Γ S1 S2 ->
   CSubtyp Γ (CType.capt C1 S1) (CType.capt C2 S2)
 
@@ -54,5 +54,9 @@ inductive SSubtyp : Context n m k -> SType n m k -> SType n m k -> Prop where
   SSubtyp Γ (SType.cforall E1) (SType.cforall E2)
 
 end
+
+notation:50 Γ " ⊢ " E1 " <:e " E2 => ESubtyp Γ E1 E2
+notation:50 Γ " ⊢ " T1 " <:s " T2 => SSubtyp Γ T1 T2
+notation:50 Γ " ⊢ " T1 " <: " T2 => CSubtyp Γ T1 T2
 
 end Capless

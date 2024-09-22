@@ -1,6 +1,7 @@
 import Capless.Subst.Basic
 import Capless.Subcapturing
 import Capless.Typing.Basic
+import Capless.Renaming.Term.Subcapturing
 namespace Capless
 
 theorem Subcapt.subst
@@ -11,11 +12,7 @@ theorem Subcapt.subst
   case trans => apply trans <;> aesop
   case subset hsub =>
     apply subset
-    rename_i D1 D2 _
-    cases D1; cases D2
-    cases hsub; simp at *
-    constructor <;> simp [CaptureSet.rename] <;>
-      try (solve | apply Finset.image_subset_image; assumption | assumption)
+    apply! CaptureSet.Subset.rename
   case union h1 h2 =>
     simp [CaptureSet.rename_union]
     apply union <;> aesop

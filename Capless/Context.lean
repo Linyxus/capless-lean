@@ -56,6 +56,12 @@ inductive Context : Nat -> Nat -> Nat -> Type where
 | tvar : Context n m k -> TBinding n m k -> Context n (m+1) k
 | cvar : Context n m k -> CBinding n k -> Context n m (k+1)
 
+notation:30 Γ ",x:" T => Context.var Γ T
+notation:30 Γ ",X<:" T => Context.tvar Γ (TBinding.bound T)
+notation:30 Γ ",X:=" T => Context.tvar Γ (TBinding.inst T)
+notation:30 Γ ",c:CapSet" => Context.cvar Γ CBinding.bound
+notation:30 Γ ",c:=" C => Context.cvar Γ (CBinding.inst C)
+
 inductive Context.Bound : Context n m k -> Fin n -> CType n m k -> Prop where
 | here : Bound (var Γ0 E) 0 E.weaken
 | there_var :

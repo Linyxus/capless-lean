@@ -41,7 +41,7 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
   TypedStore σ Γ ->
-  Typed Γ t (EType.type E) ->
+  Typed Γ t (EType.type E) Ct ->
   (hv : t.IsValue) ->
   TypedStore (Store.val σ t hv) (Γ.var E)
 | tval :
@@ -56,18 +56,18 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   ESubtyp Γ E E' ->
   TypedCont Γ E Cont.none E'
 | cons :
-  Typed (Γ.var T) t (EType.weaken E) ->
+  Typed (Γ,x: T) t (EType.weaken E) Ct ->
   TypedCont Γ E cont E' ->
   TypedCont Γ (EType.type T) (Cont.cons t cont) E'
 | conse :
-  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) ->
+  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) Ct ->
   TypedCont Γ E cont E' ->
   TypedCont Γ (EType.ex T) (Cont.conse t cont) E'
 
 inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
 | mk :
   TypedStore σ Γ ->
-  Typed Γ t E ->
+  Typed Γ t E Ct ->
   TypedCont Γ E cont E' ->
   TypedState (State.mk σ cont t) Γ E'
 

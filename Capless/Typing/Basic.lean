@@ -6,8 +6,8 @@ namespace Capless
 
 theorem Typing.inv_subcapt'
   (he1 : t0 = Term.var x) (he2 : E0 = EType.type (CType.capt C S))
-  (h : Typed Γ t0 E0) :
-  Subcapt Γ {x} C := by
+  (h : Typed Γ t0 E0 C0) :
+  Subcapt Γ {x=x} C := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var =>
     cases he1; cases he2
@@ -21,16 +21,17 @@ theorem Typing.inv_subcapt'
     apply Subcapt.trans; trivial; trivial
 
 theorem Typing.inv_subcapt
-  (h : Typed Γ (Term.var x) (EType.type (CType.capt C S))) :
-  Subcapt Γ {x} C :=
+  (h : Typed Γ (Term.var x) (EType.type (CType.capt C S)) C0) :
+  Subcapt Γ {x=x} C :=
   Typing.inv_subcapt' rfl rfl h
 
 theorem Typed.bound_typing
   (hb : Context.Bound Γ x T) :
-  Typed Γ (Term.var x) (EType.type T) := by
+  Typed Γ (Term.var x) (EType.type T) {x=x} := by
   cases T
   apply Typed.sub
   apply Typed.var hb
+  apply Subcapt.refl
   constructor
   constructor
   apply Subcapt.var; trivial
@@ -39,8 +40,8 @@ theorem Typed.bound_typing
 theorem Typed.precise_capture'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type (CType.capt C S))
-  (h : Typed Γ t0 E0) :
-  Typed Γ (Term.var x) (EType.type (CType.capt {x} S)) := by
+  (h : Typed Γ t0 E0 C0) :
+  Typed Γ (Term.var x) (EType.type (CType.capt {x=x} S)) {x=x} := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var => cases he1; cases he2; apply Typed.var; trivial
   case sub hsub ih =>
@@ -52,14 +53,32 @@ theorem Typed.precise_capture'
     have ih := ih rfl rfl
     apply Typed.sub
     { exact ih }
+    { apply Subcapt.refl }
     { constructor
       constructor
       apply Subcapt.refl
       trivial }
 
 theorem Typed.precise_capture
-  (h : Typed Γ (Term.var x) (EType.type (CType.capt C S))) :
-  Typed Γ (Term.var x) (EType.type (CType.capt {x} S)) :=
+  (h : Typed Γ (Term.var x) (EType.type (CType.capt C S)) C0) :
+  Typed Γ (Term.var x) (EType.type (CType.capt {x=x} S)) {x=x} :=
   Typed.precise_capture' rfl rfl h
+
+theorem Typed.precise_cv'
+  (he : t0 = Term.var x)
+  (h : Typed Γ t0 E C0) :
+  Typed Γ (Term.var x) E {x=x} := by
+  induction h <;> try (solve | cases he)
+  case var => cases he; apply Typed.var; trivial
+  case sub ih =>
+    apply Typed.sub
+    { apply! ih }
+    { apply Subcapt.refl }
+    { trivial }
+
+theorem Typed.precise_cv
+  (h : Typed Γ (Term.var x) E C0) :
+  Typed Γ (Term.var x) E {x=x} :=
+  Typed.precise_cv' rfl h
 
 end Capless

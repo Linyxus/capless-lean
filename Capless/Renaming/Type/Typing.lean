@@ -3,89 +3,11 @@ import Capless.Renaming.Basic
 import Capless.Renaming.Type.Subtyping
 namespace Capless
 
-theorem SealedLet.neg_trename
-  (h : ¬ SealedLet t C) :
-  ¬ SealedLet (t.trename f) C := by
-  intro h0
-  apply h
-  cases h0
-  case mk hv hl =>
-    constructor
-    apply IsValue.trename_l; trivial
-    trivial
-
-theorem SealedLet.trename
-  (h : SealedLet t C) :
-  SealedLet (t.trename f) C := by
-  cases h
-  case mk hv hl =>
-    constructor
-    apply IsValue.trename_r; trivial
-    trivial
-
-theorem Captured.trename
-  {f : FinFun m m'}
-  (h : Captured t C) :
-  Captured (t.trename f) C := by
-  induction h generalizing m'
-  case var => simp [Term.trename]; apply var
-  case lam =>
-    simp [Term.trename]
-    apply lam
-    aesop
-    aesop
-  case tlam =>
-    simp [Term.trename]
-    apply tlam
-    aesop
-  case clam =>
-    simp [Term.trename]
-    apply clam
-    aesop
-    aesop
-  case boxed =>
-    simp [Term.trename]
-    apply boxed
-  case pack =>
-    simp [Term.trename]
-    apply pack
-  case app =>
-    simp [Term.trename]
-    apply app
-  case tapp =>
-    simp [Term.trename]
-    apply tapp
-  case capp =>
-    simp [Term.trename]
-    apply capp
-  case unbox =>
-    simp [Term.trename]
-    apply unbox
-  case letin =>
-    simp [Term.trename]
-    apply letin
-    aesop
-    aesop
-    apply SealedLet.neg_trename; trivial
-    trivial
-  case letin_sealed =>
-    simp [Term.trename]
-    apply letin_sealed
-    aesop
-    aesop
-    apply SealedLet.trename; trivial
-  case letex =>
-    simp [Term.trename]
-    apply letex
-    aesop
-    aesop
-    trivial
-
 theorem Typed.trename
   {Γ : Context n m k} {Δ : Context n m' k}
-  (h : Typed Γ t E)
+  (h : Typed Γ t E Ct)
   (ρ : TVarMap Γ f Δ) :
-  Typed Δ (t.trename f) (E.trename f) := by
+  Typed Δ (t.trename f) (E.trename f) Ct := by
   induction h generalizing m'
   case var =>
     simp [Term.trename, EType.trename, CType.trename]
@@ -100,18 +22,16 @@ theorem Typed.trename
     have ih := ih (ρ.cext _)
     simp [Term.trename, EType.trename] at ih
     trivial
-  case sub hs ih =>
+  case sub hsc hs ih =>
     apply sub
     aesop
-    apply ESubtyp.trename <;> trivial
-  case abs hcv ih =>
+    apply! hsc.trename
+    apply! ESubtyp.trename
+  case abs ih =>
     simp [Term.trename, EType.trename, CType.trename, SType.trename]
     apply abs
-    apply ih <;> try trivial
-    apply TVarMap.ext; trivial
-    have hcv1 := hcv.trename (f := f)
-    simp [Term.trename] at hcv1
-    trivial
+    apply? ih
+    apply! TVarMap.ext
   case app ih1 ih2 =>
     simp [Term.trename]
     rw [EType.trename_open]
@@ -122,21 +42,15 @@ theorem Typed.trename
     have ih2 := ih2 ρ
     simp [Term.trename, EType.trename] at ih2
     trivial
-  case tabs hcv ih =>
+  case tabs ih =>
     simp [Term.trename, EType.trename, CType.trename, SType.trename]
     apply tabs
-    apply ih <;> try trivial
-    apply TVarMap.text <;> trivial
-    have hcv1 := hcv.trename (f := f)
-    simp [Term.trename] at hcv1
-    trivial
-  case cabs hcv ih =>
+    apply? ih
+    apply! TVarMap.text
+  case cabs ih =>
     simp [Term.trename, EType.trename, CType.trename, SType.trename]
     apply cabs
     have ih1 := ih (ρ.cext _)
-    trivial
-    have hcv1 := hcv.trename (f := f)
-    simp [Term.trename] at hcv1
     trivial
   case unbox ih =>
     simp [Term.trename, EType.trename, CType.trename]
