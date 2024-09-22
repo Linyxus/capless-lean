@@ -20,6 +20,7 @@ theorem Typed.rename
     apply Typed.pack
     have ih := ih (ρ.cext _)
     simp [Term.rename, EType.rename] at ih
+    rw [<- CaptureSet.cweaken_rename_comm]
     exact ih
   case sub hsc hs ih =>
     apply Typed.sub
@@ -30,7 +31,6 @@ theorem Typed.rename
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply Typed.abs
     rw [CaptureSet.weaken_rename]
-    rw [<- CaptureSet.ext_rename_singleton_zero (f := f)]
     apply? iht
     apply ρ.ext
   case tabs iht =>

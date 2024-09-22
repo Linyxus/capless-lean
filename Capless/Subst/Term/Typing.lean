@@ -21,6 +21,7 @@ theorem Typed.subst
     apply pack
     have ih := ih σ.cext
     simp [EType.rename] at ih
+    rw [<- CaptureSet.cweaken_rename_comm]
     exact ih
   case sub hsc hs ih =>
     apply sub
@@ -31,7 +32,6 @@ theorem Typed.subst
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply abs
     { rw [CaptureSet.weaken_rename]
-      rw [<- CaptureSet.ext_rename_singleton_zero (f := f)]
       apply ih
       apply σ.ext }
   case tabs hc ih =>

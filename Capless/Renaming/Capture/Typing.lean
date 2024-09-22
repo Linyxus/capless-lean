@@ -20,6 +20,7 @@ theorem Typed.crename
     apply pack
     have ih := ih (ρ.cext _)
     simp [Term.crename, EType.crename] at ih
+    rw [CaptureSet.cweaken_crename]
     exact ih
   case sub hsc hsub ih =>
     apply sub

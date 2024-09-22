@@ -86,7 +86,7 @@ theorem progress
         apply Reduce.lift
         constructor
     case app =>
-      rename_i x _ _ _ _ hx _ _ _ σ _
+      rename_i x _ _ _ _ _ hx _ _ _ σ _
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -95,7 +95,7 @@ theorem progress
       apply Progress.step
       apply Reduce.apply
       trivial
-    case tapp x _ _ _ hx _ σ _ =>
+    case tapp x _ _ _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -104,7 +104,7 @@ theorem progress
       apply Progress.step
       apply Reduce.tapply
       trivial
-    case capp x _ _ _ hx _ σ _ =>
+    case capp x _ _ _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -120,7 +120,7 @@ theorem progress
         apply Progress.step
         apply Reduce.lift
         constructor
-    case unbox x _ _ hx _ σ _ =>
+    case unbox x _ _ _ hx _ σ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
