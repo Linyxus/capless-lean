@@ -218,7 +218,7 @@ inductive Context.IsTight : Context n m k -> Prop where
 | cvar :
   Context.IsTight Γ ->
   Context.IsTight (Γ.cvar (CBinding.inst C))
-| scope :
+| label :
   Context.IsTight Γ ->
   Context.IsTight (Γ.label S)
 

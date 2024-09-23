@@ -6,12 +6,7 @@ theorem Context.var_bound_succ_inv'
   (he1 : Γ0 = Γ.var P) (he1 : x0 = x.succ)
   (hb : Context.Bound Γ0 x0 T) :
   ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
-  cases hb <;> try (solve | cases he1 | cases he2)
-  rw [Fin.succ_inj] at he1
-  subst he1
-  cases he1
-  rename_i T0 hb
-  exists T0
+  cases hb <;> try (solve | cases he1 | cases he2 | aesop)
 
 theorem Context.var_bound_succ_inv
   (hb : Context.Bound (Γ.var P) x.succ T) :
@@ -167,6 +162,7 @@ theorem Context.tight_bound_tvar_absurd
   case cvar =>
     have ⟨S0, hb0, he0⟩ := Context.cvar_tbound_inv_bound hb
     aesop
+  case label => sorry
 
 theorem Context.tvar_tbound_succ_inv'
   (he1 : Γ0 = Γ.tvar p) (he2 : X0 = Fin.succ X)
