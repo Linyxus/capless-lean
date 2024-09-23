@@ -17,6 +17,7 @@ inductive SType : Nat -> Nat -> Nat -> Type where
 | tforall : SType n m k -> EType n (m+1) k -> SType n m k
 | cforall : EType n m (k+1) -> SType n m k
 | box : CType n m k -> SType n m k
+| label : SType n m k -> SType n m k
 
 end
 
@@ -26,6 +27,7 @@ notation:50 "∀[X<:" S "]" T => SType.tforall S T
 notation:50 "∀[c]" T => SType.cforall T
 notation:max S " ^ " C => CType.capt C S
 notation:40 "∃c." T => EType.ex T
+notation:40 "Label[" S "]" => SType.label S
 
 instance : Coe (CType n m k) (EType n m k) where
   coe T := EType.type T

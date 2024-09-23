@@ -40,6 +40,9 @@ theorem SType.crename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
   | SType.box T => by
     have ih := CType.crename_rename_comm T f g
     simp [SType.rename, SType.crename, ih]
+  | SType.label S => by
+    have ih := SType.crename_rename_comm S f g
+    simp [SType.rename, SType.crename, ih]
 
 end
 
@@ -98,6 +101,9 @@ theorem SType.rename_rename (S : SType n m k) (f : FinFun n n') (g : FinFun n' n
   | SType.box T => by
     have ih := CType.rename_rename T f g
     simp [SType.rename, ih]
+  | SType.label S => by
+    have ih := SType.rename_rename S f g
+    simp [SType.rename, ih]
 
 end
 
@@ -148,6 +154,9 @@ theorem SType.trename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
   | SType.box T => by
     have ih := CType.trename_rename_comm T f g
     simp [SType.trename, SType.rename, ih]
+  | SType.label S => by
+    have ih := SType.trename_rename_comm S f g
+    simp [SType.trename, SType.rename, ih]
 
 end
 
@@ -189,6 +198,9 @@ theorem SType.crename_crename (S : SType n m k) (f : FinFun k k') (g : FinFun k'
   | SType.box T => by
     have ih := CType.crename_crename T f g
     simp [SType.crename, ih]
+  | SType.label S => by
+    have ih := SType.crename_crename S f g
+    simp [SType.crename, ih]
 
 end
 
@@ -229,6 +241,9 @@ theorem SType.crename_trename_comm (S : SType n m k) (f : FinFun k k') (g : FinF
     simp [SType.crename, SType.trename, ih]
   | SType.box T => by
     have ih := CType.crename_trename_comm T f g
+    simp [SType.crename, SType.trename, ih]
+  | SType.label S => by
+    have ih := SType.crename_trename_comm S f g
     simp [SType.crename, SType.trename, ih]
 
 end
@@ -347,6 +362,9 @@ theorem SType.trename_trename (S : SType n m k) (f : FinFun m m') (g : FinFun m'
   | SType.box T => by
     have ih := CType.trename_trename T f g
     simp [SType.trename, ih]
+  | SType.label S => by
+    have ih := SType.trename_trename S f g
+    simp [SType.trename, ih]
 
 end
 
@@ -463,6 +481,9 @@ theorem SType.rename_id {S : SType n m k} :
   | SType.box T => by
     have ih := CType.rename_id (T := T)
     simp [SType.rename, ih]
+  | SType.label S => by
+    have ih := SType.rename_id (S := S)
+    simp [SType.rename, ih]
 
 end
 
@@ -503,6 +524,9 @@ theorem SType.trename_id {S : SType n m k} :
     simp [SType.trename, ih]
   | SType.box T => by
     have ih := CType.trename_id (T := T)
+    simp [SType.trename, ih]
+  | SType.label S => by
+    have ih := SType.trename_id (S := S)
     simp [SType.trename, ih]
 
 end
@@ -545,6 +569,9 @@ theorem SType.crename_id {S : SType n m k} :
     simp [SType.crename, FinFun.id_ext, ih]
   | SType.box T => by
     have ih := CType.crename_id (T := T)
+    simp [SType.crename, ih]
+  | SType.label S => by
+    have ih := SType.crename_id (S := S)
     simp [SType.crename, ih]
 
 end
