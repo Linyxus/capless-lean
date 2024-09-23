@@ -15,6 +15,25 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
 | unbox {σ : Store n m k} :
   σ.Bound x (Term.boxed y) ->
   Reduce ⟨σ, cont, Term.unbox C x⟩ ⟨σ, cont, Term.var y⟩
+| enter :
+  Reduce
+    ⟨σ, cont, boundary:S in t⟩
+    ⟨(σ.label S).cval {x=0}, cont.weaken.cweaken.scope 0, t⟩
+| leave_var :
+  Reduce
+    ⟨σ, cont.scope x, Term.var y⟩
+    ⟨σ, cont, Term.var y⟩
+| leave_val {v : Term n m k} :
+  (hv : Term.IsValue v) ->
+  Reduce
+    ⟨σ, cont.scope x, v⟩
+    ⟨σ, cont, Term.var x⟩
+| invoke {σ : Store n m k} {cont : Cont n m k} :
+  σ.LBound x S ->
+  cont.HasLabel x tail ->
+  Reduce
+    ⟨σ, cont, Term.app x y⟩
+    ⟨σ, tail, Term.var y⟩
 | push :
   Reduce
     ⟨σ, cont, Term.letin t u⟩
