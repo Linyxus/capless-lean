@@ -53,6 +53,7 @@ def CBinding.cweaken (b : CBinding n k) : CBinding n (k+1) :=
 inductive Context : Nat -> Nat -> Nat -> Type where
 | empty : Context 0 0 0
 | var : Context n m k -> CType n m k -> Context (n+1) m k
+| label : Context n m k -> SType n m k -> Context (n+1) m k
 | tvar : Context n m k -> TBinding n m k -> Context n (m+1) k
 | cvar : Context n m k -> CBinding n k -> Context n m (k+1)
 
@@ -73,6 +74,9 @@ inductive Context.Bound : Context n m k -> Fin n -> CType n m k -> Prop where
 | there_cvar :
   Bound Γ x E ->
   Bound (cvar Γ b) x E.cweaken
+| there_label :
+  Bound Γ x E ->
+  Bound (label Γ S) (Fin.succ x) E.weaken
 
 inductive Context.TBound : Context n m k -> Fin m -> TBinding n m k -> Prop where
 | here : TBound (tvar Γ0 b) 0 b.tweaken
@@ -85,6 +89,9 @@ inductive Context.TBound : Context n m k -> Fin m -> TBinding n m k -> Prop wher
 | there_cvar :
   TBound Γ x b ->
   TBound (cvar Γ b') x b.cweaken
+| there_label :
+  TBound Γ x b ->
+  TBound (label Γ S) x b.weaken
 
 inductive Context.CBound : Context n m k -> Fin k -> CBinding n k -> Prop where
 | here : CBound (cvar Γ0 b) 0 b.cweaken
@@ -97,6 +104,24 @@ inductive Context.CBound : Context n m k -> Fin k -> CBinding n k -> Prop where
 | there_cvar :
   CBound Γ x b ->
   CBound (cvar Γ b') (Fin.succ x) b.cweaken
+| there_label :
+  CBound Γ x b ->
+  CBound (label Γ S) x b.weaken
+
+inductive Context.LBound : Context n m k -> Fin n -> SType n m k -> Prop where
+| here : LBound (label Γ0 S) 0 S.weaken
+| there_var :
+  LBound Γ x S ->
+  LBound (var Γ E) x.succ S.weaken
+| there_tvar :
+  LBound Γ x S ->
+  LBound (tvar Γ b) x S.tweaken
+| there_cvar :
+  LBound Γ x S ->
+  LBound (cvar Γ b) x S.cweaken
+| there_label :
+  LBound Γ x S ->
+  LBound (label Γ S') x.succ S.weaken
 
 theorem CBinding.crename_rename_comm {b : CBinding n k} :
   (b.crename f).rename g = (b.rename g).crename f := by
