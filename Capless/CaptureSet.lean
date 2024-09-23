@@ -29,7 +29,7 @@ instance : Union (CaptureSet n k) where
   union := CaptureSet.union
 
 inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
-| empty : Subset {} {}
+| empty : Subset {} C
 | rfl : Subset C C
 | union_l :
   Subset C1 C ->
