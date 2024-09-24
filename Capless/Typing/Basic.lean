@@ -12,6 +12,9 @@ theorem Typing.inv_subcapt'
   case var =>
     cases he1; cases he2
     apply Subcapt.refl
+  case label =>
+    cases he1; cases he2
+    apply Subcapt.refl
   case sub hsub ih =>
     subst he1 he2
     have h := ESubtyp.type_inv_subcapt hsub
