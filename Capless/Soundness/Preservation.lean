@@ -40,13 +40,13 @@ theorem preservation
       have ⟨hcfs, C0, hcft⟩ := Typed.canonical_form_lam hg hv
       constructor
       constructor
-      { trivial }
+      { exact hs }
       { apply Typed.sub
         { apply Typed.open (h := hcft)
           exact hy }
         { apply Subcapt.refl }
         { subst he1
-          trivial } }
+          exact hs1 } }
       trivial
   case tapply hl =>
     cases ht
@@ -73,7 +73,7 @@ theorem preservation
       have ⟨C0, hct⟩ := Typed.canonical_form_clam hg hv
       constructor
       constructor
-      { trivial }
+      { exact hs }
       { apply Typed.sub
         { apply Typed.copen hct }
         { apply Subcapt.refl }
@@ -89,7 +89,7 @@ theorem preservation
       have hct := Typed.canonical_form_boxed hg hv
       constructor
       constructor
-      { trivial }
+      { exact hs }
       { apply Typed.sub
         exact hct
         apply Subcapt.refl
@@ -101,7 +101,7 @@ theorem preservation
       have ⟨T, E0, C0, htt, htu, hsub⟩ := Typed.letin_inv ht
       constructor
       constructor
-      { trivial }
+      { exact hs }
       { exact htt }
       { constructor
         apply? Typed.sub
@@ -179,8 +179,8 @@ theorem preservation
       have ⟨E0, C0, ht, hsub⟩ := Typed.bindc_inv ht
       constructor
       { constructor; exact hs }
-      { apply Typed.sub
-        exact ht; apply Subcapt.refl
+      { apply Typed.ssub
+        exact ht
         apply ESubtyp.cweaken; exact hsub }
       { apply TypedCont.cweaken; exact hc }
 

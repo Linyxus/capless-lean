@@ -19,6 +19,7 @@ theorem Typed.csubst
       apply pack
       have ih := ih σ.cext
       simp [EType.crename] at ih
+      rw [CaptureSet.cweaken_crename]
       exact ih
     case sub hsc hs ih =>
       apply sub
@@ -31,12 +32,12 @@ theorem Typed.csubst
       { rw [CaptureSet.weaken_crename]
         apply ih
         apply σ.ext }
-    case tabs hc ih =>
+    case tabs ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply tabs
       { apply ih
         apply σ.text }
-    case cabs hc ih =>
+    case cabs ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply cabs
       { rw [CaptureSet.cweaken_crename]

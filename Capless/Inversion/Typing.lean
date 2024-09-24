@@ -11,15 +11,18 @@ namespace Capless
 theorem Typed.app_inv'
   (he : t0 = Term.app x y)
   (h : Typed Γ t0 E Ct0) :
-  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x}
-    ∧ Typed Γ (Term.var y) (EType.type T) {x=y}
+  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {}
+    ∧ Typed Γ (Term.var y) (EType.type T) {}
     ∧ E0 = F.open y
     ∧ ESubtyp Γ E0 E := by
     induction h <;> try (solve | cases he)
-    case app x C T F y h1 h2 _ _ =>
+    case app x C T F C' y h1 h2 _ _ =>
       cases he
       exists T, C, F, (F.open y)
-      repeat (constructor; trivial)
+      repeat (any_goals apply And.intro)
+      all_goals try trivial
+      apply Typed.precise_cv; exact h1
+      apply Typed.precise_cv; exact h2
       apply ESubtyp.refl
     case sub hsub ih =>
       have ih := ih he
@@ -31,8 +34,8 @@ theorem Typed.app_inv'
 
 theorem Typed.app_inv
   (h : Typed Γ (Term.app x y) E Ct) :
-  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x}
-    ∧ Typed Γ (Term.var y) (EType.type T) {x=y}
+  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {}
+    ∧ Typed Γ (Term.var y) (EType.type T) {}
     ∧ E0 = F.open y
     ∧ ESubtyp Γ E0 E :=
   Typed.app_inv' rfl h
@@ -41,7 +44,7 @@ theorem Typed.tapp_inv'
   (he : t0 = Term.tapp x X)
   (h : Typed Γ t0 E Ct) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x}
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {}
     ∧ E0 = F.topen X
     ∧ ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
@@ -49,11 +52,11 @@ theorem Typed.tapp_inv'
     cases he
     repeat (apply Exists.intro)
     apply And.intro
-    { trivial }
+    { apply Typed.precise_cv; trivial }
     apply And.intro
     { trivial }
     { apply ESubtyp.refl }
-  case sub ht hs ih =>
+  case sub hs ih =>
     have ih := ih he
     have ⟨Cf, F, E0, hx, he0, hs0⟩ := ih
     have h := ESubtyp.trans hs0 hs
@@ -62,7 +65,7 @@ theorem Typed.tapp_inv'
 theorem Typed.tapp_inv
   (h : Typed Γ (Term.tapp x X) E Ct) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x}
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {}
     ∧ E0 = F.topen X
     ∧ ESubtyp Γ E0 E :=
   Typed.tapp_inv' rfl h
@@ -180,7 +183,7 @@ theorem Typed.capp_inv'
   (he : t0 = Term.capp x c)
   (h : Typed Γ t0 E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
@@ -188,7 +191,7 @@ theorem Typed.capp_inv'
     cases he
     repeat (apply Exists.intro)
     apply And.intro
-    { trivial }
+    { apply Typed.precise_cv; trivial }
     apply And.intro
     { trivial }
     { apply ESubtyp.refl }
@@ -201,7 +204,7 @@ theorem Typed.capp_inv'
 theorem Typed.capp_inv
   (h : Typed Γ (Term.capp x c) E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
@@ -216,7 +219,7 @@ theorem Typed.unbox_inv'
   case unbox =>
     cases he
     apply Exists.intro
-    constructor; trivial
+    constructor; apply Typed.precise_cv; trivial
     apply ESubtyp.refl
   case sub hs ih =>
     have ih1 := ih he
@@ -411,11 +414,11 @@ theorem Typed.canonical_form_pack'
   (he1 : t0 = Term.pack C x)
   (he2 : E0 = EType.ex T)
   (h : Typed Γ t0 E0 Ct) :
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} := by
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {} := by
   induction h <;> try (solve | cases he1 | cases he2)
   case pack =>
     cases he1; cases he2
-    trivial
+    apply Typed.precise_cv; trivial
   case sub hs ih =>
     subst he2
     cases hs
@@ -430,7 +433,7 @@ theorem Typed.canonical_form_pack'
 theorem Typed.canonical_form_pack
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.pack C x) (EType.ex T) Ct) :
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} :=
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {} :=
   Typed.canonical_form_pack' ht rfl rfl h
 
 theorem Typed.forall_inv' {v : Term n m k}
