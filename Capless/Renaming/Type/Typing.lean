@@ -107,5 +107,24 @@ theorem Typed.trename
     have ih := ih (ρ.cext _)
     rw [EType.cweaken_trename]
     trivial
+  case label =>
+    simp [Term.trename, EType.trename, CType.trename, SType.trename]
+    apply label
+    have h := ρ.lmap
+    aesop
+  case invoke ih1 ih2 =>
+    simp [Term.trename]
+    apply invoke
+    apply ih1; trivial
+    apply ih2; trivial
+  case boundary ih =>
+    simp [Term.trename]
+    apply boundary
+    have ih := ih ((ρ.cext _).ext _)
+    simp [FinFun.ext, CType.trename, SType.trename] at ih
+    rw [ SType.cweaken_trename
+       , EType.cweaken_trename
+       , EType.weaken_trename ]
+    exact ih
 
 end Capless

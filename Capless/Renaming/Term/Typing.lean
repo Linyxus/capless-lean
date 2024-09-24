@@ -117,5 +117,27 @@ theorem Typed.rename
     rw [EType.cweaken_rename_comm] at ih
     rw [<- CaptureSet.cweaken_rename_comm]
     trivial
+  case label =>
+    simp [Term.rename, EType.rename, CType.rename, SType.rename]
+    apply label
+    have h := ρ.lmap
+    aesop
+  case invoke ih1 ih2 =>
+    simp [Term.rename]
+    apply Typed.invoke
+    apply ih1; trivial
+    apply ih2; trivial
+  case boundary ih =>
+    simp [Term.rename]
+    apply Typed.boundary
+    have ih := ih ((ρ.cext _).ext _)
+    simp [CBinding.rename, FinFun.ext, CType.rename, SType.rename] at ih
+    rw
+      [ <- SType.cweaken_rename_comm
+      , <- EType.cweaken_rename_comm
+      , EType.weaken_rename
+      , <- CaptureSet.cweaken_rename_comm
+      , CaptureSet.weaken_rename ]
+    exact ih
 
 end Capless

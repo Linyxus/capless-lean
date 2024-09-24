@@ -65,7 +65,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (let c=C in t) E C0
 | boundary :
   Typed
-    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=c})
+    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
     t
     E.cweaken.weaken (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
   Typed Γ (boundary: S in t) E C
