@@ -148,6 +148,28 @@ theorem Context.cvar_tbound_inv_bound
   case inst =>
     simp [TBinding.cweaken, TBinding.crename] at he0
 
+theorem Context.label_tbound_inv'
+  (he : Γ0 = Γ.label l)
+  (hb : Context.TBound Γ0 X b) :
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.weaken := by
+  cases hb <;> try (solve | cases he)
+  case there_label b0 hb0 => aesop
+
+theorem Context.label_tbound_inv
+  (hb : Context.TBound (Γ.label l) X b) :
+  ∃ b0, Context.TBound Γ X b0 ∧ b = b0.weaken :=
+  Context.label_tbound_inv' rfl hb
+
+theorem Context.label_tbound_inv_bound
+  (hb : Context.TBound (Γ.label l) X (TBinding.bound S)) :
+  ∃ S0, Context.TBound Γ X (TBinding.bound S0) ∧ S = SType.weaken S0 := by
+  have ⟨b0, hb0, he0⟩ := Context.label_tbound_inv hb
+  cases b0
+  case bound S0 =>
+    simp [TBinding.weaken, TBinding.rename] at he0
+    aesop
+  case inst => simp [TBinding.weaken, TBinding.rename] at he0
+
 theorem Context.tight_bound_tvar_absurd
   (ht : Context.IsTight Γ)
   (hb : Context.TBound Γ X (TBinding.bound S)) : False := by
@@ -162,7 +184,9 @@ theorem Context.tight_bound_tvar_absurd
   case cvar =>
     have ⟨S0, hb0, he0⟩ := Context.cvar_tbound_inv_bound hb
     aesop
-  case label => sorry
+  case label =>
+    have ⟨S0, hb0, he0⟩ := Context.label_tbound_inv_bound hb
+    aesop
 
 theorem Context.tvar_tbound_succ_inv'
   (he1 : Γ0 = Γ.tvar p) (he2 : X0 = Fin.succ X)
@@ -273,6 +297,12 @@ theorem Context.tbound_inj
       have ih := ih h1 h2
       aesop
   case cvar Γ0 b ih =>
+    cases h1
+    cases h2
+    rename_i h1 _ h2
+    have ih := ih h1 h2
+    aesop
+  case label Γ0 l ih =>
     cases h1
     cases h2
     rename_i h1 _ h2
