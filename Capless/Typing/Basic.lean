@@ -44,6 +44,7 @@ theorem Typed.precise_capture'
   Typed Γ (Term.var x) (EType.type (CType.capt {x=x} S)) {x=x} := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var => cases he1; cases he2; apply Typed.var; trivial
+  case label => cases he1; cases he2; apply Typed.label; trivial
   case sub hsub ih =>
     subst_vars
     cases hsub
@@ -70,6 +71,7 @@ theorem Typed.precise_cv'
   Typed Γ (Term.var x) E {x=x} := by
   induction h <;> try (solve | cases he)
   case var => cases he; apply Typed.var; trivial
+  case label => cases he; apply Typed.label; trivial
   case sub ih =>
     apply Typed.sub
     { apply! ih }
