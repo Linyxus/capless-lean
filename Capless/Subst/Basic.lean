@@ -13,6 +13,7 @@ structure VarSubst (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) 
   map : ∀ x E, Γ.Bound x E -> Typed Δ (Term.var (f x)) (EType.type (E.rename f)) {x=f x}
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.rename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c (b.rename f)
+  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound (f l) (S.rename f)
 
 structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.trename f)
@@ -21,12 +22,14 @@ structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k)
   tmap_inst : ∀ X S, Γ.TBound X (TBinding.inst S) ->
     Δ.TBound (f X) (TBinding.inst (S.trename f))
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
+  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.trename f)
 
 structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f c) (CBinding.inst (C.crename f))
+  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
   (σ : VarSubst Γ f Δ)
@@ -63,6 +66,13 @@ def VarSubst.ext {Γ : Context n m k}
       have hb1 := σ.cmap _ _ hb0
       rw [<- CBinding.weaken_rename]
       constructor; trivial
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_var hb0 =>
+      have hb1 := σ.lmap _ _ hb0
+      rw [<- SType.weaken_rename]
+      constructor; trivial
 
 def VarSubst.text {Γ : Context n m k}
   (σ : VarSubst Γ f Δ) :
@@ -94,6 +104,13 @@ def VarSubst.text {Γ : Context n m k}
     case there_tvar hb0 =>
       have hb1 := σ.cmap _ _ hb0
       constructor; trivial
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_tvar hb0 =>
+      have hb1 := σ.lmap _ _ hb0
+      rw [SType.tweaken_rename]
+      constructor; aesop
 
 def VarSubst.cext {Γ : Context n m k}
   (σ : VarSubst Γ f Δ) :
@@ -126,6 +143,13 @@ def VarSubst.cext {Γ : Context n m k}
       have hb1 := σ.cmap _ _ hb0
       rw [CBinding.cweaken_rename_comm]
       constructor; trivial
+  case lmap =>
+    intro l S hb
+    cases hb
+    case there_cvar hb0 =>
+      have hb1 := σ.lmap _ _ hb0
+      rw [SType.cweaken_rename_comm]
+      constructor; aesop
 
 def TVarSubst.cext {Γ : Context n m k}
   (σ : TVarSubst Γ f Δ) :
@@ -176,6 +200,14 @@ def TVarSubst.cext {Γ : Context n m k}
       have hb'' := σ.cmap _ _ hb'
       constructor
       exact hb''
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_cvar hb0 =>
+      have hb' := σ.lmap _ _ hb0
+      rw [<- SType.cweaken_trename]
+      constructor
+      assumption
 
 def TVarSubst.ext {Γ : Context n m k}
   (σ : TVarSubst Γ f Δ)
@@ -229,6 +261,14 @@ def TVarSubst.ext {Γ : Context n m k}
       have hb'' := σ.cmap _ _ hb'
       constructor
       exact hb''
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_var hb0 =>
+      have hb' := σ.lmap _ _ hb0
+      rw [<- SType.weaken_trename]
+      constructor
+      assumption
 
 def TVarSubst.text {Γ : Context n m k}
   (σ : TVarSubst Γ f Δ)
@@ -312,6 +352,14 @@ def TVarSubst.text {Γ : Context n m k}
         have hb'' := σ.cmap _ _ hb'
         constructor
         exact hb''
+    case lmap =>
+      intros l S hb
+      cases hb
+      case there_tvar hb0 =>
+        have hb' := σ.lmap _ _ hb0
+        rw [<- SType.tweaken_trename]
+        constructor
+        assumption
 
 def CVarSubst.ext {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ)
@@ -351,6 +399,14 @@ def CVarSubst.ext {Γ : Context n m k}
       have hb'' := σ.cmap _ _ hb'
       constructor
       trivial
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_var hb0 =>
+      have hb' := σ.lmap _ _ hb0
+      rw [<- SType.weaken_crename]
+      constructor
+      assumption
 
 def CVarSubst.text {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ) :
@@ -382,6 +438,14 @@ def CVarSubst.text {Γ : Context n m k}
         have hb'' := σ.cmap _ _ hb'
         constructor
         trivial
+    case lmap =>
+      intros l S hb
+      cases hb
+      case there_tvar hb0 =>
+        have hb' := σ.lmap _ _ hb0
+        rw [<- SType.tweaken_crename]
+        constructor
+        assumption
 
 def CVarSubst.cext {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ) :
@@ -433,6 +497,14 @@ def CVarSubst.cext {Γ : Context n m k}
         rw [<-CaptureSet.cweaken_crename,<-CBinding.cweaken_inst]
         constructor
         trivial
+  case lmap =>
+    intros l S hb
+    cases hb
+    case there_cvar hb0 =>
+      have hb' := σ.lmap _ _ hb0
+      rw [<- SType.cweaken_crename]
+      constructor
+      assumption
 
 def VarSubst.open
   (hx : Typed Γ (Term.var x) (EType.type T) Cx) :
@@ -465,6 +537,13 @@ def VarSubst.open
     case there_var hb0 =>
       simp [CBinding.weaken, CBinding.rename_rename, FinFun.open_comp_weaken]
       simp [CBinding.rename_id]
+      trivial
+  case lmap =>
+    intro l S hb
+    cases hb
+    case there_var hb0 =>
+      simp [SType.weaken, SType.rename_rename, FinFun.open_comp_weaken]
+      simp [SType.rename_id]
       trivial
 
 def VarSubst.narrow
@@ -499,6 +578,12 @@ def VarSubst.narrow
     cases hb
     case there_var hb0 =>
       simp [CBinding.rename_id]
+      constructor; trivial
+  case lmap =>
+    intro l S hb
+    cases hb
+    case there_var hb0 =>
+      simp [SType.rename_id]
       constructor; trivial
 
 def TVarSubst.narrow
@@ -550,6 +635,12 @@ def TVarSubst.narrow
     cases hb
     constructor
     trivial
+  case lmap =>
+    intro l S hb
+    simp [SType.trename_id]
+    cases hb
+    constructor
+    assumption
 
 def TVarSubst.open :
   TVarSubst
@@ -592,6 +683,10 @@ def TVarSubst.open :
   , cmap := fun c b hb => by
       cases hb
       trivial
+  , lmap := fun l S hb => by
+      cases hb
+      simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
+      assumption
   }
 
 def CVarSubst.open :
@@ -621,6 +716,12 @@ def CVarSubst.open :
     simp [FinFun.open_comp_weaken]
     simp [CaptureSet.crename_id]
     trivial
+  case lmap =>
+    intro l S hb
+    cases hb
+    simp [SType.cweaken, SType.crename_crename, FinFun.open_comp_weaken]
+    simp [SType.crename_id]
+    trivial
 
 def CVarSubst.instantiate {Γ : Context n m k} :
   CVarSubst
@@ -648,5 +749,10 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     rw [<- heq]
     constructor
     trivial
+  case lmap =>
+    intro l S hb
+    cases hb
+    simp [SType.crename_id]
+    constructor; trivial
 
 end Capless
