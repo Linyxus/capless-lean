@@ -118,6 +118,31 @@ theorem Typed.subst
     simp [CBinding.rename] at ih
     rw [<- CaptureSet.cweaken_rename_comm]
     exact ih
+  case label hb =>
+    have hb1 := σ.lmap _ _ hb
+    simp [Term.rename, EType.rename, CType.rename, SType.rename]
+    apply label
+    aesop
+  case invoke ih1 ih2 =>
+    simp [Term.rename]
+    apply invoke
+    apply ih1; assumption
+    apply ih2; assumption
+  case boundary ih =>
+    simp [Term.rename]
+    apply boundary
+    have ih := ih (σ.cext.ext _)
+    simp
+      [ CBinding.rename
+      , CType.rename
+      , SType.rename
+      , <- EType.weaken_rename
+      , EType.cweaken_rename_comm
+      , <- CaptureSet.weaken_rename
+      , CaptureSet.cweaken_rename_comm
+      , FinFun.ext ] at ih
+    rw [<- SType.cweaken_rename_comm]
+    exact ih
 
 theorem Typed.open
   (h : Typed (Γ,x: P) t E Ct)
