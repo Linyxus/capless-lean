@@ -114,6 +114,27 @@ theorem Typed.csubst
       rw [<- EType.cweaken_crename] at ih
       rw [CaptureSet.cweaken_crename]
       trivial
+    case label =>
+      simp [Term.crename]
+      apply label
+      have h := σ.lmap
+      aesop
+    case invoke ih1 ih2 =>
+      simp [Term.crename]
+      apply invoke
+      apply ih1; assumption
+      apply ih2; assumption
+    case boundary ih =>
+      simp [Term.crename]
+      apply boundary
+      have ih := ih (σ.cext.ext _)
+      simp [CBinding.crename, CType.crename, SType.crename, FinFun.ext] at ih
+      rw [ <- SType.cweaken_crename
+         , <- EType.weaken_crename
+         , <- EType.cweaken_crename
+         , <- CaptureSet.weaken_crename
+         , <- CaptureSet.cweaken_crename ] at ih
+      aesop
 
 theorem Typed.copen
   (h : Typed (Γ,c:CapSet) t E Ct) :
