@@ -108,6 +108,24 @@ theorem Typed.tsubst
       have ih := ih σ.cext
       rw [<-EType.cweaken_trename] at ih
       trivial
+    case label hb =>
+      simp [Term.trename, EType.trename, CType.trename, SType.trename]
+      have hb1 := σ.lmap _ _ hb
+      apply label; assumption
+    case invoke ih1 ih2 =>
+      simp [Term.trename]
+      apply invoke
+      apply ih1; assumption
+      apply ih2; assumption
+    case boundary ih =>
+      simp [Term.trename]
+      apply boundary
+      have ih := ih (σ.cext.ext _)
+      simp [CType.trename, SType.trename] at ih
+      rw [ <- SType.cweaken_trename
+         , <- EType.weaken_trename
+         , <- EType.cweaken_trename ] at ih
+      aesop
 
 theorem Typed.tnarrow
   (h : Typed (Γ,X<: S) t E Ct)
