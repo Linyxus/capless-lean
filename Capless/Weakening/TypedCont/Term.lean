@@ -32,10 +32,18 @@ theorem Cont.HasLabel.weaken
   case here =>
     simp [Cont.weaken]
     apply here
-  case there_val ih => sorry
-  case there_tval ih => sorry
-  case there_cval ih => sorry
-  case there_label ih => sorry
+  case there_val ih =>
+    simp [Cont.weaken]
+    apply there_val; trivial
+  case there_tval ih =>
+    simp [Cont.weaken]
+    apply there_tval; trivial
+  case there_cval ih =>
+    simp [Cont.weaken]
+    apply there_cval; trivial
+  case there_label ih =>
+    simp [Cont.weaken]
+    apply there_label; trivial
 
 theorem WellScoped.weaken
   (h : WellScoped Γ cont Ct) :
@@ -61,7 +69,7 @@ theorem WellScoped.weaken
     apply label
     { have hb1 := Context.LBound.there_var (E:=T) hb
       exact hb1 }
-    { sorry }
+    { apply hs.weaken }
 
 theorem TypedCont.weaken
   (h : TypedCont Γ E t E' C0) :
@@ -83,7 +91,7 @@ theorem TypedCont.weaken
       rw [EType.weaken1_weaken] at ht1
       rw [CaptureSet.weaken1_weaken] at ht1
       exact ht1 }
-    { sorry }
+    { apply WellScoped.weaken; assumption }
     { exact ih }
   case conse ih =>
     simp [Cont.weaken, EType.weaken_ex]
@@ -95,8 +103,12 @@ theorem TypedCont.weaken
       rw [CaptureSet.weaken1_weaken] at ht1
       rw [CaptureSet.weaken_cweaken] at ht1
       exact ht1 }
-    { sorry }
+    { apply WellScoped.weaken; aesop }
     { exact ih }
-  case scope ih => sorry
+  case scope ih =>
+    simp [Cont.weaken]
+    apply scope
+    { constructor; aesop }
+    { aesop }
 
 end Capless
