@@ -1,6 +1,7 @@
 import Capless.Store
 import Capless.Weakening.Typing
 import Capless.Weakening.Subtyping
+import Capless.Weakening.Subcapturing
 namespace Capless
 
 theorem EType.cweaken_ex (T : CType n m (k+1)) :
@@ -96,11 +97,12 @@ theorem TypedCont.cweaken
       exact ht1 }
     { apply hs.cweaken }
     { exact ih }
-  case scope hb _ ih =>
+  case scope hb _ hs ih =>
     simp [Cont.cweaken]
     apply scope
     have hb1 := Context.LBound.there_cvar (b := b) hb
     exact hb1
     apply ih
+    apply hs.cweaken
 
 end Capless

@@ -30,10 +30,6 @@ theorem TypedCont.narrow
     cases hsub
     rename_i hsub
     cases hsub
-    -- TODO Continue from here
-    apply TypedCont.scope
-    { apply! Typed.narrow }
-    { trivial }
-    { trivial }
+    sorry
 
 end Capless

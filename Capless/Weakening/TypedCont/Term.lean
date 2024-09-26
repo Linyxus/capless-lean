@@ -1,6 +1,7 @@
 import Capless.Store
 import Capless.Weakening.Typing
 import Capless.Weakening.Subtyping
+import Capless.Weakening.Subcapturing
 namespace Capless
 
 theorem EType.weaken1_weaken (E : EType n m k) :
@@ -105,10 +106,11 @@ theorem TypedCont.weaken
       exact ht1 }
     { apply WellScoped.weaken; aesop }
     { exact ih }
-  case scope ih =>
+  case scope hs ih =>
     simp [Cont.weaken]
     apply scope
     { constructor; aesop }
     { aesop }
+    { apply hs.weaken }
 
 end Capless
