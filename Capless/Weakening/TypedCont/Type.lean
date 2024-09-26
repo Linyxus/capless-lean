@@ -23,11 +23,11 @@ theorem Cont.HasLabel.tweaken
   (h : Cont.HasLabel cont x tail) :
   Cont.HasLabel cont.tweaken x tail.tweaken := by
   induction h
-  case here => sorry
-  case there_val => sorry
-  case there_tval => sorry
-  case there_cval => sorry
-  case there_label => sorry
+  case here => simp [Cont.tweaken]; apply here
+  case there_val ih => simp [Cont.tweaken]; apply there_val; trivial
+  case there_tval => simp [Cont.tweaken]; apply there_tval; aesop
+  case there_cval => simp [Cont.tweaken]; apply there_cval; aesop
+  case there_label => simp [Cont.tweaken]; apply there_label; aesop
 
 theorem WellScoped.tweaken
   (h : WellScoped Γ cont Ct) :
@@ -47,7 +47,12 @@ theorem WellScoped.tweaken
       simp [CType.tweaken, CType.trename] at hb1
       exact hb1 }
     { exact ih }
-  case label hs => sorry
+  case label hb hs =>
+    apply label
+    { have hb1 := Context.LBound.there_tvar (b := b) hb
+      simp [CType.tweaken, CType.trename] at hb1
+      exact hb1 }
+    { apply hs.tweaken }
 
 theorem TypedCont.tweaken
   (h : TypedCont Γ E t E' C0) :
@@ -64,9 +69,9 @@ theorem TypedCont.tweaken
     { have ht1 := ht.tweaken_ext (b := S)
       rw [EType.tweaken_weaken] at ht1
       exact ht1 }
-    { sorry }
+    { apply hs.tweaken }
     { exact ih }
-  case conse ht _ _ ih =>
+  case conse ht hs _ ih =>
     simp [Cont.tweaken]
     simp [EType.tweaken_ex]
     apply conse
@@ -74,8 +79,13 @@ theorem TypedCont.tweaken
       rw [EType.tweaken_weaken] at ht1
       rw [EType.tweaken_cweaken] at ht1
       exact ht1 }
-    { sorry }
+    { apply hs.tweaken }
     { exact ih }
-  case scope ih => sorry
+  case scope hb _ ih =>
+    simp [Cont.tweaken]
+    apply scope
+    have hb1 := Context.LBound.there_tvar (b := S) hb
+    exact hb1
+    apply ih
 
 end Capless
