@@ -11,6 +11,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | boxed : Fin n -> Term n m k
 | pack : CaptureSet n k -> Fin n -> Term n m k
 | app : Fin n -> Fin n -> Term n m k
+| invoke : Fin n -> Fin n -> Term n m k
 | tapp : Fin n -> Fin m -> Term n m k
 | capp : Fin n -> Fin k -> Term n m k
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
@@ -46,6 +47,7 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.boxed x => Term.boxed (f x)
   | Term.pack C x => Term.pack (C.rename f) (f x)
   | Term.app x y => Term.app (f x) (f y)
+  | Term.invoke x y => Term.invoke (f x) (f y)
   | Term.tapp x X => Term.tapp (f x) X
   | Term.capp x c => Term.capp (f x) c
   | Term.letin t u => Term.letin (t.rename f) (u.rename f.ext)
@@ -64,6 +66,7 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack c x
   | Term.app x y => Term.app x y
+  | Term.invoke x y => Term.invoke x y
   | Term.tapp x X => Term.tapp x (f X)
   | Term.capp x c => Term.capp x c
   | Term.letin t u => Term.letin (t.trename f) (u.trename f)
@@ -82,6 +85,7 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.boxed x => Term.boxed x
   | Term.pack C x => Term.pack (C.crename f) x
   | Term.app x y => Term.app x y
+  | Term.invoke x y => Term.invoke x y
   | Term.tapp x X => Term.tapp x X
   | Term.capp x c => Term.capp x (f c)
   | Term.letin t u => Term.letin (t.crename f) (u.crename f)
@@ -181,6 +185,8 @@ theorem Term.rename_id {t : Term n m k} :
     simp [Term.rename, CaptureSet.rename_id, FinFun.id]
   case app =>
     simp [Term.rename, FinFun.id]
+  case invoke =>
+    simp [Term.rename, FinFun.id]
   case tapp =>
     simp [Term.rename, FinFun.id]
   case capp =>
@@ -215,6 +221,8 @@ theorem Term.trename_id {t : Term n m k} :
   case pack =>
     simp [Term.trename]
   case app =>
+    simp [Term.trename]
+  case invoke =>
     simp [Term.trename]
   case tapp =>
     simp [Term.trename, FinFun.id]
@@ -253,6 +261,8 @@ theorem Term.crename_id {t : Term n m k} :
   case pack =>
     simp [Term.crename, CaptureSet.crename_id]
   case app =>
+    simp [Term.crename]
+  case invoke =>
     simp [Term.crename]
   case tapp =>
     simp [Term.crename]
