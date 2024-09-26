@@ -96,5 +96,11 @@ theorem TypedCont.cweaken
       exact ht1 }
     { apply hs.cweaken }
     { exact ih }
+  case scope hb _ ih =>
+    simp [Cont.cweaken]
+    apply scope
+    have hb1 := Context.LBound.there_cvar (b := b) hb
+    exact hb1
+    apply ih
 
 end Capless
