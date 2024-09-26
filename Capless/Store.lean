@@ -114,9 +114,9 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   TypedCont Γ (EType.ex T) (Cont.conse t cont) E' (C ∪ Ct)
 | scope :
   Context.LBound Γ x S ->
-  TypedCont Γ (S^C0) cont E' C ->
-  (Γ ⊢ C0 <:c {}) ->
-  TypedCont Γ (S^C0) (Cont.scope x cont) E' C
+  TypedCont Γ (S^{}) cont E' C ->
+  (Γ ⊢ T0 <: S^{}) ->
+  TypedCont Γ (EType.type T0) (Cont.scope x cont) E' C
 
 inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
 | mk :
