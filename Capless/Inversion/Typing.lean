@@ -28,6 +28,7 @@ theorem Typed.app_inv'
       repeat (any_goals apply And.intro)
       all_goals try assumption
       { apply! ESubtyp.trans }
+    case invoke => sorry
 
 theorem Typed.app_inv
   (h : Typed Γ (Term.app x y) E Ct) :

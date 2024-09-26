@@ -39,7 +39,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | invoke :
   Typed Γ (Term.var x) (EType.type (Label[S])^C) {x=x} ->
   Typed Γ (Term.var y) (S^{}) {x=y} ->
-  Typed Γ (Term.app x y) E ({x=x} ∪ {x=y})
+  Typed Γ (Term.invoke x y) E ({x=x} ∪ {x=y})
 | tapp :
   Typed Γ (Term.var x) (EType.type (∀[X<:SType.tvar X]E)^C) {x=x} ->
   Typed Γ (Term.tapp x X) (E.topen X) {x=x}

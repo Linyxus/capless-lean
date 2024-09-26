@@ -32,7 +32,7 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   σ.LBound x S ->
   cont.HasLabel x tail ->
   Reduce
-    ⟨σ, cont, Term.app x y⟩
+    ⟨σ, cont, Term.invoke x y⟩
     ⟨σ, tail, Term.var y⟩
 | push :
   Reduce
