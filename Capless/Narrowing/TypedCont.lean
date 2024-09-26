@@ -29,7 +29,9 @@ theorem TypedCont.narrow
   case scope =>
     cases hsub
     rename_i hsub
-    cases hsub
-    sorry
+    apply TypedCont.scope
+    { assumption }
+    { assumption }
+    { apply CSubtyp.trans <;> aesop }
 
 end Capless

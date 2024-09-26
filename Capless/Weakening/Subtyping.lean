@@ -43,6 +43,13 @@ theorem ESubtyp.tweaken
   apply? ESubtyp.trename
   apply TVarMap.weaken
 
+theorem CSubtyp.tweaken
+  (h : CSubtyp Γ E1 E2) :
+  CSubtyp (Γ.tvar b) E1.tweaken E2.tweaken := by
+  simp [CType.tweaken]
+  apply? CSubtyp.trename
+  apply TVarMap.weaken
+
 theorem ESubtyp.cweaken
   (h : ESubtyp Γ E1 E2) :
   ESubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
@@ -55,6 +62,13 @@ theorem SSubtyp.cweaken
   intro b
   simp [SType.cweaken]
   apply? SSubtyp.crename
+  apply CVarMap.weaken
+
+theorem CSubtyp.cweaken
+  (h : CSubtyp Γ E1 E2) :
+  CSubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
+  simp [CType.cweaken]
+  apply? CSubtyp.crename
   apply CVarMap.weaken
 
 end Capless
