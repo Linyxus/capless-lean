@@ -53,30 +53,49 @@ def Store.lookup_inv_bound
     have ih := ih.lweaken (S := S)
     aesop
 
-/-!
-Next steps:
-- Finish Store.bound_type
-- Finish Lookup.lookup_inv_typing
-- Continue the proof until arriving at the preservation theorem
-!-/
-
 theorem Store.bound_type
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ) :
   ∃ T0, Context.Bound Γ x T0 := by
   induction ht
   case empty => cases hl
-  case val => sorry
-  case tval => sorry
-  case cval => sorry
-  case label => sorry
+  case val ih =>
+    cases hl
+    case here => constructor; constructor
+    case there_val hb0 _ =>
+      have ⟨_, ih⟩ := ih hb0
+      apply Exists.intro
+      apply Context.Bound.there_var
+      exact ih
+  case tval ih =>
+    cases hl
+    case there_tval hb0 =>
+      have ⟨_, ih⟩ := ih hb0
+      apply Exists.intro
+      apply Context.Bound.there_tvar
+      exact ih
+  case cval ih =>
+    cases hl
+    case there_cval hb0 =>
+      have ⟨_, ih⟩ := ih hb0
+      apply Exists.intro
+      apply Context.Bound.there_cvar
+      exact ih
+  case label ih =>
+    cases hl
+    case there_label hb0 =>
+      have ⟨_, ih⟩ := ih hb0
+      apply Exists.intro
+      apply Context.Bound.there_label
+      exact ih
 
 theorem Store.lookup_inv_typing
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
   (hx : Typed Γ (Term.var x) (EType.type (CType.capt C S)) Cx) :
   ∃ Cv Cv0, Typed Γ v (EType.type (CType.capt Cv S)) Cv0 := by
-  have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx sorry
+  have ⟨_, hbx⟩ := Store.bound_type hl ht
+  have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx hbx
   have ⟨Cv0, hv⟩ := Store.lookup_inv_bound hl ht hb
   cases hsub
   rename_i hsc hss
