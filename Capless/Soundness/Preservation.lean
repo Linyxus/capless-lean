@@ -39,7 +39,7 @@ theorem preservation
       have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
       have ⟨Cv, Cv0, hv⟩ := Store.lookup_inv_typing hl hs hx
-      have ⟨hcfs, C0, hcft⟩ := Typed.canonical_form_lam hg hv
+      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv
       constructor
       constructor
       { easy }
@@ -50,7 +50,7 @@ theorem preservation
         { subst he1
           easy } }
       { have h1 := Typed.app_inv_capt ht
-        have h2 := WellScoped.subcapt
+        have h2 := WellScoped.subcapt hsc h1
        }
       { easy }
   case tapply hl =>
