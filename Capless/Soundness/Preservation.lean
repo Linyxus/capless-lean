@@ -11,6 +11,7 @@ import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
 import Capless.Weakening.TypedCont
 import Capless.Tactics
+import Capless.WellScoped.Basic
 namespace Capless
 
 inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
@@ -48,7 +49,9 @@ theorem preservation
         { apply Subcapt.refl }
         { subst he1
           easy } }
-      { sorry }
+      { have h1 := Typed.app_inv_capt ht
+        have h2 := WellScoped.subcapt
+       }
       { easy }
   case tapply hl =>
     cases ht

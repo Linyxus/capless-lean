@@ -92,8 +92,9 @@ theorem Store.bound_type
 theorem Store.lookup_inv_typing
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
+  (hb : Context.Bound Γ x (S^C0))
   (hx : Typed Γ (Term.var x) (EType.type (CType.capt C S)) Cx) :
-  ∃ Cv Cv0, Typed Γ v (EType.type (CType.capt Cv S)) Cv0 := by
+  ∃ Cv0, Typed Γ v (EType.type (CType.capt C0 S)) Cv0 := by
   have ⟨_, hbx⟩ := Store.bound_type hl ht
   have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx hbx
   have ⟨Cv0, hv⟩ := Store.lookup_inv_bound hl ht hb

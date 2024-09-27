@@ -369,4 +369,29 @@ theorem Context.label_bound_succ_inv
   ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
   apply Context.label_bound_succ_inv' rfl rfl hb
 
+theorem Context.cbound_injective
+  (hb1 : Context.CBound Γ c b1)
+  (hb2 : Context.CBound Γ c b2) : b1 = b2 := by
+  induction hb1
+  case here => cases hb2; rfl
+  case there_var ih =>
+    cases hb2
+    rename_i hb2
+    have ih := ih hb2
+    aesop
+  case there_tvar ih =>
+    cases hb2
+    rename_i hb2
+    have ih := ih hb2
+    aesop
+  case there_cvar ih =>
+    have ⟨b2, hb2, he2⟩ := Context.cvar_cbound_succ_inv hb2
+    have ih := ih hb2
+    aesop
+  case there_label ih =>
+    cases hb2
+    rename_i hb2
+    have ih := ih hb2
+    aesop
+
 end Capless

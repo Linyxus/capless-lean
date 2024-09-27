@@ -70,6 +70,6 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
     E.cweaken.weaken (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
   Typed Γ (boundary: S in t) E C
 
-notation:30 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
+notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
 
 end Capless
