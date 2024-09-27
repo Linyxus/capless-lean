@@ -5,6 +5,10 @@ def VarMap.weaken {Γ : Context n m k} :
   VarMap Γ FinFun.weaken (Γ.var T) := by
   constructor <;> (intros; constructor; trivial)
 
+def VarMap.lweaken {Γ : Context n m k} :
+  VarMap Γ FinFun.weaken (Γ.label S) := by
+  constructor <;> (intros; constructor; trivial)
+
 def VarMap.weaken_ext {Γ : Context n m k} :
   VarMap
     (Γ.var T)

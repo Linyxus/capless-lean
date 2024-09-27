@@ -11,6 +11,13 @@ theorem Typed.weaken
   apply Typed.rename h
   apply VarMap.weaken
 
+theorem Typed.lweaken
+  (h : Typed Γ t E Ct) :
+  Typed (Γ.label S) t.weaken E.weaken Ct.weaken := by
+  simp [Term.weaken, EType.weaken]
+  apply h.rename
+  apply VarMap.lweaken
+
 theorem Typed.weaken_ext {Γ : Context n m k}
   (h : Typed (Γ.var T) t E Ct) :
   Typed ((Γ.var P).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by

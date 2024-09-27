@@ -357,4 +357,16 @@ theorem Context.bound_lbound_absurd
       have ⟨_, _, _⟩ := Context.label_lbound_succ_inv hb2
       apply ih <;> assumption
 
+theorem Context.label_bound_succ_inv'
+  (he1 : Γ0 = Γ.label l) (he2 : x0 = x.succ)
+  (hb : Context.Bound Γ0 x0 T) :
+  ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
+  cases hb <;> try (solve | cases he1 | cases he2)
+  case there_label => aesop
+
+theorem Context.label_bound_succ_inv
+  (hb : Context.Bound (Γ.label l) x.succ T) :
+  ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
+  apply Context.label_bound_succ_inv' rfl rfl hb
+
 end Capless

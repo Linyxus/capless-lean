@@ -44,13 +44,39 @@ def Store.lookup_inv_bound
     have ih := ih.cweaken (b := CBinding.inst C)
     simp [EType.cweaken, EType.crename, CType.cweaken] at *
     constructor; exact ih
+  case label S _ ih =>
+    cases hl
+    have ⟨T1, hb1, heq⟩ := Context.label_bound_succ_inv hb
+    subst heq
+    rename_i hl
+    have ⟨Cv0, ih⟩ := ih hl hb1
+    have ih := ih.lweaken (S := S)
+    aesop
+
+/-!
+Next steps:
+- Finish Store.bound_type
+- Finish Lookup.lookup_inv_typing
+- Continue the proof until arriving at the preservation theorem
+!-/
+
+theorem Store.bound_type
+  (hl : Store.Bound σ x v)
+  (ht : TypedStore σ Γ) :
+  ∃ T0, Context.Bound Γ x T0 := by
+  induction ht
+  case empty => cases hl
+  case val => sorry
+  case tval => sorry
+  case cval => sorry
+  case label => sorry
 
 theorem Store.lookup_inv_typing
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
   (hx : Typed Γ (Term.var x) (EType.type (CType.capt C S)) Cx) :
   ∃ Cv Cv0, Typed Γ v (EType.type (CType.capt Cv S)) Cv0 := by
-  have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx
+  have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx sorry
   have ⟨Cv0, hv⟩ := Store.lookup_inv_bound hl ht hb
   cases hsub
   rename_i hsc hss
