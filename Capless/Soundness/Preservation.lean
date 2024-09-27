@@ -28,6 +28,19 @@ inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop wher
   TypedState state (Γ.cvar b) E.cweaken ->
   Preserve Γ E state
 
+theorem value_typing_widen
+  (hv : Typed Γ v (EType.type (S^C)) Cv)
+  (hs : Γ ⊢ (S^C1) <: (S'^C2)) :
+  Typed Γ v (S'^C) Cv := by
+    cases hs
+    apply Typed.sub
+    easy
+    apply Subcapt.refl
+    constructor
+    constructor
+    apply Subcapt.refl
+    easy
+
 theorem preservation
   (hr : Reduce state state')
   (ht : TypedState state Γ E) :
@@ -38,8 +51,9 @@ theorem preservation
     case mk hs hsc ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
-      have ⟨Cv, Cv0, hv⟩ := Store.lookup_inv_typing hl hs hx
-      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv
+      have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
+      have hv' := value_typing_widen hv hvs
+      have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv'
       constructor
       constructor
       { easy }
@@ -51,7 +65,14 @@ theorem preservation
           easy } }
       { have h1 := Typed.app_inv_capt ht
         have h2 := WellScoped.subcapt hsc h1
-       }
+        simp [CaptureSet.open]
+        simp [FinFun.open, CaptureSet.weaken, CaptureSet.rename_rename]
+        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
+        cases h2; rename_i h2 h3
+        apply WellScoped.union
+        { apply WellScoped.var_inv
+          exact h2; easy }
+        { easy } }
       { easy }
   case tapply hl =>
     cases ht

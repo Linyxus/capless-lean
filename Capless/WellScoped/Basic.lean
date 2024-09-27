@@ -35,4 +35,18 @@ theorem WellScoped.subcapt
     easy
   case cinstr => apply WellScoped.csingleton <;> aesop
 
+theorem WellScoped.var_inv
+  (hsc : WellScoped Γ cont {x=x})
+  (hbx : Γ.Bound x (S^C)) :
+  WellScoped Γ cont C := by
+  cases hsc
+  case singleton =>
+    rename_i hbx'
+    have h := Context.bound_injective hbx hbx'
+    cases h
+    trivial
+  case label =>
+    exfalso
+    apply Context.bound_lbound_absurd <;> easy
+
 end Capless

@@ -92,20 +92,16 @@ theorem Store.bound_type
 theorem Store.lookup_inv_typing
   (hl : Store.Bound σ x v)
   (ht : TypedStore σ Γ)
-  (hb : Context.Bound Γ x (S^C0))
-  (hx : Typed Γ (Term.var x) (EType.type (CType.capt C S)) Cx) :
-  ∃ Cv0, Typed Γ v (EType.type (CType.capt C0 S)) Cv0 := by
-  have ⟨_, hbx⟩ := Store.bound_type hl ht
+  (hx : Typed Γ (Term.var x) (EType.type (S^C)) Cx) :
+  ∃ S0 C0 Cv0,
+    Typed Γ v (EType.type (S0^C0)) Cv0 ∧
+    Γ.Bound x (S0^C0) ∧
+    (Γ ⊢ (S0^{x=x}) <: (S^C)) := by
+  have ⟨Tx, hbx⟩ := Store.bound_type hl ht
   have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx hbx
   have ⟨Cv0, hv⟩ := Store.lookup_inv_bound hl ht hb
-  cases hsub
-  rename_i hsc hss
-  constructor; constructor
-  apply Typed.sub
-  exact hv; apply Subcapt.refl
-  constructor
-  constructor
-  apply Subcapt.refl
-  trivial
+  repeat apply Exists.intro
+  repeat any_goals apply And.intro
+  all_goals easy
 
 end Capless

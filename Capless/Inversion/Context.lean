@@ -394,4 +394,24 @@ theorem Context.cbound_injective
     have ih := ih hb2
     aesop
 
+theorem Context.bound_injective
+  (hb1 : Context.Bound Γ x T1)
+  (hb2 : Context.Bound Γ x T2) : T1 = T2 := by
+  induction hb2
+  case here =>
+    cases hb1
+    rfl
+  case there_var ih =>
+    have ⟨T1, hb1, he1⟩ := Context.var_bound_succ_inv hb1
+    aesop
+  case there_tvar =>
+    cases hb1
+    aesop
+  case there_cvar =>
+    cases hb1
+    aesop
+  case there_label ih =>
+    have ⟨T1, hb1, he1⟩ := Context.label_bound_succ_inv hb1
+    aesop
+
 end Capless
