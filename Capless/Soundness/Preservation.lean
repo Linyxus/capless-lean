@@ -41,15 +41,15 @@ theorem preservation
       have ⟨hcfs, C0, hcft⟩ := Typed.canonical_form_lam hg hv
       constructor
       constructor
-      { assumption }
+      { easy }
       { apply Typed.sub
         { apply Typed.open (h := hcft)
           exact hy }
         { apply Subcapt.refl }
         { subst he1
-          assumption } }
+          easy } }
       { sorry }
-      { assumption }
+      { easy }
   case tapply hl =>
     cases ht
     case mk hs hsc ht hc =>
@@ -93,7 +93,7 @@ theorem preservation
       have hct := Typed.canonical_form_boxed hg hv
       constructor
       constructor
-      { trivial }
+      { easy }
       { apply Typed.sub
         exact hct
         apply Subcapt.refl
@@ -110,9 +110,9 @@ theorem preservation
       { exact htt }
       { sorry }
       { constructor
-        apply? Typed.sub
+        apply Typed.sub <;> try easy
         apply Subcapt.refl
-        apply! ESubtyp.weaken
+        apply ESubtyp.weaken; easy
         { sorry }
         easy }
   case push_ex =>
