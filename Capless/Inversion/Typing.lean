@@ -6,6 +6,7 @@ import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Subtyping
 import Capless.Narrowing.Typing
+import Capless.Inversion.Context
 namespace Capless
 
 theorem Typed.app_inv'
@@ -28,7 +29,6 @@ theorem Typed.app_inv'
       repeat (any_goals apply And.intro)
       all_goals try assumption
       { apply! ESubtyp.trans }
-    case invoke => sorry
 
 theorem Typed.app_inv
   (h : Typed Γ (Term.app x y) E Ct) :
@@ -54,7 +54,7 @@ theorem Typed.tapp_inv'
     apply And.intro
     { trivial }
     { apply ESubtyp.refl }
-  case sub ht hs ih =>
+  case sub hs ih =>
     have ih := ih he
     have ⟨Cf, F, E0, hx, he0, hs0⟩ := ih
     have h := ESubtyp.trans hs0 hs
@@ -71,8 +71,8 @@ theorem Typed.tapp_inv
 theorem Typed.var_inv'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type T)
-  (h : Typed Γ t0 E0 Ct0) :
-  ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x=x} S0) T := by
+  (h : Typed Γ t0 E0 Ct0) (hb : Γ.Bound x T0) :
+  ∃ C0 S0, Γ.Bound x (S0^C0) ∧ (Γ ⊢ (S0^{x=x}) <: T) := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var C0 S0 hb =>
     cases he1; cases he2
@@ -81,21 +81,25 @@ theorem Typed.var_inv'
     constructor
     { trivial }
     { apply CSubtyp.refl }
+  case label hbl =>
+    exfalso
+    cases he1
+    apply Context.bound_lbound_absurd hb hbl
   case sub hs ih =>
     have h := ESubtyp.sub_type_inv' he2 hs
     have ⟨T1, he, hs1⟩ := h
-    have ih := ih he1 he
+    have ih := ih he1 he hb
     have ⟨C0, S0, hb, hs0⟩ := ih
     apply Exists.intro C0
     apply Exists.intro S0
     constructor
-    { trivial }
-    { apply CSubtyp.trans <;> trivial }
+    { assumption }
+    { apply CSubtyp.trans <;> assumption }
 
 theorem Typed.var_inv
-  (h : Typed Γ (Term.var x) (EType.type T) Ct) :
+  (h : Typed Γ (Term.var x) (EType.type T) Ct) (hb : Γ.Bound x T0) :
   ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x=x} S0) T := by
-  apply Typed.var_inv' rfl rfl h
+  apply Typed.var_inv' rfl rfl h hb
 
 theorem Typed.canonical_form_lam'
   (ht : Γ.IsTight)

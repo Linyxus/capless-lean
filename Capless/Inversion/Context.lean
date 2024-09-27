@@ -309,4 +309,52 @@ theorem Context.tbound_inj
     have ih := ih h1 h2
     aesop
 
+theorem Context.var_lbound_succ_inv'
+  (he1 : Γ0 = Γ.var T) (he2 : x0 = x.succ)
+  (hb : Context.LBound Γ0 x0 S) :
+  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  cases hb <;> try (solve | cases he1 | cases he2)
+  case there_var => aesop
+
+theorem Context.var_lbound_succ_inv
+  (hb : Context.LBound (Γ.var T) x.succ S) :
+  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  apply Context.var_lbound_succ_inv' rfl rfl hb
+
+theorem Context.label_lbound_succ_inv'
+  (he1 : Γ0 = Γ.label l) (he2 : x0 = x.succ)
+  (hb : Context.LBound Γ0 x0 S) :
+  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  cases hb <;> try (solve | cases he1 | cases he2)
+  case there_label => aesop
+
+theorem Context.label_lbound_succ_inv
+  (hb : Context.LBound (Γ.label l) x.succ S) :
+  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  apply Context.label_lbound_succ_inv' rfl rfl hb
+
+theorem Context.bound_lbound_absurd
+  (hb1 : Context.Bound Γ x T)
+  (hb2 : Context.LBound Γ x S) : False := by
+  induction Γ
+  case empty => cases hb1
+  case var ih =>
+    cases hb1
+    case here =>
+      cases hb2
+    case there_var =>
+      have ⟨_, _, _⟩ := Context.var_lbound_succ_inv hb2
+      apply! ih
+  case tvar ih =>
+    cases hb1; cases hb2
+    apply ih <;> assumption
+  case cvar ih =>
+    cases hb1; cases hb2
+    apply ih <;> assumption
+  case label ih =>
+    cases hb1
+    case there_label =>
+      have ⟨_, _, _⟩ := Context.label_lbound_succ_inv hb2
+      apply ih <;> assumption
+
 end Capless
