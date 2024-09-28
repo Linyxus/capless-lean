@@ -608,4 +608,19 @@ theorem Typed.capp_inv_capt
   Γ ⊢ ({x=x}) <:c Ct :=
   Typed.capp_inv_capt' rfl ht
 
+theorem Typed.unbox_inv_capt'
+  (he : t0 = Term.unbox C x)
+  (ht : Typed Γ t0 E Ct) :
+  Γ ⊢ C <:c Ct := by
+  induction ht <;> try (solve | cases he)
+  case unbox => cases he; apply Subcapt.refl
+  case sub ih =>
+    have ih := ih he
+    apply! Subcapt.trans
+
+theorem Typed.unbox_inv_capt
+  (ht : Typed Γ (C o- x) E Ct) :
+  Γ ⊢ C <:c Ct :=
+  Typed.unbox_inv_capt' rfl ht
+
 end Capless

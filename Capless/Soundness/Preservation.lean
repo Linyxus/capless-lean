@@ -125,8 +125,9 @@ theorem preservation
     case mk hs hsc ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨S0, hx, he0⟩ := Typed.unbox_inv ht
-      have ⟨Cv, Cv0, hv⟩ := Store.lookup_inv_typing hl hs hx
-      have hct := Typed.canonical_form_boxed hg hv
+      have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
+      have hv' := value_typing_widen hv hvs
+      have hct := Typed.canonical_form_boxed hg hv'
       constructor
       constructor
       { easy }
@@ -134,7 +135,11 @@ theorem preservation
         exact hct
         apply Subcapt.refl
         apply he0 }
-      { sorry }
+      { have h1 := Typed.unbox_inv_capt ht
+        have h2 := WellScoped.subcapt hsc h1
+        have h3 := Typing.inv_subcapt hct
+        have h4 := WellScoped.subcapt h2 h3
+        easy }
       { easy }
   case push =>
     cases ht
