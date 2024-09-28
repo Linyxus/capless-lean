@@ -152,14 +152,13 @@ theorem Typed.canonical_form_tlam'
   (he2 : E0 = EType.type (CType.capt Cf S0))
   (h : Typed Γ t0 E0 Ct0) :
   SSubtyp Γ S' S ∧
-  ∃ C0, Typed (Γ.tvar (TBinding.bound S')) t E C0 := by
+  Typed (Γ.tvar (TBinding.bound S')) t E Cf := by
   induction h <;> try (solve | cases he1 | cases he2)
   case tabs =>
     cases he1; cases he2
     cases hd
     constructor
     apply SSubtyp.refl
-    constructor
     trivial
   case sub hs ih =>
     subst he2
@@ -170,19 +169,21 @@ theorem Typed.canonical_form_tlam'
     have ⟨S1, E1, hd3⟩ := SSubtyp.dealias_right_tforall hs ht hd
     have ih := ih ht hd3 he1 rfl
     have h := SSubtyp.sub_dealias_tforall_inv ht hd3 hd hs
-    have ⟨hs1, C0, ht1⟩ := ih
+    have ⟨hs1, ht1⟩ := ih
     have ⟨hs2, ht2⟩ := h
     apply And.intro
     { apply! SSubtyp.trans }
     { constructor
       apply? Typed.sub
-      apply ht1.tnarrow; assumption; apply Subcapt.refl }
+      apply ht1.tnarrow; assumption; apply Subcapt.refl
+      apply hsc.tweaken
+      apply ESubtyp.refl }
 
 theorem Typed.canonical_form_tlam
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.tlam S t) (EType.type ((∀[X<:S']E)^Cf)) Ct0) :
   SSubtyp Γ S' S ∧
-  ∃ C0, Typed (Γ.tvar (TBinding.bound S')) t E C0 := by
+  Typed (Γ.tvar (TBinding.bound S')) t E Cf := by
   apply Typed.canonical_form_tlam' <;> try trivial
   constructor
 
@@ -356,12 +357,12 @@ theorem Typed.canonical_form_clam'
   (he1 : t0 = Term.clam t)
   (he2 : E0 = EType.type (CType.capt Cf S0))
   (h : Typed Γ t0 E0 Ct0) :
-  ∃ C0, Typed (Γ.cvar CBinding.bound) t E C0 := by
+  Typed (Γ.cvar CBinding.bound) t E Cf.cweaken := by
   induction h <;> try (solve | cases he1 | cases he2)
   case cabs =>
     cases he1; cases he2
     cases hd
-    constructor; trivial
+    trivial
   case sub hs ih =>
     subst he2
     cases hs
@@ -369,18 +370,20 @@ theorem Typed.canonical_form_clam'
     cases hs
     rename_i hsc hs
     have ⟨E1, hd3⟩ := SSubtyp.dealias_right_cforall hs ht hd
-    have ⟨C0, ih⟩ := ih ht hd3 he1 rfl
+    have ih := ih ht hd3 he1 rfl
     have h := SSubtyp.sub_dealias_cforall_inv ht hd3 hd hs
     constructor
     apply Typed.sub
     apply ih
     apply Subcapt.refl
     trivial
+    apply hsc.cweaken
+    apply ESubtyp.refl
 
 theorem Typed.canonical_form_clam
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.clam t) (EType.type ((∀[c]E)^Cf)) Ct) :
-  ∃ C0, Typed (Γ.cvar CBinding.bound) t E C0 := by
+  Typed (Γ.cvar CBinding.bound) t E Cf.cweaken := by
   apply Typed.canonical_form_clam' <;> try trivial
   constructor
 
@@ -574,5 +577,35 @@ theorem Typed.app_inv_capt
   (ht : Typed Γ (Term.app x y) E Ct) :
   Γ ⊢ ({x=x}∪{x=y}) <:c Ct :=
   Typed.app_inv_capt' rfl ht
+
+theorem Typed.tapp_inv_capt'
+  (he : t0 = Term.tapp x X)
+  (ht : Typed Γ t0 E Ct) :
+  Γ ⊢ ({x=x}) <:c Ct := by
+  induction ht <;> try (solve | cases he)
+  case tapp => cases he; apply Subcapt.refl
+  case sub ih =>
+    have ih := ih he
+    apply! Subcapt.trans
+
+theorem Typed.tapp_inv_capt
+  (ht : Typed Γ (Term.tapp x X) E Ct) :
+  Γ ⊢ ({x=x}) <:c Ct :=
+  Typed.tapp_inv_capt' rfl ht
+
+theorem Typed.capp_inv_capt'
+  (he : t0 = Term.capp x c)
+  (ht : Typed Γ t0 E Ct) :
+  Γ ⊢ ({x=x}) <:c Ct := by
+  induction ht <;> try (solve | cases he)
+  case capp => cases he; apply Subcapt.refl
+  case sub ih =>
+    have ih := ih he
+    apply! Subcapt.trans
+
+theorem Typed.capp_inv_capt
+  (ht : Typed Γ (Term.capp x c) E Ct) :
+  Γ ⊢ ({x=x}) <:c Ct :=
+  Typed.capp_inv_capt' rfl ht
 
 end Capless

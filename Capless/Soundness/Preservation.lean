@@ -79,8 +79,9 @@ theorem preservation
     case mk hs hsc ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨Cf, F, E0, hx, he0, hs0⟩ := Typed.tapp_inv ht
-      have ⟨Cv, Cv0, hv⟩ := Store.lookup_inv_typing hl hs hx
-      have ⟨hs1, C0, hft⟩ := Typed.canonical_form_tlam hg hv
+      have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
+      have hv' := value_typing_widen hv hvs
+      have ⟨hs1, hft⟩ := Typed.canonical_form_tlam hg hv'
       constructor
       constructor
       { easy }
@@ -89,15 +90,20 @@ theorem preservation
         { apply Subcapt.refl }
         { subst he0
           easy } }
-      { sorry }
+      { have h1 := Typed.tapp_inv_capt ht
+        have h2 := WellScoped.subcapt hsc h1
+        apply WellScoped.var_inv
+        exact h2
+        easy }
       easy
   case capply hl =>
     cases ht
     case mk hs hsc ht hc =>
       have hg := TypedStore.is_tight hs
       have ⟨Cf, F, E0, hx, he1, hs1⟩ := Typed.capp_inv ht
-      have ⟨Cv, Cv0, hv⟩ := Store.lookup_inv_typing hl hs hx
-      have ⟨C0, hct⟩ := Typed.canonical_form_clam hg hv
+      have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
+      have hv' := value_typing_widen hv hvs
+      have hct := Typed.canonical_form_clam hg hv'
       constructor
       constructor
       { easy }
@@ -106,7 +112,13 @@ theorem preservation
         { apply Subcapt.refl }
         { subst he1
           exact hs1 } }
-      { sorry }
+      { have h1 := Typed.capp_inv_capt ht
+        have h2 := WellScoped.subcapt hsc h1
+        simp [CaptureSet.cweaken, CaptureSet.copen, CaptureSet.crename_crename]
+        simp [FinFun.open_comp_weaken, CaptureSet.crename_id]
+        apply WellScoped.var_inv
+        exact h2
+        easy }
       easy
   case unbox hl =>
     cases ht
