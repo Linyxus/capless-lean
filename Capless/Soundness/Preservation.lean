@@ -159,17 +159,17 @@ theorem preservation
   case push_ex =>
     cases ht
     case mk hs hsc ht hc =>
-      have ⟨T, E0, C0, htt, htu, hsub⟩ := Typed.letex_inv ht
+      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
       constructor
       constructor
       { exact hs }
       { exact htt }
-      { sorry }
+      { apply WellScoped.conse; easy }
       { constructor
         apply Typed.sub; exact htu; apply Subcapt.refl
         apply ESubtyp.weaken
         apply ESubtyp.cweaken; exact hsub
-        { sorry }
+        { easy }
         exact hc }
   case rename =>
     cases ht
@@ -182,7 +182,11 @@ theorem preservation
         simp [FinFun.open_comp_weaken] at hu1
         simp [EType.rename_id] at hu1
         constructor
-        apply TypedState.mk hs hu1 sorry hc0
+        constructor <;> try easy
+        simp [CaptureSet.weaken, CaptureSet.open]
+        simp [CaptureSet.rename_rename]
+        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
+        easy
   case lift_ex =>
     cases ht
     case mk hs hsc ht hc =>
@@ -200,7 +204,10 @@ theorem preservation
         constructor
         { constructor; exact hs }
         { exact hu2 }
-        { sorry }
+        { simp [CaptureSet.weaken, CaptureSet.open]
+          simp [CaptureSet.rename_rename, FinFun.open_comp_weaken]
+          simp [CaptureSet.rename_id]
+          apply hsc.cweaken }
         { apply TypedCont.cweaken; exact hc0 }
   case lift hv =>
     cases ht
@@ -211,31 +218,31 @@ theorem preservation
         constructor
         { constructor; exact hs; exact ht }
         { exact hu }
-        { sorry }
+        { apply hsc0.weaken }
         { apply TypedCont.weaken; exact hc0 }
   case tlift =>
     cases ht
     case mk hs hsc ht hc =>
       apply Preserve.mk_tweaken
-      have ⟨E0, C0, ht, hsub⟩ := Typed.bindt_inv ht
+      have ⟨E0, ht, hsub⟩ := Typed.bindt_inv ht
       constructor
       { constructor; exact hs }
       { apply Typed.sub
         exact ht; apply Subcapt.refl
         apply ESubtyp.tweaken; exact hsub }
-      { sorry }
+      { apply hsc.tweaken }
       { apply TypedCont.tweaken; exact hc }
   case clift =>
     cases ht
     case mk hs hsc ht hc =>
       apply Preserve.mk_cweaken
-      have ⟨E0, C0, ht, hsub⟩ := Typed.bindc_inv ht
+      have ⟨E0, ht, hsub⟩ := Typed.bindc_inv ht
       constructor
       { constructor; exact hs }
       { apply Typed.sub
         exact ht; apply Subcapt.refl
         apply ESubtyp.cweaken; exact hsub }
-      { sorry }
+      { apply hsc.cweaken }
       { apply TypedCont.cweaken; exact hc }
   case enter => sorry
   case leave_var => sorry

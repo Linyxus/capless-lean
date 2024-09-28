@@ -284,9 +284,9 @@ theorem Typed.letin_inv {Γ : Context n m k}
 theorem Typed.letex_inv' {Γ : Context n m k}
   (he : t0 = Term.letex t u)
   (h : Typed Γ t0 E Ct0) :
-  ∃ T E0 C0,
-    Typed Γ t (EType.ex T) C0 ∧
-    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken C0.cweaken.weaken ∧
+  ∃ T E0,
+    Typed Γ t (EType.ex T) Ct0 ∧
+    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken Ct0.cweaken.weaken ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case letex =>
@@ -297,49 +297,63 @@ theorem Typed.letex_inv' {Γ : Context n m k}
     apply ESubtyp.refl
   case sub hs ih =>
     have ih := ih he
-    obtain ⟨T, E0, C0, ht, hu, hs0⟩ := ih
+    obtain ⟨T, E0, ht, hu, hs0⟩ := ih
     have hs1 := ESubtyp.trans hs0 hs
-    aesop
+    repeat apply Exists.intro
+    repeat any_goals apply And.intro
+    { apply Typed.sub
+      easy
+      easy
+      apply ESubtyp.refl }
+    { apply Typed.sub
+      easy
+      apply Subcapt.weaken; apply Subcapt.cweaken; easy
+      apply ESubtyp.refl }
+    { easy }
 
 theorem Typed.letex_inv {Γ : Context n m k}
   (h : Typed Γ (Term.letex t u) E Ct) :
-  ∃ T E0 C0,
-    Typed Γ t (EType.ex T) C0 ∧
-    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken C0.cweaken.weaken ∧
+  ∃ T E0,
+    Typed Γ t (EType.ex T) Ct ∧
+    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken Ct.cweaken.weaken ∧
     ESubtyp Γ E0 E :=
   Typed.letex_inv' rfl h
 
 theorem Typed.bindt_inv' {Γ : Context n m k}
   (he : t0 = Term.bindt T t)
   (h : Typed Γ t0 E Ct0) :
-  ∃ E0 C0,
-    Typed (Γ.tvar (TBinding.inst T)) t E0.tweaken C0 ∧
+  ∃ E0,
+    Typed (Γ.tvar (TBinding.inst T)) t E0.tweaken Ct0 ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case bindt =>
     cases he
-    apply Exists.intro; apply Exists.intro
+    repeat apply Exists.intro
     constructor; trivial
     apply ESubtyp.refl
   case sub hs ih =>
     have ih := ih he
-    obtain ⟨E0, C0, ht, hs0⟩ := ih
-    apply Exists.intro E0; apply Exists.intro
-    constructor; trivial
-    apply? ESubtyp.trans
+    obtain ⟨E0, ht, hs0⟩ := ih
+    apply Exists.intro E0
+    repeat any_goals apply And.intro
+    { apply Typed.sub
+      easy
+      apply Subcapt.tweaken; easy
+      apply ESubtyp.refl }
+    { apply ESubtyp.trans <;> easy }
 
 theorem Typed.bindt_inv {Γ : Context n m k}
   (h : Typed Γ (let X=T in t) E Ct) :
-  ∃ E0 C0,
-    Typed (Γ,X:=T) t E0.tweaken C0 ∧
+  ∃ E0,
+    Typed (Γ,X:=T) t E0.tweaken Ct ∧
     (Γ ⊢ E0 <:e E) :=
   Typed.bindt_inv' rfl h
 
 theorem Typed.bindc_inv' {Γ : Context n m k}
   (he : t0 = Term.bindc C t)
   (h : Typed Γ t0 E Ct) :
-  ∃ E0 C0,
-    Typed (Γ.cvar (CBinding.inst C)) t E0.cweaken (CaptureSet.cweaken C0) ∧
+  ∃ E0,
+    Typed (Γ.cvar (CBinding.inst C)) t E0.cweaken Ct.cweaken ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case bindc =>
@@ -349,15 +363,19 @@ theorem Typed.bindc_inv' {Γ : Context n m k}
     apply ESubtyp.refl
   case sub hs ih =>
     have ih := ih he
-    obtain ⟨E0, C0, ht, hs0⟩ := ih
+    obtain ⟨E0, ht, hs0⟩ := ih
     repeat apply Exists.intro
-    constructor; trivial
-    apply? ESubtyp.trans
+    repeat any_goals apply And.intro
+    { apply Typed.sub
+      easy
+      apply Subcapt.cweaken; easy
+      apply ESubtyp.refl }
+    { apply ESubtyp.trans <;> easy }
 
 theorem Typed.bindc_inv {Γ : Context n m k}
   (h : Typed Γ (let c=C in t) E Ct) :
-  ∃ E0 C0,
-    Typed (Γ,c:=C) t E0.cweaken (CaptureSet.cweaken C0) ∧
+  ∃ E0,
+    Typed (Γ,c:=C) t E0.cweaken Ct.cweaken ∧
     (Γ ⊢ E0 <:e E) :=
   Typed.bindc_inv' rfl h
 
