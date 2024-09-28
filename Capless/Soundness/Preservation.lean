@@ -144,17 +144,17 @@ theorem preservation
   case push =>
     cases ht
     case mk hs hsc ht hc =>
-      have ⟨T, E0, C0, htt, htu, hsub⟩ := Typed.letin_inv ht
+      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letin_inv ht
       constructor
       constructor
       { easy }
       { exact htt }
-      { sorry }
+      { apply WellScoped.cons; easy }
       { constructor
         apply Typed.sub <;> try easy
         apply Subcapt.refl
         apply ESubtyp.weaken; easy
-        { sorry }
+        { easy }
         easy }
   case push_ex =>
     cases ht

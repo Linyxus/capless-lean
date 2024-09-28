@@ -18,6 +18,32 @@ theorem WellScoped.subset
     cases hsc
     aesop
 
+theorem WellScoped.cons
+  (hsc : WellScoped Γ cont C) :
+  WellScoped Γ (Cont.cons u cont) C := by
+  induction hsc
+  case empty => apply empty
+  case union ih1 ih2 => apply union <;> aesop
+  case singleton ih => apply singleton <;> aesop
+  case csingleton ih => apply csingleton <;> aesop
+  case label =>
+    apply label
+    easy
+    constructor; easy
+
+theorem WellScoped.conse
+  (hsc : WellScoped Γ cont C) :
+  WellScoped Γ (Cont.conse u cont) C := by
+  induction hsc
+  case empty => apply empty
+  case union ih1 ih2 => apply union <;> aesop
+  case singleton ih => apply singleton <;> aesop
+  case csingleton ih => apply csingleton <;> aesop
+  case label =>
+    apply label
+    easy
+    constructor; easy
+
 theorem WellScoped.subcapt
   (hsc : WellScoped Γ cont C)
   (hs : Γ ⊢ C' <:c C) :

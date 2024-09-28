@@ -246,9 +246,9 @@ theorem Typed.unbox_inv
 theorem Typed.letin_inv' {Γ : Context n m k}
   (he : t0 = Term.letin t u)
   (h : Typed Γ t0 E Ct0) :
-  ∃ T E0 C0,
-    Typed Γ t (EType.type T) C0 ∧
-    Typed (Γ.var T) u E0.weaken C0.weaken ∧
+  ∃ T E0,
+    Typed Γ t (EType.type T) Ct0 ∧
+    Typed (Γ.var T) u E0.weaken Ct0.weaken ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case letin =>
@@ -259,15 +259,25 @@ theorem Typed.letin_inv' {Γ : Context n m k}
     apply ESubtyp.refl
   case sub hs ih =>
     have ih := ih he
-    obtain ⟨T, E0, C0, ht, hu, hs0⟩ := ih
+    obtain ⟨T, E0, ht, hu, hs0⟩ := ih
     have hs1 := ESubtyp.trans hs0 hs
-    aesop
+    repeat apply Exists.intro
+    repeat any_goals apply And.intro
+    { apply Typed.sub
+      easy
+      easy
+      apply ESubtyp.refl }
+    { apply Typed.sub
+      easy
+      apply Subcapt.weaken; easy
+      apply ESubtyp.refl }
+    { easy }
 
 theorem Typed.letin_inv {Γ : Context n m k}
   (h : Typed Γ (Term.letin t u) E Ct) :
-  ∃ T E0 C0,
-    Typed Γ t (EType.type T) C0 ∧
-    Typed (Γ.var T) u E0.weaken C0.weaken ∧
+  ∃ T E0,
+    Typed Γ t (EType.type T) Ct ∧
+    Typed (Γ.var T) u E0.weaken Ct.weaken ∧
     ESubtyp Γ E0 E :=
   Typed.letin_inv' rfl h
 
