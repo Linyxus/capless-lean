@@ -649,4 +649,17 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     constructor
     trivial
 
+structure OmniSubst
+  (Γ : Context n m k)
+  (f : OmniMap n m k n' m' k')
+  (Δ : Context n' m' k') where
+  map : ∀ x E, Γ.Bound x E -> Typed Δ (Term.var (f.map x)) (EType.type (E.orename f)) {x=f.map x}
+  tmap : ∀ X S, Γ.TBound X (TBinding.bound S) ->
+    SSubtyp Δ (SType.tvar (f.tmap X)) (S.orename f)
+  tmap_inst : ∀ X S, Γ.TBound X (TBinding.inst S) ->
+    Δ.TBound (f.tmap X) (TBinding.inst (S.orename f))
+  cmap : ∀ c C,
+    Γ.CBound c (CBinding.inst C) ->
+    Δ.CBound (f.cmap c) (CBinding.inst (C.orename f))
+
 end Capless
