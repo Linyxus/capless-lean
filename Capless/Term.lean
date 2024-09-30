@@ -86,6 +86,23 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
   | Term.unbox c x => Term.unbox (c.crename f) x
 
+def Term.orename (t : Term n m k) (f : OmniMap n m k n' m' k') : Term n' m' k' :=
+  match t with
+  | Term.var x => Term.var (f.map x)
+  | Term.lam E t => Term.lam (E.orename f) (t.orename f.ext)
+  | Term.tlam S t => Term.tlam (S.orename f) (t.orename f.text)
+  | Term.clam t => Term.clam (t.orename f.cext)
+  | Term.boxed x => Term.boxed (f.map x)
+  | Term.pack C x => Term.pack (C.orename f) (f.map x)
+  | Term.app x y => Term.app (f.map x) (f.map y)
+  | Term.tapp x X => Term.tapp (f.map x) (f.tmap X)
+  | Term.capp x c => Term.capp (f.map x) (f.cmap c)
+  | Term.letin t u => Term.letin (t.orename f) (u.orename f.ext)
+  | Term.letex t u => Term.letex (t.orename f) (u.orename f.ext.cext)
+  | Term.bindt S t => Term.bindt (S.orename f) (t.orename f.text)
+  | Term.bindc c t => Term.bindc (c.orename f) (t.orename f.cext)
+  | Term.unbox c x => Term.unbox (c.orename f) (f.map x)
+
 theorem IsValue.rename_l' {t : Term n m k} {t0 : Term n' m k}
   (he : t0 = t.rename f)
   (hv : t0.IsValue) :
