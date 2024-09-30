@@ -755,4 +755,11 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     simp [SType.crename_id]
     constructor; trivial
 
+-- structure OmniMap (n m k n' m' k' : Nat) where
+--   map : FinFun n n'
+--   tmap : FinFun m m'
+--   cmap : FinFun k k'
+
+-- structure OmniSubst (Γ : Context n m k) (f : OmniMap n m k n' m' k') (Δ : Context n' m' k') where
+
 end Capless

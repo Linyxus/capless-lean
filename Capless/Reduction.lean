@@ -27,7 +27,7 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   (hv : Term.IsValue v) ->
   Reduce
     ⟨σ, cont.scope x, v⟩
-    ⟨σ, cont, Term.var x⟩
+    ⟨σ, cont, v⟩
 | invoke {σ : Store n m k} {cont : Cont n m k} :
   σ.LBound x S ->
   cont.HasLabel x tail ->

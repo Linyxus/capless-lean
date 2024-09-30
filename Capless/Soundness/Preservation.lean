@@ -27,6 +27,9 @@ inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop wher
 | mk_cweaken :
   TypedState state (Γ.cvar b) E.cweaken ->
   Preserve Γ E state
+| mk_label :
+  TypedState state ((Γ.label S).cvar b) E.weaken.cweaken ->
+  Preserve Γ E state
 
 theorem value_typing_widen
   (hv : Typed Γ v (EType.type (S^C)) Cv)
@@ -244,9 +247,19 @@ theorem preservation
         apply ESubtyp.cweaken; exact hsub }
       { apply hsc.cweaken }
       { apply TypedCont.cweaken; exact hc }
-  case enter => sorry
-  case leave_var => sorry
-  case leave_val => sorry
-  case invoke => sorry
+  case enter =>
+    cases ht
+    case mk hs hsc ht hc => sorry
+  case leave_var =>
+    cases ht
+    case mk hs hsc ht hc => sorry
+  case leave_val =>
+    cases ht
+    case mk hs hsc ht hc =>
+      cases hc
+      case scope hv hbl hc => sorry
+  case invoke =>
+    cases ht
+    case mk hs hsc ht hc => sorry
 
 end Capless
