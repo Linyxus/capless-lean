@@ -60,6 +60,25 @@ def SType.crename : SType n m k -> FinFun k k' -> SType n m k'
 
 end
 
+mutual
+
+def EType.orename : EType n m k -> OmniMap n m k n' m' k' -> EType n' m' k'
+| EType.ex T, f => EType.ex (T.orename f.cext)
+| EType.type T, f => EType.type (T.orename f)
+
+def CType.orename : CType n m k -> OmniMap n m k n' m' k' -> CType n' m' k'
+| CType.capt C S, f => CType.capt (C.orename f) (S.orename f)
+
+def SType.orename : SType n m k -> OmniMap n m k n' m' k' -> SType n' m' k'
+| SType.top, _ => SType.top
+| SType.tvar X, f => SType.tvar (f.tmap X)
+| SType.forall E1 E2, f => SType.forall (E1.orename f) (E2.orename f.ext)
+| SType.tforall S E, f => SType.tforall (S.orename f) (E.orename f.text)
+| SType.cforall E, f => SType.cforall (E.orename f.cext)
+| SType.box T, f => SType.box (T.orename f)
+
+end
+
 def EType.weaken (E : EType n m k) : EType (n+1) m k :=
   E.rename FinFun.weaken
 

@@ -74,4 +74,18 @@ theorem FinFun.comp_succ {f : FinFun n n'}: Fin.succ ∘ f = (FinFun.ext f) ∘ 
   case succ n =>
     simp [FinFun.ext]
 
+structure OmniMap (n m k n' m' k' : Nat) where
+  map : FinFun n n'
+  tmap : FinFun m m'
+  cmap : FinFun k k'
+
+def OmniMap.ext (f : OmniMap n m k n' m' k') : OmniMap (n+1) m k (n'+1) m' k' :=
+  { map := f.map.ext, tmap := f.tmap, cmap := f.cmap }
+
+def OmniMap.text (f : OmniMap n m k n' m' k') : OmniMap n (m+1) k n' (m'+1) k' :=
+  { map := f.map, tmap := f.tmap.ext, cmap := f.cmap }
+
+def OmniMap.cext (f : OmniMap n m k n' m' k') : OmniMap n m (k+1) n' m' (k'+1) :=
+  { map := f.map, tmap := f.tmap, cmap := f.cmap.ext }
+
 end Capless

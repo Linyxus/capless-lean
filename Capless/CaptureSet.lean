@@ -62,6 +62,14 @@ def CaptureSet.crename (C : CaptureSet n k) (f : FinFun k k') : CaptureSet n k' 
   | singleton x => {x=x}
   | csingleton c => {c=f c}
 
+@[simp]
+def CaptureSet.orename (C : CaptureSet n k) (f : OmniMap n m k n' m' k') : CaptureSet n' k' :=
+  match C with
+  | empty => empty
+  | union C1 C2 => (C1.orename f) ∪ (C2.orename f)
+  | singleton x => {x=f.map x}
+  | csingleton c => {c=f.cmap c}
+
 def CaptureSet.weaken (C : CaptureSet n k) : CaptureSet (n+1) k :=
   C.rename FinFun.weaken
 
