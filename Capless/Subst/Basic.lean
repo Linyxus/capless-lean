@@ -662,4 +662,18 @@ structure OmniSubst
     Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f.cmap c) (CBinding.inst (C.orename f))
 
+def OmniSubst.ext {Γ : Context n m k}
+  (σ : OmniSubst Γ f Δ)
+  (T : CType n m k) :
+  OmniSubst (Γ.var T) f.ext (Δ.var (T.orename f)) := by
+  constructor
+  case map =>
+    intro x E hb
+    cases hb
+    case here => sorry
+    case there_var => sorry
+  case tmap => sorry
+  case tmap_inst => sorry
+  case cmap => sorry
+
 end Capless
