@@ -28,6 +28,7 @@ notation:50 "∀[c]" T => SType.cforall T
 notation:max S " ^ " C => CType.capt C S
 notation:40 "∃c." T => EType.ex T
 notation:40 "Label[" S "]" => SType.label S
+notation:60 "□" T => SType.box T
 
 instance : Coe (CType n m k) (EType n m k) where
   coe T := EType.type T
