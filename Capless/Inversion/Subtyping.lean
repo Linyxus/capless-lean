@@ -120,6 +120,11 @@ theorem SSubtyp.dealias_right_forall
     repeat intro
     rename_i hd
     cases hd
+  case label =>
+    unfold dealias_right_forall.smotive
+    repeat intro
+    rename_i hd
+    cases hd
 
 
 def SSubtyp.dealias_right_tforall.emotive
@@ -199,6 +204,11 @@ theorem SSubtyp.dealias_right_tforall
     { trivial }
   case boxed =>
     unfold dealias_right_tforall.cmotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case label =>
+    unfold dealias_right_tforall.smotive
     repeat intro
     rename_i hd
     cases hd
@@ -385,6 +395,11 @@ theorem SSubtyp.sub_dealias_forall_inv
     repeat intro
     rename_i hd
     cases hd
+  case label =>
+    unfold dealias_forall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
   case tforall =>
     unfold dealias_forall_inv.smotive
     repeat intro
@@ -502,6 +517,11 @@ theorem SSubtyp.sub_dealias_tforall_inv
     repeat intro
     rename_i hd
     cases hd
+  case label =>
+    unfold dealias_tforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
   case xforall =>
     unfold dealias_tforall_inv.emotive dealias_tforall_inv.cmotive dealias_tforall_inv.smotive
     repeat intro
@@ -612,6 +632,11 @@ theorem SSubtyp.dealias_right_cforall
     rename_i hd
     repeat (apply Exists.intro)
     apply SType.Dealias.refl
+  case label =>
+    unfold dealias_right_cforall.smotive
+    repeat intro
+    rename_i hd
+    cases hd
 
 theorem SType.dealias_cforall_inj'
   (he1 : S1 = SType.cforall E1) (he2 : S2 = SType.cforall E2)
@@ -754,6 +779,11 @@ theorem SSubtyp.sub_dealias_cforall_inv
     cases hd1; cases hd2
     rename_i ih _ _
     trivial
+  case label =>
+    unfold dealias_cforall_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
 
 def SSubtyp.dealias_right_boxed.emotive
   (Γ : Context n m k)
@@ -854,6 +884,11 @@ theorem SSubtyp.dealias_right_boxed
     cases hd
   case cforall =>
     unfold dealias_right_boxed.smotive dealias_right_boxed.emotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case label =>
+    unfold dealias_right_boxed.smotive
     repeat intro
     rename_i hd
     cases hd
@@ -995,6 +1030,11 @@ theorem SSubtyp.sub_dealias_boxed_inv
     rename_i hd
     cases hd
   case cforall =>
+    unfold dealias_boxed_inv.smotive
+    repeat intro
+    rename_i hd
+    cases hd
+  case label =>
     unfold dealias_boxed_inv.smotive
     repeat intro
     rename_i hd
