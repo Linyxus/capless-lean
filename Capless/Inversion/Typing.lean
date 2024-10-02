@@ -706,4 +706,23 @@ theorem Typed.val_precise_cv
   Typed Γ t (EType.type T) {} :=
   Typed.val_precise_cv' rfl ht hv
 
+theorem Typed.invoke_inv' {Γ : Context n m k}
+  (he : t0 = Term.invoke x y)
+  (ht : Typed Γ t0 E Ct) :
+  ∃ S0 C0,
+    Typed Γ (Term.var x) (Label[S0]^C0) {x=x} ∧
+    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y} := by
+  induction ht <;> try (solve | cases he)
+  case invoke =>
+    cases he
+    aesop
+  case sub => aesop
+
+theorem Typed.invoke_inv {Γ : Context n m k}
+  (ht : Typed Γ (Term.invoke x y) E Ct) :
+  ∃ S0 C0,
+    Typed Γ (Term.var x) (Label[S0]^C0) {x=x} ∧
+    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y} :=
+  Typed.invoke_inv' rfl ht
+
 end Capless

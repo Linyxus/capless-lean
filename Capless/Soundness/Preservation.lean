@@ -288,6 +288,12 @@ theorem preservation
         { easy }
   case invoke =>
     cases ht
-    case mk hs hsc ht hc => sorry
+    case mk hs hsc ht hc =>
+      have ⟨S0, C0, hx, hy⟩ := Typed.invoke_inv ht
+      apply Preserve.mk
+      constructor
+      { easy }
+      { sorry }
+      { sorry }
 
 end Capless
