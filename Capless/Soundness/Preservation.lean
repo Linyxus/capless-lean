@@ -252,7 +252,18 @@ theorem preservation
     case mk hs hsc ht hc => sorry
   case leave_var =>
     cases ht
-    case mk hs hsc ht hc => sorry
+    case mk hs hsc ht hc =>
+      apply Preserve.mk
+      cases hc
+      rename_i hsub hbl hc0
+      constructor
+      { easy }
+      { apply Typed.sub
+        { exact ht }
+        { apply Subcapt.refl }
+        { constructor; easy } }
+      { sorry }
+      { easy }
   case leave_val =>
     cases ht
     case mk hs hsc ht hc =>
