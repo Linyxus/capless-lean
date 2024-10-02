@@ -651,4 +651,59 @@ theorem Typed.unbox_inv_capt
   Γ ⊢ C <:c Ct :=
   Typed.unbox_inv_capt' rfl ht
 
+theorem Typed.var_inv_cs'
+  (he1 : t0 = Term.var x)
+  (he2 : E0 = EType.type (S^C))
+  (hx : Typed Γ t0 E0 Cx) :
+  Γ ⊢ ({x=x}) <:c C := by
+  induction hx <;> try (solve | cases he1 | cases he2)
+  case var => cases he1; cases he2; apply Subcapt.refl
+  case label => cases he1; cases he2; apply Subcapt.refl
+  case sub ih =>
+    subst_vars
+    rename_i hsub
+    cases hsub
+    rename_i hsub
+    cases hsub
+    have ih := ih rfl rfl
+    apply Subcapt.trans <;> easy
+
+theorem Typed.var_inv_cs
+  (hx : Typed Γ (Term.var x) (EType.type (S^C)) Cx) :
+  Γ ⊢ ({x=x}) <:c C :=
+  Typed.var_inv_cs' rfl rfl hx
+
+theorem Typed.val_precise_cv'
+  (he : E0 = EType.type T)
+  (ht : Typed Γ t E0 Ct)
+  (hv : t.IsValue) :
+  Typed Γ t E0 {} := by
+  induction ht <;> try (solve | cases he | cases hv)
+  case abs =>
+    cases he
+    apply Typed.abs; easy
+  case tabs =>
+    cases he
+    apply Typed.tabs; easy
+  case cabs =>
+    cases he
+    apply Typed.cabs; easy
+  case box =>
+    cases he
+    apply Typed.box; easy
+  case sub hsub ih =>
+    subst_vars
+    cases hsub
+    have ih := ih rfl hv
+    apply Typed.sub
+    { easy }
+    { apply Subcapt.refl }
+    { constructor; easy }
+
+theorem Typed.val_precise_cv
+  (ht : Typed Γ t (EType.type T) Ct)
+  (hv : t.IsValue) :
+  Typed Γ t (EType.type T) {} :=
+  Typed.val_precise_cv' rfl ht hv
+
 end Capless

@@ -253,22 +253,39 @@ theorem preservation
   case leave_var =>
     cases ht
     case mk hs hsc ht hc =>
+      have ht1 := Typed.precise_cv ht
       apply Preserve.mk
       cases hc
       rename_i hsub hbl hc0
       constructor
       { easy }
       { apply Typed.sub
-        { exact ht }
+        { exact ht1 }
         { apply Subcapt.refl }
         { constructor; easy } }
-      { sorry }
+      { have ht1 := Typed.sub ht Subcapt.refl (ESubtyp.type hsub)
+        have hy := Typed.var_inv_cs ht1
+        apply WellScoped.subcapt
+        apply WellScoped.empty
+        easy }
       { easy }
   case leave_val =>
     cases ht
     case mk hs hsc ht hc =>
+      rename_i hv _ _ _
       cases hc
-      case scope hv hbl hc => sorry
+      case scope hsub hbl hc0 =>
+        have ht1 := Typed.sub ht Subcapt.refl (ESubtyp.type hsub)
+        have ht2 := Typed.val_precise_cv ht1 hv
+        apply Preserve.mk
+        constructor
+        { easy }
+        { apply Typed.sub
+          { exact ht2 }
+          { apply Subcapt.refl }
+          { apply ESubtyp.refl } }
+        { constructor }
+        { easy }
   case invoke =>
     cases ht
     case mk hs hsc ht hc => sorry
