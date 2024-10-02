@@ -293,7 +293,11 @@ theorem preservation
       apply Preserve.mk
       constructor
       { easy }
-      { sorry }
+      { exact hy }
+      { have hy1 := Typed.var_inv_cs hy
+        apply WellScoped.subcapt
+        apply WellScoped.empty
+        easy }
       { sorry }
 
 end Capless
