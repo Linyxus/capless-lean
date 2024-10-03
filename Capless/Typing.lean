@@ -63,12 +63,12 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | bindc :
   Typed (Γ,c:=C) t E.cweaken C0.cweaken ->
   Typed Γ (let c=C in t) E C0
-| boundary :
+| boundary {Γ : Context n m k} {S : SType n m k} :
   Typed
     ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
     t
-    E.cweaken.weaken (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
-  Typed Γ (boundary: S in t) E C
+    (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
+  Typed Γ (boundary: S in t) (S^CaptureSet.empty) C
 
 notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
 
