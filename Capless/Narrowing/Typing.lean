@@ -1,4 +1,5 @@
 import Capless.Subst.Term.Typing
+import Capless.Subst.Capture.Typing
 namespace Capless
 
 theorem Typed.narrow

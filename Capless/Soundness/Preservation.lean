@@ -28,7 +28,7 @@ inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop wher
 | mk_cweaken :
   TypedState state (Γ.cvar b) E.cweaken ->
   Preserve Γ E state
-| mk_label :
+| mk_enter :
   TypedState state ((Γ.label S).cvar b) E.weaken.cweaken ->
   Preserve Γ E state
 
@@ -250,7 +250,14 @@ theorem preservation
       { apply TypedCont.cweaken; exact hc }
   case enter =>
     cases ht
-    case mk hs hsc ht hc => sorry
+    case mk hs hsc ht hc =>
+      have ⟨ht0, hsub0⟩ := Typed.boundary_inv ht
+      apply Preserve.mk_enter
+      constructor
+      { constructor; constructor; easy }
+      { sorry }
+      { sorry }
+      { sorry }
   case leave_var =>
     cases ht
     case mk hs hsc ht hc =>
