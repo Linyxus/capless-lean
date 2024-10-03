@@ -763,4 +763,40 @@ theorem Typed.label_inv_sub
   have h1 := SSubtyp.sub_dealias_label_inv hg (by constructor) (by constructor) hs
   aesop
 
+theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
+  (he : t0 = (boundary:S in t))
+  (ht : Typed Γ t0 E Ct) :
+  Typed
+    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
+    t
+    (S.cweaken.weaken^{})
+    (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
+    (Γ ⊢ (S^{}) <:e E) := by
+  induction ht <;> try (solve | cases he)
+  case boundary =>
+    cases he
+    split_and
+    { easy }
+    { apply ESubtyp.refl }
+  case sub hsc hsub ih =>
+    have ⟨ih, hsub0⟩ := ih he
+    split_and
+    { apply Typed.sub
+      { exact ih }
+      { apply Subcapt.join; apply Subcapt.join
+        all_goals try apply Subcapt.refl
+        apply hsc.cweaken.weaken }
+      apply ESubtyp.refl }
+    { apply ESubtyp.trans <;> easy }
+
+theorem Typed.boundary_inv {Γ : Context n m k} {S : SType n m k}
+  (ht : Typed Γ (boundary:S in t) E Ct) :
+  Typed
+    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
+    t
+    (S.cweaken.weaken^{})
+    (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
+    (Γ ⊢ (S^{}) <:e E) :=
+  Typed.boundary_inv' rfl ht
+
 end Capless
