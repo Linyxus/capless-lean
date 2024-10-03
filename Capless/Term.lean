@@ -284,4 +284,133 @@ theorem Term.crename_id {t : Term n m k} :
     simp [Term.crename]
     simp [ih, SType.crename_id, FinFun.id_ext]
 
+theorem Term.rename_rename {t : Term n m k} {f : FinFun n n'} {g : FinFun n' n''} :
+  (t.rename f).rename g = t.rename (g.comp f) := by
+  induction t generalizing g n' n''
+  case var => simp [rename]
+  case lam ih =>
+    simp [rename, CType.rename_rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case tlam ih =>
+    simp [rename, SType.rename_rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case clam ih =>
+    simp [rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case boxed =>
+    simp [rename]
+  case pack =>
+    simp [rename, CaptureSet.rename_rename]
+  case app =>
+    simp [rename]
+  case invoke =>
+    simp [rename]
+  case tapp =>
+    simp [rename]
+  case capp =>
+    simp [rename]
+  case letin ih1 ih2 =>
+    simp [rename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [rename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case bindt ih =>
+    simp [rename, SType.rename_rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case bindc ih =>
+    simp [rename, CaptureSet.rename_rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case unbox =>
+    simp [rename, CaptureSet.rename_rename]
+  case boundary ih =>
+    simp [rename, SType.rename_rename]
+    simp [<- FinFun.ext_comp_ext, ih]
+
+theorem Term.crename_crename {t : Term n m k} {f : FinFun k k'} {g : FinFun k' k''} :
+  (t.crename f).crename g = t.crename (g.comp f) := by
+  induction t generalizing g k' k''
+  case var => simp [crename]
+  case lam ih =>
+    simp [crename, CType.crename_crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case tlam ih =>
+    simp [crename, SType.crename_crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case clam ih =>
+    simp [crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case boxed =>
+    simp [crename]
+  case pack =>
+    simp [crename, CaptureSet.crename_crename]
+  case app =>
+    simp [crename]
+  case invoke =>
+    simp [crename]
+  case tapp =>
+    simp [crename]
+  case capp =>
+    simp [crename]
+  case letin ih1 ih2 =>
+    simp [crename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [crename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case bindt ih =>
+    simp [crename, SType.crename_crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case bindc ih =>
+    simp [crename, CaptureSet.crename_crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case unbox =>
+    simp [crename, CaptureSet.crename_crename]
+  case boundary ih =>
+    simp [crename, SType.crename_crename]
+    simp [<- FinFun.ext_comp_ext, ih]
+
+theorem Term.trename_trename {t : Term n m k} {f : FinFun m m'} {g : FinFun m' m''} :
+  (t.trename f).trename g = t.trename (g.comp f) := by
+  induction t generalizing g m' m''
+  case var => simp [trename]
+  case lam ih =>
+    simp [trename, CType.trename_trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case tlam ih =>
+    simp [trename, SType.trename_trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case clam ih =>
+    simp [trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case boxed =>
+    simp [trename]
+  case pack =>
+    simp [trename]
+  case app =>
+    simp [trename]
+  case invoke =>
+    simp [trename]
+  case tapp =>
+    simp [trename]
+  case capp =>
+    simp [trename]
+  case letin ih1 ih2 =>
+    simp [trename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case letex ih1 ih2 =>
+    simp [trename]
+    simp [<- FinFun.ext_comp_ext, ih1, ih2]
+  case bindt ih =>
+    simp [trename, SType.trename_trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case bindc ih =>
+    simp [trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+  case unbox =>
+    simp [trename]
+  case boundary ih =>
+    simp [trename, SType.trename_trename]
+    simp [<- FinFun.ext_comp_ext, ih]
+
 end Capless

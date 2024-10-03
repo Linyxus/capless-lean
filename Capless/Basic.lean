@@ -59,6 +59,11 @@ theorem FinFun.open_comp_weaken :
   funext i
   simp [weaken, FinFun.open, id]
 
+theorem FinFun.open_zero_comp_weaken_ext :
+  (FinFun.open 0) ∘ (weaken.ext : FinFun (n+1) (n+2)) = id := by
+  funext i
+  cases i using Fin.cases <;> rfl
+
 theorem FinFun.id_ext :
   (FinFun.ext (n := n) id) = id := by
   funext i
