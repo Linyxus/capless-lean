@@ -44,6 +44,19 @@ theorem WellScoped.conse
     easy
     constructor; easy
 
+theorem WellScoped.scope
+  (hsc : WellScoped Γ cont C) :
+  WellScoped Γ (Cont.scope x cont) C := by
+  induction hsc
+  case empty => apply empty
+  case union ih1 ih2 => apply union <;> aesop
+  case singleton ih => apply singleton <;> aesop
+  case csingleton ih => apply csingleton <;> aesop
+  case label =>
+    apply label
+    easy
+    constructor; easy
+
 theorem WellScoped.subcapt
   (hsc : WellScoped Γ cont C)
   (hs : Γ ⊢ C' <:c C) :

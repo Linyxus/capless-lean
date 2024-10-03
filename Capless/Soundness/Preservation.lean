@@ -13,6 +13,7 @@ import Capless.Weakening.TypedCont
 import Capless.Tactics
 import Capless.WellScoped.Basic
 import Capless.Narrowing.TypedCont
+import Capless.Typing.Boundary
 namespace Capless
 
 inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
@@ -255,8 +256,16 @@ theorem preservation
       apply Preserve.mk_enter
       constructor
       { constructor; constructor; easy }
-      { sorry }
-      { sorry }
+      { apply Typed.boundary_body_typing ht0 }
+      { repeat any_goals apply WellScoped.union
+        { rw [CaptureSet.weaken_cweaken]
+          apply WellScoped.scope
+          apply WellScoped.cweaken
+          sorry }
+        { constructor; constructor
+          simp
+          apply WellScoped.label; repeat constructor }
+        { apply WellScoped.label; repeat constructor } }
       { sorry }
   case leave_var =>
     cases ht
