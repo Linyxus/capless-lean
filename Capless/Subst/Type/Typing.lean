@@ -121,10 +121,10 @@ theorem Typed.tsubst
       simp [Term.trename]
       apply boundary
       have ih := ih (σ.cext.ext _)
-      simp [CType.trename, SType.trename] at ih
+      simp [EType.trename, CType.trename, SType.trename] at ih
       rw [ <- SType.cweaken_trename
-         , <- EType.weaken_trename
-         , <- EType.cweaken_trename ] at ih
+         , <- SType.weaken_trename
+         , <- SType.cweaken_trename ] at ih
       aesop
 
 theorem Typed.tnarrow

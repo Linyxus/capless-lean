@@ -134,14 +134,14 @@ theorem Typed.subst
     have ih := ih (σ.cext.ext _)
     simp
       [ CBinding.rename
+      , EType.rename
       , CType.rename
       , SType.rename
-      , <- EType.weaken_rename
-      , EType.cweaken_rename_comm
+      , <- SType.weaken_rename
+      , SType.cweaken_rename_comm
       , <- CaptureSet.weaken_rename
       , CaptureSet.cweaken_rename_comm
       , FinFun.ext ] at ih
-    rw [<- SType.cweaken_rename_comm]
     exact ih
 
 theorem Typed.open

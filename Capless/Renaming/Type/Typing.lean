@@ -123,8 +123,7 @@ theorem Typed.trename
     have ih := ih ((ρ.cext _).ext _)
     simp [FinFun.ext, CType.trename, SType.trename] at ih
     rw [ SType.cweaken_trename
-       , EType.cweaken_trename
-       , EType.weaken_trename ]
+       , SType.weaken_trename ]
     exact ih
 
 end Capless

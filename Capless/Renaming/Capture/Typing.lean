@@ -126,12 +126,12 @@ theorem Typed.crename
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.crename,
           TBinding.crename,
-          CType.crename,
+          CType.crename, EType.crename,
           FinFun.ext,
           SType.crename] at ih
     rw [<- SType.cweaken_crename,
-        <- EType.weaken_crename,
-        <- EType.cweaken_crename,
+        <- SType.weaken_crename,
+        <- SType.cweaken_crename,
         <- CaptureSet.weaken_crename,
         <- CaptureSet.cweaken_crename] at ih
     exact ih

@@ -128,10 +128,10 @@ theorem Typed.csubst
       simp [Term.crename]
       apply boundary
       have ih := ih (σ.cext.ext _)
-      simp [CBinding.crename, CType.crename, SType.crename, FinFun.ext] at ih
+      simp [CBinding.crename, EType.crename, CType.crename, SType.crename, FinFun.ext] at ih
       rw [ <- SType.cweaken_crename
-         , <- EType.weaken_crename
-         , <- EType.cweaken_crename
+         , <- SType.weaken_crename
+         , <- SType.cweaken_crename
          , <- CaptureSet.weaken_crename
          , <- CaptureSet.cweaken_crename ] at ih
       aesop

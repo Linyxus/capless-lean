@@ -134,8 +134,7 @@ theorem Typed.rename
     simp [CBinding.rename, FinFun.ext, CType.rename, SType.rename] at ih
     rw
       [ <- SType.cweaken_rename_comm
-      , <- EType.cweaken_rename_comm
-      , EType.weaken_rename
+      , SType.weaken_rename
       , <- CaptureSet.cweaken_rename_comm
       , CaptureSet.weaken_rename ]
     exact ih
