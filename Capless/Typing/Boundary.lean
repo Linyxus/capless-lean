@@ -170,7 +170,16 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     easy
   case cmap =>
     intro c b hb
-    sorry
+    have ⟨C0, hb1, he1⟩ := Context.var_cbound_inv_inst hb
+    have ⟨c0, C1, hb2, he2, he3⟩ := Context.cvar_bound_cbound_inv_inst hb1
+    subst_vars
+    simp [FinFun.open]
+    rw [<- CaptureSet.weaken_crename]
+    rw [<- CBinding.weaken_inst]
+    constructor
+    simp [CaptureSet.cweaken, CaptureSet.crename_crename]
+    simp [FinFun.open_comp_weaken, CaptureSet.crename_id]
+    easy
   case lmap =>
     intro l S hb
     cases hb; rename_i hb
@@ -186,6 +195,49 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       rw [SType.cweaken_copen_id]
       repeat constructor
       easy
+
+def VarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
+  VarSubst
+    (((Γ.label S),c:={x=0}),x:(Label[S.weaken.cweaken])^{c=0})
+    (FinFun.open 0)
+    ((Γ.label S),c:={x=0}) := by
+  constructor
+  case map =>
+    intro x T hb
+    cases hb
+    case here =>
+      simp [FinFun.open]
+      simp [CType.weaken, CType.rename_rename]
+      simp [FinFun.open_comp_weaken, CType.rename_id]
+      apply Typed.sub
+      { apply Typed.label; constructor; constructor }
+      { apply Subcapt.refl }
+      { constructor; constructor
+        { apply Subcapt.cinstl; constructor }
+        { apply SSubtyp.refl } }
+    case there_var hb =>
+      simp [FinFun.open]
+      simp [CType.weaken, CType.rename_rename]
+      simp [FinFun.open_comp_weaken, CType.rename_id]
+      apply Typed.bound_typing; easy
+  case tmap =>
+    intro X b hb
+    cases hb; rename_i hb
+    simp [TBinding.weaken, TBinding.rename_rename]
+    simp [FinFun.open_comp_weaken, TBinding.rename_id]
+    easy
+  case cmap =>
+    intro c b hb
+    cases hb; rename_i hb
+    simp [CBinding.weaken, CBinding.rename_rename]
+    simp [FinFun.open_comp_weaken, CBinding.rename_id]
+    easy
+  case lmap =>
+    intro l S hb
+    cases hb; rename_i hb
+    simp [SType.weaken, SType.rename_rename]
+    simp [FinFun.open_comp_weaken, SType.rename_id]
+    easy
 
 theorem Term.copen_cweaken_ext {t : Term n m (k+1)} :
   (t.crename (FinFun.weaken.ext)).crename (FinFun.open 0) = t := by
@@ -205,6 +257,24 @@ theorem CaptureSet.copen_cweaken_ext {C : CaptureSet n (k+1)} :
   simp [FinFun.open_zero_comp_weaken_ext]
   simp [CaptureSet.crename_id]
 
+theorem Term.open_weaken_ext {t : Term (n+1) m k} :
+  (t.rename (FinFun.weaken.ext)).rename (FinFun.open 0) = t := by
+  simp [Term.rename_rename]
+  simp [FinFun.open_zero_comp_weaken_ext]
+  simp [Term.rename_id]
+
+theorem EType.open_weaken_ext {E : EType (n+1) m k} :
+  (E.rename (FinFun.weaken.ext)).rename (FinFun.open 0) = E := by
+  simp [EType.rename, EType.rename_rename]
+  simp [FinFun.open_zero_comp_weaken_ext]
+  simp [EType.rename_id]
+
+theorem CaptureSet.open_weaken_ext {C : CaptureSet (n+1) k} :
+  (C.rename (FinFun.weaken.ext)).rename (FinFun.open 0) = C := by
+  simp [CaptureSet.rename, CaptureSet.rename_rename]
+  simp [FinFun.open_zero_comp_weaken_ext]
+  simp [CaptureSet.rename_id]
+
 theorem Typed.boundary_body_typing {Γ : Context n m k} {S : SType n m k}
   (ht : Typed ((Γ,c:CapSet),x:(Label[S.cweaken])^{c=0}) t E Ct) :
   Typed ((Γ.label S),c:={x=0}) t E Ct := by
@@ -212,6 +282,8 @@ theorem Typed.boundary_body_typing {Γ : Context n m k} {S : SType n m k}
   have h := h.crename CVarRename.boundary
   have h := h.csubst CVarSubst.boundary
   simp [Term.copen_cweaken_ext, EType.copen_cweaken_ext, CaptureSet.copen_cweaken_ext] at h
-  sorry
+  have h := h.subst VarSubst.boundary
+  simp [Term.open_weaken_ext, EType.open_weaken_ext, CaptureSet.open_weaken_ext] at h
+  easy
 
 end Capless

@@ -436,4 +436,38 @@ theorem Context.lbound_inj
     have ih := ih hb2
     aesop
 
+theorem Context.var_cbound_inv_inst'
+  (he : b = CBinding.inst C)
+  (hb : Context.CBound (Γ.var T) c b) :
+  ∃ C0, Context.CBound Γ c (CBinding.inst C0) ∧ C = C0.weaken := by
+  cases hb
+  case there_var b0 hb =>
+    cases b0 <;> cases he
+    aesop
+
+theorem Context.var_cbound_inv_inst
+  (hb : Context.CBound (Γ.var T) c (CBinding.inst C)) :
+  ∃ C0, Context.CBound Γ c (CBinding.inst C0) ∧ C = C0.weaken := by
+  apply Context.var_cbound_inv_inst' rfl hb
+
+theorem Context.cvar_bound_cbound_inv_inst'
+  (he : b = CBinding.inst C)
+  (hb : Context.CBound (Γ,c:CapSet) c b) :
+  ∃ c0 C0, Context.CBound Γ c0 (CBinding.inst C0)
+    ∧ c = c0.succ
+    ∧ C = C0.cweaken := by
+  cases hb
+  case here => cases he
+  case there_cvar b hb =>
+    cases b; cases he
+    cases he
+    aesop
+
+theorem Context.cvar_bound_cbound_inv_inst
+  (hb : Context.CBound (Γ,c:CapSet) c (CBinding.inst C)) :
+  ∃ c0 C0, Context.CBound Γ c0 (CBinding.inst C0)
+    ∧ c = c0.succ
+    ∧ C = C0.cweaken := by
+  apply Context.cvar_bound_cbound_inv_inst' rfl hb
+
 end Capless
