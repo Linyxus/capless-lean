@@ -104,4 +104,23 @@ theorem Store.lookup_inv_typing
   repeat any_goals apply And.intro
   all_goals easy
 
+theorem Store.bound_label
+  (hl : Store.LBound σ x S)
+  (ht : TypedStore σ Γ) :
+  Γ.LBound x S := by
+  induction ht <;> cases hl <;> try (solve | constructor; aesop)
+  case label ih => constructor
+
+theorem Cont.has_label_tail_inv
+  (htc : TypedCont Γ E1 cont E2 Ct)
+  (hb : Γ.LBound x S0)
+  (hh : cont.HasLabel x tail) :
+  ∃ Ct1, TypedCont Γ (S0^{}) tail E2 Ct1 := by
+  induction hh generalizing E1 E2 Ct <;> try (solve | cases htc; aesop)
+  case here =>
+    cases htc; rename_i hb0 htc0
+    have he := Context.lbound_inj hb hb0
+    cases he
+    aesop
+
 end Capless

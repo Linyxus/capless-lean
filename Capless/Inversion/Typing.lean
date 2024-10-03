@@ -725,4 +725,42 @@ theorem Typed.invoke_inv {Γ : Context n m k}
     Typed Γ (Term.var y) (EType.type (S0^{})) {x=y} :=
   Typed.invoke_inv' rfl ht
 
+theorem Typed.label_inv'
+  (he1 : t0 = Term.var x)
+  (he2 : E0 = EType.type T)
+  (ht : Typed Γ t0 E0 Ct) (hb : Γ.LBound x S1) :
+  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ (Label[S0]^{x=x}) <: T) := by
+  induction ht <;> try (solve | cases he1 | cases he2)
+  case var hb0 =>
+    cases he1; cases he2
+    exfalso
+    apply! Context.bound_lbound_absurd
+  case label hb0 =>
+    cases he1; cases he2
+    apply Exists.intro; apply And.intro
+    { exact hb0 }
+    { apply CSubtyp.refl }
+  case sub hsub ih =>
+    cases he1; cases he2
+    cases hsub
+    have ⟨S0, hb0, hs0⟩ := ih rfl rfl hb
+    apply Exists.intro
+    apply And.intro
+    { easy }
+    { apply CSubtyp.trans <;> easy }
+
+theorem Typed.label_inv
+  (ht : Typed Γ (Term.var x) (EType.type T) Ct) (hb : Γ.LBound x S1) :
+  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ (Label[S0]^{x=x}) <: T) :=
+  Typed.label_inv' rfl rfl ht hb
+
+theorem Typed.label_inv_sub
+  (ht : Typed Γ (Term.var x) (Label[S]^C) Ct) (hb : Γ.LBound x S1)
+  (hg : Γ.IsTight) :
+  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ S <:s S0) := by
+  have ⟨S0, hl, hs⟩ := Typed.label_inv ht hb
+  cases hs; rename_i hs
+  have h1 := SSubtyp.sub_dealias_label_inv hg (by constructor) (by constructor) hs
+  aesop
+
 end Capless

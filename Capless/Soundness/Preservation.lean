@@ -12,6 +12,7 @@ import Capless.Subst.Capture.Typing
 import Capless.Weakening.TypedCont
 import Capless.Tactics
 import Capless.WellScoped.Basic
+import Capless.Narrowing.TypedCont
 namespace Capless
 
 inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
@@ -286,10 +287,14 @@ theorem preservation
           { apply ESubtyp.refl } }
         { constructor }
         { easy }
-  case invoke =>
+  case invoke hl hhl =>
     cases ht
     case mk hs hsc ht hc =>
+      have hg := TypedStore.is_tight hs
       have ⟨S0, C0, hx, hy⟩ := Typed.invoke_inv ht
+      have h1 := Store.bound_label hl hs
+      have ⟨S0, hbx, hsub⟩ := Typed.label_inv_sub hx h1 hg
+      have ⟨Ct1, hc1⟩ := Cont.has_label_tail_inv hc hbx hhl
       apply Preserve.mk
       constructor
       { easy }
@@ -298,6 +303,8 @@ theorem preservation
         apply WellScoped.subcapt
         apply WellScoped.empty
         easy }
-      { sorry }
+      { apply hc1.narrow
+        constructor; constructor
+        apply Subcapt.refl; easy }
 
 end Capless
