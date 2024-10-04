@@ -208,6 +208,7 @@ def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 | Cont.scope x cont => Cont.scope x cont.cweaken
 
+@[aesop safe [constructors]]
 inductive Context.IsTight : Context n m k -> Prop where
 | empty : Context.IsTight Context.empty
 | var :
@@ -226,11 +227,6 @@ inductive Context.IsTight : Context n m k -> Prop where
 theorem TypedStore.is_tight
   (h : TypedStore σ Γ) :
   Γ.IsTight := by
-  induction h
-  case empty => constructor
-  case val ih => constructor; trivial
-  case tval ih => constructor; trivial
-  case cval ih => constructor; trivial
-  case label ih => constructor; trivial
+  induction h <;> aesop
 
 end Capless
