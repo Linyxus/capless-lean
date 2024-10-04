@@ -103,6 +103,12 @@ theorem SSubtyp.trename
     simp [SType.trename]
     apply boxed
     aesop
+  case label =>
+    unfold trename_motive3
+    repeat intro
+    simp [SType.trename]
+    apply label
+    aesop
   case xforall =>
     unfold trename_motive1 trename_motive3
     repeat intro

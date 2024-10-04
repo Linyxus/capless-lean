@@ -110,5 +110,30 @@ theorem Typed.crename
     rw [<- EType.cweaken_crename] at ih
     rw [CaptureSet.cweaken_crename]
     exact ih
+  case label =>
+    simp [Term.crename, EType.crename, CType.crename, SType.crename]
+    apply label
+    have h := ρ.lmap
+    aesop
+  case invoke ih1 ih2 =>
+    simp [Term.crename]
+    apply invoke
+    apply ih1 <;> assumption
+    apply ih2; assumption
+  case boundary ih =>
+    simp [Term.crename]
+    apply boundary
+    have ih := ih ((ρ.cext _).ext _)
+    simp [CBinding.crename,
+          TBinding.crename,
+          CType.crename, EType.crename,
+          FinFun.ext,
+          SType.crename] at ih
+    rw [<- SType.cweaken_crename,
+        <- SType.weaken_crename,
+        <- SType.cweaken_crename,
+        <- CaptureSet.weaken_crename,
+        <- CaptureSet.cweaken_crename] at ih
+    exact ih
 
 end Capless

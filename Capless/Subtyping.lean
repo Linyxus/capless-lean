@@ -40,7 +40,10 @@ inductive SSubtyp : Context n m k -> SType n m k -> SType n m k -> Prop where
   SSubtyp Γ (SType.tvar X) S
 | boxed :
   CSubtyp Γ T1 T2 ->
-  SSubtyp Γ (SType.box T1) (SType.box T2)
+  SSubtyp Γ (□ T1) (□ T2)
+| label :
+  SSubtyp Γ S2 S1 ->
+  SSubtyp Γ (Label[S1]) (Label[S2])
 | xforall :
   CSubtyp Γ E2 E1 ->
   ESubtyp (Context.var Γ E2) F1 F2 ->

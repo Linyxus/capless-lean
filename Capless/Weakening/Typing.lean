@@ -11,17 +11,36 @@ theorem Typed.weaken
   apply Typed.rename h
   apply VarMap.weaken
 
+theorem Typed.lweaken
+  (h : Typed Γ t E Ct) :
+  Typed (Γ.label S) t.weaken E.weaken Ct.weaken := by
+  simp [Term.weaken, EType.weaken]
+  apply h.rename
+  apply VarMap.lweaken
+
 theorem Typed.weaken_ext {Γ : Context n m k}
   (h : Typed (Γ.var T) t E Ct) :
   Typed ((Γ.var P).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
   simp [Term.weaken1, EType.weaken1, CaptureSet.weaken1]
   apply h.rename VarMap.weaken_ext
 
+theorem Typed.lweaken_ext {Γ : Context n m k}
+  (h : Typed (Γ.var T) t E Ct) :
+  Typed ((Γ.label P).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
+  simp [Term.weaken1, EType.weaken1]
+  apply h.rename VarMap.lweaken_ext
+
 theorem Typed.weaken_cext_ext {Γ : Context n m k}
   (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
   Typed (((Γ.var P).cvar CBinding.bound).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
   simp [Term.weaken1, EType.weaken1]
   apply h.rename VarMap.weaken_cext_ext
+
+theorem Typed.lweaken_cext_ext {Γ : Context n m k}
+  (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
+  Typed (((Γ.label P).cvar CBinding.bound).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
+  simp [Term.weaken1, EType.weaken1]
+  apply h.rename VarMap.lweaken_cext_ext
 
 def Typed.tweaken
   (h : Typed Γ t E Ct) :

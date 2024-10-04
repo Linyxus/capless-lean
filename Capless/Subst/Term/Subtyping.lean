@@ -105,6 +105,11 @@ theorem SSubtyp.subst
     simp [SType.rename]
     apply boxed
     aesop
+  case label =>
+    unfold subst_motive3
+    repeat intro
+    apply label
+    aesop
   case xforall =>
     unfold subst_motive1 subst_motive2 subst_motive3
     repeat intro
