@@ -173,7 +173,15 @@ theorem progress
       case scope =>
         apply Progress.step
         apply Reduce.leave_var
-    case label => sorry
+    case label =>
+      cases hc
+      case none => apply Progress.halt_var
+      case cons =>
+        apply Progress.step
+        apply Reduce.rename
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_var
     case pack =>
       cases hc
       case none => apply Progress.halt_value; constructor
