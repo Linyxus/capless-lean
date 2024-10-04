@@ -4,6 +4,7 @@ import Capless.Narrowing.TypedCont
 import Capless.Inversion.Lookup
 import Capless.Inversion.Typing
 import Capless.Weakening.IsValue
+import Capless.WellScoped.Basic
 namespace Capless
 
 theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
@@ -32,6 +33,8 @@ theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
     constructor; constructor
     { constructor; trivial }
     { apply Term.IsValue.cweaken; trivial }
+  case label ih =>
+    sorry
 
 inductive Progress : State n m k -> Prop where
 | step :
@@ -47,7 +50,7 @@ theorem progress
   (ht : TypedState state Γ E) :
   Progress state := by
   cases ht
-  case mk hs ht hc =>
+  case mk hs ht hsc hc =>
     induction ht
     case var =>
       cases hc
@@ -55,14 +58,19 @@ theorem progress
       case cons =>
         apply Progress.step
         apply Reduce.rename
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_var
+    case label => sorry
     case pack =>
       cases hc
       case none => apply Progress.halt_value; constructor
       case conse =>
         apply Progress.step
         apply Reduce.lift_ex
-    case sub hsub ih _ _ =>
+    case sub hsub ih _ _ _ =>
       apply ih <;> try trivial
+      apply WellScoped.subcapt; easy; easy
       apply! TypedCont.narrow
     case abs =>
       cases hc
@@ -71,12 +79,20 @@ theorem progress
         apply Progress.step
         apply Reduce.lift
         constructor
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_val
+        constructor
     case tabs =>
       cases hc
       case none => apply Progress.halt_value; constructor
       case cons =>
         apply Progress.step
         apply Reduce.lift
+        constructor
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_val
         constructor
     case cabs =>
       cases hc
@@ -85,8 +101,12 @@ theorem progress
         apply Progress.step
         apply Reduce.lift
         constructor
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_val
+        constructor
     case app =>
-      rename_i x _ _ _ _ hx _ _ _ σ _
+      rename_i x _ _ _ _ hx _ _ _ σ _ _
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -95,7 +115,7 @@ theorem progress
       apply Progress.step
       apply Reduce.apply
       trivial
-    case tapp x _ _ _ hx _ σ _ =>
+    case tapp x _ _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -104,7 +124,7 @@ theorem progress
       apply Progress.step
       apply Reduce.tapply
       trivial
-    case capp x _ _ _ hx _ σ _ =>
+    case capp x _ _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
       have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
@@ -120,10 +140,14 @@ theorem progress
         apply Progress.step
         apply Reduce.lift
         constructor
-    case unbox x _ _ hx _ σ _ =>
+      case scope =>
+        apply Progress.step
+        apply Reduce.leave_val
+        constructor
+    case unbox x _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.lookup_exists (σ := σ) (x := x)
-      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
+      have ⟨Sv, Cv, Cv0, htv⟩ := Store.lookup_inv_typing hb0 hs hx
       have ⟨t0, he⟩ := Typed.boxed_inv hg hv0 htv
       subst he
       apply Progress.step
@@ -141,5 +165,7 @@ theorem progress
     case bindc =>
       apply Progress.step
       apply Reduce.clift
+    case invoke => sorry
+    case boundary => sorry
 
 end Capless
