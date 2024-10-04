@@ -46,6 +46,12 @@ theorem value_typing_widen
     apply Subcapt.refl
     easy
 
+theorem EType.weaken_cweaken_helper {S : SType n m k} :
+  (EType.type (S^{})).weaken.cweaken = EType.type (S.weaken.cweaken^{}) := by
+  simp [EType.weaken, EType.cweaken, EType.rename, CType.rename]
+  simp [EType.crename, CType.crename]
+  simp [SType.weaken, SType.cweaken]
+
 theorem preservation
   (hr : Reduce state state')
   (ht : TypedState state Γ E) :
@@ -261,12 +267,19 @@ theorem preservation
         { rw [CaptureSet.weaken_cweaken]
           apply WellScoped.scope
           apply WellScoped.cweaken
-          sorry }
+          apply WellScoped.lweaken; easy }
         { constructor; constructor
           simp
           apply WellScoped.label; repeat constructor }
         { apply WellScoped.label; repeat constructor } }
-      { sorry }
+      { constructor; constructor; constructor
+        rw [<- EType.weaken_cweaken_helper]
+        apply TypedCont.cweaken
+        apply TypedCont.lweaken
+        apply TypedCont.narrow; easy; easy
+        simp [SType.cweaken, SType.weaken]
+        rw [SType.crename_rename_comm]
+        apply CSubtyp.refl }
   case leave_var =>
     cases ht
     case mk hs hsc ht hc =>

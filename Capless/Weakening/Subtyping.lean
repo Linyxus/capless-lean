@@ -13,6 +13,15 @@ theorem SSubtyp.weaken
   { apply h }
   { apply VarMap.weaken }
 
+theorem SSubtyp.lweaken
+  (h : SSubtyp Γ S1 S2) :
+  ∀ S, SSubtyp (Γ.label S) S1.weaken S2.weaken := by
+  intro b
+  simp [SType.weaken]
+  apply SSubtyp.rename
+  { apply h }
+  { apply VarMap.lweaken }
+
 theorem CSubtyp.weaken
   (h : CSubtyp Γ E1 E2) :
   CSubtyp (Γ.var T) E1.weaken E2.weaken := by
@@ -21,6 +30,14 @@ theorem CSubtyp.weaken
   { apply h }
   { apply VarMap.weaken }
 
+theorem CSubtyp.lweaken
+  (h : CSubtyp Γ E1 E2) :
+  CSubtyp (Γ.label S) E1.weaken E2.weaken := by
+  simp [CType.weaken]
+  apply CSubtyp.rename
+  { apply h }
+  { apply VarMap.lweaken }
+
 theorem ESubtyp.weaken
   (h : ESubtyp Γ E1 E2) :
   ESubtyp (Γ.var T) E1.weaken E2.weaken := by
@@ -28,6 +45,14 @@ theorem ESubtyp.weaken
   apply ESubtyp.rename
   { apply h }
   { apply VarMap.weaken }
+
+theorem ESubtyp.lweaken
+  (h : ESubtyp Γ E1 E2) :
+  ESubtyp (Γ.label S) E1.weaken E2.weaken := by
+  simp [EType.weaken]
+  apply ESubtyp.rename
+  { apply h }
+  { apply VarMap.lweaken }
 
 theorem SSubtyp.tweaken
   (h : SSubtyp Γ S1 S2) :
