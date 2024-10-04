@@ -2,6 +2,7 @@ import Capless.Term
 import Capless.Store
 namespace Capless
 
+@[aesop unsafe [constructors 50%]]
 inductive Reduce : State n m k -> State n' m' k' -> Prop where
 | apply {σ : Store n m k} :
   σ.Bound x (Term.lam T t) ->

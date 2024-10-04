@@ -31,6 +31,7 @@ notation:40 "let X=" S " in " t => Term.bindt S t
 notation:40 "let c=" C " in " t => Term.bindc C t
 notation:40 "boundary:" S " in " t => Term.boundary S t
 
+@[aesop safe constructors]
 inductive Term.IsValue : Term n m k -> Prop where
 | lam : Term.IsValue (lam E t)
 | tlam : Term.IsValue (tlam S t)

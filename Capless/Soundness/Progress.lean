@@ -148,15 +148,16 @@ theorem Store.label_lookup_exists {σ : Store n m k} {x : Fin n}
     exfalso
     apply Store.value_typing_label_absurd hg htv hv
 
+@[aesop unsafe [constructors 50%]]
 inductive Progress : State n m k -> Prop where
-| step :
-  Reduce state state' ->
-  Progress state
+| halt_var :
+  Progress ⟨σ, Cont.none, Term.var x⟩
 | halt_value {t : Term n m k} :
   t.IsValue ->
   Progress ⟨σ, Cont.none, t⟩
-| halt_var :
-  Progress ⟨σ, Cont.none, Term.var x⟩
+| step :
+  Reduce state state' ->
+  Progress state
 
 theorem progress
   (ht : TypedState state Γ E) :
@@ -165,136 +166,55 @@ theorem progress
   case mk hs ht hsc hc =>
     induction ht
     case var =>
-      cases hc
-      case none => apply Progress.halt_var
-      case cons =>
-        apply Progress.step
-        apply Reduce.rename
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_var
+      cases hc <;> aesop
     case label =>
-      cases hc
-      case none => apply Progress.halt_var
-      case cons =>
-        apply Progress.step
-        apply Reduce.rename
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_var
+      cases hc <;> aesop
     case pack =>
-      cases hc
-      case none => apply Progress.halt_value; constructor
-      case conse =>
-        apply Progress.step
-        apply Reduce.lift_ex
+      cases hc <;> aesop
     case sub hsub ih _ _ _ =>
-      apply ih <;> try trivial
+      apply ih <;> try easy
       apply WellScoped.subcapt; easy; easy
       apply! TypedCont.narrow
-    case abs =>
-      cases hc
-      case none => apply Progress.halt_value; constructor
-      case cons =>
-        apply Progress.step
-        apply Reduce.lift
-        constructor
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_val
-        constructor
-    case tabs =>
-      cases hc
-      case none => apply Progress.halt_value; constructor
-      case cons =>
-        apply Progress.step
-        apply Reduce.lift
-        constructor
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_val
-        constructor
-    case cabs =>
-      cases hc
-      case none => apply Progress.halt_value; constructor
-      case cons =>
-        apply Progress.step
-        apply Reduce.lift
-        constructor
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_val
-        constructor
+    case abs => cases hc <;> aesop
+    case tabs => cases hc <;> aesop
+    case cabs => cases hc <;> aesop
     case app =>
       rename_i x _ _ _ _ hx _ _ _ σ _ _
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨U0, t0, he⟩ := Typed.forall_inv hg hv0 htv
-      subst he
-      apply Progress.step
-      apply Reduce.apply
-      trivial
+      aesop
     case tapp x _ _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨U0, t0, he⟩ := Typed.tforall_inv hg hv0 htv
-      subst he
-      apply Progress.step
-      apply Reduce.tapply
-      trivial
+      aesop
     case capp x _ _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
       have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨t0, he⟩ := Typed.cforall_inv hg hv0 htv
-      subst he
-      apply Progress.step
-      apply Reduce.capply
-      trivial
-    case box =>
-      cases hc
-      case none => apply Progress.halt_value; constructor
-      case cons =>
-        apply Progress.step
-        apply Reduce.lift
-        constructor
-      case scope =>
-        apply Progress.step
-        apply Reduce.leave_val
-        constructor
+      aesop
+    case box => cases hc <;> aesop
     case unbox x _ _ hx _ σ _ _ =>
       have hg := TypedStore.is_tight hs
       have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
       have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨t0, he⟩ := Typed.boxed_inv hg hv0 htv
-      subst he
-      apply Progress.step
-      apply Reduce.unbox
-      trivial
-    case letin =>
-      apply Progress.step
-      apply Reduce.push
-    case letex =>
-      apply Progress.step
-      apply Reduce.push_ex
-    case bindt =>
-      apply Progress.step
-      apply Reduce.tlift
-    case bindc =>
-      apply Progress.step
-      apply Reduce.clift
+      aesop
+    case letin => aesop
+    case letex => aesop
+    case bindt => aesop
+    case bindc => aesop
     case invoke hx hy _ _ σ cont Ct =>
       cases hsc; rename_i hsc _
       have hg := TypedStore.is_tight hs
       have ⟨S0, hl⟩ := Store.label_lookup_exists hs hx
       have hl := Store.bound_label hl hs
       have ⟨_, hsl⟩ := WellScoped.label_inv hsc hl
-      apply Progress.step
-      apply Reduce.invoke <;> easy
-    case boundary =>
-      apply Progress.step
-      apply Reduce.enter
+      aesop
+    case boundary => aesop
 
 end Capless
