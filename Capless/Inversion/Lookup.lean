@@ -104,6 +104,19 @@ theorem Store.lookup_inv_typing
   repeat any_goals apply And.intro
   all_goals easy
 
+theorem Store.lookup_inv_typing_alt
+  (hl : Store.Bound σ x v)
+  (ht : TypedStore σ Γ)
+  (hx : Typed Γ (Term.var x) (EType.type (S^C)) Cx) :
+  ∃ C0 Cv0, Typed Γ v (EType.type (S^C0)) Cv0 := by
+  have ⟨Sv, Cv, Cv0, htv, _, hsv⟩ := Store.lookup_inv_typing hl ht hx
+  cases hsv; rename_i hsv
+  repeat apply Exists.intro
+  apply Typed.sub
+  { exact htv }
+  { apply Subcapt.refl }
+  { constructor; constructor; apply Subcapt.refl; easy }
+
 theorem Store.bound_label
   (hl : Store.LBound σ x S)
   (ht : TypedStore σ Γ) :

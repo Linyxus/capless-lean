@@ -88,4 +88,14 @@ theorem WellScoped.var_inv
     exfalso
     apply Context.bound_lbound_absurd <;> easy
 
+theorem WellScoped.label_inv
+  (hsc : WellScoped Γ cont {x=x})
+  (hbl : Γ.LBound x S) :
+  ∃ tail, cont.HasLabel x tail := by
+  cases hsc
+  case singleton =>
+    exfalso
+    apply Context.bound_lbound_absurd <;> easy
+  case label => aesop
+
 end Capless
