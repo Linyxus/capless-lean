@@ -157,4 +157,6 @@ inductive SSubtyp : Context n m -> SType n m -> SType n m -> Prop where
 
 end
 
+inductive CapRefine : CaptureSet n -> CType n m -> CType n m -> Prop where
+
 end Cappy

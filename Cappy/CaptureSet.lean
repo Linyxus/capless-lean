@@ -48,4 +48,19 @@ def CaptureSet.rename (C : CaptureSet n) (f : Capless.FinFun n n') : CaptureSet 
   | reach x => {x*=(f x)}
   | universal => {cap}
 
+def CaptureSet.weaken (C : CaptureSet n) : CaptureSet (n+1) :=
+  C.rename Capless.FinFun.weaken
+
+structure CapSubst (n n' : Nat) where
+  map : Fin n -> CaptureSet n'
+  rmap : Fin n -> CaptureSet n'
+  capmap : CaptureSet n'
+
+def CaptureSet.subst : CaptureSet n -> CapSubst n n' -> CaptureSet n'
+| empty, _ => {}
+| union C1 C2, σ => (C1.subst σ) ∪ (C2.subst σ)
+| singleton x, σ => (σ.map x)
+| reach x, σ => (σ.rmap x)
+| universal, σ => σ.capmap
+
 end Cappy
