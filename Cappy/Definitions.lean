@@ -181,4 +181,34 @@ inductive SType.CapRefine : CaptureSet n -> SType n m -> SType n m -> Prop where
 
 end
 
+inductive Typed : CaptureSet n -> Context n m -> Term n m -> CType n m -> Prop where
+| var :
+  Γ.Bound x (S^C) ->
+  S.CapRefine {x*=x} S' ->
+  Typed {x=x} Γ (Term.var x) (S'^{x=x})
+| sub :
+  Typed C Γ t T ->
+  Subcapt Γ C C' ->
+  CSubtyp Γ T T' ->
+  Typed C' Γ t T'
+| abs {C : CaptureSet n} :
+  Typed (C.weaken ∪ {x=0} ∪ {x*=0}) (Γ.var T) t U ->
+  Typed {} Γ (Term.abs Annot.eps T t) ((∀(x:T)U)^C)
+| uabs {C : CaptureSet n} :
+  Typed (C.weaken ∪ {x=0}) (Γ.var T) t U ->
+  Typed {} Γ (Term.abs Annot.use T t) ((∀(use x:T)U)^C)
+| tabs {C : CaptureSet n} :
+  Typed C (Γ.tvar S) t T ->
+  Typed {} Γ (Term.tabs S t) ((∀[X<:S]T)^C)
+| box {C : CaptureSet n} :
+  Typed C Γ (Term.var x) T ->
+  Typed {} Γ (Term.box x) ((SType.boxed T)^{})
+| unbox {C : CaptureSet n} :
+  Typed C Γ (Term.var x) ((SType.boxed (S^C))^{}) ->
+  Typed C Γ (Term.unbox C x) (S^C)
+| letin {C : CaptureSet n} {U : CType n m} :
+  Typed C Γ t T ->
+  Typed C.weaken (Γ.var T) u U.weaken ->
+  Typed C Γ (Term.letin t u) U
+
 end Cappy
