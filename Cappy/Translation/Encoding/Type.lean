@@ -1,4 +1,4 @@
-import Cappy.Translation.CaptureSet
+import Cappy.Translation.Encoding.CaptureSet
 import Capless.Type
 namespace Cappy
 
