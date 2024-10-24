@@ -157,6 +157,28 @@ inductive SSubtyp : Context n m -> SType n m -> SType n m -> Prop where
 
 end
 
-inductive CapRefine : CaptureSet n -> CType n m -> CType n m -> Prop where
+mutual
+
+inductive CType.CapRefine : CaptureSet n -> CType n m -> CType n m -> Prop where
+| r_capt :
+  SType.CapRefine D S S' ->
+  CType.CapRefine D (S^C) (S'^(C.open_cap D))
+
+inductive SType.CapRefine : CaptureSet n -> SType n m -> SType n m -> Prop where
+| r_top :
+  SType.CapRefine D top top
+| r_tvar :
+  SType.CapRefine D (SType.tvar X) (SType.tvar X)
+| r_fun :
+  CType.CapRefine (D.weaken ∪ {x=0} ∪ {x*=0}) U U' ->
+  SType.CapRefine D (SType.arrow a T U) (SType.arrow a T U')
+| r_tfun :
+  CType.CapRefine D T T' ->
+  SType.CapRefine D (SType.tarrow S T) (SType.tarrow S T')
+| r_boxed :
+  CType.CapRefine D T T' ->
+  SType.CapRefine D (SType.boxed T) (SType.boxed T')
+
+end
 
 end Cappy

@@ -63,4 +63,10 @@ def CaptureSet.subst : CaptureSet n -> CapSubst n n' -> CaptureSet n'
 | reach x, σ => (σ.rmap x)
 | universal, σ => σ.capmap
 
+def CapSubst.open_cap (D : CaptureSet n) : CapSubst n n :=
+  { map := λ x => {x=x}, rmap := λ x => {x*=x}, capmap := D }
+
+def CaptureSet.open_cap (C : CaptureSet n) (D : CaptureSet n) : CaptureSet n :=
+  C.subst (CapSubst.open_cap D)
+
 end Cappy
