@@ -5,6 +5,13 @@ namespace Cappy
 
 /-!
 # Encoding of Capture Sets
+
+The `CaptureSet.Interp` derivation defines the encoding of capture sets from Cappy to Capless. It is a 5-place judgement:
+1. The mapping from reach capabilities to capture variables
+2. The type context in Cappy
+3. The input capture set
+4. The interpretation
+5. The output capture set
 !-/
 
 inductive CaptureSet.Interp : TMap n m k -> Context n m -> CaptureSet n -> Capless.CaptureSet n k -> Capless.CaptureSet n k -> Prop where
