@@ -1,1 +1,2 @@
-import Cappy.Definitions
+import Cappy.Syntax
+import Cappy.TypeSystem

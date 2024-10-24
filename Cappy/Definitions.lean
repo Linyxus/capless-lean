@@ -1,1 +1,0 @@
-import Cappy.TypeSystem.Typing
