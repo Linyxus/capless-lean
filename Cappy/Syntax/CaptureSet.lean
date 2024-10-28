@@ -22,6 +22,7 @@ notation:max "{cap}" => CaptureSet.universal
 instance : Union (CaptureSet n) where
   union := CaptureSet.union
 
+@[aesop unsafe [50% constructors]]
 inductive CaptureSet.Subset : CaptureSet n -> CaptureSet n -> Prop where
 | empty : Subset {} C
 | rfl : Subset C C

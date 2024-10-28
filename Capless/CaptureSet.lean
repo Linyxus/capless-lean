@@ -28,6 +28,7 @@ notation:max "{c=" c "}" => CaptureSet.csingleton c
 instance : Union (CaptureSet n k) where
   union := CaptureSet.union
 
+@[aesop unsafe [50% constructors]]
 inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | empty : Subset {} C
 | rfl : Subset C C
