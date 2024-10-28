@@ -24,7 +24,9 @@ theorem subcapt_enc_monotonic
     rename_i hb1 hi1 _ _ hb2 hi2
     have h := Context.bound_inj hb1 hb2
     cases h
-    sorry
+    have h := CaptureSet.interp_inj hi1 hi2
+    cases h
+    apply Capless.Subcapt.refl
   case reach =>
     cases hi1; cases hi2
     apply Capless.Subcapt.refl
