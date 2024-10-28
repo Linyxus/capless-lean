@@ -33,4 +33,7 @@ notation:60 "□" T => SType.box T
 instance : Coe (CType n m k) (EType n m k) where
   coe T := EType.type T
 
+instance : Coe (SType n m k) (CType n m k) where
+  coe T := CType.capt {} T
+
 end Capless
