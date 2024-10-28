@@ -66,6 +66,40 @@ theorem CaptureSet.interp_weaken
     simp [CaptureSet.weaken, CaptureSet.rename]
     constructor
 
+inductive CaptureSet.Lift : CaptureSet n -> CaptureSet n' -> Prop where
+| refl : CaptureSet.Lift C C
+| step :
+  CaptureSet.Lift C C' ->
+  CaptureSet.Lift C C'.weaken
+
+theorem CaptureSet.lift_empty'
+  (he : C0 = {})
+  (hl : CaptureSet.Lift C0 C) : C = {} := by
+  induction hl
+  case refl => assumption
+  case step hl => aesop
+
+theorem CaptureSet.lift_empty
+  (hl : CaptureSet.Lift ({} : CaptureSet n) C) : C = {} :=
+  CaptureSet.lift_empty' rfl hl
+
+theorem CaptureSet.interp_complete'
+  (hl : CaptureSet.Lift C C') :
+  ∃ I, CaptureSet.Interp ρ Γ C' D I := by
+  rename_i n n' m k
+  induction n generalizing n' m k
+  case zero =>
+    induction C generalizing C' D
+    case empty =>
+      have h := CaptureSet.lift_empty hl
+      cases h
+      constructor; constructor
+    case union => sorry
+    case singleton => sorry
+    case reach => sorry
+    case universal => sorry
+  case succ => sorry
+
 theorem CaptureSet.interp_complete :
   ∃ I, CaptureSet.Interp ρ Γ C D I := by
   rename_i n m k
