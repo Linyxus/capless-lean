@@ -16,9 +16,20 @@ theorem subcapt_enc_monotonic
     apply Capless.Subcapt.refl
   case union C1 C2 ih1 ih2 =>
     cases hi1; cases hi2
+    apply Capless.Subcapt.join
+    { aesop }
+    { aesop }
+  case singleton =>
+    cases hi1; cases hi2
+    rename_i hb1 hi1 _ _ hb2 hi2
+    have h := Context.bound_inj hb1 hb2
+    cases h
     sorry
-  case singleton => sorry
-  case reach => sorry
-  case universal => sorry
+  case reach =>
+    cases hi1; cases hi2
+    apply Capless.Subcapt.refl
+  case universal =>
+    cases hi1; cases hi2
+    assumption
 
 end Cappy
