@@ -5,7 +5,6 @@ import Capless.Subcapturing.Basic
 namespace Cappy
 
 theorem subcapt_enc_monotonic
-  (hg : Context.Interp Γ ⟨Δ, ρ⟩)
   (h : Δ ⊢ D1 <:c D2)
   (hi1 : CaptureSet.Interp ρ Γ C D1 I1)
   (hi2 : CaptureSet.Interp ρ Γ C D2 I2) :
