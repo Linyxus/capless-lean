@@ -83,6 +83,32 @@ theorem CaptureSet.lift_empty
   (hl : CaptureSet.Lift ({} : CaptureSet n) C) : C = {} :=
   CaptureSet.lift_empty' rfl hl
 
+theorem CaptureSet.lift_union'
+  (he : C0 = C1 ∪ C2)
+  (hl : CaptureSet.Lift C0 D) :
+  ∃ D1 D2, CaptureSet.Lift C1 D1 ∧ CaptureSet.Lift C2 D2 ∧ D = D1 ∪ D2 := by
+  induction hl
+  case refl =>
+    constructor; constructor
+    constructor; constructor
+    constructor; constructor
+    assumption
+  case step hl ih =>
+    have ih := ih he
+    have ⟨D1, D2, ih1, ih2, he⟩ := ih
+    apply Exists.intro D1.weaken
+    apply Exists.intro D2.weaken
+    constructor
+    constructor; assumption
+    constructor
+    constructor; assumption
+    rw [he, CaptureSet.weaken_union]
+
+theorem CaptureSet.lift_union
+  (hl : CaptureSet.Lift (C1 ∪ C2) D) :
+  ∃ D1 D2, CaptureSet.Lift C1 D1 ∧ CaptureSet.Lift C2 D2 ∧ D = D1 ∪ D2 := by
+  apply CaptureSet.lift_union' rfl hl
+
 theorem CaptureSet.interp_complete'
   (hl : CaptureSet.Lift C C') :
   ∃ I, CaptureSet.Interp ρ Γ C' D I := by
@@ -94,7 +120,12 @@ theorem CaptureSet.interp_complete'
       have h := CaptureSet.lift_empty hl
       cases h
       constructor; constructor
-    case union => sorry
+    case union ih1 ih2 =>
+      have ⟨D1, D2, hl1, hl2, he⟩ := CaptureSet.lift_union hl
+      have ⟨I1, hi1⟩ := ih1 (D := D) hl1
+      have ⟨I2, hi2⟩ := ih2 (D := D) hl2
+      rw [he]
+      constructor; constructor <;> assumption
     case singleton => sorry
     case reach => sorry
     case universal => sorry
