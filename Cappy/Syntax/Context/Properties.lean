@@ -30,4 +30,32 @@ theorem Context.bound_inj
     have ih := ih hb2
     aesop
 
+theorem Context.bound_exists {x : Fin n} {Γ : Context n m} :
+  ∃ T, Context.Bound Γ x T := by
+  induction Γ
+  case empty => apply Fin.elim0 x
+  case var ih =>
+    cases x using Fin.cases
+    case zero => constructor; constructor
+    case succ x0 =>
+      have ⟨T0, ih⟩ := ih (x := x0)
+      constructor; constructor
+      assumption
+  case tvar ih =>
+    have ⟨T0, ih⟩ := ih (x := x)
+    constructor; constructor
+    assumption
+
+theorem Context.var_bound_succ_exists {x : Fin (n+1)} {Γ : Context (n+1) m} :
+  ∃ T, Context.Bound Γ x (CType.weaken T) := by
+  cases Γ
+  case var Γ0 P0 =>
+    cases x using Fin.cases
+    case zero => constructor; constructor
+    case succ x0 =>
+      have ⟨T0, h0⟩ := Context.bound_exists (Γ := Γ0) (x := x0)
+      constructor; constructor
+      assumption
+  case tvar Γ0 R0 => sorry
+
 end Cappy
