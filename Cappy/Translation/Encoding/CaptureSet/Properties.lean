@@ -22,6 +22,11 @@ theorem CType.weaken_capt :
   (S^C : CType n m).weaken = S.weaken^C.weaken := by
   simp [CType.weaken, CType.rename, CaptureSet.weaken, SType.weaken, RenameFun.weaken]
 
+theorem CType.tweaken_capt :
+  (S^C : CType n m).tweaken = S.tweaken^C := by
+  simp [CType.tweaken, CType.rename, SType.tweaken, RenameFun.tweaken]
+  simp [CaptureSet.rename_id]
+
 theorem Capless.CaptureSet.weaken_union {C1 C2 : Capless.CaptureSet n k} :
   (C1 ∪ C2).weaken = C1.weaken ∪ C2.weaken := by
   simp [Capless.CaptureSet.weaken, Capless.CaptureSet.rename]
@@ -37,33 +42,6 @@ theorem Capless.CaptureSet.weaken_csingleton :
 theorem TMap.ext_reach_succ {ρ : TMap n m k} :
   ρ.ext.reach x.succ = (ρ.reach x).succ := by
   simp [TMap.ext, Capless.FinFun.ext]
-
-theorem CaptureSet.interp_weaken
-  (hi : CaptureSet.Interp ρ Γ C D I) :
-  ∃ I', CaptureSet.Interp ρ' (Γ.var P) C.weaken D' I' := by
-  induction hi generalizing ρ' D'
-  case i_empty =>
-    simp [weaken, rename]
-    constructor; constructor
-  case i_union ih1 ih2 =>
-    have ⟨I1, ih1⟩ := ih1 (ρ' := ρ') (D' := D')
-    have ⟨I2, ih2⟩ := ih2 (ρ' := ρ') (D' := D')
-    rw [CaptureSet.weaken_union]
-    constructor; constructor <;> assumption
-  case i_singleton x0 _ _ _ _ _ hb _ ih =>
-    have hb1 := Context.Bound.there_var (T' := P) hb
-    simp [CType.weaken_capt] at hb1
-    simp [weaken, rename, Capless.FinFun.weaken]
-    have ⟨I, ih⟩ := ih (ρ' := ρ') (D' := {c=ρ'.reach x0.succ})
-    constructor; constructor
-    { exact hb1 }
-    { exact ih }
-  case i_reach =>
-    simp [weaken, rename, Capless.FinFun.weaken]
-    constructor; constructor
-  case i_cap =>
-    simp [weaken, rename]
-    constructor; constructor
 
 inductive CaptureSet.Lift : CaptureSet n -> CaptureSet n' -> Prop where
 | refl : CaptureSet.Lift C C
@@ -140,56 +118,54 @@ theorem CaptureSet.lift_reach
   ∃ y, D = {x*=y} :=
   CaptureSet.lift_reach' rfl hl
 
--- theorem CaptureSet.interp_complete'
---   (hl : CaptureSet.Lift C C') :
---   ∃ I, CaptureSet.Interp ρ Γ C' D I := by
---   rename_i n n' m k
---   induction n generalizing n' m k
---   case zero =>
---     induction C generalizing C' D
---     case empty =>
---       have h := CaptureSet.lift_empty hl
---       cases h
---       constructor; constructor
---     case union ih1 ih2 =>
---       have ⟨D1, D2, hl1, hl2, he⟩ := CaptureSet.lift_union hl
---       have ⟨I1, hi1⟩ := ih1 (D := D) hl1
---       have ⟨I2, hi2⟩ := ih2 (D := D) hl2
---       rw [he]
---       constructor; constructor <;> assumption
---     case singleton x0 => apply Fin.elim0 x0
---     case reach x0 => apply Fin.elim0 x0
---     case universal =>
---       have h := CaptureSet.lift_cap hl
---       rw [h]
---       constructor; constructor
---   case succ n0 ih =>
---     induction C generalizing C' D
---     case empty =>
---       have h := CaptureSet.lift_empty hl
---       cases h
---       constructor; constructor
---     case union ih1 ih2 =>
---       have ⟨D1, D2, hl1, hl2, he⟩ := CaptureSet.lift_union hl
---       have ⟨I1, hi1⟩ := ih1 (D := D) hl1
---       have ⟨I2, hi2⟩ := ih2 (D := D) hl2
---       rw [he]
---       constructor; constructor <;> assumption
---     case singleton x =>
---       cases x using Fin.cases
---       case zero => sorry
---       case succ x0 => sorry
---     case reach =>
---       have ⟨y0, h0⟩ := CaptureSet.lift_reach hl
---       rw [h0]
---       constructor; constructor
---     case universal =>
---       have h := CaptureSet.lift_cap hl
---       cases h
---       constructor; constructor
-
 def CaptureSet.InterpComplete (Γ : Context n m) :=
   ∀ {k} (ρ : TMap n m k) C D, ∃ I, CaptureSet.Interp ρ Γ C D I
+
+theorem CaptureSet.interp_weaken
+  (hi : CaptureSet.Interp ρ Γ C D I) :
+  ∃ I', CaptureSet.Interp ρ' (Γ.var P) C.weaken D' I' := by
+  induction hi generalizing ρ' D'
+  case i_empty =>
+    simp [weaken, rename]
+    constructor; constructor
+  case i_union ih1 ih2 =>
+    have ⟨I1, ih1⟩ := ih1 (ρ' := ρ') (D' := D')
+    have ⟨I2, ih2⟩ := ih2 (ρ' := ρ') (D' := D')
+    rw [CaptureSet.weaken_union]
+    constructor; constructor <;> assumption
+  case i_singleton x0 _ _ _ _ _ hb _ ih =>
+    have hb1 := Context.Bound.there_var (T' := P) hb
+    simp [CType.weaken_capt] at hb1
+    simp [weaken, rename, Capless.FinFun.weaken]
+    have ⟨I, ih⟩ := ih (ρ' := ρ') (D' := {c=ρ'.reach x0.succ})
+    constructor; constructor
+    { exact hb1 }
+    { exact ih }
+  case i_reach =>
+    simp [weaken, rename, Capless.FinFun.weaken]
+    constructor; constructor
+  case i_cap =>
+    simp [weaken, rename]
+    constructor; constructor
+
+theorem CaptureSet.interp_tweaken
+  (hi : CaptureSet.Interp ρ Γ C D I) :
+  ∃ I', CaptureSet.Interp ρ' (Γ.tvar S) C D' I' := by
+  induction hi generalizing ρ' D'
+  case i_empty => constructor; constructor
+  case i_union ih1 ih2 =>
+    have ⟨I1, ih1⟩ := ih1 (ρ' := ρ') (D' := D')
+    have ⟨I2, ih2⟩ := ih2 (ρ' := ρ') (D' := D')
+    constructor; constructor <;> assumption
+  case i_singleton x0 _ _ _ _ _ hb0 _ ih =>
+    have ⟨I0, hi0⟩ := ih (ρ' := ρ') (D' := {c=ρ'.reach x0})
+    have hb := Context.Bound.there_tvar (S := S) hb0
+    simp [CType.tweaken_capt] at hb
+    constructor; constructor
+    { exact hb }
+    { exact hi0 }
+  case i_reach => constructor; constructor
+  case i_cap => constructor; constructor
 
 theorem CaptureSet.interp_complete' :
   InterpComplete Γ := by
@@ -211,46 +187,32 @@ theorem CaptureSet.interp_complete' :
       have ⟨I1, ih1⟩ := ih1
       have ⟨I2, ih2⟩ := ih2
       constructor; constructor <;> assumption
-    case singleton x0 => sorry
+    case singleton x0 =>
+      cases P0; rename_i C0 S0
+      have ⟨T0, hb0⟩ := Context.bound_exists (Γ:=Γ0.var (S0^C0)) (x:=x0)
+      cases hb0
+      case here =>
+        have hb0 := Context.Bound.here (Γ := Γ0) (T := (S0^C0))
+        simp [CType.weaken_capt] at hb0
+        have ⟨I0, ih0⟩ := ih (ρ := ρ.strip) (C := C0) (D := {})
+        have ⟨I1, ih1⟩ := CaptureSet.interp_weaken (ρ':=ρ) (D':={c=ρ.reach 0}) (P:=(S0^C0)) ih0
+        constructor
+        constructor
+        { exact hb0 }
+        { exact ih1 }
+      case there_var x0 T0 hb0 =>
+        have ⟨I0, ih0⟩ := ih (ρ := ρ.strip) (C:={x=x0}) (D:={})
+        have ih1 := CaptureSet.interp_weaken (ρ':=ρ) (D':=D) (P:=(S0^C0)) ih0
+        exact ih1
     case reach => constructor; constructor
     case universal => constructor; constructor
-  case tvar Γ0 S0 ih => sorry
+  case tvar Γ0 S0 ih =>
+    have ⟨I0, h0⟩ := ih (ρ:=ρ.tstrip) (C:=C) (D:=D)
+    have h1 := CaptureSet.interp_tweaken (ρ':=ρ) (D':=D) (S:=S0) h0
+    exact h1
 
--- theorem CaptureSet.interp_complete :
---   ∃ I, CaptureSet.Interp ρ Γ C D I := by
---   rename_i n m k
---   induction n generalizing m k
---   case zero =>
---     induction C generalizing D
---     case empty => constructor; constructor
---     case union ih1 ih2 =>
---       have ⟨I1, ih1⟩ := ih1 (D := D)
---       have ⟨I2, ih2⟩ := ih2 (D := D)
---       constructor; constructor <;> assumption
---     case singleton x0 => apply Fin.elim0; assumption
---     case reach => constructor; constructor
---     case universal => constructor; constructor
---   case succ n0 ih =>
---     induction C generalizing D
---     case empty => constructor; constructor
---     case union ih1 ih2 =>
---       have ⟨I1, ih1⟩ := ih1 (D := D)
---       have ⟨I2, ih2⟩ := ih2 (D := D)
---       constructor; constructor <;> assumption
---     case singleton x0 =>
---       cases x0 using Fin.cases
---       case zero =>
---         cases Γ; rename_i Γ0 P
---         cases P; rename_i C S
---         have hb0 := Context.Bound.here (Γ := Γ0) (T := (S^C))
---         rw [CType.weaken_capt] at hb0
---         constructor
---         constructor
---         { exact hb0 }
---         { sorry }
---         all_goals sorry
---       case succ x0 => sorry
---     case reach => constructor; constructor
---     case universal => constructor; constructor
+theorem CaptureSet.interp_complete :
+  ∃ I, CaptureSet.Interp ρ Γ C D I :=
+  CaptureSet.interp_complete' ρ C D
 
 end Cappy

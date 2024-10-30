@@ -46,4 +46,24 @@ def TMap.cweaken (ρ : TMap n m k) : TMap n m (k+1) := by
     apply Fin.succ
     aesop
 
+def TMap.strip (ρ : TMap (n+1) m k) : TMap n m k := by
+  constructor
+  case reach =>
+    have h := ρ.reach
+    intro n
+    exact h (n.succ)
+  case treach =>
+    have h := ρ.treach
+    aesop
+
+def TMap.tstrip (ρ : TMap n (m+1) k) : TMap n m k := by
+  constructor
+  case reach =>
+    have h := ρ.reach
+    aesop
+  case treach =>
+    have h := ρ.treach
+    intro m
+    exact h (m.succ)
+
 end Cappy
