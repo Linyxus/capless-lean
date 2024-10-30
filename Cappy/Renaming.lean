@@ -18,5 +18,17 @@ def RenameFun.weaken : RenameFun n m (n+1) m :=
 def RenameFun.tweaken : RenameFun n m n (m+1) :=
   { map := Capless.FinFun.id, tmap := Capless.FinFun.weaken }
 
+def RenameFun.comp (g : RenameFun n' m' n'' m'') (f : RenameFun n m n' m') : RenameFun n m n'' m'' :=
+  { map := g.map ∘ f.map, tmap := g.tmap ∘ f.tmap }
+
+theorem RenameFun.comp_ext {g : RenameFun n' m' n'' m''} {f : RenameFun n m n' m'} :
+  (g.comp f).ext = g.ext.comp f.ext := by
+  simp [RenameFun.comp, RenameFun.ext]
+  simp [Capless.FinFun.ext_comp_ext]
+
+theorem RenameFun.comp_text {g : RenameFun n' m' n'' m''} {f : RenameFun n m n' m'} :
+  (g.comp f).text = g.text.comp f.text := by
+  simp [RenameFun.comp, RenameFun.text]
+  simp [Capless.FinFun.ext_comp_ext]
 
 end Cappy
