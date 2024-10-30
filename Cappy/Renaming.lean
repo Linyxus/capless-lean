@@ -31,4 +31,9 @@ theorem RenameFun.comp_text {g : RenameFun n' m' n'' m''} {f : RenameFun n m n' 
   simp [RenameFun.comp, RenameFun.text]
   simp [Capless.FinFun.ext_comp_ext]
 
+theorem RenameFun.weaken_tweaken :
+  tweaken.comp (weaken : RenameFun n m (n+1) m) = weaken.comp tweaken := by
+  simp [tweaken, weaken, comp]
+  aesop
+
 end Cappy

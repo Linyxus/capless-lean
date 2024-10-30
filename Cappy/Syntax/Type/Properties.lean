@@ -35,4 +35,10 @@ theorem SType.rename_comp {S : SType n m} :
 
 end
 
+theorem CType.tweaken_weaken {T : CType n m} :
+  T.weaken.tweaken = T.tweaken.weaken := by
+  simp [CType.weaken, CType.tweaken]
+  simp [CType.rename_comp]
+  simp [RenameFun.weaken_tweaken]
+
 end Cappy
