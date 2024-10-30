@@ -70,4 +70,11 @@ def CapSubst.open_cap (D : CaptureSet n) : CapSubst n n :=
 def CaptureSet.open_cap (C : CaptureSet n) (D : CaptureSet n) : CaptureSet n :=
   C.subst (CapSubst.open_cap D)
 
+theorem CaptureSet.rename_comp {C : CaptureSet n} :
+  (C.rename f).rename g = C.rename (g.comp f) := by
+  induction C generalizing f g <;> try (solve | simp [rename])
+  case union ih1 ih2 =>
+    simp [rename]
+    aesop
+
 end Cappy
