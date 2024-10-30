@@ -77,4 +77,11 @@ theorem CaptureSet.rename_comp {C : CaptureSet n} :
     simp [rename]
     aesop
 
+theorem CaptureSet.rename_id {C : CaptureSet n} :
+  C.rename Capless.FinFun.id = C := by
+  induction C <;> try (solve | simp [rename, Capless.FinFun.id])
+  case union ih1 ih2 =>
+    simp [rename]
+    aesop
+
 end Cappy
