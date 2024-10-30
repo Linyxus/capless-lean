@@ -1,4 +1,5 @@
 import Cappy.Syntax.Context.Core
+import Cappy.Syntax.Type.Properties
 namespace Cappy
 
 theorem Context.var_bound_succ'
@@ -46,16 +47,19 @@ theorem Context.bound_exists {x : Fin n} {Γ : Context n m} :
     constructor; constructor
     assumption
 
-theorem Context.var_bound_succ_exists {x : Fin (n+1)} {Γ : Context (n+1) m} :
-  ∃ T, Context.Bound Γ x (CType.weaken T) := by
-  cases Γ
-  case var Γ0 P0 =>
-    cases x using Fin.cases
-    case zero => constructor; constructor
-    case succ x0 =>
-      have ⟨T0, h0⟩ := Context.bound_exists (Γ := Γ0) (x := x0)
-      constructor; constructor
-      assumption
-  case tvar Γ0 R0 => sorry
+inductive CType.Weakened : CType n m -> Prop where
+| mk :
+  CType.Weakened (CType.weaken T)
+
+theorem Context.bound_weaken
+  (hb : Context.Bound Γ x T) :
+  T.Weakened := by
+  induction hb
+  case here => constructor
+  case there_var => constructor
+  case there_tvar ih =>
+    cases ih
+    simp [CType.tweaken_weaken]
+    constructor
 
 end Cappy
