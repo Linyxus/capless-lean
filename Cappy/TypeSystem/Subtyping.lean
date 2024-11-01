@@ -1,6 +1,12 @@
 import Cappy.TypeSystem.Subcapturing
 namespace Cappy
 
+inductive SubAnnot : Annot -> Annot -> Prop where
+| refl :
+  SubAnnot a a
+| use :
+  SubAnnot Annot.eps Annot.use
+
 mutual
 
 inductive CSubtyp : Context n m -> CType n m -> CType n m -> Prop where
@@ -25,16 +31,12 @@ inductive SSubtyp : Context n m -> SType n m -> SType n m -> Prop where
   CSubtyp Γ T1 T2 ->
   SSubtyp Γ (SType.boxed T1) (SType.boxed T2)
 | arrow :
-  CSubtyp Γ T2 T1 ->
-  CSubtyp (Γ.var T2) U1 U2 ->
-  SSubtyp Γ (∀(x:T1)U1) (SType.arrow a T2 U2)
-| uarrow :
+  SubAnnot a1 a2 ->
   CSubtyp (Γ.var T) U1 U2 ->
-  SSubtyp Γ (∀(use x:T)U1) (∀(use x:T)U2)
+  SSubtyp Γ (SType.arrow a1 T U1) (SType.arrow a2 T U2)
 | tarrow :
-  SSubtyp Γ S2 S1 ->
-  CSubtyp (Γ.tvar S2) T1 T2 ->
-  SSubtyp Γ (∀[X<:S1]T1) (∀[X<:S2]T2)
+  CSubtyp (Γ.tvar S) T1 T2 ->
+  SSubtyp Γ (∀[X<:S]T1) (∀[X<:S]T2)
 
 end
 
