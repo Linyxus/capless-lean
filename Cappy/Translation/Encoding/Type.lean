@@ -40,7 +40,7 @@ inductive CType.Interp : TMap n m k -> Context n m -> CType n m -> Capless.Captu
 | i_tarrow :
   CaptureSet.Interp ρ Γ C D C' ->
   CType.Interp ρ.cweaken Γ (S^{}) ({c=0}) (S'^{}) ->
-  CType.Interp ρ.text (Γ.tvar S) T (D.cweaken) T' ->
+  CType.Interp ρ.text (Γ.tvar S) T (D.cweaken ∪ {c=0}) T' ->
   CType.Interp ρ Γ
     ((∀[X<:S]T)^C)
     D
