@@ -3,6 +3,13 @@ import Cappy.TypeSystem
 import Capless.Subtyping
 namespace Cappy
 
+theorem CType.interp_monotonic_cs
+  (hi : CType.Interp ρ Γ (S^C1) D1 Q1)
+  (hs : Subcapt Γ C1 C2) :
+  ∃ D2 Q2,
+    CType.Interp ρ Γ (S^C2) D2 Q2 ∧
+    Capless.CSubtyp Δ Q1 Q2 := sorry
+
 def CType.interp_monotonic.motive_1
   (Γ : Context n m)
   (T1 T2 : CType n m)
@@ -23,7 +30,6 @@ def CType.interp_monotonic.motive_2
     CType.Interp ρ Γ (S2^C) D2 Q2 ∧
     (Δ ⊢ Q1 <: Q2)
 
-
 theorem CType.interp_monotonic
   (hg : Context.Interp Γ ⟨Δ, ρ⟩)
   (hsub : CSubtyp Γ T1 T2)
@@ -39,6 +45,8 @@ theorem CType.interp_monotonic
   all_goals try assumption
   case capt =>
     repeat intro
+    rename_i hsc hs ih _ Δ ρ hg D1 Q1 hi1
+    unfold interp_monotonic.motive_2 at ih
     sorry
   case top => sorry
   case refl => sorry
