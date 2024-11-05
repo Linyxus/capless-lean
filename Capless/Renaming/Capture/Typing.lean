@@ -9,12 +9,14 @@ theorem Typed.crename
   (ρ : CVarMap Γ f Δ) :
   Typed Δ (t.crename f) (E.crename f) (Ct.crename f) := by
   induction h generalizing k'
-  case var hb =>
+  case var hb ha =>
     simp [Term.crename, EType.crename, CType.crename]
     apply var
-    have hb1 := ρ.map _ _ hb
-    simp [CType.crename] at hb1
-    exact hb1
+    { have hb1 := ρ.map _ _ hb
+      simp [CType.crename] at hb1
+      exact hb1 }
+    { have ha1 := ha.crename (f := f)
+      aesop }
   case pack ih =>
     simp [Term.crename, EType.crename]
     apply pack

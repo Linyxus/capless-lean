@@ -9,12 +9,14 @@ theorem Typed.rename
   (ρ : VarMap Γ f Δ) :
   Typed Δ (t.rename f) (E.rename f) (Ct.rename f) := by
   induction h generalizing n'
-  case var hb =>
+  case var hb ha =>
     simp [Term.rename, EType.rename, CType.rename]
     apply Typed.var
-    have hb1 := ρ.map _ _ hb
-    simp [CType.rename] at hb1
-    trivial
+    { have hb1 := ρ.map _ _ hb
+      simp [CType.rename] at hb1
+      trivial }
+    { have ha1 := ha.rename (f := f)
+      exact ha1 }
   case pack ih =>
     simp [Term.rename, EType.rename]
     apply Typed.pack
