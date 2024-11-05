@@ -32,9 +32,11 @@ inductive SType.AnchorUniversal : SType n m k -> CaptureSet n k -> SType n m k -
 | arrow :
   SType.AnchorUniversal (∀(x:T)U) C (∀(x:T)U)
 | tarrow :
-  SType.AnchorUniversal (∀[X<:S]E) C (∀[X<:S]E)
+  EType.AnchorType E C E' ->
+  SType.AnchorUniversal (∀[X<:S]E) C (∀[X<:S]E')
 | carrow :
-  SType.AnchorUniversal (∀[c]E) C (∀[c]E)
+  EType.AnchorCapture E C E' ->
+  SType.AnchorUniversal (∀[c]E) C (∀[c]E')
 | box :
   SType.AnchorUniversal (SType.box T) C (SType.box T)
 
