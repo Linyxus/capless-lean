@@ -1,5 +1,6 @@
 import Capless.Context
 import Capless.CaptureSet
+import Capless.Anchoring
 namespace Capless
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
@@ -15,7 +16,8 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Subcapt Γ C2 C3 ->
   Subcapt Γ (C1 ∪ C2) C3
 | var :
-  Context.Bound Γ x (S^C) ->
+  SType.Anchor S C T ->
+  Context.Bound Γ x T ->
   Subcapt Γ {x=x} C
 | cinstl :
   Context.CBound Γ c (CBinding.inst C) ->

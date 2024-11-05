@@ -8,7 +8,8 @@ namespace Capless
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -> Prop where
 | var :
   Context.Bound Γ x (S^C) ->
-  Typed Γ (Term.var x) (S^{x=x}) {x=x}
+  SType.Anchor S {x=x} T ->
+  Typed Γ (Term.var x) T {x=x}
 | label :
   Context.LBound Γ x S ->
   Typed Γ (Term.var x) (Label[S]^{x=x}) {x=x}
