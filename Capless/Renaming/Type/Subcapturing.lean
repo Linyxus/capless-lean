@@ -1,5 +1,6 @@
 import Capless.Subcapturing
 import Capless.Renaming.Basic
+import Capless.Renaming.Type.Anchoring
 import Mathlib.Data.Finset.Image
 namespace Capless
 
@@ -14,11 +15,12 @@ theorem Subcapt.trename
     trivial
   case union ih1 ih2 =>
     apply union <;> aesop
-  case var hb =>
+  case var ha hb =>
     apply var
-    have hb1 := ρ.map _ _ hb
-    simp [EType.trename, CType.trename] at hb1
-    exact hb1
+    { apply SType.Anchor.trename <;> easy }
+    { have hb1 := ρ.map _ _ hb
+      simp [EType.trename, CType.trename] at hb1
+      exact hb1 }
   case cinstl hb =>
     apply cinstl
     have hb1 := ρ.cmap _ _ hb
