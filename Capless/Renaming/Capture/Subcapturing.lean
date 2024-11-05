@@ -1,5 +1,6 @@
 import Capless.Subcapturing
 import Capless.Renaming.Basic
+import Capless.Renaming.Capture.Anchoring
 import Mathlib.Data.Finset.Image
 namespace Capless
 
@@ -24,9 +25,10 @@ theorem Subcapt.crename
   case var hb =>
     simp [CaptureSet.crename_singleton]
     apply var
-    have hb1 := ρ.map _ _ hb
-    simp [EType.crename, CType.crename] at hb1
-    assumption
+    { apply SType.Anchor.crename; easy }
+    { have hb1 := ρ.map _ _ hb
+      simp [EType.crename, CType.crename] at hb1
+      assumption }
   case cinstl hb =>
     simp [CaptureSet.crename_csingleton]
     have hb1 := ρ.cmap _ _ hb
