@@ -11,6 +11,9 @@ package «capless» where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
+-- require Duper from git
+--   "https://github.com/leanprover-community/duper.git" @ "v0.0.19"
+
 @[default_target]
 lean_lib «Capless» where
   -- add any library configuration options here
