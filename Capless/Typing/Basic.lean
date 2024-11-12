@@ -9,8 +9,9 @@ theorem Typing.inv_subcapt'
   (h : Typed Γ t0 E0 C0) :
   Subcapt Γ {x=x} C := by
   induction h <;> try (solve | cases he1 | cases he2)
-  case var =>
+  case var ha =>
     cases he1; cases he2
+    cases ha
     apply Subcapt.refl
   case label =>
     cases he1; cases he2
