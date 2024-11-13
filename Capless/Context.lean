@@ -6,9 +6,12 @@ inductive TBinding : Nat -> Nat -> Nat -> Type where
 | bound : SType n m k -> TBinding n m k
 | inst : SType n m k -> TBinding n m k
 
+inductive CBound : Nat -> Nat -> Type where
+| upper : CaptureSet n k -> CBound n k
+| star : CBound n k
+
 inductive CBinding : Nat -> Nat -> Type where
-| bound : CBinding n k
-| ubound : CaptureSet n k -> CBinding n k
+| bound : CBound n k -> CBinding n k
 | inst : CaptureSet n k -> CBinding n k
 
 def TBinding.rename (b : TBinding n m k) (f : FinFun n n') : TBinding n' m k :=
@@ -26,16 +29,24 @@ def TBinding.crename (b : TBinding n m k) (f : FinFun k k') : TBinding n m k' :=
   | bound S => bound (S.crename f)
   | inst S => inst (S.crename f)
 
+def CBound.rename (b : CBound n k) (f : FinFun n n') : CBound n' k :=
+  match b with
+  | upper C => upper (C.rename f)
+  | star => star
+
 def CBinding.rename (b : CBinding n k) (f : FinFun n n') : CBinding n' k :=
   match b with
-  | bound => bound
-  | ubound C => ubound (C.rename f)
+  | bound b0 => bound (b0.rename f)
   | inst C => inst (C.rename f)
+
+def CBound.crename (b : CBound n k) (f : FinFun k k') : CBound n k' :=
+  match b with
+  | upper C => upper (C.crename f)
+  | star => star
 
 def CBinding.crename (b : CBinding n k) (f : FinFun k k') : CBinding n k' :=
   match b with
-  | bound => bound
-  | ubound C => ubound (C.crename f)
+  | bound b0 => bound (b0.crename f)
   | inst C => inst (C.crename f)
 
 def TBinding.weaken (b : TBinding n m k) : TBinding (n+1) m k :=
@@ -126,9 +137,18 @@ inductive Context.LBound : Context n m k -> Fin n -> SType n m k -> Prop where
   LBound Γ x S ->
   LBound (label Γ S') x.succ S.weaken
 
+theorem CBound.crename_rename_comm {b : CBound n k} :
+  (b.crename f).rename g = (b.rename g).crename f := by
+  cases b <;>
+    simp [rename, crename,
+          CaptureSet.crename_rename_comm]
+
 theorem CBinding.crename_rename_comm {b : CBinding n k} :
   (b.crename f).rename g = (b.rename g).crename f := by
-  cases b <;> simp [rename, crename, CaptureSet.crename_rename_comm]
+  cases b <;>
+    simp [rename, crename,
+          CBound.crename_rename_comm,
+          CaptureSet.crename_rename_comm]
 
 theorem TBinding.crename_rename_comm {b : TBinding n m k} :
   (b.crename f).rename g = (b.rename g).crename f := by
@@ -150,9 +170,14 @@ theorem TBinding.rename_rename {b : TBinding n m k} :
   case bound => simp [rename, SType.rename_rename]
   case inst => simp [rename, SType.rename_rename]
 
-theorem CBinding.rename_rename {b : CBinding n k} :
+theorem CBound.rename_rename {b : CBound n k} :
   (b.rename f).rename g = b.rename (g ∘ f) := by
   cases b <;> simp [rename, CaptureSet.rename_rename]
+
+theorem CBinding.rename_rename {b : CBinding n k} :
+  (b.rename f).rename g = b.rename (g ∘ f) := by
+  cases b
+    <;> simp [rename, CBound.rename_rename, CaptureSet.rename_rename]
 
 theorem TBinding.crename_crename {b : TBinding n m k} :
   (b.crename f).crename g = b.crename (g ∘ f) := by
@@ -160,9 +185,13 @@ theorem TBinding.crename_crename {b : TBinding n m k} :
   case bound => simp [crename, SType.crename_crename]
   case inst => simp [crename, SType.crename_crename]
 
-theorem CBinding.crename_crename {b : CBinding n k} :
+theorem CBound.crename_crename {b : CBound n k} :
   (b.crename f).crename g = b.crename (g ∘ f) := by
   cases b <;> simp [crename, CaptureSet.crename_crename]
+
+theorem CBinding.crename_crename {b : CBinding n k} :
+  (b.crename f).crename g = b.crename (g ∘ f) := by
+  cases b <;> simp [crename, CBound.crename_crename, CaptureSet.crename_crename]
 
 theorem TBinding.trename_trename {b : TBinding n m k} :
   (b.trename f).trename g = b.trename (g ∘ f) := by
@@ -232,9 +261,13 @@ theorem TBinding.rename_id {b : TBinding n m k} :
   case bound => simp [rename, SType.rename_id]
   case inst => simp [rename, SType.rename_id]
 
-theorem CBinding.rename_id {b : CBinding n k} :
+theorem CBound.rename_id {b : CBound n k} :
   b.rename FinFun.id = b := by
   cases b <;> simp [rename, CaptureSet.rename_id]
+
+theorem CBinding.rename_id {b : CBinding n k} :
+  b.rename FinFun.id = b := by
+  cases b <;> simp [rename, CBound.rename_id, CaptureSet.rename_id]
 
 theorem TBinding.trename_id {b : TBinding n m k} :
   b.trename FinFun.id = b := by
@@ -248,9 +281,13 @@ theorem TBinding.crename_id {b : TBinding n m k} :
   case bound => simp [crename, SType.crename_id]
   case inst => simp [crename, SType.crename_id]
 
-theorem CBinding.crename_id {b : CBinding n k} :
+theorem CBound.crename_id {b : CBound n k} :
   b.crename FinFun.id = b := by
   cases b <;> simp [crename, CaptureSet.crename_id]
+
+theorem CBinding.crename_id {b : CBinding n k} :
+  b.crename FinFun.id = b := by
+  cases b <;> simp [crename, CBound.crename_id, CaptureSet.crename_id]
 
 theorem Context.cvar_bound_var_inv'
   (he : Γ0 = Context.cvar Γ b)
@@ -275,7 +312,7 @@ theorem CBinding.eq_inst_cweaken_inv {b : CBinding n k}
     exists C0
 
 theorem Context.cvar_bound_cvar_inst_inv' {Γ : Context n m k}
-  (he1 : Γ' = Context.cvar Γ CBinding.bound)
+  (he1 : Γ' = Context.cvar Γ (CBinding.bound b0))
   (he2 : b' = CBinding.inst C)
   (hb : Context.CBound Γ' c b') :
   ∃ c0 C0, c = c0.succ ∧ C = C0.cweaken ∧ Context.CBound Γ c0 (CBinding.inst C0) := by
@@ -291,7 +328,7 @@ theorem Context.cvar_bound_cvar_inst_inv' {Γ : Context n m k}
     exists x0, C0; simp [CaptureSet.cweaken]; aesop
 
 theorem Context.cvar_bound_cvar_inst_inv {Γ : Context n m k}
-  (hb : Context.CBound (Context.cvar Γ CBinding.bound) c (CBinding.inst C)) :
+  (hb : Context.CBound (Context.cvar Γ (CBinding.bound b0)) c (CBinding.inst C)) :
   ∃ c0 C0, c = c0.succ ∧ C = C0.cweaken ∧ Context.CBound Γ c0 (CBinding.inst C0) := by
   apply Context.cvar_bound_cvar_inst_inv' rfl rfl hb
 
