@@ -5,7 +5,7 @@ namespace Capless
 inductive SType.IsValue : SType n m k -> Prop where
 | xforall : SType.IsValue (∀(x:T)U)
 | tforall : SType.IsValue (∀[X<:S]T)
-| cforall : SType.IsValue (∀[c]T)
+| cforall : SType.IsValue (∀[c<:B]T)
 | box : SType.IsValue (□ T)
 
 @[aesop safe [constructors, cases]]
