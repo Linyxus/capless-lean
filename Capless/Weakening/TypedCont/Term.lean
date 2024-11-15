@@ -66,6 +66,11 @@ theorem WellScoped.weaken
     { have hb1 := Context.CBound.there_var (E:=T) hb
       exact hb1 }
     { exact ih }
+  case cbound hb _ ih =>
+    apply cbound
+    { have hb1 := Context.CBound.there_var (E:=T) hb
+      exact hb1 }
+    { exact ih }
   case label hb hs =>
     apply label
     { have hb1 := Context.LBound.there_var (E:=T) hb
@@ -85,7 +90,7 @@ theorem TypedCont.weaken
     have heq : ∀ {n m k} {T0 : CType n m k}, (EType.type T0).weaken = EType.type T0.weaken := by
       intro T0
       simp [EType.weaken, EType.rename, CType.weaken]
-    rw [heq]
+    -- rw [heq]
     apply cons
     { rename_i ht _ _
       have ht1 := ht.weaken_ext (P := T)
@@ -111,7 +116,8 @@ theorem TypedCont.weaken
     apply scope
     { constructor; aesop }
     { aesop }
-    { apply hs.weaken }
+    { have h1 := hs.weaken (T:=T)
+      aesop }
 
 theorem Cont.HasLabel.lweaken
   (h : Cont.HasLabel cont x tail) :
@@ -153,6 +159,11 @@ theorem WellScoped.lweaken
     { have hb1 := Context.CBound.there_label (S:=S) hb
       exact hb1 }
     { exact ih }
+  case cbound hb _ ih =>
+    apply cbound
+    { have hb1 := Context.CBound.there_label (S:=S) hb
+      exact hb1 }
+    { exact ih }
   case label hb hs =>
     apply label
     { have hb1 := Context.LBound.there_label (S':=S) hb
@@ -172,7 +183,7 @@ theorem TypedCont.lweaken
     have heq : ∀ {n m k} {T0 : CType n m k}, (EType.type T0).weaken = EType.type T0.weaken := by
       intro T0
       simp [EType.weaken, EType.rename, CType.weaken]
-    rw [heq]
+    -- rw [heq]
     apply cons
     { rename_i ht _ _
       have ht1 := ht.lweaken_ext (P := S)
@@ -198,6 +209,7 @@ theorem TypedCont.lweaken
     apply scope
     { constructor; aesop }
     { aesop }
-    { apply hs.lweaken }
+    { have h1 := hs.lweaken (S:=S)
+      aesop }
 
 end Capless

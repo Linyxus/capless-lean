@@ -452,7 +452,7 @@ theorem Context.var_cbound_inv_inst
 
 theorem Context.cvar_bound_cbound_inv_inst'
   (he : b = CBinding.inst C)
-  (hb : Context.CBound (Γ,c:CapSet) c b) :
+  (hb : Context.CBound (Γ,c<:B) c b) :
   ∃ c0 C0, Context.CBound Γ c0 (CBinding.inst C0)
     ∧ c = c0.succ
     ∧ C = C0.cweaken := by
@@ -464,7 +464,7 @@ theorem Context.cvar_bound_cbound_inv_inst'
     aesop
 
 theorem Context.cvar_bound_cbound_inv_inst
-  (hb : Context.CBound (Γ,c:CapSet) c (CBinding.inst C)) :
+  (hb : Context.CBound (Γ,c<:B) c (CBinding.inst C)) :
   ∃ c0 C0, Context.CBound Γ c0 (CBinding.inst C0)
     ∧ c = c0.succ
     ∧ C = C0.cweaken := by

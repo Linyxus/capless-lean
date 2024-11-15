@@ -8,9 +8,9 @@ theorem EType.cweaken_ex (T : CType n m (k+1)) :
   (EType.ex T).cweaken = EType.ex T.cweaken1 := by
   simp [EType.cweaken, EType.crename, CType.cweaken1]
 
-theorem EType.cweaken_type (T : CType n m k) :
-  (EType.type T).cweaken = EType.type T.cweaken := by
-  simp [EType.cweaken, EType.crename, CType.cweaken]
+-- theorem EType.cweaken_type (T : CType n m k) :
+--   (EType.type T).cweaken = EType.type T.cweaken := by
+--   simp [EType.cweaken, EType.crename, CType.cweaken]
 
 theorem EType.cweaken_weaken (E : EType n m k) :
   E.weaken.cweaken = E.cweaken.weaken := by
@@ -62,6 +62,12 @@ theorem WellScoped.cweaken
       simp [CType.cweaken, CType.crename] at hb1
       exact hb1 }
     { exact ih }
+  case cbound hb _ ih =>
+    apply cbound
+    { have hb1 := Context.CBound.there_cvar (b' := b) hb
+      simp [CType.cweaken, CType.crename] at hb1
+      exact hb1 }
+    { exact ih }
   case label hb hs =>
     apply label
     { have hb1 := Context.LBound.there_cvar (b := b) hb
@@ -102,7 +108,9 @@ theorem TypedCont.cweaken
     apply scope
     have hb1 := Context.LBound.there_cvar (b := b) hb
     exact hb1
+    simp at ih
     apply ih
-    apply hs.cweaken
+    have h := hs.cweaken (b:=b)
+    aesop
 
 end Capless
