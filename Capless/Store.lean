@@ -108,7 +108,7 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   TypedCont Γ E cont E' C ->
   TypedCont Γ (EType.type T) (Cont.cons t cont) E' (C ∪ Ct)
 | conse {Ct : CaptureSet n k} :
-  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) Ct.cweaken.weaken ->
+  Typed ((Γ.cvar (CBinding.bound CBound.star)).var T) t (EType.weaken (EType.cweaken E)) Ct.cweaken.weaken ->
   WellScoped Γ cont Ct ->
   TypedCont Γ E cont E' C ->
   TypedCont Γ (EType.ex T) (Cont.conse t cont) E' (C ∪ Ct)
