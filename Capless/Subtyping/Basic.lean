@@ -23,7 +23,7 @@ theorem ESubtyp.type_inv_subcapt
 
 theorem ESubtyp.ex_inv_subcapt
   (h : ESubtyp Γ E (EType.ex (CType.capt C S))) :
-  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ Subcapt (Γ.cvar CBinding.bound) C0 C := by
+  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ Subcapt (Γ.cvar (CBinding.bound CBound.star)) C0 C := by
   cases h
   case exist hs =>
     cases hs
