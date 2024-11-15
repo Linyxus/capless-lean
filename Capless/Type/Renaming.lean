@@ -13,6 +13,12 @@ def CBound.crename (b : CBound n k) (f : FinFun k k') : CBound n k' :=
   | upper C => upper (C.crename f)
   | star => star
 
+def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
+  b.rename FinFun.weaken
+
+def CBound.cweaken (b : CBound n k) : CBound n (k+1) :=
+  b.crename FinFun.weaken
+
 mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k

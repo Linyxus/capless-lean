@@ -4,6 +4,19 @@ import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subcapturing
 namespace Capless
 
+theorem Subbound.crename
+  (h : Subbound Γ B1 B2)
+  (ρ : CVarMap Γ f Δ) :
+  Subbound Δ (B1.crename f) (B2.crename f) := by
+  cases h
+  case set =>
+    simp [CBound.crename]
+    apply Subbound.set
+    apply Subcapt.crename <;> easy
+  case star =>
+    simp [CBound.crename]
+    apply Subbound.star
+
 def SSubtyp.crename_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
@@ -128,16 +141,17 @@ theorem SSubtyp.crename
     apply SSubtyp.tforall
     aesop
     rename_i ih1 ih2 _ _ _ _
-    apply ih2 <;> try assumption
-    apply CVarMap.text <;> trivial
+    apply ih2; try easy
+    apply CVarMap.text; easy
   case cforall =>
     unfold crename_motive1 crename_motive3
     repeat intro
     simp [SType.crename]
     apply SSubtyp.cforall
-    rename_i ih _ _ _ _
-    apply ih
-    apply CVarMap.cext <;> trivial
+    { apply Subbound.crename <;> easy }
+    { rename_i ih _ _ _ _
+      apply ih
+      apply CVarMap.cext; easy }
 
 theorem CSubtyp.crename
   (h : CSubtyp Γ C1 C2)
