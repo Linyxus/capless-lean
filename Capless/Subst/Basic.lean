@@ -29,6 +29,8 @@ structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k')
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f c) (CBinding.inst (C.crename f))
+  cmap_bound : ∀ c B, Γ.CBound c (CBinding.bound B) ->
+    Subbound Δ (CBound.upper {c=f c}) (B.crename f)
   lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
