@@ -9,7 +9,7 @@ theorem Subcapt.tsubst
   induction h
   case trans => apply trans <;> aesop
   case subset hsub =>
-    apply subset ; aesop
+    apply subset; easy
   case union h1 h2 =>
     apply union <;> aesop
   case var hb =>
@@ -18,9 +18,12 @@ theorem Subcapt.tsubst
     apply var <;> aesop
   case cinstl hb =>
     have hb1 := σ.cmap _ _ hb
-    apply cinstl ; aesop
+    apply cinstl; easy
   case cinstr hb =>
     have hb1 := σ.cmap _ _ hb
-    apply cinstr ; aesop
+    apply cinstr; easy
+  case cbound hb =>
+    have hb1 := σ.cmap _ _ hb
+    apply cbound; easy
 
 end Capless
