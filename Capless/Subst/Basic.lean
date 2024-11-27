@@ -755,7 +755,29 @@ def CVarSubst.open :
     simp [CaptureSet.crename_id]
     trivial
   case cmap_bound =>
-    sorry
+    intro c0 b0 hb0
+    have h := Context.cvar_cbound_inv hb0
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      cases he1; cases b0 <;> cases he2
+      simp [FinFun.open]
+      simp [CBound.crename, CaptureSet.crename_csingleton]
+      simp [FinFun.weaken, FinFun.open]
+      constructor; apply Subcapt.refl
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.open]
+      simp [CBound.crename_crename]
+      simp [FinFun.open_comp_weaken, CBound.crename_id]
+      rename_i cb; cases cb
+      case star => constructor
+      case upper D0 =>
+        constructor
+        apply Subcapt.cbound
+        easy
   case lmap =>
     intro l S hb
     cases hb
