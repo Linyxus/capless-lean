@@ -110,4 +110,11 @@ theorem CSubtyp.cweaken
   apply? CSubtyp.crename
   apply CVarMap.weaken
 
+theorem Subbound.cweaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.cvar b) B1.cweaken B2.cweaken := by
+  simp [CBound.cweaken]
+  apply? Subbound.crename
+  apply CVarMap.weaken
+
 end Capless

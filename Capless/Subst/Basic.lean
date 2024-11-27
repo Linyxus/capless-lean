@@ -542,7 +542,15 @@ def CVarSubst.cext {Γ : Context n m k}
         rw [<- CaptureSet.cweaken_def]
         rw [<- CaptureSet.cweaken_crename]
         constructor
-    case inr h => sorry
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.ext]
+      have h := σ.cmap_bound _ _ hb1
+      have h' := h.cweaken (b := b.crename f)
+      rw [CBound.cweaken_crename] at h'
+      easy
 
 def VarSubst.open
   (hx : Typed Γ (Term.var x) (EType.type T) Cx) :
