@@ -24,6 +24,14 @@ theorem CBound.crename_id {b : CBound n k} :
   b.crename FinFun.id = b := by
   cases b <;> simp [crename, CaptureSet.crename_id]
 
+theorem CBound.cweaken_crename {b : CBound n k} :
+  (b.crename f).cweaken = b.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
+theorem CBound.cweaken_def {b : CBound n k} :
+  b.cweaken = b.crename FinFun.weaken := by
+  simp [cweaken]
+
 mutual
 
 theorem EType.crename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun k k') :

@@ -31,4 +31,14 @@ def CType.cweaken_capt :
   (CType.capt C S).cweaken = CType.capt C.cweaken S.cweaken := by
   simp [CType.cweaken, CType.crename, SType.cweaken, CaptureSet.cweaken]
 
+@[simp]
+def CBound.weaken_upper :
+  (CBound.upper C).weaken = CBound.upper C.weaken := by
+  simp [CBound.weaken, CBound.rename, CaptureSet.weaken]
+
+@[simp]
+def CBound.cweaken_upper :
+  (CBound.upper C).cweaken = CBound.upper C.cweaken := by
+  simp [CBound.cweaken, CBound.crename, CaptureSet.cweaken]
+
 end Capless

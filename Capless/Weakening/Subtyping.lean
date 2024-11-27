@@ -13,6 +13,14 @@ theorem SSubtyp.weaken
   { apply h }
   { apply VarMap.weaken }
 
+theorem Subbound.weaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.var b) B1.weaken B2.weaken := by
+  simp [CBound.weaken]
+  apply Subbound.rename
+  { apply h }
+  { apply VarMap.weaken }
+
 theorem SSubtyp.lweaken
   (h : SSubtyp Γ S1 S2) :
   ∀ S, SSubtyp (Γ.label S) S1.weaken S2.weaken := by
@@ -73,6 +81,12 @@ theorem CSubtyp.tweaken
   CSubtyp (Γ.tvar b) E1.tweaken E2.tweaken := by
   simp [CType.tweaken]
   apply? CSubtyp.trename
+  apply TVarMap.weaken
+
+theorem Subbound.tweaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.tvar b) B1 B2 := by
+  apply? Subbound.trename
   apply TVarMap.weaken
 
 theorem ESubtyp.cweaken
