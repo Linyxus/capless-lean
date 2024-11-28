@@ -114,11 +114,13 @@ theorem Typed.tsubst
       apply label; assumption
     case invoke ih1 ih2 =>
       simp [Term.trename]
+      simp [EType.trename, CType.trename, SType.trename] at ih1 ih2
       apply invoke
       apply ih1; assumption
       apply ih2; assumption
     case boundary ih =>
       simp [Term.trename]
+      simp [EType.trename, CType.trename, SType.trename]
       apply boundary
       have ih := ih (σ.cext.ext _)
       simp [EType.trename, CType.trename, SType.trename] at ih
