@@ -27,19 +27,19 @@ theorem Typed.subst
     { apply ih; trivial }
     { apply! hsc.subst }
     { apply! hs.subst }
-  case abs hc ih =>
+  case abs ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply abs
     { rw [CaptureSet.weaken_rename]
       rw [<- CaptureSet.ext_rename_singleton_zero (f := f)]
       apply ih
       apply σ.ext }
-  case tabs hc ih =>
+  case tabs ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply tabs
     { apply ih
       apply σ.text }
-  case cabs hc ih =>
+  case cabs ih =>
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply cabs
     { rw [<- CaptureSet.cweaken_rename_comm]
@@ -125,11 +125,13 @@ theorem Typed.subst
     aesop
   case invoke ih1 ih2 =>
     simp [Term.rename]
+    simp [EType.rename, CType.rename, SType.rename] at *
     apply invoke
     apply ih1; assumption
     apply ih2; assumption
   case boundary ih =>
     simp [Term.rename]
+    simp [EType.rename, CType.rename, SType.rename] at *
     apply boundary
     have ih := ih (σ.cext.ext _)
     simp
