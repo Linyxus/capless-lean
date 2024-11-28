@@ -3,6 +3,13 @@ import Capless.Subtyping
 import Capless.Subst.Type.Subcapturing
 namespace Capless
 
+theorem Subbound.tsubst
+  (h : Subbound Γ B1 B2)
+  (σ : TVarSubst Γ f Δ) :
+  Subbound Δ B1 B2 := by
+  cases h <;> constructor
+  apply Subcapt.tsubst <;> easy
+
 def SSubtyp.tsubst_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
@@ -130,6 +137,7 @@ theorem SSubtyp.tsubst
       repeat intro
       simp [SType.trename]
       apply cforall
+      { apply Subbound.tsubst <;> easy }
       { rename_i ih _ _ _ σ
         apply ih ; try assumption
         apply TVarSubst.cext; trivial }
