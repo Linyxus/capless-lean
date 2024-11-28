@@ -686,14 +686,14 @@ def SSubtyp.dealias_cforall_inv.smotive
     (ht : Γ.IsTight)
     (h1 : SType.Dealias Γ S1 (SType.cforall B1 E1))
     (h2 : SType.Dealias Γ S2 (SType.cforall B2 E2)),
-    ESubtyp (Γ.cvar (CBinding.bound B2)) E1 E2
+    Subbound Γ B2 B1 ∧ ESubtyp (Γ.cvar (CBinding.bound B2)) E1 E2
 
 theorem SSubtyp.sub_dealias_cforall_inv
   (ht : Γ.IsTight)
   (h1 : SType.Dealias Γ S1 (SType.cforall B1 E1))
   (h2 : SType.Dealias Γ S2 (SType.cforall B2 E2))
   (hs : SSubtyp Γ S1 S2) :
-  ESubtyp (Γ.cvar CBinding.bound) E1 E2 := by
+  Subbound Γ B2 B1 ∧ ESubtyp (Γ.cvar (CBinding.bound B2)) E1 E2 := by
   apply SSubtyp.rec
     (motive_1 := fun Γ E1 E2 h => SSubtyp.dealias_cforall_inv.emotive Γ E1 E2)
     (motive_2 := fun Γ C1 C2 h => SSubtyp.dealias_cforall_inv.cmotive Γ C1 C2)
@@ -713,16 +713,20 @@ theorem SSubtyp.sub_dealias_cforall_inv
     rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h; subst_vars
-    apply ESubtyp.refl
+    constructor
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case trans =>
     unfold dealias_cforall_inv.smotive
-    repeat intro
-    rename_i hs1 hs2 ih1 ih2 E1 E2 ht hd1 hd2
+    intros; intros
+    rename_i hs1 hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_cforall hs2 ht hd2
-    have ⟨E3, hd3⟩ := h
+    have ⟨B3, E3, hd3⟩ := h
     have he1 := ih1 ht hd1 hd3
     have he2 := ih2 ht hd3 hd2
-    apply ESubtyp.trans <;> trivial
+    constructor
+    { apply Subbound.trans <;> aesop }
+    { apply ESubtyp.trans <;> aesop }
   case tinstl =>
     unfold dealias_cforall_inv.smotive
     repeat intro
