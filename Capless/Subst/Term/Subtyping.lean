@@ -175,14 +175,4 @@ theorem ESubtyp.subst
     apply ESubtyp.type
     apply hs.subst; trivial
 
-theorem ESubtyp.narrow
-  (h : ESubtyp (Γ.var T) E1 E2)
-  (hs : CSubtyp Γ T' T) :
-  ESubtyp (Γ.var T') E1 E2 := by
-  rw [<- EType.rename_id (E := E1), <- EType.rename_id (E := E2)]
-  apply ESubtyp.subst
-  { trivial }
-  { apply VarSubst.narrow
-    trivial }
-
 end Capless

@@ -3,8 +3,7 @@ import Capless.Store
 import Capless.Inversion.Basic
 import Capless.Inversion.Context
 import Capless.Subtyping.Basic
-import Capless.Subst.Term.Subtyping
-import Capless.Subst.Type.Subtyping
+import Capless.Narrowing.Subtyping
 namespace Capless
 
 theorem ESubtyp.sub_type_inv'
@@ -717,7 +716,7 @@ theorem SSubtyp.sub_dealias_cforall_inv
     { apply ESubtyp.refl }
   case trans =>
     unfold dealias_cforall_inv.smotive
-    intros _ _ _ _ _ _ _ hs1 hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
+    intros _ _ _ _ _ _ _ _ hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_cforall hs2 ht hd2
     have ⟨B3, E3, hd3⟩ := h
     have ⟨he11, he12⟩ := ih1 ht hd1 hd3
@@ -725,7 +724,7 @@ theorem SSubtyp.sub_dealias_cforall_inv
     constructor
     { apply Subbound.trans <;> easy }
     { apply ESubtyp.trans
-      { sorry }
+      { apply ESubtyp.cnarrow <;> easy }
       { easy } }
   case tinstl =>
     unfold dealias_cforall_inv.smotive

@@ -168,12 +168,5 @@ theorem ESubtyp.tsubst
     apply ESubtyp.type
     apply hs.tsubst; trivial
 
-theorem ESubtyp.tnarrow
-  (h : ESubtyp (Γ.tvar (TBinding.bound S)) E1 E2)
-  (hs : SSubtyp Γ S' S) :
-  ESubtyp (Γ.tvar (TBinding.bound S')) E1 E2 := by
-  rw [<- EType.trename_id (E := E1), <- EType.trename_id (E := E2)]
-  apply? ESubtyp.tsubst
-  { apply? TVarSubst.narrow }
 
 end Capless
