@@ -77,7 +77,7 @@ import «Capless».Inversion.Subtyping
 /-
 ### Typing
 Main results:
-- Inversion of redex typing. For instance, an application `x y `is well-typed implies
+- Inversion of redex typing. For instance, an application `x y` is well-typed implies
   that x is typed at a function and y can be typed at the argument type of the function.
 -/
 import «Capless».Inversion.Typing
