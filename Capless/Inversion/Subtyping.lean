@@ -3,7 +3,7 @@ import Capless.Store
 import Capless.Inversion.Basic
 import Capless.Inversion.Context
 import Capless.Subtyping.Basic
-import Capless.Narrowing.Subtyping
+import Capless.Narrowing
 namespace Capless
 
 theorem ESubtyp.sub_type_inv'

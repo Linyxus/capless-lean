@@ -2,13 +2,10 @@ import Capless.Tactics
 import Capless.Typing
 import Capless.Subtyping.Basic
 import Capless.Subcapturing.Basic
-import Capless.Inversion.Subtyping
-import Capless.Subst.Term.Typing
-import Capless.Subst.Type.Typing
-import Capless.Subst.Capture.Subtyping
-import Capless.Narrowing.Typing
+import Capless.Narrowing
 import Capless.Weakening.Subcapturing
 import Capless.Inversion.Context
+import Capless.Inversion.Subtyping
 namespace Capless
 
 theorem Typed.app_inv'
