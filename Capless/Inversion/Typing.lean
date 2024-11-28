@@ -411,8 +411,9 @@ theorem Typed.canonical_form_clam'
 
 theorem Typed.canonical_form_clam
   (ht : Γ.IsTight)
-  (h : Typed Γ (Term.clam t) (EType.type ((∀[c]E)^Cf)) Ct) :
-  Typed (Γ.cvar CBinding.bound) t E Cf.cweaken := by
+  (h : Typed Γ (Term.clam B t) (EType.type ((∀[c<:B']E)^Cf)) Ct) :
+  Subbound Γ B' B ∧
+    Typed (Γ,c<:B') t E Cf.cweaken := by
   apply Typed.canonical_form_clam' <;> try trivial
   constructor
 
