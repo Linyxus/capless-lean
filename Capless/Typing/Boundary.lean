@@ -184,7 +184,34 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     simp [CaptureSet.cweaken, CaptureSet.crename_crename]
     simp [FinFun.open_comp_weaken, CaptureSet.crename_id]
     easy
-  case cmap_bound => sorry
+  case cmap_bound =>
+    intro c b hb
+    have ⟨b1, hb1, he1⟩ := Context.var_cbound_inv hb
+    cases b1 <;> cases he1
+    have h := Context.cvar_cbound_inv hb1
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      rename_i cb0
+      cases cb0; cases he2
+      constructor
+    case inr h =>
+      have ⟨b2, c2, hb2, he3, he4⟩ := h
+      rename_i cb0
+      cases b2 <;> cases he3
+      cases he4
+      rename_i cb0
+      cases cb0
+      case star => constructor
+      case upper D0 =>
+        constructor
+        simp [FinFun.open]
+        apply Subcapt.cbound
+        simp [CaptureSet.crename_rename_comm]
+        simp [CaptureSet.crename_crename, FinFun.open_comp_weaken, CaptureSet.crename_id]
+        have hb3 := Context.CBound.there_var (E:=Label[S.weaken.cweaken]^{c=0}) hb2
+        simp [CBinding.weaken] at hb3
+        easy
   case lmap =>
     intro l S hb
     cases hb; rename_i hb
