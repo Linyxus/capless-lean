@@ -155,6 +155,10 @@ theorem CaptureSet.cweaken_csingleton {c : Fin k} :
   (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
   simp [csingleton, cweaken, crename, FinFun.weaken]
 
+theorem CaptureSet.weaken_csingleton :
+  ({c=c} : CaptureSet n k).weaken = {c=c} := by
+  simp [csingleton, weaken]
+
 theorem CaptureSet.rename_id {C : CaptureSet n k} :
   C.rename FinFun.id = C := by
   induction C <;> aesop
@@ -178,5 +182,9 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
   case union_rr =>
     simp
     apply! Subset.union_rr
+
+theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
+  C.cweaken = C.crename FinFun.weaken := by
+  induction C <;> aesop
 
 end Capless

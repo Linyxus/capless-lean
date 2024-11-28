@@ -27,5 +27,9 @@ theorem Subcapt.trename
     apply cinstr
     have hb1 := ρ.cmap _ _ hb
     exact hb1
+  case cbound hb =>
+    apply cbound
+    have hb1 := ρ.cmap _ _ hb
+    exact hb1
 
 end Capless

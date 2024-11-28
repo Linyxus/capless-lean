@@ -27,8 +27,8 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed (Γ,X<:S) t E C ->
   Typed Γ (λ[X<:S]t) ((∀[X<:S]E)^C) {}
 | cabs {C : CaptureSet n k} :
-  Typed (Γ,c:CapSet) t E C.cweaken ->
-  Typed Γ (λ[c]t) ((∀[c]E)^C) {}
+  Typed (Γ,c<:B) t E C.cweaken ->
+  Typed Γ (λ[c<:B]t) ((∀[c<:B]E)^C) {}
 | box :
   Typed Γ (Term.var x) (EType.type T) {x=x} ->
   Typed Γ (Term.boxed x) ((SType.box T)^{}) {}
@@ -44,7 +44,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (Term.var x) (EType.type (∀[X<:SType.tvar X]E)^C) {x=x} ->
   Typed Γ (Term.tapp x X) (E.topen X) {x=x}
 | capp :
-  Typed Γ (Term.var x) (EType.type (∀[c]E)^C) {x=x} ->
+  Typed Γ (Term.var x) (EType.type (∀[c<:CBound.upper {c=c}]E)^C) {x=x} ->
   Typed Γ (Term.capp x c) (E.copen c) {x=x}
 | unbox :
   Typed Γ (Term.var x) (EType.type (SType.box (S^C))^{}) {} ->
@@ -55,7 +55,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (let x=t in u) E C
 | letex :
   Typed Γ t (EType.ex T) C ->
-  Typed ((Γ,c:CapSet),x: T) u E.cweaken.weaken C.cweaken.weaken ->
+  Typed ((Γ,c<:*),x: T) u E.cweaken.weaken C.cweaken.weaken ->
   Typed Γ (let (c,x)=t in u) E C
 | bindt :
   Typed (Γ,X:=S) t E.tweaken C ->
@@ -65,7 +65,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (let c=C in t) E C0
 | boundary {Γ : Context n m k} {S : SType n m k} :
   Typed
-    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:CBound.star),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
   Typed Γ (boundary: S in t) (S^CaptureSet.empty) C

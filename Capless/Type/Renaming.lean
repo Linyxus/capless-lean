@@ -3,6 +3,22 @@ import Capless.Basic
 import Capless.Type.Core
 namespace Capless
 
+def CBound.rename (b : CBound n k) (f : FinFun n n') : CBound n' k :=
+  match b with
+  | upper C => upper (C.rename f)
+  | star => star
+
+def CBound.crename (b : CBound n k) (f : FinFun k k') : CBound n k' :=
+  match b with
+  | upper C => upper (C.crename f)
+  | star => star
+
+def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
+  b.rename FinFun.weaken
+
+def CBound.cweaken (b : CBound n k) : CBound n (k+1) :=
+  b.crename FinFun.weaken
+
 mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k
@@ -17,7 +33,7 @@ def SType.rename : SType n m k -> FinFun n n' -> SType n' m k
 | SType.tvar X, _ => SType.tvar X
 | SType.forall E1 E2, f => SType.forall (E1.rename f) (E2.rename f.ext)
 | SType.tforall S E, f => SType.tforall (S.rename f) (E.rename f)
-| SType.cforall E, f => SType.cforall (E.rename f)
+| SType.cforall B E, f => SType.cforall (B.rename f) (E.rename f)
 | SType.box T, f => SType.box (T.rename f)
 | SType.label S, f => SType.label (S.rename f)
 
@@ -37,7 +53,7 @@ def SType.trename : SType n m k -> FinFun m m' -> SType n m' k
 | SType.tvar X, f => SType.tvar (f X)
 | SType.forall E1 E2, f => SType.forall (E1.trename f) (E2.trename f)
 | SType.tforall S E, f => SType.tforall (S.trename f) (E.trename f.ext)
-| SType.cforall E, f => SType.cforall (E.trename f)
+| SType.cforall B E, f => SType.cforall B (E.trename f)
 | SType.box T, f => SType.box (T.trename f)
 | SType.label S, f => SType.label (S.trename f)
 
@@ -57,7 +73,7 @@ def SType.crename : SType n m k -> FinFun k k' -> SType n m k'
 | SType.tvar X, _ => SType.tvar X
 | SType.forall E1 E2, f => SType.forall (E1.crename f) (E2.crename f)
 | SType.tforall S E, f => SType.tforall (S.crename f) (E.crename f)
-| SType.cforall E, f => SType.cforall (E.crename f.ext)
+| SType.cforall B E, f => SType.cforall (B.crename f) (E.crename f.ext)
 | SType.box T, f => SType.box (T.crename f)
 | SType.label S, f => SType.label (S.crename f)
 

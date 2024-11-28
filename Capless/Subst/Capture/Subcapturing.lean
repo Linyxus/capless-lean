@@ -28,6 +28,9 @@ theorem Subcapt.csubst
     have hb1 := σ.cmap _ _ hb
     apply cinstr
     trivial
-
+  case cbound hb =>
+    have hb1 := σ.cmap_bound _ _ hb
+    cases hb1
+    easy
 
 end Capless

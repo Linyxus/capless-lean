@@ -114,11 +114,13 @@ theorem Typed.tsubst
       apply label; assumption
     case invoke ih1 ih2 =>
       simp [Term.trename]
+      simp [EType.trename, CType.trename, SType.trename] at ih1 ih2
       apply invoke
       apply ih1; assumption
       apply ih2; assumption
     case boundary ih =>
       simp [Term.trename]
+      simp [EType.trename, CType.trename, SType.trename]
       apply boundary
       have ih := ih (σ.cext.ext _)
       simp [EType.trename, CType.trename, SType.trename] at ih
@@ -126,14 +128,6 @@ theorem Typed.tsubst
          , <- SType.weaken_trename
          , <- SType.cweaken_trename ] at ih
       aesop
-
-theorem Typed.tnarrow
-  (h : Typed (Γ,X<: S) t E Ct)
-  (hs : SSubtyp Γ S' S) :
-  Typed (Γ,X<: S') t E Ct := by
-  rw [<- Term.trename_id (t := t), <- EType.trename_id (E := E)]
-  apply? Typed.tsubst
-  apply? TVarSubst.narrow
 
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :

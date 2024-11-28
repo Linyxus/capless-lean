@@ -2,6 +2,36 @@ import Capless.Type.Core
 import Capless.Type.Renaming
 namespace Capless
 
+theorem CBound.crename_rename_comm {b : CBound n k} :
+  (b.crename f).rename g = (b.rename g).crename f := by
+  cases b <;>
+    simp [rename, crename,
+          CaptureSet.crename_rename_comm]
+
+theorem CBound.rename_rename {b : CBound n k} :
+  (b.rename f).rename g = b.rename (g ∘ f) := by
+  cases b <;> simp [rename, CaptureSet.rename_rename]
+
+theorem CBound.crename_crename {b : CBound n k} :
+  (b.crename f).crename g = b.crename (g ∘ f) := by
+  cases b <;> simp [crename, CaptureSet.crename_crename]
+
+theorem CBound.rename_id {b : CBound n k} :
+  b.rename FinFun.id = b := by
+  cases b <;> simp [rename, CaptureSet.rename_id]
+
+theorem CBound.crename_id {b : CBound n k} :
+  b.crename FinFun.id = b := by
+  cases b <;> simp [crename, CaptureSet.crename_id]
+
+theorem CBound.cweaken_crename {b : CBound n k} :
+  (b.crename f).cweaken = b.cweaken.crename f.ext := by
+  simp [cweaken, crename_crename, FinFun.comp_weaken]
+
+theorem CBound.cweaken_def {b : CBound n k} :
+  b.cweaken = b.crename FinFun.weaken := by
+  simp [cweaken]
+
 mutual
 
 theorem EType.crename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun k k') :
@@ -34,9 +64,9 @@ theorem SType.crename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
     have ih1 := SType.crename_rename_comm S f g
     have ih2 := EType.crename_rename_comm E f g
     simp [SType.rename, SType.crename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.crename_rename_comm E f g.ext
-    simp [SType.rename, SType.crename, ih]
+    simp [SType.rename, CBound.crename_rename_comm, SType.crename, ih]
   | SType.box T => by
     have ih := CType.crename_rename_comm T f g
     simp [SType.rename, SType.crename, ih]
@@ -99,9 +129,9 @@ theorem SType.rename_rename (S : SType n m k) (f : FinFun n n') (g : FinFun n' n
     have ih1 := SType.rename_rename S f g
     have ih2 := EType.rename_rename E f g
     simp [SType.rename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.rename_rename E f g
-    simp [SType.rename, ih]
+    simp [SType.rename, CBound.rename_rename, ih]
   | SType.box T => by
     have ih := CType.rename_rename T f g
     simp [SType.rename, ih]
@@ -156,7 +186,7 @@ theorem SType.trename_rename_comm (S : SType n m k) (f : FinFun n n') (g : FinFu
     have ih1 := SType.trename_rename_comm S f g
     have ih2 := EType.trename_rename_comm E f g.ext
     simp [SType.trename, SType.rename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.trename_rename_comm E f g
     simp [SType.trename, SType.rename, ih]
   | SType.box T => by
@@ -200,9 +230,9 @@ theorem SType.crename_crename (S : SType n m k) (f : FinFun k k') (g : FinFun k'
     have ih1 := SType.crename_crename S f g
     have ih2 := EType.crename_crename E f g
     simp [SType.crename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.crename_crename E f.ext g.ext
-    simp [SType.crename, ih, FinFun.ext_comp_ext]
+    simp [SType.crename, ih, FinFun.ext_comp_ext, CBound.crename_crename]
   | SType.box T => by
     have ih := CType.crename_crename T f g
     simp [SType.crename, ih]
@@ -244,7 +274,7 @@ theorem SType.crename_trename_comm (S : SType n m k) (f : FinFun k k') (g : FinF
     have ih1 := SType.crename_trename_comm S f g
     have ih2 := EType.crename_trename_comm E f g.ext
     simp [SType.crename, SType.trename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.crename_trename_comm E f.ext g
     simp [SType.crename, SType.trename, ih]
   | SType.box T => by
@@ -376,7 +406,7 @@ theorem SType.trename_trename (S : SType n m k) (f : FinFun m m') (g : FinFun m'
     have ih1 := SType.trename_trename S f g
     have ih2 := EType.trename_trename E f.ext g.ext
     simp [SType.trename, ih1, ih2, FinFun.ext_comp_ext]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.trename_trename E f g
     simp [SType.trename, ih]
   | SType.box T => by
@@ -495,9 +525,9 @@ theorem SType.rename_id {S : SType n m k} :
     have ih1 := SType.rename_id (S := S)
     have ih2 := EType.rename_id (E := E)
     simp [SType.rename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.rename_id (E := E)
-    simp [SType.rename, ih]
+    simp [SType.rename, CBound.rename_id, ih]
   | SType.box T => by
     have ih := CType.rename_id (T := T)
     simp [SType.rename, ih]
@@ -539,7 +569,7 @@ theorem SType.trename_id {S : SType n m k} :
     have ih1 := SType.trename_id (S := S)
     have ih2 := EType.trename_id (E := E)
     simp [SType.trename, FinFun.id_ext, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.trename_id (E := E)
     simp [SType.trename, ih]
   | SType.box T => by
@@ -584,9 +614,9 @@ theorem SType.crename_id {S : SType n m k} :
     have ih1 := SType.crename_id (S := S)
     have ih2 := EType.crename_id (E := E)
     simp [SType.crename, ih1, ih2]
-  | SType.cforall E => by
+  | SType.cforall B E => by
     have ih := EType.crename_id (E := E)
-    simp [SType.crename, FinFun.id_ext, ih]
+    simp [SType.crename, CBound.crename_id, FinFun.id_ext, ih]
   | SType.box T => by
     have ih := CType.crename_id (T := T)
     simp [SType.crename, ih]

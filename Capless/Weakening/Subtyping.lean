@@ -13,6 +13,14 @@ theorem SSubtyp.weaken
   { apply h }
   { apply VarMap.weaken }
 
+theorem Subbound.weaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.var b) B1.weaken B2.weaken := by
+  simp [CBound.weaken]
+  apply Subbound.rename
+  { apply h }
+  { apply VarMap.weaken }
+
 theorem SSubtyp.lweaken
   (h : SSubtyp Γ S1 S2) :
   ∀ S, SSubtyp (Γ.label S) S1.weaken S2.weaken := by
@@ -75,6 +83,12 @@ theorem CSubtyp.tweaken
   apply? CSubtyp.trename
   apply TVarMap.weaken
 
+theorem Subbound.tweaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.tvar b) B1 B2 := by
+  apply? Subbound.trename
+  apply TVarMap.weaken
+
 theorem ESubtyp.cweaken
   (h : ESubtyp Γ E1 E2) :
   ESubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
@@ -94,6 +108,13 @@ theorem CSubtyp.cweaken
   CSubtyp (Γ.cvar b) E1.cweaken E2.cweaken := by
   simp [CType.cweaken]
   apply? CSubtyp.crename
+  apply CVarMap.weaken
+
+theorem Subbound.cweaken
+  (h : Subbound Γ B1 B2) :
+  Subbound (Γ.cvar b) B1.cweaken B2.cweaken := by
+  simp [CBound.cweaken]
+  apply? Subbound.crename
   apply CVarMap.weaken
 
 end Capless

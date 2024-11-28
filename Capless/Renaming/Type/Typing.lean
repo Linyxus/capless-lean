@@ -115,15 +115,18 @@ theorem Typed.trename
   case invoke ih1 ih2 =>
     simp [Term.trename]
     apply invoke
+    simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
     apply ih1; trivial
+    simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih2
     apply ih2; trivial
   case boundary ih =>
-    simp [Term.trename]
+    simp [Term.trename, EType.trename, CType.trename]
     apply boundary
     have ih := ih ((ρ.cext _).ext _)
     simp [FinFun.ext, CType.trename, SType.trename] at ih
     rw [ SType.cweaken_trename
        , SType.weaken_trename ]
+    simp [EType.trename, CType.trename] at ih
     exact ih
 
 end Capless

@@ -118,10 +118,12 @@ theorem Typed.crename
   case invoke ih1 ih2 =>
     simp [Term.crename]
     apply invoke
-    apply ih1 <;> assumption
+    simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
+    apply ih1; assumption
+    simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih2
     apply ih2; assumption
   case boundary ih =>
-    simp [Term.crename]
+    simp [Term.crename, EType.crename, CType.crename, SType.crename]
     apply boundary
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.crename,

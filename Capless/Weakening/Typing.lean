@@ -31,14 +31,14 @@ theorem Typed.lweaken_ext {Γ : Context n m k}
   apply h.rename VarMap.lweaken_ext
 
 theorem Typed.weaken_cext_ext {Γ : Context n m k}
-  (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
-  Typed (((Γ.var P).cvar CBinding.bound).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
+  (h : Typed ((Γ.cvar (CBinding.bound B)).var T) t E Ct) :
+  Typed (((Γ.var P).cvar (CBinding.bound B.weaken)).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
   simp [Term.weaken1, EType.weaken1]
   apply h.rename VarMap.weaken_cext_ext
 
 theorem Typed.lweaken_cext_ext {Γ : Context n m k}
-  (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
-  Typed (((Γ.label P).cvar CBinding.bound).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
+  (h : Typed ((Γ.cvar (CBinding.bound B)).var T) t E Ct) :
+  Typed (((Γ.label P).cvar (CBinding.bound B.weaken)).var T.weaken) t.weaken1 E.weaken1 Ct.weaken1 := by
   simp [Term.weaken1, EType.weaken1]
   apply h.rename VarMap.lweaken_cext_ext
 
@@ -56,8 +56,8 @@ theorem Typed.tweaken_ext {Γ : Context n m k}
   apply h.trename TVarMap.weaken_ext
 
 theorem Typed.tweaken_cext_ext {Γ : Context n m k}
-  (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
-  Typed (((Γ.tvar b).cvar CBinding.bound).var T.tweaken) t.tweaken E.tweaken Ct := by
+  (h : Typed ((Γ.cvar (CBinding.bound B)).var T) t E Ct) :
+  Typed (((Γ.tvar b).cvar (CBinding.bound B)).var T.tweaken) t.tweaken E.tweaken Ct := by
   simp [Term.tweaken, EType.tweaken]
   apply h.trename TVarMap.weaken_cext_ext
 
@@ -75,8 +75,8 @@ def Typed.cweaken_ext {Γ : Context n m k}
   apply h.crename CVarMap.weaken_ext
 
 def Typed.cweaken_cext_ext {Γ : Context n m k}
-  (h : Typed ((Γ.cvar CBinding.bound).var T) t E Ct) :
-  Typed (((Γ.cvar b).cvar CBinding.bound).var T.cweaken1) t.cweaken1 E.cweaken1 Ct.cweaken1 := by
+  (h : Typed ((Γ.cvar (CBinding.bound B)).var T) t E Ct) :
+  Typed (((Γ.cvar b).cvar (CBinding.bound B.cweaken)).var T.cweaken1) t.cweaken1 E.cweaken1 Ct.cweaken1 := by
   simp [Term.cweaken, EType.cweaken1]
   apply h.crename CVarMap.weaken_cext_ext
 

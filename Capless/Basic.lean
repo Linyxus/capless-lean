@@ -79,4 +79,7 @@ theorem FinFun.comp_succ {f : FinFun n n'}: Fin.succ ∘ f = (FinFun.ext f) ∘ 
   case succ n =>
     simp [FinFun.ext]
 
+theorem FinFun.ext_zero {f : FinFun n n'} : f.ext 0 = 0 := by
+  simp [FinFun.ext]
+
 end Capless

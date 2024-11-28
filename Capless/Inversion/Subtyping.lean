@@ -3,8 +3,7 @@ import Capless.Store
 import Capless.Inversion.Basic
 import Capless.Inversion.Context
 import Capless.Subtyping.Basic
-import Capless.Subst.Term.Subtyping
-import Capless.Subst.Type.Subtyping
+import Capless.Narrowing
 namespace Capless
 
 theorem ESubtyp.sub_type_inv'
@@ -343,7 +342,7 @@ theorem SSubtyp.sub_dealias_forall_inv
   case trans =>
     unfold dealias_forall_inv.smotive
     repeat intro
-    rename_i hs1 hs2 ih1 ih2 T1 E1 T2 E2 ht hd1 hd2
+    rename_i hs2 ih1 ih2 T1 E1 T2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_forall hs2 ht hd2
     have ⟨T3, E3, hd3⟩ := h
     have ⟨hc1, he1⟩ := ih1 ht hd1 hd3
@@ -556,13 +555,13 @@ def SSubtyp.dealias_right_cforall.smotive
   (S1 : SType n m k)
   (S2 : SType n m k)
   : Prop :=
-  ∀ {E2} (ht : Γ.IsTight) (hd : SType.Dealias Γ S2 (SType.cforall E2)),
-    ∃ E1, SType.Dealias Γ S1 (SType.cforall E1)
+  ∀ {B2 E2} (ht : Γ.IsTight) (hd : SType.Dealias Γ S2 (SType.cforall B2 E2)),
+    ∃ B1 E1, SType.Dealias Γ S1 (SType.cforall B1 E1)
 
 theorem SSubtyp.dealias_right_cforall
   (h : SSubtyp Γ S1 S2) (ht : Γ.IsTight)
-  (hd : SType.Dealias Γ S2 (SType.cforall E2)) :
-  ∃ E1, SType.Dealias Γ S1 (SType.cforall E1) := by
+  (hd : SType.Dealias Γ S2 (SType.cforall B2 E2)) :
+  ∃ B1 E1, SType.Dealias Γ S1 (SType.cforall B1 E1) := by
   apply SSubtyp.rec
     (motive_1 := fun Γ E1 E2 h => SSubtyp.dealias_right_cforall.emotive Γ E1 E2)
     (motive_2 := fun Γ C1 C2 h => SSubtyp.dealias_right_cforall.cmotive Γ C1 C2)
@@ -579,20 +578,20 @@ theorem SSubtyp.dealias_right_cforall
   case refl =>
     unfold dealias_right_cforall.smotive
     repeat intro
-    rename_i E2 _ _
-    exists E2
+    rename_i B2 E2 _ _
+    exists B2, E2
   case trans =>
     unfold dealias_right_cforall.smotive
     repeat intro
-    rename_i ih1 ih2 E3 ht3 hd3
+    rename_i ih1 ih2 B3 E3 ht3 hd3
     have ih2 := ih2 ht3 hd3
-    have ⟨E2, hd2⟩ := ih2
+    have ⟨B2, E2, hd2⟩ := ih2
     have ih1 := ih1 ht3 hd2
     exact ih1
   case tvar =>
     unfold dealias_right_cforall.smotive
     repeat intro
-    rename_i hb _ ht _
+    rename_i hb _ _ ht _
     exfalso
     apply Context.tight_bound_tvar_absurd ht hb
   case tinstl =>
@@ -601,14 +600,14 @@ theorem SSubtyp.dealias_right_cforall
     rename_i hd
     cases hd
     case step hb0 hd0 =>
-      rename_i hb1 _ _ _
+      rename_i hb1 _ _ _ _
       have h := Context.tbound_inj hb0 hb1
       cases h
       aesop
   case tinstr =>
     unfold dealias_right_cforall.smotive
     repeat intro
-    constructor; constructor
+    constructor; constructor; constructor
     trivial
     trivial
   case boxed =>
@@ -639,10 +638,10 @@ theorem SSubtyp.dealias_right_cforall
     cases hd
 
 theorem SType.dealias_cforall_inj'
-  (he1 : S1 = SType.cforall E1) (he2 : S2 = SType.cforall E2)
+  (he1 : S1 = SType.cforall B1 E1) (he2 : S2 = SType.cforall B2 E2)
   (h1 : SType.Dealias Γ S S1)
   (h2 : SType.Dealias Γ S S2) :
-  E1 = E2 := by
+  B1 = B2 ∧ E1 = E2 := by
   induction h1 generalizing E2
   case refl =>
     subst he1
@@ -660,9 +659,9 @@ theorem SType.dealias_cforall_inj'
         trivial }
 
 theorem SType.dealias_cforall_inj
-  (h1 : SType.Dealias Γ S (SType.cforall E1))
-  (h2 : SType.Dealias Γ S (SType.cforall E2)) :
-  E1 = E2 :=
+  (h1 : SType.Dealias Γ S (SType.cforall B1 E1))
+  (h2 : SType.Dealias Γ S (SType.cforall B2 E2)) :
+  B1 = B2 ∧ E1 = E2 :=
   SType.dealias_cforall_inj' rfl rfl h1 h2
 
 def SSubtyp.dealias_cforall_inv.emotive
@@ -682,18 +681,18 @@ def SSubtyp.dealias_cforall_inv.smotive
   (S1 : SType n m k)
   (S2 : SType n m k)
   : Prop :=
-  ∀ {E1 E2}
+  ∀ {B1 E1 B2 E2}
     (ht : Γ.IsTight)
-    (h1 : SType.Dealias Γ S1 (SType.cforall E1))
-    (h2 : SType.Dealias Γ S2 (SType.cforall E2)),
-    ESubtyp (Γ.cvar CBinding.bound) E1 E2
+    (h1 : SType.Dealias Γ S1 (SType.cforall B1 E1))
+    (h2 : SType.Dealias Γ S2 (SType.cforall B2 E2)),
+    Subbound Γ B2 B1 ∧ ESubtyp (Γ.cvar (CBinding.bound B2)) E1 E2
 
 theorem SSubtyp.sub_dealias_cforall_inv
   (ht : Γ.IsTight)
-  (h1 : SType.Dealias Γ S1 (SType.cforall E1))
-  (h2 : SType.Dealias Γ S2 (SType.cforall E2))
+  (h1 : SType.Dealias Γ S1 (SType.cforall B1 E1))
+  (h2 : SType.Dealias Γ S2 (SType.cforall B2 E2))
   (hs : SSubtyp Γ S1 S2) :
-  ESubtyp (Γ.cvar CBinding.bound) E1 E2 := by
+  Subbound Γ B2 B1 ∧ ESubtyp (Γ.cvar (CBinding.bound B2)) E1 E2 := by
   apply SSubtyp.rec
     (motive_1 := fun Γ E1 E2 h => SSubtyp.dealias_cforall_inv.emotive Γ E1 E2)
     (motive_2 := fun Γ C1 C2 h => SSubtyp.dealias_cforall_inv.cmotive Γ C1 C2)
@@ -709,52 +708,60 @@ theorem SSubtyp.sub_dealias_cforall_inv
     cases hd2
   case refl =>
     unfold dealias_cforall_inv.smotive
-    repeat intro
-    rename_i hd1 hd2
+    intros _ _ _ _ _ _ _ _ _ _ hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h; subst_vars
-    apply ESubtyp.refl
+    apply And.intro
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case trans =>
     unfold dealias_cforall_inv.smotive
-    repeat intro
-    rename_i hs1 hs2 ih1 ih2 E1 E2 ht hd1 hd2
+    intros _ _ _ _ _ _ _ _ hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_cforall hs2 ht hd2
-    have ⟨E3, hd3⟩ := h
-    have he1 := ih1 ht hd1 hd3
-    have he2 := ih2 ht hd3 hd2
-    apply ESubtyp.trans <;> trivial
+    have ⟨B3, E3, hd3⟩ := h
+    have ⟨he11, he12⟩ := ih1 ht hd1 hd3
+    have ⟨he21, he22⟩ := ih2 ht hd3 hd2
+    constructor
+    { apply Subbound.trans <;> easy }
+    { apply ESubtyp.trans
+      { apply ESubtyp.cnarrow <;> easy }
+      { easy } }
   case tinstl =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
     rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h
     subst_vars
-    apply ESubtyp.refl
+    apply And.intro
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case tinstr =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd _
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
     rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h
     subst_vars
-    apply ESubtyp.refl
+    apply And.intro
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case tvar =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd _
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
   case boxed =>

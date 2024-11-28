@@ -27,18 +27,18 @@ def VarMap.lweaken_ext {Γ : Context n m k} :
 
 def VarMap.weaken_cext_ext {Γ : Context n m k} :
   VarMap
-    ((Γ.cvar CBinding.bound).var T)
+    ((Γ.cvar (CBinding.bound b)).var T)
     FinFun.weaken.ext
-    (((Γ.var P).cvar CBinding.bound).var T.weaken) := by
+    (((Γ.var P).cvar (CBinding.bound b.weaken)).var T.weaken) := by
   apply VarMap.ext
   apply VarMap.cext
   apply VarMap.weaken
 
 def VarMap.lweaken_cext_ext {Γ : Context n m k} :
   VarMap
-    ((Γ.cvar CBinding.bound).var T)
+    ((Γ.cvar (CBinding.bound b)).var T)
     FinFun.weaken.ext
-    (((Γ.label P).cvar CBinding.bound).var T.weaken) := by
+    (((Γ.label P).cvar (CBinding.bound b.weaken)).var T.weaken) := by
   apply VarMap.ext
   apply VarMap.cext
   apply VarMap.lweaken
@@ -56,14 +56,14 @@ def CVarMap.weaken_ext {Γ : Context n m k} :
   apply CVarMap.weaken
 
 theorem CBinding.cweaken_bound :
-  (CBinding.bound : CBinding n k).cweaken = CBinding.bound := by
-  simp [CBinding.cweaken, CBinding.crename]
+  (CBinding.bound b : CBinding n k).cweaken = (CBinding.bound b.cweaken) := by
+  simp [CBinding.cweaken, CBinding.crename, CBound.cweaken]
 
 def CVarMap.weaken_cext_ext {Γ : Context n m k} :
   CVarMap
-    ((Γ.cvar CBinding.bound).var T)
+    ((Γ.cvar (CBinding.bound B)).var T)
     FinFun.weaken.ext
-    (((Γ.cvar b).cvar CBinding.bound).var T.cweaken1) := by
+    (((Γ.cvar b).cvar (CBinding.bound B.cweaken)).var T.cweaken1) := by
   rw [<- CBinding.cweaken_bound]
   apply CVarMap.ext
   apply CVarMap.cext
@@ -83,9 +83,9 @@ def TVarMap.weaken_ext {Γ : Context n m k} :
 
 def TVarMap.weaken_cext_ext {Γ : Context n m k} :
   TVarMap
-    ((Γ.cvar CBinding.bound).var T)
+    ((Γ.cvar (CBinding.bound B)).var T)
     FinFun.weaken
-    (((Γ.tvar b).cvar CBinding.bound).var T.tweaken) := by
+    (((Γ.tvar b).cvar (CBinding.bound B)).var T.tweaken) := by
   apply TVarMap.ext
   apply TVarMap.cext
   apply TVarMap.weaken

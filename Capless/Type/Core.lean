@@ -3,6 +3,10 @@ import Capless.Basic
 namespace Capless
 mutual
 
+inductive CBound : Nat -> Nat -> Type where
+| upper : CaptureSet n k -> CBound n k
+| star : CBound n k
+
 inductive EType : Nat -> Nat -> Nat -> Type where
 | ex : CType n m (k+1) -> EType n m k
 | type : CType n m k -> EType n m k
@@ -15,7 +19,7 @@ inductive SType : Nat -> Nat -> Nat -> Type where
 | tvar : Fin m -> SType n m k
 | forall : CType n m k -> EType (n+1) m k -> SType n m k
 | tforall : SType n m k -> EType n (m+1) k -> SType n m k
-| cforall : EType n m (k+1) -> SType n m k
+| cforall : CBound n k -> EType n m (k+1) -> SType n m k
 | box : CType n m k -> SType n m k
 | label : SType n m k -> SType n m k
 
@@ -24,7 +28,7 @@ end
 notation "⊤" => SType.top
 notation:50 "∀(x:" T ")" U => SType.forall T U
 notation:50 "∀[X<:" S "]" T => SType.tforall S T
-notation:50 "∀[c]" T => SType.cforall T
+notation:50 "∀[c<:" B "]" T => SType.cforall B T
 notation:max S " ^ " C => CType.capt C S
 notation:40 "∃c." T => EType.ex T
 notation:40 "Label[" S "]" => SType.label S

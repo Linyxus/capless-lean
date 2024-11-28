@@ -29,6 +29,8 @@ structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k')
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f c) (CBinding.inst (C.crename f))
+  cmap_bound : ∀ c B, Γ.CBound c (CBinding.bound B) ->
+    Subbound Δ (CBound.upper {c=f c}) (B.crename f)
   lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
@@ -407,6 +409,15 @@ def CVarSubst.ext {Γ : Context n m k}
       rw [<- SType.weaken_crename]
       constructor
       assumption
+  case cmap_bound =>
+    intro c B hb
+    have ⟨b0, hb', he0⟩ := Context.var_cbound_inv hb
+    cases b0 <;> cases he0
+    have h := σ.cmap_bound _ _ hb'
+    rw [<- CBound.crename_rename_comm]
+    rw [<- CaptureSet.weaken_csingleton]
+    rw [<- CBound.weaken_upper]
+    apply Subbound.weaken; easy
 
 def CVarSubst.text {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ) :
@@ -438,6 +449,12 @@ def CVarSubst.text {Γ : Context n m k}
         have hb'' := σ.cmap _ _ hb'
         constructor
         trivial
+    case cmap_bound =>
+      intro c b hb
+      cases hb
+      rename_i hb0
+      have h0 := σ.cmap_bound _ _ hb0
+      apply Subbound.tweaken; easy
     case lmap =>
       intros l S hb
       cases hb
@@ -505,6 +522,35 @@ def CVarSubst.cext {Γ : Context n m k}
       rw [<- SType.cweaken_crename]
       constructor
       assumption
+  case cmap_bound =>
+    intros c b0 hb
+    have hb' := Context.cvar_cbound_inv hb
+    cases hb'
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      subst he1
+      cases b <;> cases he2
+      simp [FinFun.ext_zero]
+      rename_i cb
+      cases cb
+      case star =>
+        simp [CBinding.crename, CBound.crename]
+        constructor
+      case upper D0 =>
+        constructor
+        apply Subcapt.cbound
+        rw [<- CaptureSet.cweaken_def]
+        rw [<- CaptureSet.cweaken_crename]
+        constructor
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.ext]
+      have h := σ.cmap_bound _ _ hb1
+      have h' := h.cweaken (b := b.crename f)
+      rw [CBound.cweaken_crename] at h'
+      easy
 
 def VarSubst.open
   (hx : Typed Γ (Term.var x) (EType.type T) Cx) :
@@ -585,6 +631,56 @@ def VarSubst.narrow
     case there_var hb0 =>
       simp [SType.rename_id]
       constructor; trivial
+
+def CVarSubst.narrow
+  (hs : Subbound Γ B' B) :
+  CVarSubst
+    (Γ,c<:B)
+    FinFun.id
+    (Γ,c<:B') := by
+  constructor <;> try (solve |
+    intros A B hb; cases hb;
+    simp [CType.crename_id, TBinding.crename_id, SType.crename_id];
+    constructor; easy)
+  case cmap =>
+    intro c D hb
+    have h := Context.cvar_cbound_inv hb
+    cases h
+    case inl h =>
+      have ⟨_, h⟩ := h
+      cases h
+    case inr h =>
+      have ⟨b0, c0, hb0, he1, he2⟩ := h
+      cases b0 <;> cases he1
+      cases he2
+      simp [CaptureSet.crename_id]
+      have hb' := Context.CBound.there_cvar (b':=CBinding.bound B') hb0
+      exact hb'
+  case cmap_bound =>
+    intro c B hb
+    have h := Context.cvar_cbound_inv hb
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      cases he1; cases he2
+      simp [CBound.crename_id]
+      simp [FinFun.id]
+      apply Subbound.trans (B2:=B'.cweaken)
+      { cases B' <;> constructor
+        apply Subcapt.cbound
+        constructor }
+      { apply Subbound.cweaken; easy }
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.id, CBound.crename_id]
+      rename_i cb0
+      cases cb0 <;> constructor
+      apply Subcapt.cbound
+      have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
+      simp [CBinding.cweaken] at hb1'
+      exact hb1'
 
 def TVarSubst.narrow
   (hs : SSubtyp Γ S' S) :
@@ -691,7 +787,7 @@ def TVarSubst.open :
 
 def CVarSubst.open :
   CVarSubst
-    (Γ.cvar CBinding.bound)
+    (Γ.cvar (CBinding.bound (CBound.upper {c=c})))
     (FinFun.open c)
     Γ := by
   constructor
@@ -716,6 +812,30 @@ def CVarSubst.open :
     simp [FinFun.open_comp_weaken]
     simp [CaptureSet.crename_id]
     trivial
+  case cmap_bound =>
+    intro c0 b0 hb0
+    have h := Context.cvar_cbound_inv hb0
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      cases he1; cases b0 <;> cases he2
+      simp [FinFun.open]
+      simp [CBound.crename, CaptureSet.crename_csingleton]
+      simp [FinFun.weaken, FinFun.open]
+      constructor; apply Subcapt.refl
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.open]
+      simp [CBound.crename_crename]
+      simp [FinFun.open_comp_weaken, CBound.crename_id]
+      rename_i cb; cases cb
+      case star => constructor
+      case upper D0 =>
+        constructor
+        apply Subcapt.cbound
+        easy
   case lmap =>
     intro l S hb
     cases hb
@@ -725,7 +845,7 @@ def CVarSubst.open :
 
 def CVarSubst.instantiate {Γ : Context n m k} :
   CVarSubst
-    (Γ.cvar CBinding.bound)
+    (Γ.cvar (CBinding.bound CBound.star))
     FinFun.id
     (Γ.cvar (CBinding.inst C)) := by
   constructor
@@ -754,12 +874,29 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     cases hb
     simp [SType.crename_id]
     constructor; trivial
-
--- structure OmniMap (n m k n' m' k' : Nat) where
---   map : FinFun n n'
---   tmap : FinFun m m'
---   cmap : FinFun k k'
-
--- structure OmniSubst (Γ : Context n m k) (f : OmniMap n m k n' m' k') (Δ : Context n' m' k') where
+  case cmap_bound =>
+    intro c b0 hb
+    have h := Context.cvar_cbound_inv hb
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      subst he1
+      cases b0 <;> cases he2
+      constructor
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases he2
+      cases b1 <;> cases he1
+      rename_i cb
+      simp [FinFun.id, CBound.crename_id]
+      cases cb
+      case star => constructor
+      case upper D0 =>
+        constructor
+        apply Subcapt.cbound
+        rw [<- CaptureSet.cweaken_def]
+        rw [<- CBound.cweaken_upper]
+        rw [<- CBinding.cweaken_bound]
+        constructor; easy
 
 end Capless

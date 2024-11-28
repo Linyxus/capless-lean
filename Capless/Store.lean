@@ -93,6 +93,10 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   Context.CBound Γ c (CBinding.inst C) ->
   WellScoped Γ cont C ->
   WellScoped Γ cont {c=c}
+| cbound :
+  Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
+  WellScoped Γ cont C ->
+  WellScoped Γ cont {c=c}
 | label :
   Context.LBound Γ x S ->
   Cont.HasLabel cont x tail ->
@@ -108,7 +112,7 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   TypedCont Γ E cont E' C ->
   TypedCont Γ (EType.type T) (Cont.cons t cont) E' (C ∪ Ct)
 | conse {Ct : CaptureSet n k} :
-  Typed ((Γ.cvar CBinding.bound).var T) t (EType.weaken (EType.cweaken E)) Ct.cweaken.weaken ->
+  Typed ((Γ.cvar (CBinding.bound CBound.star)).var T) t (EType.weaken (EType.cweaken E)) Ct.cweaken.weaken ->
   WellScoped Γ cont Ct ->
   TypedCont Γ E cont E' C ->
   TypedCont Γ (EType.ex T) (Cont.conse t cont) E' (C ∪ Ct)

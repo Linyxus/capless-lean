@@ -26,6 +26,7 @@ theorem WellScoped.cons
   case union ih1 ih2 => apply union <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
+  case cbound ih => apply cbound <;> aesop
   case label =>
     apply label
     easy
@@ -39,6 +40,7 @@ theorem WellScoped.conse
   case union ih1 ih2 => apply union <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
+  case cbound ih => apply cbound <;> aesop
   case label =>
     apply label
     easy
@@ -52,6 +54,7 @@ theorem WellScoped.scope
   case union ih1 ih2 => apply union <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
+  case cbound ih => apply cbound <;> aesop
   case label =>
     apply label
     easy
@@ -71,8 +74,13 @@ theorem WellScoped.subcapt
     rename_i hb1 _ _ hb2
     have h := Context.cbound_injective hb1 hb2
     cases h
-    easy
+    rename_i h
+    exact h
+    rename_i hb1 _ _ hb2
+    have h := Context.cbound_injective hb1 hb2
+    cases h
   case cinstr => apply WellScoped.csingleton <;> aesop
+  case cbound => apply WellScoped.cbound <;> aesop
 
 theorem WellScoped.var_inv
   (hsc : WellScoped Γ cont {x=x})

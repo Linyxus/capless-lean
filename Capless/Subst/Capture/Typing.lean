@@ -31,12 +31,12 @@ theorem Typed.csubst
       { rw [CaptureSet.weaken_crename]
         apply ih
         apply σ.ext }
-    case tabs hc ih =>
+    case tabs ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply tabs
       { apply ih
         apply σ.text }
-    case cabs hc ih =>
+    case cabs ih =>
       simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply cabs
       { rw [CaptureSet.cweaken_crename]
@@ -115,17 +115,19 @@ theorem Typed.csubst
       rw [CaptureSet.cweaken_crename]
       trivial
     case label =>
-      simp [Term.crename]
+      simp [Term.crename, EType.crename, CType.crename, SType.crename]
       apply label
       have h := σ.lmap
       aesop
     case invoke ih1 ih2 =>
       simp [Term.crename]
+      simp [EType.crename, CType.crename, SType.crename] at ih1 ih2
       apply invoke
       apply ih1; assumption
       apply ih2; assumption
     case boundary ih =>
       simp [Term.crename]
+      simp [EType.crename, CType.crename, SType.crename]
       apply boundary
       have ih := ih (σ.cext.ext _)
       simp [CBinding.crename, EType.crename, CType.crename, SType.crename, FinFun.ext] at ih
@@ -137,14 +139,14 @@ theorem Typed.csubst
       aesop
 
 theorem Typed.copen
-  (h : Typed (Γ,c:CapSet) t E Ct) :
+  (h : Typed (Γ,c<:CBound.upper {c=c}) t E Ct) :
   Typed Γ (t.copen c) (E.copen c) (Ct.copen c) := by
   simp [Term.copen, EType.copen]
   apply? Typed.csubst
   apply? CVarSubst.open
 
 theorem Typed.cinstantiate {Γ : Context n m k}
-  (h : Typed (Γ,c:CapSet) t E Ct) :
+  (h : Typed (Γ,c<:CBound.star) t E Ct) :
   Typed (Γ,c:= C) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]
@@ -152,7 +154,7 @@ theorem Typed.cinstantiate {Γ : Context n m k}
   apply? CVarSubst.instantiate
 
 theorem Typed.cinstantiate_extvar {Γ : Context n m k}
-  (h : Typed ((Γ,c:CapSet).var P) t E Ct) :
+  (h : Typed ((Γ,c<:CBound.star).var P) t E Ct) :
   Typed ((Γ,c:=C).var P) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]

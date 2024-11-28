@@ -125,10 +125,12 @@ theorem Typed.rename
   case invoke ih1 ih2 =>
     simp [Term.rename]
     apply Typed.invoke
+    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
     apply ih1; trivial
+    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih2
     apply ih2; trivial
   case boundary ih =>
-    simp [Term.rename]
+    simp [Term.rename, EType.rename, CType.rename]
     apply Typed.boundary
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.rename, FinFun.ext, CType.rename, SType.rename] at ih
@@ -137,6 +139,7 @@ theorem Typed.rename
       , SType.weaken_rename
       , <- CaptureSet.cweaken_rename_comm
       , CaptureSet.weaken_rename ]
+    simp [CBound.rename, EType.rename, CType.rename] at ih
     exact ih
 
 end Capless

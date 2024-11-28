@@ -3,6 +3,19 @@ import Capless.Subcapturing
 import Capless.Subcapturing.Basic
 namespace Capless
 
+theorem Subbound.refl {B : CBound n k} :
+  Subbound Γ B B := by
+  cases B <;> constructor
+  case upper =>
+    apply Subcapt.refl
+
+theorem Subbound.trans
+  (h1 : Subbound Γ B1 B2)
+  (h2 : Subbound Γ B2 B3) :
+  Subbound Γ B1 B3 := by
+  cases h1 <;> cases h2 <;> constructor
+  apply Subcapt.trans <;> easy
+
 theorem ESubtyp.type_inv_subcapt'
   (heq : E1 = EType.type (CType.capt C S))
   (h : ESubtyp Γ E E1) :
@@ -23,7 +36,7 @@ theorem ESubtyp.type_inv_subcapt
 
 theorem ESubtyp.ex_inv_subcapt
   (h : ESubtyp Γ E (EType.ex (CType.capt C S))) :
-  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ Subcapt (Γ.cvar CBinding.bound) C0 C := by
+  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ Subcapt (Γ.cvar (CBinding.bound CBound.star)) C0 C := by
   cases h
   case exist hs =>
     cases hs

@@ -39,5 +39,11 @@ theorem Subcapt.crename
     simp [CBinding.rename] at hb1
     apply cinstr
     assumption
+  case cbound hb =>
+    simp [CaptureSet.crename_csingleton]
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    apply cbound
+    assumption
 
 end Capless

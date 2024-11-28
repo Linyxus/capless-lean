@@ -7,7 +7,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | var : Fin n -> Term n m k
 | lam : CType n m k -> Term (n+1) m k -> Term n m k
 | tlam : SType n m k -> Term n (m+1) k -> Term n m k
-| clam : Term n m (k+1) -> Term n m k
+| clam : CBound n k -> Term n m (k+1) -> Term n m k
 | boxed : Fin n -> Term n m k
 | pack : CaptureSet n k -> Fin n -> Term n m k
 | app : Fin n -> Fin n -> Term n m k
@@ -23,7 +23,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 
 notation:50 "λ(x:" T ")" t => Term.lam T t
 notation:50 "λ[X<:" S "]" t => Term.tlam S t
-notation:50 "λ[c]" t => Term.clam t
+notation:50 "λ[c<:" B "]" t => Term.clam B t
 notation:50 C " o- " x => Term.unbox C x
 notation:40 "let x=" t " in " u => Term.letin t u
 notation:40 "let (c,x)=" t " in " u => Term.letex t u
@@ -35,7 +35,7 @@ notation:40 "boundary:" S " in " t => Term.boundary S t
 inductive Term.IsValue : Term n m k -> Prop where
 | lam : Term.IsValue (lam E t)
 | tlam : Term.IsValue (tlam S t)
-| clam : Term.IsValue (clam t)
+| clam : Term.IsValue (clam B t)
 | boxed : Term.IsValue (boxed x)
 | pack : Term.IsValue (pack c x)
 
@@ -44,7 +44,7 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.var x => Term.var (f x)
   | Term.lam E t => Term.lam (E.rename f) (t.rename f.ext)
   | Term.tlam S t => Term.tlam (S.rename f) (t.rename f)
-  | Term.clam t => Term.clam (t.rename f)
+  | Term.clam B t => Term.clam (B.rename f) (t.rename f)
   | Term.boxed x => Term.boxed (f x)
   | Term.pack C x => Term.pack (C.rename f) (f x)
   | Term.app x y => Term.app (f x) (f y)
@@ -63,7 +63,7 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.var x => Term.var x
   | Term.lam E t => Term.lam (E.trename f) (t.trename f)
   | Term.tlam S t => Term.tlam (S.trename f) (t.trename f.ext)
-  | Term.clam t => Term.clam (t.trename f)
+  | Term.clam B t => Term.clam B (t.trename f)
   | Term.boxed x => Term.boxed x
   | Term.pack c x => Term.pack c x
   | Term.app x y => Term.app x y
@@ -82,7 +82,7 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.var x => Term.var x
   | Term.lam E t => Term.lam (E.crename f) (t.crename f)
   | Term.tlam S t => Term.tlam (S.crename f) (t.crename f)
-  | Term.clam t => Term.clam (t.crename f.ext)
+  | Term.clam B t => Term.clam (B.crename f) (t.crename f.ext)
   | Term.boxed x => Term.boxed x
   | Term.pack C x => Term.pack (C.crename f) x
   | Term.app x y => Term.app x y
@@ -176,7 +176,7 @@ theorem Term.rename_id {t : Term n m k} :
     simp [Term.rename, SType.rename_id]
     trivial
   case clam =>
-    simp [Term.rename, SType.rename_id]
+    simp [Term.rename, CBound.rename_id]
     trivial
   case boxed =>
     simp [Term.rename, FinFun.id]
@@ -256,7 +256,7 @@ theorem Term.crename_id {t : Term n m k} :
     simp [Term.crename]
     simp [ih, SType.crename_id]
   case clam ih =>
-    simp [Term.crename, ih, FinFun.id_ext]
+    simp [Term.crename, ih, CBound.crename_id, FinFun.id_ext]
   case boxed =>
     simp [Term.crename]
   case pack =>
@@ -297,7 +297,7 @@ theorem Term.rename_rename {t : Term n m k} {f : FinFun n n'} {g : FinFun n' n''
     simp [<- FinFun.ext_comp_ext, ih]
   case clam ih =>
     simp [rename]
-    simp [<- FinFun.ext_comp_ext, ih]
+    simp [<- FinFun.ext_comp_ext, ih, CBound.rename_rename]
   case boxed =>
     simp [rename]
   case pack =>
@@ -340,7 +340,7 @@ theorem Term.crename_crename {t : Term n m k} {f : FinFun k k'} {g : FinFun k' k
     simp [<- FinFun.ext_comp_ext, ih]
   case clam ih =>
     simp [crename]
-    simp [<- FinFun.ext_comp_ext, ih]
+    simp [<- FinFun.ext_comp_ext, ih, CBound.crename_crename]
   case boxed =>
     simp [crename]
   case pack =>
