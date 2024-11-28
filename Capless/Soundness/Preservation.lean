@@ -114,7 +114,7 @@ theorem preservation
       have ⟨Cf, F, E0, hx, he1, hs1⟩ := Typed.capp_inv ht
       have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
       have hv' := value_typing_widen hv hvs
-      have hct := Typed.canonical_form_clam hg hv'
+      have ⟨hsb, hct⟩ := Typed.canonical_form_clam hg hv'
       constructor
       constructor
       { easy }
