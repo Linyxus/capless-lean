@@ -3,6 +3,13 @@ import Capless.Subst.Basic
 import Capless.Subst.Capture.Subcapturing
 namespace Capless
 
+theorem Subbound.csubst
+  (h : Subbound Γ B1 B2)
+  (σ : CVarSubst Γ f Δ) :
+  Subbound Δ (B1.crename f) (B2.crename f) := by
+  cases h <;> constructor
+  apply Subcapt.csubst <;> easy
+
 def SSubtyp.csubst_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
@@ -132,6 +139,7 @@ theorem SSubtyp.csubst
       repeat intro
       simp [SType.crename]
       apply cforall
+      { apply Subbound.csubst <;> easy }
       { rename_i ih _ _ _ σ
         apply ih ; try assumption
         apply CVarSubst.cext; trivial
@@ -164,11 +172,10 @@ theorem ESubtyp.csubst
     apply hs.csubst; trivial
 
 theorem CSubtyp.cinstantiate {Γ : Context n m k}
-  (h : CSubtyp (Γ.cvar CBinding.bound) T1 T2) :
+  (h : CSubtyp (Γ.cvar (CBinding.bound CBound.star)) T1 T2) :
   CSubtyp (Γ.cvar (CBinding.inst C)) T1 T2 := by
   rw [<- CType.crename_id (T := T1), <- CType.crename_id (T := T2)]
   apply? CSubtyp.csubst
   apply? CVarSubst.instantiate
-
 
 end Capless
