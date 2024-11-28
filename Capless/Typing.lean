@@ -55,7 +55,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (let x=t in u) E C
 | letex :
   Typed Γ t (EType.ex T) C ->
-  Typed ((Γ,c<:CBound.star),x: T) u E.cweaken.weaken C.cweaken.weaken ->
+  Typed ((Γ,c<:*),x: T) u E.cweaken.weaken C.cweaken.weaken ->
   Typed Γ (let (c,x)=t in u) E C
 | bindt :
   Typed (Γ,X:=S) t E.tweaken C ->

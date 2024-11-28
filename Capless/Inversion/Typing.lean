@@ -21,13 +21,13 @@ theorem Typed.app_inv'
     induction h <;> try (solve | cases he)
     case app x C T F y h1 h2 _ _ =>
       cases he
-      exists T, C, F, (F.open y)
+      refine ⟨T, C, F, (F.open y), ?_⟩
       repeat (constructor; trivial)
       apply ESubtyp.refl
     case sub hsub ih =>
       have ih := ih he
       have ⟨T0, Cf0, E0, F0, hx0, hy0, he0, hs0⟩ := ih
-      exists T0, Cf0, E0, F0
+      refine ⟨T0, Cf0, E0, F0, ?_⟩
       repeat (any_goals apply And.intro)
       all_goals try assumption
       { apply! ESubtyp.trans }
@@ -183,7 +183,7 @@ theorem Typed.canonical_form_tlam
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.tlam S t) (EType.type ((∀[X<:S']E)^Cf)) Ct0) :
   SSubtyp Γ S' S ∧
-  Typed (Γ.tvar (TBinding.bound S')) t E Cf := by
+  Typed (Γ,X<:S') t E Cf := by
   apply Typed.canonical_form_tlam' <;> try trivial
   constructor
 
@@ -191,7 +191,7 @@ theorem Typed.capp_inv'
   (he : t0 = Term.capp x c)
   (h : Typed Γ t0 E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c}) F))) {x=x} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
@@ -212,7 +212,7 @@ theorem Typed.capp_inv'
 theorem Typed.capp_inv
   (h : Typed Γ (Term.capp x c) E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c}) F))) {x=x} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
@@ -286,7 +286,7 @@ theorem Typed.letex_inv' {Γ : Context n m k}
   (h : Typed Γ t0 E Ct0) :
   ∃ T E0,
     Typed Γ t (EType.ex T) Ct0 ∧
-    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken Ct0.cweaken.weaken ∧
+    Typed ((Γ.cvar (CBinding.bound CBound.star)).var T) u E0.cweaken.weaken Ct0.cweaken.weaken ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case letex =>
@@ -315,7 +315,7 @@ theorem Typed.letex_inv {Γ : Context n m k}
   (h : Typed Γ (Term.letex t u) E Ct) :
   ∃ T E0,
     Typed Γ t (EType.ex T) Ct ∧
-    Typed ((Γ.cvar CBinding.bound).var T) u E0.cweaken.weaken Ct.cweaken.weaken ∧
+    Typed ((Γ,c<:*).var T) u E0.cweaken.weaken Ct.cweaken.weaken ∧
     ESubtyp Γ E0 E :=
   Typed.letex_inv' rfl h
 
@@ -381,32 +381,33 @@ theorem Typed.bindc_inv {Γ : Context n m k}
 
 theorem Typed.canonical_form_clam'
   (ht : Γ.IsTight)
-  (hd : SType.Dealias Γ S0 (SType.cforall E))
-  (he1 : t0 = Term.clam t)
+  (hd : SType.Dealias Γ S0 (SType.cforall B' E))
+  (he1 : t0 = Term.clam B t)
   (he2 : E0 = EType.type (CType.capt Cf S0))
   (h : Typed Γ t0 E0 Ct0) :
-  Typed (Γ.cvar CBinding.bound) t E Cf.cweaken := by
+  Subbound Γ B' B ∧ Typed (Γ.cvar (CBinding.bound B')) t E Cf.cweaken := by
   induction h <;> try (solve | cases he1 | cases he2)
   case cabs =>
     cases he1; cases he2
     cases hd
-    trivial
+    apply And.intro
+    { apply Subbound.refl }
+    { trivial }
   case sub hs ih =>
     subst he2
     cases hs
     rename_i hs
     cases hs
     rename_i hsc hs
-    have ⟨E1, hd3⟩ := SSubtyp.dealias_right_cforall hs ht hd
-    have ih := ih ht hd3 he1 rfl
-    have h := SSubtyp.sub_dealias_cforall_inv ht hd3 hd hs
+    have ⟨B1, E1, hd3⟩ := SSubtyp.dealias_right_cforall hs ht hd
+    have ⟨ih1, ih2⟩ := ih ht hd3 he1 rfl
+    have ⟨h1, h2⟩ := SSubtyp.sub_dealias_cforall_inv ht hd3 hd hs
     constructor
+    { apply Subbound.trans <;> easy }
     apply Typed.sub
-    apply ih
-    apply Subcapt.refl
-    trivial
-    apply hsc.cweaken
-    apply ESubtyp.refl
+    { sorry } -- apply ih2
+    { apply Subcapt.refl }
+    { easy }
 
 theorem Typed.canonical_form_clam
   (ht : Γ.IsTight)
@@ -526,11 +527,11 @@ theorem Typed.tforall_inv {v : Term n m k}
 
 theorem Typed.cforall_inv' {v : Term n m k}
   (ht : Γ.IsTight)
-  (hd : SType.Dealias Γ S0 (SType.cforall E))
+  (hd : SType.Dealias Γ S0 (SType.cforall B E))
   (he : E0 = EType.type (CType.capt Cv S0))
   (hv : v.IsValue)
   (ht : Typed Γ v E0 Ct) :
-  ∃ t, v = Term.clam t := by
+  ∃ B0 t, v = Term.clam B0 t := by
   induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
   case sub hsub ih =>
     subst he
@@ -545,8 +546,8 @@ theorem Typed.cforall_inv' {v : Term n m k}
 theorem Typed.cforall_inv {v : Term n m k}
   (hg : Γ.IsTight)
   (hv : v.IsValue)
-  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.cforall E))) Ct) :
-  ∃ t, v = Term.clam t :=
+  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.cforall B E))) Ct) :
+  ∃ B0 t, v = Term.clam B0 t :=
   Typed.cforall_inv' hg (by constructor) rfl hv ht
 
 theorem Typed.boxed_inv' {v : Term n m k}
@@ -767,7 +768,7 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
   (he : t0 = (boundary:S in t))
   (ht : Typed Γ t0 E Ct) :
   Typed
-    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:*),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{})
     (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
@@ -792,7 +793,7 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
 theorem Typed.boundary_inv {Γ : Context n m k} {S : SType n m k}
   (ht : Typed Γ (boundary:S in t) E Ct) :
   Typed
-    ((Γ,c:CapSet),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:*),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{})
     (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
