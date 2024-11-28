@@ -632,6 +632,56 @@ def VarSubst.narrow
       simp [SType.rename_id]
       constructor; trivial
 
+def CVarSubst.narrow
+  (hs : Subbound Γ B' B) :
+  CVarSubst
+    (Γ,c<:B)
+    FinFun.id
+    (Γ,c<:B') := by
+  constructor <;> try (solve |
+    intros A B hb; cases hb;
+    simp [CType.crename_id, TBinding.crename_id, SType.crename_id];
+    constructor; easy)
+  case cmap =>
+    intro c D hb
+    have h := Context.cvar_cbound_inv hb
+    cases h
+    case inl h =>
+      have ⟨_, h⟩ := h
+      cases h
+    case inr h =>
+      have ⟨b0, c0, hb0, he1, he2⟩ := h
+      cases b0 <;> cases he1
+      cases he2
+      simp [CaptureSet.crename_id]
+      have hb' := Context.CBound.there_cvar (b':=CBinding.bound B') hb0
+      exact hb'
+  case cmap_bound =>
+    intro c B hb
+    have h := Context.cvar_cbound_inv hb
+    cases h
+    case inl h =>
+      have ⟨he1, he2⟩ := h
+      cases he1; cases he2
+      simp [CBound.crename_id]
+      simp [FinFun.id]
+      apply Subbound.trans (B2:=B'.cweaken)
+      { cases B' <;> constructor
+        apply Subcapt.cbound
+        constructor }
+      { apply Subbound.cweaken; easy }
+    case inr h =>
+      have ⟨b1, c1, hb1, he1, he2⟩ := h
+      cases b1 <;> cases he1
+      cases he2
+      simp [FinFun.id, CBound.crename_id]
+      rename_i cb0
+      cases cb0 <;> constructor
+      apply Subcapt.cbound
+      have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
+      simp [CBinding.cweaken] at hb1'
+      exact hb1'
+
 def TVarSubst.narrow
   (hs : SSubtyp Γ S' S) :
   TVarSubst
