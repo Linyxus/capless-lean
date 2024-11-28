@@ -129,14 +129,6 @@ theorem Typed.tsubst
          , <- SType.cweaken_trename ] at ih
       aesop
 
-theorem Typed.tnarrow
-  (h : Typed (Γ,X<: S) t E Ct)
-  (hs : SSubtyp Γ S' S) :
-  Typed (Γ,X<: S') t E Ct := by
-  rw [<- Term.trename_id (t := t), <- EType.trename_id (E := E)]
-  apply? Typed.tsubst
-  apply? TVarSubst.narrow
-
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :
   Typed Γ (t.topen X) (E.topen X) Ct := by

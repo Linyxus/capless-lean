@@ -405,8 +405,8 @@ theorem Typed.canonical_form_clam'
     constructor
     { apply Subbound.trans <;> easy }
     apply Typed.sub
-    { sorry } -- apply ih2
-    { apply Subcapt.refl }
+    { apply ih2.cnarrow; easy }
+    { apply Subcapt.cweaken; easy }
     { easy }
 
 theorem Typed.canonical_form_clam
