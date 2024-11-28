@@ -3,6 +3,16 @@ import Capless.Subtyping
 import Capless.Subst.Term.Subcapturing
 namespace Capless
 
+theorem Subbound.subst
+  (h : Subbound Γ B1 B2)
+  (σ : VarSubst Γ f Δ) :
+  Subbound Δ (B1.rename f) (B2.rename f) := by
+  cases h
+  case set =>
+    constructor
+    apply Subcapt.subst <;> easy
+  case star => constructor
+
 def SSubtyp.subst_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
@@ -42,7 +52,7 @@ theorem SSubtyp.subst
     simp [EType.rename]
     apply ESubtyp.exist
     rename_i ih _ _ _ _
-    apply ih <;> try assumption
+    apply ih
     apply VarSubst.cext; trivial
   case type =>
     unfold subst_motive1 subst_motive2
@@ -108,6 +118,7 @@ theorem SSubtyp.subst
   case label =>
     unfold subst_motive3
     repeat intro
+    simp
     apply label
     aesop
   case xforall =>
@@ -117,7 +128,7 @@ theorem SSubtyp.subst
     apply xforall
     { aesop }
     { rename_i ih _ _ _ σ
-      apply ih <;> try assumption
+      apply ih
       apply VarSubst.ext; trivial }
   case tforall =>
     unfold subst_motive1 subst_motive3
@@ -126,15 +137,16 @@ theorem SSubtyp.subst
     apply tforall
     { aesop }
     { rename_i ih _ _ _ σ
-      apply ih <;> try assumption
+      apply ih
       apply VarSubst.text; trivial }
   case cforall =>
     unfold subst_motive1 subst_motive3
     repeat intro
     simp [SType.rename]
     apply cforall
+    { apply Subbound.subst <;> easy }
     { rename_i ih _ _ _ σ
-      apply ih <;> try assumption
+      apply ih
       apply VarSubst.cext; trivial }
 
 theorem CSubtyp.subst

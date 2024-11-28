@@ -41,4 +41,9 @@ def CBound.cweaken_upper :
   (CBound.upper C).cweaken = CBound.upper C.cweaken := by
   simp [CBound.cweaken, CBound.crename, CaptureSet.cweaken]
 
+@[simp]
+theorem SType.rename_label :
+  (SType.label S).rename f = SType.label (S.rename f) := by
+  simp [SType.rename]
+
 end Capless
