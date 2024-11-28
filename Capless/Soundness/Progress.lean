@@ -107,7 +107,7 @@ theorem Store.val_lookup_exists {σ : Store n m k} {x : Fin n}
         have ⟨_, _, hd1⟩ := SSubtyp.dealias_right_tforall hsub hg (by constructor)
         cases hd1
       case cforall =>
-        have ⟨_, hd1⟩ := SSubtyp.dealias_right_cforall hsub hg (by constructor)
+        have ⟨_, _, hd1⟩ := SSubtyp.dealias_right_cforall hsub hg (by constructor)
         cases hd1
       case box =>
         have ⟨_, hd1⟩ := SSubtyp.dealias_right_boxed hsub hg (by constructor)
