@@ -10,18 +10,20 @@ It is a prerequisite for the (ENTER) case in the preservation theorem.
 
 def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
   VarMap
-    ((Γ,c:CapSet),x:(Label[S.cweaken])^{c=0})
+    ((Γ,c<:*),x:(Label[S.cweaken])^{c=0})
     FinFun.weaken.ext
-    (((Γ.label S),c:CapSet),x:(Label[S.weaken.cweaken])^{c=0}) := by
+    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0}) := by
   constructor
   case map =>
     intro x E hb
     cases hb
     case here =>
       simp [FinFun.weaken, FinFun.ext]
+      rw [<- CType.weaken_capt]
       rw [<- CType.weaken_rename]
       simp [CType.rename, SType.rename]
       rw [SType.cweaken_rename_comm]
+      rw [<- CType.weaken_capt]
       constructor
     case there_var hb0 =>
       cases hb0
@@ -63,9 +65,9 @@ def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
 
 def CVarRename.boundary {Γ : Context n m k} {S : SType n m k} :
   CVarMap
-    (((Γ.label S),c:CapSet),x:(Label[S.weaken.cweaken])^{c=0})
+    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0})
     FinFun.weaken.ext
-    ((((Γ.label S),c:={x=0}),c:CapSet),x:(Label[S.weaken.cweaken.cweaken])^{c=0}) := by
+    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0}) := by
   constructor
   case map =>
     intro x T hb
@@ -74,6 +76,7 @@ def CVarRename.boundary {Γ : Context n m k} {S : SType n m k} :
       rw [<- CType.weaken_crename]
       simp [CType.crename, SType.crename, FinFun.ext]
       rw [<- SType.cweaken_crename]
+      rw [<- CType.weaken_capt]
       constructor
     case there_var hb0 =>
       cases hb0; rename_i hb0
@@ -138,7 +141,7 @@ theorem TBinding.cweaken_copen_id {b : TBinding n m k} :
 
 def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
   CVarSubst
-    ((((Γ.label S),c:={x=0}),c:CapSet),x:(Label[S.weaken.cweaken.cweaken])^{c=0})
+    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0})
     (FinFun.open 0)
     (((Γ.label S),c:={x=0}),x:(Label[S.weaken.cweaken])^{c=0}) := by
   constructor
@@ -149,6 +152,7 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       rw [<- CType.weaken_crename]
       simp [CType.crename, SType.crename, FinFun.open]
       simp [SType.cweaken_copen_id]
+      rw [<- CType.weaken_capt]
       constructor
     case there_var hb0 =>
       cases hb0; rename_i hb0
@@ -180,6 +184,7 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     simp [CaptureSet.cweaken, CaptureSet.crename_crename]
     simp [FinFun.open_comp_weaken, CaptureSet.crename_id]
     easy
+  case cmap_bound => sorry
   case lmap =>
     intro l S hb
     cases hb; rename_i hb
@@ -207,12 +212,14 @@ def VarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     cases hb
     case here =>
       simp [FinFun.open]
-      simp [CType.weaken, CType.rename_rename]
-      simp [FinFun.open_comp_weaken, CType.rename_id]
+      simp [CType.rename]
+      simp [SType.weaken, SType.rename_rename]
+      simp [FinFun.open_comp_weaken, SType.rename_id]
       apply Typed.sub
       { apply Typed.label; constructor; constructor }
       { apply Subcapt.refl }
-      { constructor; constructor
+      { constructor
+        constructor
         { apply Subcapt.cinstl; constructor }
         { apply SSubtyp.refl } }
     case there_var hb =>
@@ -276,7 +283,7 @@ theorem CaptureSet.open_weaken_ext {C : CaptureSet (n+1) k} :
   simp [CaptureSet.rename_id]
 
 theorem Typed.boundary_body_typing {Γ : Context n m k} {S : SType n m k}
-  (ht : Typed ((Γ,c:CapSet),x:(Label[S.cweaken])^{c=0}) t E Ct) :
+  (ht : Typed ((Γ,c<:*),x:(Label[S.cweaken])^{c=0}) t E Ct) :
   Typed ((Γ.label S),c:={x=0}) t E Ct := by
   have h := ht.rename VarRename.boundary
   have h := h.crename CVarRename.boundary

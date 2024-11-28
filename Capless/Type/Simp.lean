@@ -46,4 +46,7 @@ theorem SType.rename_label :
   (SType.label S).rename f = SType.label (S.rename f) := by
   simp [SType.rename]
 
+theorem CType.rename_capt :
+  (CType.capt C S).rename f = CType.capt (C.rename f) (S.rename f) := by simp [CType.rename]
+
 end Capless
