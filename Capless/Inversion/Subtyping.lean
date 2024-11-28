@@ -709,56 +709,60 @@ theorem SSubtyp.sub_dealias_cforall_inv
     cases hd2
   case refl =>
     unfold dealias_cforall_inv.smotive
-    repeat intro
-    rename_i hd1 hd2
+    intros _ _ _ _ _ _ _ _ _ _ hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h; subst_vars
-    constructor
+    apply And.intro
     { apply Subbound.refl }
     { apply ESubtyp.refl }
   case trans =>
     unfold dealias_cforall_inv.smotive
-    intros; intros
-    rename_i hs1 hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
+    intros _ _ _ _ _ _ _ hs1 hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_cforall hs2 ht hd2
     have ⟨B3, E3, hd3⟩ := h
-    have he1 := ih1 ht hd1 hd3
-    have he2 := ih2 ht hd3 hd2
+    have ⟨he11, he12⟩ := ih1 ht hd1 hd3
+    have ⟨he21, he22⟩ := ih2 ht hd3 hd2
     constructor
-    { apply Subbound.trans <;> aesop }
-    { apply ESubtyp.trans <;> aesop }
+    { apply Subbound.trans <;> easy }
+    { apply ESubtyp.trans
+      { sorry }
+      { easy } }
   case tinstl =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
     rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h
     subst_vars
-    apply ESubtyp.refl
+    apply And.intro
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case tinstr =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd _
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
     rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h
     subst_vars
-    apply ESubtyp.refl
+    apply And.intro
+    { apply Subbound.refl }
+    { apply ESubtyp.refl }
   case tvar =>
     unfold dealias_cforall_inv.smotive
     repeat intro
     rename_i hd _
     cases hd
-    rename_i hb1 _ _ _ _ _ hb2 _
+    rename_i hb1 _ _ _ _ _ _ _ hb2 _
     have h := Context.tbound_inj hb1 hb2
     cases h
   case boxed =>
