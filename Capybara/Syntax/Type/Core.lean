@@ -1,4 +1,4 @@
-import Capybara.Syntax.CaptureSet
+import Capybara.Syntax.CaptureSet.Core
 namespace Capybara
 
 inductive Kind : Type where

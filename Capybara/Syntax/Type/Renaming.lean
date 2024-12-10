@@ -3,14 +3,20 @@ namespace Capybara
 
 mutual
 
-def EType.rename (E : EType n m k) (f : FinFun n n') : EType n' m k :=
+def EType.rename
+  (E : EType n m k)
+  (ρ : Renaming n m k n' m' k') :
+  EType n' m' k' :=
   match E with
-  | EType.type T => EType.type (T.rename f)
-  | EType.ex T => EType.ex (T.rename f)
+  | EType.type T => EType.type (T.rename ρ)
+  | EType.ex T => EType.ex (T.rename ρ)
 
-def CType.rename (T : CType n m k) (f : FinFun n n') : CType n' m k :=
+def CType.rename
+  (T : CType n m k)
+  (ρ : Renaming n m k n' m' k') :
+  CType n' m' k' :=
   match T with
-  | CType.capt C m S => CType.capt (C.rename f) m (S.rename f)
+  | CType.capt C m S => CType.capt (C.rename ρ) m (S.rename ρ)
 
 def SType.rename (S : SType n m k) (f : FinFun n n') : SType n' m k :=
   match S with

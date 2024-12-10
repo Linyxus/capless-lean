@@ -1,5 +1,5 @@
-import Capybara.Syntax.Type
-import Capybara.Syntax.CaptureSet
+import Capybara.Syntax.Type.Core
+import Capybara.Syntax.CaptureSet.Core
 namespace Capybara
 
 structure Subst (n m k n' m' k' : Nat) where

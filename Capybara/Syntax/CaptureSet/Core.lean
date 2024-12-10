@@ -19,18 +19,38 @@ notation:40 "{x=" x "}" => {x@ε:=x}
 notation:40 "{c@" m ":=" x "}" => CaptureSet.csingleton x m
 notation:40 "{c=" x "}" => {c@ε:=x}
 
-def CaptureSet.rename (C : CaptureSet n k) (f : Fin n -> Fin n') : CaptureSet n' k :=
+def CaptureSet.rename
+  (C : CaptureSet n k)
+  (ρ : Renaming n m k n' m' k') :
+  CaptureSet n' k' :=
   match C with
   | empty => {}
-  | union C1 C2 => (C1.rename f) ∪ (C2.rename f)
-  | singleton x m => {x@m:=f x}
-  | csingleton x m => {c@m:=x}
+  | union C1 C2 => (C1.rename ρ) ∪ (C2.rename ρ)
+  | singleton x m => {x@m:=ρ.var x}
+  | csingleton x m => {c@m:=ρ.cvar x}
 
-def CaptureSet.crename (C : CaptureSet n k) (f : Fin k -> Fin k') : CaptureSet n k' :=
-  match C with
-  | empty => {}
-  | union C1 C2 => (C1.crename f) ∪ (C2.crename f)
-  | singleton x m => {x@m:=x}
-  | csingleton x m => {c@m:=f x}
+def CaptureSet.qualified
+  (C : CaptureSet n k)
+  (m : Mode) :
+  CaptureSet n k :=
+  match C, m with
+  | empty, _ => {}
+  | union C1 C2, m => (C1.qualified m) ∪ (C2.qualified m)
+  | singleton x m0, ε => singleton x m0
+  | singleton x _, m => singleton x m
+  | csingleton x m0, ε => csingleton x m0
+  | csingleton x _, m => csingleton x m
+
+theorem CaptureSet.empty_def :
+  ({} : CaptureSet n k) = CaptureSet.empty := rfl
+
+theorem CaptureSet.union_def (C1 C2 : CaptureSet n k) :
+  (C1 ∪ C2) = CaptureSet.union C1 C2 := rfl
+
+@[simp]
+theorem CaptureSet.qualified_default {C : CaptureSet n k} :
+  C.qualified ε = C := by
+  induction C <;> simp [CaptureSet.qualified, CaptureSet.empty_def]
+  case union ih1 ih2 => simp [CaptureSet.union_def, ih1, ih2]
 
 end Capybara
