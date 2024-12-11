@@ -1,58 +1,46 @@
 import Mathlib.Data.Fin.Basic
 namespace ExpWeaken
 
-inductive CaptureSet0 : Nat -> Type where
-| empty : CaptureSet0 n
-| union : CaptureSet0 n -> CaptureSet0 n -> CaptureSet0 n
-| zero : CaptureSet0 1
-| weaken : CaptureSet0 n -> CaptureSet0 (n+1)
+inductive CaptureSet : Nat -> Type where
+| empty : CaptureSet n
+| union : CaptureSet n -> CaptureSet n -> CaptureSet n
+| zero : CaptureSet 1
+| weaken : CaptureSet n -> CaptureSet (n+1)
 
-instance : EmptyCollection (CaptureSet0 n) where
-  emptyCollection := CaptureSet0.empty
+instance : EmptyCollection (CaptureSet n) where
+  emptyCollection := CaptureSet.empty
 
-instance : Union (CaptureSet0 n) where
-  union := CaptureSet0.union
+instance : Union (CaptureSet n) where
+  union := CaptureSet.union
 
-notation:max C "↑" => CaptureSet0.weaken C
+notation:max C "↑" => CaptureSet.weaken C
 
-@[aesop safe [constructors]]
-inductive CaptureSet0.Simp : CaptureSet0 n -> CaptureSet0 n -> Prop where
-| refl : CaptureSet0.Simp C C
-| union :
-  CaptureSet0.Simp C1 C1' ->
-  CaptureSet0.Simp C2 C2' ->
-  CaptureSet0.Simp (C1 ∪ C2) (C1' ∪ C2')
-| weaken_empty :
-  CaptureSet0.Simp {}↑ {}
+inductive CaptureSet.Subset : CaptureSet n -> CaptureSet n -> Prop where
+| refl : CaptureSet.Subset C C
+| union_l :
+  CaptureSet.Subset C1 C ->
+  CaptureSet.Subset C2 C ->
+  CaptureSet.Subset (C1 ∪ C2) C
+| union_r1 :
+  CaptureSet.Subset C C1 ->
+  CaptureSet.Subset C (C1 ∪ C2)
+| union_r2 :
+  CaptureSet.Subset C C2 ->
+  CaptureSet.Subset C (C1 ∪ C2)
 | weaken_union :
-  CaptureSet0.Simp (C1 ∪ C2)↑ (C1'↑ ∪ C2'↑)
+  CaptureSet.Subset (C1↑ ∪ C2↑) C ->
+  CaptureSet.Subset (C1 ∪ C2)↑ C
+| weaken_elim :
+  CaptureSet.Subset C1 C2 ->
+  CaptureSet.Subset C1↑ C2↑
 
-@[aesop unsafe [50% constructors]]
-inductive CaptureSet0.Rewrite : CaptureSet0 n -> CaptureSet0 n -> Prop where
-| simp :
-  CaptureSet0.Simp C C' ->
-  CaptureSet0.Rewrite C C'
-| symm :
-  CaptureSet0.Rewrite C1 C2 ->
-  CaptureSet0.Rewrite C2 C1
-| trans :
-  CaptureSet0.Rewrite C1 C2 ->
-  CaptureSet0.Rewrite C2 C3 ->
-  CaptureSet0.Rewrite C1 C3
-
-def CaptureSet0.rewrite_equiv : Equivalence (α:=CaptureSet0 n) CaptureSet0.Rewrite :=
-  by constructor <;> aesop
-
-def CaptureSet0.isSetoid : Setoid (CaptureSet0 n) :=
-  ⟨CaptureSet0.Rewrite, CaptureSet0.rewrite_equiv⟩
-
-def CaptureSet (n : Nat) : Type :=
-  Quotient (CaptureSet0.isSetoid (n:=n))
+instance : HasSubset (CaptureSet n) where
+  Subset := CaptureSet.Subset
 
 mutual
 
 inductive CType0 : Nat -> Nat -> Type where
-| capt : CaptureSet0 n -> SType0 n m -> CType0 n m
+| capt : CaptureSet n -> SType0 n m -> CType0 n m
 | weaken : CType0 n m -> CType0 (n+1) m
 | tweaken : CType0 n m -> CType0 n (m+1)
 
