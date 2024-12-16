@@ -38,4 +38,6 @@ inductive Subcapturing : Context n m k -> CaptureSet n k -> CaptureSet n k -> Pr
   Context.LookupC Γ c (calias C) ->
   Subcapturing Γ (C.qualified m) ({c@m:=c})
 
+notation:50 Γ "⊢c" C1 "<:" C2 => Subcapturing Γ C1 C2
+
 end Capybara

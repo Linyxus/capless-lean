@@ -1,6 +1,9 @@
 import Capybara.Syntax.CaptureSet.Core
 namespace Capybara
 
+/-!
+Kinds of capture set parameters.
+-/
 inductive Kind : Type where
 | Imm : Kind
 | Mut : Kind
@@ -24,9 +27,13 @@ inductive SType : Nat -> Nat -> Nat -> Type where
 
 end
 
-notation:50 "⊤" => SType.top
+/-!
+Notation for types.
+-/
+notation:max "⊤" => SType.top
 notation:40 "[X<:" S "]->" T => SType.tarrow S T
 notation:40 "(x:" S ")->" T => SType.arrow S T
 notation:40 "[c:" S "]->" T => SType.carrow S T
+notation:50 S "^[" m "]" C => CType.capt C m S
 
 end Capybara
