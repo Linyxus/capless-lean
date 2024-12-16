@@ -80,7 +80,7 @@ theorem CaptureSet.qualified_default {C : CaptureSet n k} :
   case union ih1 ih2 => simp [CaptureSet.union_def, ih1, ih2]
 
 /-!
-Subset relation for capture sets.
+Subset relation for capture sets. It is defined inductively.
 -/
 inductive CaptureSet.Subset : CaptureSet n k -> CaptureSet n k -> Prop where
 | empty : CaptureSet.Subset {} C
@@ -95,5 +95,8 @@ inductive CaptureSet.Subset : CaptureSet n k -> CaptureSet n k -> Prop where
 | union_rr :
   CaptureSet.Subset C C2 ->
   CaptureSet.Subset C (C1 ∪ C2)
+
+instance : HasSubset (CaptureSet n k) where
+  Subset := CaptureSet.Subset
 
 end Capybara
