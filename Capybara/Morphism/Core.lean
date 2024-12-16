@@ -14,4 +14,28 @@ structure Renaming (n m k n' m' k' : Nat) where
   tvar : FinFun m m'
   cvar : FinFun k k'
 
+def Renaming.ext (ρ : Renaming n m k n' m' k') :
+  Renaming (n+1) m k (n'+1) m' k' :=
+  {
+    var := ρ.var.ext
+    tvar := ρ.tvar
+    cvar := ρ.cvar
+  }
+
+def Renaming.text (ρ : Renaming n m k n' m' k') :
+  Renaming n (m+1) k n' (m'+1) k' :=
+  {
+    var := ρ.var
+    tvar := ρ.tvar.ext
+    cvar := ρ.cvar
+  }
+
+def Renaming.cext (ρ : Renaming n m k n' m' k') :
+  Renaming n m (k+1) n' m' (k'+1) :=
+  {
+    var := ρ.var
+    tvar := ρ.tvar
+    cvar := ρ.cvar.ext
+  }
+
 end Capybara
