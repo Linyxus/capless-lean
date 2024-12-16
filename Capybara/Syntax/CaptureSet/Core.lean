@@ -24,9 +24,9 @@ instance : Union (CaptureSet n k) where
 Notation for capture sets.
 -/
 notation:40 "{x@" m ":=" x "}" => CaptureSet.singleton x m
-notation:40 "{x=" x "}" => {x@ε:=x}
+notation:40 "{x:=" x "}" => {x@ε:=x}
 notation:40 "{c@" m ":=" x "}" => CaptureSet.csingleton x m
-notation:40 "{c=" x "}" => {c@ε:=x}
+notation:40 "{c:=" x "}" => {c@ε:=x}
 
 /-!
 Renaming functions for capture sets.
@@ -78,5 +78,22 @@ theorem CaptureSet.qualified_default {C : CaptureSet n k} :
   C.qualified ε = C := by
   induction C <;> simp [CaptureSet.qualified, CaptureSet.empty_def]
   case union ih1 ih2 => simp [CaptureSet.union_def, ih1, ih2]
+
+/-!
+Subset relation for capture sets.
+-/
+inductive CaptureSet.Subset : CaptureSet n k -> CaptureSet n k -> Prop where
+| empty : CaptureSet.Subset {} C
+| refl : CaptureSet.Subset C C
+| union_l :
+  CaptureSet.Subset C1 C ->
+  CaptureSet.Subset C2 C ->
+  CaptureSet.Subset (C1 ∪ C2) C
+| union_rl :
+  CaptureSet.Subset C C1 ->
+  CaptureSet.Subset C (C1 ∪ C2)
+| union_rr :
+  CaptureSet.Subset C C2 ->
+  CaptureSet.Subset C (C1 ∪ C2)
 
 end Capybara
