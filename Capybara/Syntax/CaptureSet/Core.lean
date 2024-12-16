@@ -56,6 +56,9 @@ def CaptureSet.qualified
   | csingleton x m0, ε => csingleton x m0
   | csingleton x _, m => csingleton x m
 
+def CaptureSet.ro (C : CaptureSet n k) : CaptureSet n k :=
+  C.qualified ro
+
 /-!
 Weakening functions for capture sets.
 -/
