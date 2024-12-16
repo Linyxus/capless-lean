@@ -1,6 +1,31 @@
 import Capybara.Syntax.Type
 namespace Capybara
+/-!
+# Term Syntax
 
+This module defines the syntax of terms in the Capybara language.
+
+## Main Definitions
+
+- `Term n m k`: Terms with `n` term variables, `m` type variables, and `k` capture set variables
+- `Term.rename`: Renaming operation for terms
+
+## Term Constructors
+
+- Variables: `var`
+- Functions: `lam` (term abstraction), `tlam` (type abstraction), `clam` (capture set abstraction)
+- Applications: `app` (term application), `tapp` (type application), `capp` (capture set application)
+- Capture set operations: `pack` (capture set creation), `unpack` (capture set elimination)
+- Let bindings: `letin` (term binding)
+- Aliases: `calias` (capture set alias), `talias` (type alias)
+
+The indices `n`, `m`, and `k` track the number of term variables, type variables, and capture set variables
+in scope, respectively. This ensures well-scopedness of terms through the type system.
+-/
+
+/-!
+Term definitions.
+-/
 inductive Term : Nat -> Nat -> Nat -> Type where
 | var : Fin n -> Term n m k
 | lam : CType n m k -> Term (n+1) m k -> Term n m k
@@ -15,6 +40,9 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | calias : CaptureSet n k -> Term n m (k+1) -> Term n m k
 | talias : SType n m k -> Term n (m+1) k -> Term n m k
 
+/-!
+Renaming operation for terms.
+-/
 def Term.rename
   (t : Term n m k)
   (ρ : Renaming n m k n' m' k') :
@@ -32,5 +60,15 @@ def Term.rename
   | unpack t1 t2 => unpack (t1.rename ρ) (t2.rename ρ.cext.ext)
   | calias C t => calias (C.rename ρ) (t.rename ρ.cext)
   | talias T t => talias (T.rename ρ) (t.rename ρ.text)
+
+/-!
+Weakening operation for terms.
+-/
+def Term.weaken : Term n m k -> Term (n+1) m k :=
+  fun t => t.rename Renaming.weaken
+def Term.tweaken : Term n m k -> Term n (m+1) k :=
+  fun t => t.rename Renaming.tweaken
+def Term.cweaken : Term n m k -> Term n m (k+1) :=
+  fun t => t.rename Renaming.cweaken
 
 end Capybara
