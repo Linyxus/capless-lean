@@ -12,8 +12,8 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | capp : Fin n -> Fin k -> Term n m k
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
 | unpack : Term n m k -> Term (n+1) m (k+1) -> Term n m k
-| bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
-| bindt : SType n m k -> Term n (m+1) k -> Term n m k
+| calias : CaptureSet n k -> Term n m (k+1) -> Term n m k
+| talias : SType n m k -> Term n (m+1) k -> Term n m k
 
 def Term.rename
   (t : Term n m k)
@@ -30,7 +30,7 @@ def Term.rename
   | capp x c => capp (ρ.var x) (ρ.cvar c)
   | letin t1 t2 => letin (t1.rename ρ) (t2.rename ρ.ext)
   | unpack t1 t2 => unpack (t1.rename ρ) (t2.rename ρ.cext.ext)
-  | bindc C t => bindc (C.rename ρ) (t.rename ρ.cext)
-  | bindt T t => bindt (T.rename ρ) (t.rename ρ.text)
+  | calias C t => calias (C.rename ρ) (t.rename ρ.cext)
+  | talias T t => talias (T.rename ρ) (t.rename ρ.text)
 
 end Capybara
