@@ -50,4 +50,8 @@ inductive ESubtyping : Context n m k -> EType n m k -> EType n m k -> Prop
 
 end
 
+notation:50 Γ " ⊢s " S1 " <: " S2 => SSubtyping Γ S1 S2
+notation:50 Γ " ⊢ " C1 " <: " C2 => CSubtyping Γ C1 C2
+notation:50 Γ " ⊢e " E1 " <: " E2 => ESubtyping Γ E1 E2
+
 end Capybara
