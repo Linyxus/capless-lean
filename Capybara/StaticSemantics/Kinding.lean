@@ -27,4 +27,13 @@ inductive CaptureRoot.Kinding : Context n m k -> CaptureRoot k -> Kind -> Prop w
   Context.LookupC Γ c (cparam Kind.Fresh) ->
   CaptureRoot.Kinding Γ (CaptureRoot.singleton c m) Kind.Fresh
 
+/-!
+Kinding of capture sets is defined by the kinding of its root capture variables.
+-/
+inductive CaptureSet.Kinding : Context n m k -> CaptureSet n k -> Kind -> Prop where
+| mk :
+  CaptureSet.Root C Γ D ->
+  D.Kinding Γ K ->
+  CaptureSet.Kinding Γ C K
+
 end Capybara
