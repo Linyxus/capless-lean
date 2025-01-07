@@ -11,4 +11,6 @@ inductive CaptureSet.Chaining : Context n m k -> CaptureSet n k -> CaptureSet n 
   D1.Chaining D2 ->
   CaptureSet.Chaining Γ C1 C2
 
+notation:50 Γ " ⊢ " C1 " >> " C2 => CaptureSet.Chaining Γ C1 C2
+
 end Capybara
