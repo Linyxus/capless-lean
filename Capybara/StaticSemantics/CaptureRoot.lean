@@ -47,4 +47,17 @@ inductive CaptureSet.Root : CaptureSet n k -> Context n m k -> CaptureRoot k -> 
   CaptureSet.Root (C.qualified m) Γ D ->
   CaptureSet.Root ({c@m:=c}) Γ D
 
+/-!
+Membership of an access in a capture root.
+-/
+inductive CaptureRoot.HasElem : CaptureRoot k -> Fin k -> Mode -> Prop where
+| union_l :
+  HasElem D1 c m ->
+  HasElem (D1 ∪ D2) c m
+| union_r :
+  HasElem D2 c m ->
+  HasElem (D1 ∪ D2) c m
+| singleton :
+  HasElem (CaptureRoot.singleton c m) c m
+
 end Capybara
