@@ -60,4 +60,12 @@ inductive CaptureRoot.HasElem : CaptureRoot k -> Fin k -> Mode -> Prop where
 | singleton :
   HasElem (CaptureRoot.singleton c m) c m
 
+/-!
+Qualifying all access in a capture root to `drop`.
+-/
+def CaptureRoot.drop : CaptureRoot k -> CaptureRoot k
+| CaptureRoot.empty => CaptureRoot.empty
+| CaptureRoot.union D1 D2 => CaptureRoot.union (CaptureRoot.drop D1) (CaptureRoot.drop D2)
+| CaptureRoot.singleton c _ => CaptureRoot.singleton c drop
+
 end Capybara
