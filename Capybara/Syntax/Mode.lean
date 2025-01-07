@@ -13,11 +13,11 @@ notation "ε" => Mode.M Mutability.default
 notation "drop" => Mode.drop
 
 /-!
-Which mutability mode is more permissive?
+Given `m1` and `m2`, `LessPermissive m1 m2` means that `m1` is less permissive than `m2`.
 -/
-inductive MorePermissive : Mutability -> Mutability -> Prop where
-| readonly : MorePermissive Mutability.readonly Mutability.default
-| refl : MorePermissive m m
+inductive LessPermissive : Mutability -> Mutability -> Prop where
+| readonly : LessPermissive Mutability.readonly Mutability.default
+| refl : LessPermissive m m
 
 
 end Capybara
