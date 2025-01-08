@@ -102,4 +102,10 @@ inductive CaptureSet.Subset : CaptureSet n k -> CaptureSet n k -> Prop where
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
+/-!
+Spanning a capture set over a variable.
+-/
+def CaptureSet.span (x : Fin n) : CaptureSet n k :=
+  ({x:=x}) ∪ ({x@ro:=x}) ∪ ({x@drop:=x})
+
 end Capybara

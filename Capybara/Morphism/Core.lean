@@ -41,9 +41,21 @@ def FinFun.ext (f : FinFun n n') : FinFun (n+1) (n'+1) := by
 
 def FinFun.id {n : Nat} : FinFun n n := fun x => x
 
+/-!
+A weaken function that shifts all indices by one.
+-/
 def FinFun.weaken {n : Nat} : FinFun n (n+1) := by
   intro x
   exact Fin.succ x
+
+/-!
+Open a bound variable.
+-/
+def FinFun.open {n : Nat} (x : Fin n) : FinFun (n+1) n := by
+  intro y
+  cases y using Fin.cases
+  case zero => exact x
+  case succ y0 => exact y0
 
 /-!
 A renaming function, which maps the three dimensions of a context (term, type, and capture set variables).
@@ -114,6 +126,27 @@ def Renaming.cweaken : Renaming n m k n m (k+1) :=
     var := FinFun.id
     tvar := FinFun.id
     cvar := FinFun.weaken
+  }
+
+def Renaming.open (x : Fin n) : Renaming (n+1) m k n m k :=
+  {
+    var := FinFun.open x
+    tvar := FinFun.id
+    cvar := FinFun.id
+  }
+
+def Renaming.topen (X : Fin m) : Renaming n (m+1) k n m k :=
+  {
+    var := FinFun.id
+    tvar := FinFun.open X
+    cvar := FinFun.id
+  }
+
+def Renaming.copen (X : Fin k) : Renaming n m (k+1) n m k :=
+  {
+    var := FinFun.id
+    tvar := FinFun.id
+    cvar := FinFun.open X
   }
 
 end Capybara

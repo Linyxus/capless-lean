@@ -35,5 +35,6 @@ notation:40 "[X<:" S "]->" T => SType.tarrow S T
 notation:40 "(x:" S ")->" T => SType.arrow S T
 notation:40 "[c:" S "]->" T => SType.carrow S T
 notation:50 S "^[" m "]" C => CType.capt C m S
+notation:50 S "^" C => CType.capt C ε S
 
 end Capybara

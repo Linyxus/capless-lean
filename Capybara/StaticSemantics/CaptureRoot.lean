@@ -1,4 +1,5 @@
 import Capybara.Syntax
+import Capybara.StaticSemantics.Subcapturing
 namespace Capybara
 
 /-!
@@ -61,11 +62,16 @@ inductive CaptureRoot.HasElem : CaptureRoot k -> Fin k -> Mode -> Prop where
   HasElem (CaptureRoot.singleton c m) c m
 
 /-!
-Qualifying all access in a capture root to `drop`.
+All capture roots are dropped by this capture set.
 -/
-def CaptureRoot.drop : CaptureRoot k -> CaptureRoot k
-| CaptureRoot.empty => CaptureRoot.empty
-| CaptureRoot.union D1 D2 => CaptureRoot.union (CaptureRoot.drop D1) (CaptureRoot.drop D2)
-| CaptureRoot.singleton c _ => CaptureRoot.singleton c drop
+inductive CaptureRoot.Dropped : CaptureRoot k -> CaptureSet n k -> Prop where
+| empty : CaptureRoot.Dropped {} C
+| union :
+  Dropped D1 C ->
+  Dropped D2 C ->
+  Dropped (D1 ∪ D2) C
+| singleton :
+  Subcapturing Γ ({c@drop:=c}) C ->
+  Dropped (CaptureRoot.singleton c m) C
 
 end Capybara

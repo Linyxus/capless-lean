@@ -10,6 +10,7 @@ inductive Mode : Type where
 
 notation "ro" => Mode.M Mutability.readonly
 notation "ε" => Mode.M Mutability.default
+notation "ε" => Mutability.default
 notation "drop" => Mode.drop
 
 /-!
