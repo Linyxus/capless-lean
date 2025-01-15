@@ -30,7 +30,7 @@ inductive Typed : CaptureSet n k -> Context n m k -> Term n m k -> EType n m k -
   Typed {} Γ (Term.lam T t) (EType.type (((x:T)->E)^[ε]C))
 | tabs :
   Typed C (Γ,X:tparam S) t E ->
-  --------------------------------
+  ---------------------------------
   Typed C Γ (Term.tlam S t) (EType.type (([X<:S]->E)^[ε]C))
 
 end Capybara
