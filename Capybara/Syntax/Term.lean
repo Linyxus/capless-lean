@@ -36,6 +36,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | app : Fin n -> Fin n -> Term n m k
 | tapp : Fin n -> Fin m -> Term n m k
 | capp : Fin n -> Fin k -> Term n m k
+| fapp : Fin n -> Fin k -> Fin n -> Term n m k
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
 | unpack : Term n m k -> Term (n+1) m (k+1) -> Term n m k
 | calias : CaptureSet n k -> Term n m (k+1) -> Term n m k
@@ -58,6 +59,7 @@ def Term.rename
   | app x y => app (ρ.var x) (ρ.var y)
   | tapp x X => tapp (ρ.var x) (ρ.tvar X)
   | capp x c => capp (ρ.var x) (ρ.cvar c)
+  | fapp x c y => fapp (ρ.var x) (ρ.cvar c) (ρ.var y)
   | letin t1 t2 => letin (t1.rename ρ) (t2.rename ρ.ext)
   | unpack t1 t2 => unpack (t1.rename ρ) (t2.rename ρ.cext.ext)
   | calias C t => calias (C.rename ρ) (t.rename ρ.cext)
