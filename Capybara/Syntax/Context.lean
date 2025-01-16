@@ -3,6 +3,13 @@ import Capybara.Syntax.Type
 namespace Capybara
 
 /-!
+Kind of a capture set parameter.
+-/
+inductive CKind : Nat -> Nat -> Type where
+| Sep : SepDegree n k -> CKind n k
+| Fresh : CKind n k
+
+/-!
 Type binding and capture set binding.
 
 Type binding can be either a type parameter (abstract) or
@@ -13,8 +20,9 @@ inductive TBinding : Nat -> Nat -> Nat -> Type where
 | param : SType n m k -> TBinding n m k
 | alias : SType n m k -> TBinding n m k
 
+
 inductive CBinding : Nat -> Nat -> Type where
-| param : Kind -> CBinding n k
+| param : CKind n k -> CBinding n k
 | alias : CaptureSet n k -> CBinding n k
 
 notation:max "tparam" S => TBinding.param S
@@ -28,8 +36,11 @@ Weakening functions for type and capture set binding.
 def TBinding.weaken : TBinding n m k -> TBinding (n+1) m k
 | TBinding.param T => TBinding.param (T.weaken)
 | TBinding.alias T => TBinding.alias (T.weaken)
+def CKind.weaken : CKind n k -> CKind (n+1) k
+| CKind.Sep D => CKind.Sep (D.weaken)
+| CKind.Fresh => CKind.Fresh
 def CBinding.weaken : CBinding n k -> CBinding (n+1) k
-| CBinding.param k => CBinding.param k
+| CBinding.param k => CBinding.param (k.weaken)
 | CBinding.alias C => CBinding.alias (C.weaken)
 def TBinding.tweaken : TBinding n m k -> TBinding n (m+1) k
 | TBinding.param T => TBinding.param (T.tweaken)
@@ -37,8 +48,11 @@ def TBinding.tweaken : TBinding n m k -> TBinding n (m+1) k
 def TBinding.cweaken : TBinding n m k -> TBinding n m (k+1)
 | TBinding.param T => TBinding.param (T.cweaken)
 | TBinding.alias T => TBinding.alias (T.cweaken)
+def CKind.cweaken : CKind n k -> CKind n (k+1)
+| CKind.Sep D => CKind.Sep (D.cweaken)
+| CKind.Fresh => CKind.Fresh
 def CBinding.cweaken : CBinding n k -> CBinding n (k+1)
-| CBinding.param k => CBinding.param k
+| CBinding.param k => CBinding.param (k.cweaken)
 | CBinding.alias C => CBinding.alias (C.cweaken)
 
 /-!
