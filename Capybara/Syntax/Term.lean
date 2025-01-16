@@ -13,7 +13,7 @@ This module defines the syntax of terms in the Capybara language.
 ## Term Constructors
 
 - Variables: `var`
-- Functions: `lam` (term abstraction), `tlam` (type abstraction), `clam` (capture set abstraction)
+- Functions: `lam` (term abstraction), `tlam` (type abstraction), `clam` (capture abstraction), `flam` (fresh capture abstraction)
 - Applications: `app` (term application), `tapp` (type application), `capp` (capture set application)
 - Capture set operations: `pack` (capture set creation), `unpack` (capture set elimination)
 - Let bindings: `letin` (term binding)
@@ -30,7 +30,8 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | var : Fin n -> Term n m k
 | lam : CType n m k -> Term (n+1) m k -> Term n m k
 | tlam : SType n m k -> Term n (m+1) k -> Term n m k
-| clam : Kind -> Term n m (k+1) -> Term n m k
+| clam : SepDegree n k -> Term n m (k+1) -> Term n m k
+| flam : CType n m (k+1) -> Term (n+1) m (k+1) -> Term n m k
 | pack : Fin k -> Fin n -> Term n m k
 | app : Fin n -> Fin n -> Term n m k
 | tapp : Fin n -> Fin m -> Term n m k
@@ -51,7 +52,8 @@ def Term.rename
   | var x => var (ρ.var x)
   | lam t1 t2 => lam (t1.rename ρ) (t2.rename ρ.ext)
   | tlam t1 t2 => tlam (t1.rename ρ) (t2.rename ρ.text)
-  | clam k t => clam k (t.rename ρ.cext)
+  | clam D t => clam (D.rename ρ) (t.rename ρ.cext)
+  | flam T t => flam (T.rename ρ.cext) (t.rename ρ.cext.ext)
   | pack x y => pack (ρ.cvar x) (ρ.var y)
   | app x y => app (ρ.var x) (ρ.var y)
   | tapp x X => tapp (ρ.var x) (ρ.tvar X)
