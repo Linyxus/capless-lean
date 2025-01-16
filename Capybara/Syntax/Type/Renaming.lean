@@ -1,6 +1,14 @@
 import Capybara.Syntax.Type.Core
 namespace Capybara
 
+def SepDegree.rename
+  (D : SepDegree n k)
+  (ρ : Renaming n m k n' m' k') :
+  SepDegree n' k' :=
+  match D with
+  | Imm C => Imm (C.rename ρ)
+  | Mut C => Mut (C.rename ρ)
+
 mutual
 
 def EType.rename
@@ -23,7 +31,8 @@ def SType.rename (S : SType n m k) (ρ : Renaming n m k n' m' k') : SType n' m' 
   | SType.top => SType.top
   | SType.tvar x => SType.tvar (ρ.tvar x)
   | SType.arrow T E => (x:T.rename ρ)->(E.rename ρ.ext)
-  | SType.carrow k E => [c:k]->(E.rename ρ.cext)
+  | SType.carrow D E => [c:D.rename ρ]->(E.rename ρ.cext)
+  | SType.farrow T E => [c:Fresh](x:T.rename ρ.cext)->(E.rename ρ.cext.ext)
   | SType.tarrow S T => [X<:S.rename ρ]->(T.rename ρ.text)
 
 end
