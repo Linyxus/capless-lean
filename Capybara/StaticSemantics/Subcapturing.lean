@@ -23,8 +23,9 @@ inductive Subcapturing : Context n m k -> CaptureSet n k -> CaptureSet n k -> Pr
   Subcapturing Γ C1 C ->
   Subcapturing Γ C2 C ->
   Subcapturing Γ (C1 ∪ C2) C
-| ro :
-  Subcapturing Γ (C.ro) C
+| mode {C : CaptureSet n k} :
+  Mode.LessPermissive m1 m2 ->
+  Subcapturing Γ (C.qualified m1) (C.qualified m2)
 | var :
   Context.Lookup Γ x (CType.capt C m S) ->
   Subcapturing Γ ({x:=x}) (C.qualified (Mode.M m))
