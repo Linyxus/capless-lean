@@ -25,7 +25,7 @@ inductive SSubtyping : Context n m k -> SType n m k -> SType n m k -> Prop
   ESubtyping (Γ,X:tparam S2) E1 E2 ->
   SSubtyping Γ ([X<:S1]->E1) ([X<:S2]->E2)
 | carrow :
-  ESubtyping (Γ,c:cparam K) E1 E2 ->
+  ESubtyping (Γ,c:cparam (CKind.Sep K)) E1 E2 ->
   SSubtyping Γ ([c:K]->E1) ([c:K]->E2)
 | talias_l :
   Context.LookupT Γ X (talias S) ->
@@ -45,7 +45,7 @@ inductive ESubtyping : Context n m k -> EType n m k -> EType n m k -> Prop
   CSubtyping Γ T1 T2 ->
   ESubtyping Γ (EType.type T1) (EType.type T2)
 | ex :
-  CSubtyping (Γ,c:cparam Kind.Fresh) T1 T2 ->
+  CSubtyping (Γ,c:cparam CKind.Fresh) T1 T2 ->
   ESubtyping Γ (EType.ex T1) (EType.ex T2)
 
 end
