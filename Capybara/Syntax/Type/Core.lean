@@ -1,12 +1,16 @@
 import Capybara.Syntax.CaptureSet.Core
 namespace Capybara
 
+inductive SepMode : Type where
+| Mut : SepMode
+| Imm : SepMode
+
 /-!
 Separation degree.
 -/
-inductive SepDegree : Nat -> Nat -> Type where
-| Mut : CaptureSet n k -> SepDegree n k
-| Imm : CaptureSet n k -> SepDegree n k
+structure SepDegree (n k : Nat) : Type where
+  mode : SepMode
+  degree : CaptureSet n k
 
 mutual
 

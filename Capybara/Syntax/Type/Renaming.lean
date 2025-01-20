@@ -6,8 +6,7 @@ def SepDegree.rename
   (ρ : Renaming n m k n' m' k') :
   SepDegree n' k' :=
   match D with
-  | Imm C => Imm (C.rename ρ)
-  | Mut C => Mut (C.rename ρ)
+  | ⟨s, C⟩ => ⟨s, C.rename ρ⟩
 
 mutual
 
