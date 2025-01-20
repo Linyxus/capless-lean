@@ -1,4 +1,4 @@
-import Capybara.StaticSemantics.ReachRoot
+import Capybara.StaticSemantics.CaptureRoot
 namespace Capybara
 
 /-!
