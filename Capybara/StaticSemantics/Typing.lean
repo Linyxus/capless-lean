@@ -74,6 +74,19 @@ inductive Typed : CaptureSet n k -> Context n m k -> Term n m k -> EType n m k -
   DroppedChaining Γ ({c:=c}) ({x:=x}) ->
   ------------------------------------------------------------
   Typed C' Γ (Term.fapp x c y) ((E.copen c).open y)
-
+| letin :
+  Typed C1 Γ t (EType.type T) ->
+  Typed C2.weaken (Γ,x:T) u E0 ->
+  ((Γ,x:T) ⊢e E0 <: E.weaken) ->
+  Chaining Γ C1 C2 ->
+  ------------------------------------------------------------
+  Typed (C1 ∪ C2) Γ (Term.letin t u) E
+| unpack :
+  Typed C1 Γ t (EType.ex T) ->
+  Typed (C2.cweaken.weaken ∪ CaptureSet.span 0) ((Γ,c:cparam CKind.Fresh),x:T) u E0 ->
+  (((Γ,c:cparam CKind.Fresh),x:T) ⊢e E0 <: E.cweaken.weaken) ->
+  Chaining Γ C1 C2 ->
+  ------------------------------------------------------------
+  Typed (C1 ∪ C2) Γ (Term.unpack t u) E
 
 end Capybara
