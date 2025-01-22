@@ -14,9 +14,11 @@ inductive CaptureSet : Nat -> Nat -> Type where
 /-!
 Instance definitions for capture sets.
 -/
+@[simp]
 instance : EmptyCollection (CaptureSet n k) where
   emptyCollection := CaptureSet.empty
 
+@[simp]
 instance : Union (CaptureSet n k) where
   union := CaptureSet.union
 

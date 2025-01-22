@@ -149,4 +149,94 @@ def Renaming.copen (X : Fin k) : Renaming n m (k+1) n m k :=
     cvar := FinFun.open X
   }
 
+def Renaming.id : Renaming n m k n m k :=
+  {
+    var := FinFun.id
+    tvar := FinFun.id
+    cvar := FinFun.id
+  }
+
+def FinFun.comp (f : FinFun n n') (g : FinFun n' n'') : FinFun n n'' :=
+  fun x => g (f x)
+
+def Renaming.comp (ρ : Renaming n m k n' m' k') (ρ' : Renaming n' m' k' n'' m'' k'') : Renaming n m k n'' m'' k'' :=
+  {
+    var := ρ.var.comp ρ'.var
+    tvar := ρ.tvar.comp ρ'.tvar
+    cvar := ρ.cvar.comp ρ'.cvar
+  }
+
+/-!
+Basic properties of renamings.
+-/
+theorem Renaming.ext_var_zero {ρ : Renaming n m k n' m' k'} : ρ.ext.var 0 = 0 := by
+  simp [Renaming.ext]
+  rfl
+
+theorem Renaming.ext_var_succ {ρ : Renaming n m k n' m' k'} {x : Fin n} : ρ.ext.var (Fin.succ x) = Fin.succ (ρ.var x) := by
+  simp [Renaming.ext]
+  rfl
+
+theorem FinFun.id_comp_id {n : Nat} : FinFun.comp (n:=n) FinFun.id FinFun.id = FinFun.id := by rfl
+
+theorem Renaming.id_comp_id {n m k : Nat} : Renaming.comp (n:=n) (m:=m) (k:=k) Renaming.id Renaming.id = Renaming.id := by rfl
+
+theorem FinFun.id_ext {n : Nat} : FinFun.ext (n:=n) FinFun.id = FinFun.id := by
+  funext x0
+  cases x0 using Fin.cases
+  case zero => simp [FinFun.id, FinFun.ext]
+  case succ x0 => simp [FinFun.id, FinFun.ext]
+
+theorem Renaming.id_ext {n m k : Nat} : Renaming.ext (n:=n) (m:=m) (k:=k) Renaming.id = Renaming.id := by simp [Renaming.ext, Renaming.id, FinFun.id_ext]
+
+theorem Renaming.id_text {n m k : Nat} : Renaming.text (n:=n) (m:=m) (k:=k) Renaming.id = Renaming.id := by simp [Renaming.text, Renaming.id, FinFun.id_ext]
+
+theorem Renaming.id_cext {n m k : Nat} : Renaming.cext (n:=n) (m:=m) (k:=k) Renaming.id = Renaming.id := by simp [Renaming.cext, Renaming.id, FinFun.id_ext]
+
+theorem FinFun.comp_ext {f : FinFun n n'} {g : FinFun n' n''} : (f.comp g).ext = f.ext.comp g.ext := by
+  funext x
+  cases x using Fin.cases
+  case zero => rfl
+  case succ x0 => simp [FinFun.comp, FinFun.ext]
+
+theorem Renaming.comp_ext {ρ : Renaming n m k n' m' k'} {ρ' : Renaming n' m' k' n'' m'' k''} :
+  (ρ.comp ρ').ext = ρ.ext.comp ρ'.ext := by
+  simp [Renaming.ext, Renaming.comp, FinFun.comp_ext]
+
+theorem Renaming.comp_text {ρ : Renaming n m k n' m' k'} {ρ' : Renaming n' m' k' n'' m'' k''} :
+  (ρ.comp ρ').text = ρ.text.comp ρ'.text := by
+  simp [Renaming.text, Renaming.comp, FinFun.comp_ext]
+
+theorem Renaming.comp_cext {ρ : Renaming n m k n' m' k'} {ρ' : Renaming n' m' k' n'' m'' k''} :
+  (ρ.comp ρ').cext = ρ.cext.comp ρ'.cext := by
+  simp [Renaming.cext, Renaming.comp, FinFun.comp_ext]
+
+theorem FinFun.comp_weaken {f : FinFun n n'} :
+  f.comp FinFun.weaken = FinFun.weaken.comp (f.ext) := by
+  funext x
+  simp [FinFun.comp, FinFun.weaken, FinFun.ext]
+
+theorem FinFun.comp_id {f : FinFun n n'} : f.comp FinFun.id = f := by
+  funext x
+  simp [FinFun.comp, FinFun.id]
+
+theorem FinFun.id_comp {f : FinFun n n'} : FinFun.id.comp f = f := by
+  funext x
+  simp [FinFun.comp, FinFun.id]
+
+theorem Renaming.comp_weaken {ρ : Renaming n m k n' m' k'} :
+  ρ.comp Renaming.weaken = Renaming.weaken.comp ρ.ext := by
+  simp [Renaming.weaken, Renaming.comp, Renaming.ext]
+  simp [FinFun.comp_weaken, FinFun.comp_id, FinFun.id_comp]
+
+theorem Renaming.comp_tweaken {ρ : Renaming n m k n' m' k'} :
+  ρ.comp Renaming.tweaken = Renaming.tweaken.comp ρ.text := by
+  simp [Renaming.tweaken, Renaming.comp, Renaming.text]
+  simp [FinFun.comp_weaken, FinFun.comp_id, FinFun.id_comp]
+
+theorem Renaming.comp_cweaken {ρ : Renaming n m k n' m' k'} :
+  ρ.comp Renaming.cweaken = Renaming.cweaken.comp ρ.cext := by
+  simp [Renaming.cweaken, Renaming.comp, Renaming.cext]
+  simp [FinFun.comp_weaken, FinFun.comp_id, FinFun.id_comp]
+
 end Capybara

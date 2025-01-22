@@ -1,2 +1,3 @@
 import Capybara.StaticSemantics.Subcapturing
 import Capybara.StaticSemantics.Subtyping
+import Capybara.StaticSemantics.Typing

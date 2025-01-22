@@ -20,7 +20,6 @@ inductive TBinding : Nat -> Nat -> Nat -> Type where
 | param : SType n m k -> TBinding n m k
 | alias : SType n m k -> TBinding n m k
 
-
 inductive CBinding : Nat -> Nat -> Type where
 | param : CKind n k -> CBinding n k
 | alias : CaptureSet n k -> CBinding n k
@@ -31,29 +30,35 @@ notation:max "cparam" k => CBinding.param k
 notation:max "calias" C => CBinding.alias C
 
 /-!
+Renaming functions for type and capture set binding.
+-/
+def CKind.rename : CKind n k -> Renaming n m k n' m' k' -> CKind n' k'
+| CKind.Sep D, ρ => CKind.Sep (D.rename ρ)
+| CKind.Fresh, _ => CKind.Fresh
+def TBinding.rename : TBinding n m k -> Renaming n m k n' m' k' -> TBinding n' m' k'
+| TBinding.param T, ρ => TBinding.param (T.rename ρ)
+| TBinding.alias T, ρ => TBinding.alias (T.rename ρ)
+def CBinding.rename : CBinding n k -> Renaming n m k n' m' k' -> CBinding n' k'
+| CBinding.param k, ρ => CBinding.param (k.rename ρ)
+| CBinding.alias C, ρ => CBinding.alias (C.rename ρ)
+
+/-!
 Weakening functions for type and capture set binding.
 -/
-def TBinding.weaken : TBinding n m k -> TBinding (n+1) m k
-| TBinding.param T => TBinding.param (T.weaken)
-| TBinding.alias T => TBinding.alias (T.weaken)
-def CKind.weaken : CKind n k -> CKind (n+1) k
-| CKind.Sep D => CKind.Sep (D.weaken)
-| CKind.Fresh => CKind.Fresh
-def CBinding.weaken : CBinding n k -> CBinding (n+1) k
-| CBinding.param k => CBinding.param (k.weaken)
-| CBinding.alias C => CBinding.alias (C.weaken)
-def TBinding.tweaken : TBinding n m k -> TBinding n (m+1) k
-| TBinding.param T => TBinding.param (T.tweaken)
-| TBinding.alias T => TBinding.alias (T.tweaken)
-def TBinding.cweaken : TBinding n m k -> TBinding n m (k+1)
-| TBinding.param T => TBinding.param (T.cweaken)
-| TBinding.alias T => TBinding.alias (T.cweaken)
-def CKind.cweaken : CKind n k -> CKind n (k+1)
-| CKind.Sep D => CKind.Sep (D.cweaken)
-| CKind.Fresh => CKind.Fresh
-def CBinding.cweaken : CBinding n k -> CBinding n (k+1)
-| CBinding.param k => CBinding.param (k.cweaken)
-| CBinding.alias C => CBinding.alias (C.cweaken)
+def TBinding.weaken (B : TBinding n m k) : TBinding (n+1) m k :=
+  B.rename (Renaming.weaken)
+def CKind.weaken (K : CKind n k) : CKind (n+1) k :=
+  K.rename (Renaming.weaken (m:=0))
+def CBinding.weaken (B : CBinding n k) : CBinding (n+1) k :=
+  B.rename (Renaming.weaken (m:=0))
+def TBinding.tweaken (B : TBinding n m k) : TBinding n (m+1) k :=
+  B.rename (Renaming.tweaken)
+def TBinding.cweaken (B : TBinding n m k) : TBinding n m (k+1) :=
+  B.rename (Renaming.cweaken)
+def CKind.cweaken (K : CKind n k) : CKind n (k+1) :=
+  K.rename (Renaming.cweaken (m:=0))
+def CBinding.cweaken (B : CBinding n k) : CBinding n (k+1) :=
+  B.rename (Renaming.cweaken (m:=0))
 
 /-!
 An indexed context. A `Context n m k` contains `n` term variables,
