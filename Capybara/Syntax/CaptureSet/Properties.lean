@@ -25,4 +25,10 @@ theorem CaptureSet.rename_comp {C : CaptureSet n k} :
   case singleton => simp [Renaming.comp, FinFun.comp]
   case csingleton => simp [Renaming.comp, FinFun.comp]
 
+theorem CaptureSet.rename_weaken {C : CaptureSet n k} :
+  (C.rename ρ).weaken = C.weaken.rename ρ.ext := by
+  simp [CaptureSet.weaken]
+  sorry
+
+
 end Capybara

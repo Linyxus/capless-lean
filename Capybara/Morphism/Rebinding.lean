@@ -24,7 +24,17 @@ def Rebinding.ext (θ : Rebinding Γ Δ) : Rebinding (Γ,x:T) (Δ,x:T.rename θ.
       simp [<-CType.rename_weaken]
       constructor
       apply θ.var; easy
-  case tvar => sorry
-  case cvar => sorry
+  case tvar =>
+    intro X S hb
+    cases hb
+    case there hb =>
+      simp [<-TBinding.rename_weaken]
+      constructor
+      apply θ.tvar; easy
+  case cvar =>
+    intro c B hb
+    cases hb
+    case there hb =>
+      sorry
 
 end Capybara

@@ -1,0 +1,31 @@
+import Capybara.Syntax.Context.Core
+namespace Capybara
+
+theorem TBinding.rename_id {B : TBinding n m k} : B.rename Renaming.id = B := by
+  cases B
+  case param => simp [TBinding.rename, SType.rename_id]
+  case typealias => simp [TBinding.rename, SType.rename_id]
+
+theorem TBinding.rename_weaken {B : TBinding n m k} :
+  (B.rename ρ).weaken = B.weaken.rename ρ.ext := by
+  cases B
+  case param =>
+    simp [TBinding.weaken, TBinding.rename]
+    apply SType.rename_weaken
+  case typealias =>
+    simp [TBinding.weaken, TBinding.rename]
+    apply SType.rename_weaken
+
+theorem CBinding.rename_weaken {B : CBinding n k} :
+  (B.rename ρ).weaken = B.weaken.rename ρ.ext := by
+  cases B
+  case param K =>
+    simp [CBinding.weaken, CBinding.rename]
+    cases K
+    case Sep D =>
+      cases D <;> simp [CKind.rename] <;> simp [SepDegree.rename]
+      apply CaptureSet.rename_weaken
+    case Fresh =>
+      simp [CKind.rename]
+
+end Capybara

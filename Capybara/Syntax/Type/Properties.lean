@@ -114,4 +114,8 @@ theorem CType.rename_weaken {T : CType n m k} :
   (T.rename ρ).weaken = T.weaken.rename ρ.ext := by
   simp [CType.weaken, CType.rename_comp, Renaming.comp_weaken]
 
+theorem SType.rename_weaken {S : SType n m k} :
+  (S.rename ρ).weaken = S.weaken.rename ρ.ext := by
+  simp [SType.weaken, SType.rename_comp, Renaming.comp_weaken]
+
 end Capybara
