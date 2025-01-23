@@ -7,7 +7,7 @@ theorem Subcapturing.rebind
   (θ : Rebinding Γ Δ) :
   Δ ⊢c (C1.rename θ.ρ.asCapt) <: (C2.rename θ.ρ.asCapt) := by
   induction h
-  case subset => sorry
+  case subset hs => sorry
   case trans ih1 ih2 => apply trans <;> aesop
   case union ih1 ih2 => apply union <;> aesop
   case mode => sorry
