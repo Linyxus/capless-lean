@@ -6,6 +6,7 @@ namespace Capybara
 /-!
 # Rebinding
 
+## Definition
 A rebinding is a morphism from a source context `Γ` to a target context `Δ` that maps each binding in `Γ` to an equivalent one in `Δ`.
 -/
 structure Rebinding (Γ : Context n m k) (Δ : Context n' m' k') where
@@ -14,6 +15,10 @@ structure Rebinding (Γ : Context n m k) (Δ : Context n' m' k') where
   tvar : ∀ {X S}, Γ.LookupT X S -> Δ.LookupT (ρ.tvar X) (S.rename ρ)
   cvar : ∀ {c K}, Γ.LookupC c K -> Δ.LookupC (ρ.cvar c) (K.rename ρ.asCapt)
 
+/-!
+## Extensions
+The following methods lift rebindings to environments with more bindings.
+-/
 def Rebinding.ext (θ : Rebinding Γ Δ) : Rebinding (Γ,x:T) (Δ,x:T.rename θ.ρ) := by
   constructor
   case ρ => exact θ.ρ.ext
