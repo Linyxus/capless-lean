@@ -16,6 +16,16 @@ theorem TBinding.rename_weaken {B : TBinding n m k} :
     simp [TBinding.weaken, TBinding.rename]
     apply SType.rename_weaken
 
+theorem TBinding.rename_tweaken {B : TBinding n m k} :
+  (B.rename ρ).tweaken = B.tweaken.rename ρ.text := by
+  cases B
+  case param =>
+    simp [TBinding.tweaken, TBinding.rename]
+    apply SType.rename_tweaken
+  case typealias =>
+    simp [TBinding.tweaken, TBinding.rename]
+    apply SType.rename_tweaken
+
 theorem CBinding.rename_weaken {B : CBinding n k} {ρ : Renaming n m k n' m' k'} :
   (B.rename ρ.asCapt).weaken = B.weaken.rename ρ.ext.asCapt := by
   cases B

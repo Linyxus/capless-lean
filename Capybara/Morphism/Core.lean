@@ -268,4 +268,9 @@ theorem Renaming.weaken_transportM {n m1 m2 k : Nat} :
     (Renaming.weaken (n:=n) (m:=m2) (k:=k)).asCapt := by
   simp [Renaming.weaken, Renaming.asCapt]
 
+@[simp]
+theorem Renaming.text_asCapt {ρ : Renaming n m k n' m' k'} :
+  ρ.text.asCapt = ρ.asCapt := by
+  simp [text, asCapt]
+
 end Capybara
