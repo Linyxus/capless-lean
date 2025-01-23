@@ -35,7 +35,7 @@ Renaming functions for capture sets.
 -/
 def CaptureSet.rename
   (C : CaptureSet n k)
-  (ρ : Renaming n m k n' m' k') :
+  (ρ : CaptureRenaming n k n' k') :
   CaptureSet n' k' :=
   match C with
   | empty => {}
@@ -65,9 +65,9 @@ def CaptureSet.ro (C : CaptureSet n k) : CaptureSet n k :=
 Weakening functions for capture sets.
 -/
 def CaptureSet.weaken : CaptureSet n k -> CaptureSet (n+1) k :=
-  fun C => C.rename (Renaming.weaken (m:=0))
+  fun C => C.rename (Renaming.weaken (m:=0)).asCapt
 def CaptureSet.cweaken : CaptureSet n k -> CaptureSet n (k+1) :=
-  fun C => C.rename (Renaming.cweaken (m:=0))
+  fun C => C.rename (Renaming.cweaken (m:=0)).asCapt
 
 /-!
 Basic theorems.

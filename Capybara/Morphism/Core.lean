@@ -12,6 +12,7 @@ This module defines morphisms between contexts in the Capybara type system.
   - `n` term variables to `n'` term variables
   - `m` type variables to `m'` type variables
   - `k` capture set variables to `k'` capture set variables
+- `CaptureRenaming n k n' k'`: A renaming morphism that maps between capture sets with only two dimensions: terms and captures.
 
 ## Implementation Notes
 
@@ -64,6 +65,19 @@ structure Renaming (n m k n' m' k' : Nat) where
   var : FinFun n n'
   tvar : FinFun m m'
   cvar : FinFun k k'
+
+/-!
+Capture renaming function.
+-/
+structure CaptureRenaming (n k n' k' : Nat) where
+  var : FinFun n n'
+  cvar : FinFun k k'
+
+def Renaming.asCapt (ρ : Renaming n m k n' m' k') : CaptureRenaming n k n' k' :=
+  {
+    var := ρ.var
+    cvar := ρ.cvar
+  }
 
 /-!
 Extend a renaming function by one on the term variable dimension.
@@ -166,6 +180,12 @@ def Renaming.comp (ρ : Renaming n m k n' m' k') (ρ' : Renaming n' m' k' n'' m'
     cvar := ρ.cvar.comp ρ'.cvar
   }
 
+def CaptureRenaming.comp (ρ : CaptureRenaming n k n' k') (ρ' : CaptureRenaming n' k' n'' k'') : CaptureRenaming n k n'' k'' :=
+  {
+    var := ρ.var.comp ρ'.var
+    cvar := ρ.cvar.comp ρ'.cvar
+  }
+
 /-!
 Basic properties of renamings.
 -/
@@ -238,5 +258,14 @@ theorem Renaming.comp_cweaken {ρ : Renaming n m k n' m' k'} :
   ρ.comp Renaming.cweaken = Renaming.cweaken.comp ρ.cext := by
   simp [Renaming.cweaken, Renaming.comp, Renaming.cext]
   simp [FinFun.comp_weaken, FinFun.comp_id, FinFun.id_comp]
+
+theorem Renaming.comp_asCapt {ρ : Renaming n m k n' m' k'} {ρ' : Renaming n' m' k' n'' m'' k''} :
+  (ρ.comp ρ').asCapt = ρ.asCapt.comp ρ'.asCapt := by
+  simp [Renaming.asCapt, CaptureRenaming.comp, Renaming.comp]
+
+theorem Renaming.weaken_transportM {n m1 m2 k : Nat} :
+  (Renaming.weaken (n:=n) (m:=m1) (k:=k)).asCapt =
+    (Renaming.weaken (n:=n) (m:=m2) (k:=k)).asCapt := by
+  simp [Renaming.weaken, Renaming.asCapt]
 
 end Capybara

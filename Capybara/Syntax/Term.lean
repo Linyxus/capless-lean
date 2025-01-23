@@ -53,7 +53,7 @@ def Term.rename
   | var x => var (ρ.var x)
   | lam t1 t2 => lam (t1.rename ρ) (t2.rename ρ.ext)
   | tlam t1 t2 => tlam (t1.rename ρ) (t2.rename ρ.text)
-  | clam D t => clam (D.rename ρ) (t.rename ρ.cext)
+  | clam D t => clam (D.rename ρ.asCapt) (t.rename ρ.cext)
   | flam T t => flam (T.rename ρ.cext) (t.rename ρ.cext.ext)
   | pack x y => pack (ρ.cvar x) (ρ.var y)
   | app x y => app (ρ.var x) (ρ.var y)
@@ -62,7 +62,7 @@ def Term.rename
   | fapp x c y => fapp (ρ.var x) (ρ.cvar c) (ρ.var y)
   | letin t1 t2 => letin (t1.rename ρ) (t2.rename ρ.ext)
   | unpack t1 t2 => unpack (t1.rename ρ) (t2.rename ρ.cext.ext)
-  | calias C t => calias (C.rename ρ) (t.rename ρ.cext)
+  | calias C t => calias (C.rename ρ.asCapt) (t.rename ρ.cext)
   | talias T t => talias (T.rename ρ) (t.rename ρ.text)
 
 /-!

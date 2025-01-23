@@ -32,13 +32,13 @@ notation:max "calias" C => CBinding.capturealias C
 /-!
 Renaming functions for type and capture set binding.
 -/
-def CKind.rename : CKind n k -> Renaming n m k n' m' k' -> CKind n' k'
+def CKind.rename : CKind n k -> CaptureRenaming n k n' k' -> CKind n' k'
 | CKind.Sep D, ρ => CKind.Sep (D.rename ρ)
 | CKind.Fresh, _ => CKind.Fresh
 def TBinding.rename : TBinding n m k -> Renaming n m k n' m' k' -> TBinding n' m' k'
 | TBinding.param T, ρ => TBinding.param (T.rename ρ)
 | TBinding.typealias T, ρ => TBinding.typealias (T.rename ρ)
-def CBinding.rename : CBinding n k -> Renaming n m k n' m' k' -> CBinding n' k'
+def CBinding.rename : CBinding n k -> CaptureRenaming n k n' k' -> CBinding n' k'
 | CBinding.param k, ρ => CBinding.param (k.rename ρ)
 | CBinding.capturealias C, ρ => CBinding.capturealias (C.rename ρ)
 
@@ -48,17 +48,17 @@ Weakening functions for type and capture set binding.
 def TBinding.weaken (B : TBinding n m k) : TBinding (n+1) m k :=
   B.rename (Renaming.weaken)
 def CKind.weaken (K : CKind n k) : CKind (n+1) k :=
-  K.rename (Renaming.weaken (m:=0))
+  K.rename (Renaming.weaken (m:=0)).asCapt
 def CBinding.weaken (B : CBinding n k) : CBinding (n+1) k :=
-  B.rename (Renaming.weaken (m:=0))
+  B.rename (Renaming.weaken (m:=0)).asCapt
 def TBinding.tweaken (B : TBinding n m k) : TBinding n (m+1) k :=
   B.rename (Renaming.tweaken)
 def TBinding.cweaken (B : TBinding n m k) : TBinding n m (k+1) :=
   B.rename (Renaming.cweaken)
 def CKind.cweaken (K : CKind n k) : CKind n (k+1) :=
-  K.rename (Renaming.cweaken (m:=0))
+  K.rename (Renaming.cweaken (m:=0)).asCapt
 def CBinding.cweaken (B : CBinding n k) : CBinding n (k+1) :=
-  B.rename (Renaming.cweaken (m:=0))
+  B.rename (Renaming.cweaken (m:=0)).asCapt
 
 /-!
 An indexed context. A `Context n m k` contains `n` term variables,

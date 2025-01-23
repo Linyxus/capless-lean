@@ -10,7 +10,7 @@ namespace Capybara
 ## Renaming identity
 First, we show that renaming by the identity renaming yields the separation degree.
 -/
-theorem SepDegree.rename_id {D : SepDegree n k} : D.rename (Renaming.id (m:=m)) = D := by
+theorem SepDegree.rename_id {D : SepDegree n k} : D.rename (Renaming.id (m:=m)).asCapt = D := by
   cases D; simp [SepDegree.rename]
 
 /-!
@@ -83,7 +83,7 @@ theorem CType.rename_comp {C : CType n m k} :
   match C with
   | .capt m' C' S => by
     simp [CType.rename, SType.rename_comp]
-    simp [CaptureSet.rename_comp]
+    simp [CaptureSet.rename_comp, Renaming.comp_asCapt]
 
 theorem SType.rename_comp {S : SType n m k} :
   (S.rename ρ).rename ρ' = S.rename (ρ.comp ρ') :=
@@ -100,7 +100,7 @@ theorem SType.rename_comp {S : SType n m k} :
     simp [CType.rename_comp, EType.rename_comp, Renaming.comp_ext]
   | .carrow D T => by
     simp [SType.rename]
-    simp [EType.rename_comp, SepDegree.rename_comp, Renaming.comp_cext]
+    simp [EType.rename_comp, SepDegree.rename_comp, Renaming.comp_cext, Renaming.comp_asCapt]
   | .farrow C T => by
     simp [SType.rename]
     simp [CType.rename_comp, EType.rename_comp, Renaming.comp_cext, Renaming.comp_ext]

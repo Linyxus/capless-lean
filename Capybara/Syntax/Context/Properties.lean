@@ -16,16 +16,24 @@ theorem TBinding.rename_weaken {B : TBinding n m k} :
     simp [TBinding.weaken, TBinding.rename]
     apply SType.rename_weaken
 
-theorem CBinding.rename_weaken {B : CBinding n k} :
-  (B.rename ρ).weaken = B.weaken.rename ρ.ext := by
+theorem CBinding.rename_weaken {B : CBinding n k} {ρ : Renaming n m k n' m' k'} :
+  (B.rename ρ.asCapt).weaken = B.weaken.rename ρ.ext.asCapt := by
   cases B
   case param K =>
     simp [CBinding.weaken, CBinding.rename]
     cases K
     case Sep D =>
-      cases D <;> simp [CKind.rename] <;> simp [SepDegree.rename]
+      cases D; simp [CKind.rename]; simp [SepDegree.rename]
       apply CaptureSet.rename_weaken
     case Fresh =>
       simp [CKind.rename]
+  case capturealias C =>
+    simp [CBinding.weaken, CBinding.rename]
+    simp [CaptureSet.rename_comp]
+    rw [Renaming.weaken_transportM (m1:=0) (m2:=m')]
+    rw [<-Renaming.comp_asCapt]
+    rw [Renaming.weaken_transportM (m1:=0) (m2:=m)]
+    rw [<-Renaming.comp_asCapt]
+    simp [Renaming.comp_weaken]
 
 end Capybara
