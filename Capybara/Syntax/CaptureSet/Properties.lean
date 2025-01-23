@@ -35,5 +35,14 @@ theorem CaptureSet.rename_weaken {C : CaptureSet n k} {ρ : Renaming n m k n' m'
   rw [<-Renaming.comp_asCapt]
   simp [Renaming.comp_weaken]
 
+theorem CaptureSet.rename_cweaken {C : CaptureSet n k} {ρ : Renaming n m k n' m' k'} :
+  (C.rename ρ.asCapt).cweaken = C.cweaken.rename ρ.cext.asCapt := by
+  simp [CaptureSet.cweaken, CaptureSet.rename_comp]
+  rw [Renaming.cweaken_transportM (m1:=0) (m2:=m')]
+  rw [<-Renaming.comp_asCapt]
+  rw [Renaming.cweaken_transportM (m1:=0) (m2:=m)]
+  rw [<-Renaming.comp_asCapt]
+  simp [Renaming.comp_cweaken]
+
 
 end Capybara

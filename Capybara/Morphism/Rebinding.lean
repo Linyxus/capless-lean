@@ -77,4 +77,32 @@ def Rebinding.text (θ : Rebinding Γ Δ) : Rebinding (Γ,X:B) (Δ,X:B.rename θ
       constructor
       apply θ.cvar; easy
 
+def Rebinding.cext (θ : Rebinding Γ Δ) : Rebinding (Γ,c:K) (Δ,c:K.rename θ.ρ.asCapt) := by
+  constructor
+  case ρ => exact θ.ρ.cext
+  case var =>
+    intro x T hb
+    cases hb
+    case cthere hb =>
+      simp [<-CType.rename_cweaken]
+      constructor
+      apply θ.var; easy
+  case tvar =>
+    intro X B hb
+    cases hb
+    case cthere hb =>
+      simp [<-TBinding.rename_cweaken]
+      constructor
+      apply θ.tvar; easy
+  case cvar =>
+    intro c K hb
+    cases hb
+    case here =>
+      simp [<-CBinding.rename_cweaken]
+      constructor
+    case cthere hb =>
+      simp [<-CBinding.rename_cweaken]
+      constructor
+      apply θ.cvar; easy
+
 end Capybara

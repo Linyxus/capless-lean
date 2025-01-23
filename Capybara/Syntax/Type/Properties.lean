@@ -118,6 +118,10 @@ theorem CType.rename_tweaken {T : CType n m k} :
   (T.rename ρ).tweaken = T.tweaken.rename ρ.text := by
   simp [CType.tweaken, CType.rename_comp, Renaming.comp_tweaken]
 
+theorem CType.rename_cweaken {T : CType n m k} :
+  (T.rename ρ).cweaken = T.cweaken.rename ρ.cext := by
+  simp [CType.cweaken, CType.rename_comp, Renaming.comp_cweaken]
+
 theorem SType.rename_weaken {S : SType n m k} :
   (S.rename ρ).weaken = S.weaken.rename ρ.ext := by
   simp [SType.weaken, SType.rename_comp, Renaming.comp_weaken]
@@ -125,5 +129,9 @@ theorem SType.rename_weaken {S : SType n m k} :
 theorem SType.rename_tweaken {S : SType n m k} :
   (S.rename ρ).tweaken = S.tweaken.rename ρ.text := by
   simp [SType.tweaken, SType.rename_comp, Renaming.comp_tweaken]
+
+theorem SType.rename_cweaken {S : SType n m k} :
+  (S.rename ρ).cweaken = S.cweaken.rename ρ.cext := by
+  simp [SType.cweaken, SType.rename_comp, Renaming.comp_cweaken]
 
 end Capybara
