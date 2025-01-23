@@ -7,7 +7,7 @@ structure Rebinding (Γ : Context n m k) (Δ : Context n' m' k') where
   ρ : Renaming n m k n' m' k'
   var : ∀ {x T}, Γ.Lookup x T -> Δ.Lookup (ρ.var x) (T.rename ρ)
   tvar : ∀ {X S}, Γ.LookupT X S -> Δ.LookupT (ρ.tvar X) (S.rename ρ)
-  cvar : ∀ {c K}, Γ.LookupC c K -> Δ.LookupC (ρ.cvar c) (K.rename ρ)
+  cvar : ∀ {c K}, Γ.LookupC c K -> Δ.LookupC (ρ.cvar c) (K.rename ρ.asCapt)
 
 def Rebinding.ext (θ : Rebinding Γ Δ) : Rebinding (Γ,x:T) (Δ,x:T.rename θ.ρ) := by
   constructor
@@ -35,6 +35,8 @@ def Rebinding.ext (θ : Rebinding Γ Δ) : Rebinding (Γ,x:T) (Δ,x:T.rename θ.
     intro c B hb
     cases hb
     case there hb =>
-      sorry
+      simp [<-CBinding.rename_weaken]
+      constructor
+      apply θ.cvar; easy
 
 end Capybara
