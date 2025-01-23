@@ -44,5 +44,12 @@ theorem CaptureSet.rename_cweaken {C : CaptureSet n k} {ρ : Renaming n m k n' m
   rw [<-Renaming.comp_asCapt]
   simp [Renaming.comp_cweaken]
 
+theorem CaptureSet.rename_subset {C1 C2 : CaptureSet n k} {ρ : CaptureRenaming n k n' k'} (hs : C1 ⊆ C2) :
+  (C1.rename ρ) ⊆ (C2.rename ρ) := by
+  induction hs <;> try simp [CaptureSet.rename] <;> try (solve | constructor)
+  case refl => apply Subset.refl
+  case union_l ih1 ih2 => constructor <;> aesop
+  case union_rl => apply Subset.union_rl; aesop
+  case union_rr => apply Subset.union_rr; aesop
 
 end Capybara
