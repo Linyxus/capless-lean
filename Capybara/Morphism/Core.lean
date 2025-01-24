@@ -278,4 +278,9 @@ theorem Renaming.text_asCapt {ρ : Renaming n m k n' m' k'} :
   ρ.text.asCapt = ρ.asCapt := by
   simp [text, asCapt]
 
+@[simp]
+theorem Renaming.asCapt_var {ρ : Renaming n m k n' m' k'} :
+  ρ.asCapt.var = ρ.var := by
+  simp [asCapt]
+
 end Capybara

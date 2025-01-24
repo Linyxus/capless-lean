@@ -52,4 +52,15 @@ theorem CaptureSet.rename_subset {C1 C2 : CaptureSet n k} {ρ : CaptureRenaming 
   case union_rl => apply Subset.union_rl; aesop
   case union_rr => apply Subset.union_rr; aesop
 
+theorem CaptureSet.qualified_rename {C : CaptureSet n k} :
+  (C.qualified m).rename ρ = (C.rename ρ).qualified m := by
+  induction C <;> simp [CaptureSet.qualified, CaptureSet.rename]
+  case union ih1 ih2 => simp [ih1, ih2]
+  case singleton =>
+    cases m <;> try simp [CaptureSet.qualified, CaptureSet.rename]
+    case M mu => cases mu <;> simp [CaptureSet.qualified, CaptureSet.rename]
+  case csingleton =>
+    cases m <;> try simp [CaptureSet.qualified, CaptureSet.rename]
+    case M mu => cases mu <;> simp [CaptureSet.qualified, CaptureSet.rename]
+
 end Capybara
