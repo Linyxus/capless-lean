@@ -1,0 +1,1 @@
+import «Capybara».Syntax

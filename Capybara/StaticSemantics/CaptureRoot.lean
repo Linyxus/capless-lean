@@ -1,0 +1,37 @@
+import Capybara.Syntax
+namespace Capybara
+
+structure CaptureRoot (k : Nat) : Type where
+  m : Mode
+  c : Fin k
+
+/-!
+`ReachRoot Γ C m c` means that the root `c` is reachable at access mode `m` from the capture set `C` under the context `Γ`.
+-/
+inductive ReachRoot : Context n m k -> CaptureSet n k -> CaptureRoot k -> Prop where
+| union_l :
+  ReachRoot Γ C1 ⟨m,c⟩ ->
+  ReachRoot Γ (C1 ∪ C2) ⟨m,c⟩
+| union_r :
+  ReachRoot Γ C2 ⟨m,c⟩ ->
+  ReachRoot Γ (C1 ∪ C2) ⟨m,c⟩
+| var :
+  Context.Lookup Γ x (S^[m]C) ->
+  ReachRoot Γ ((C.qualified (Mode.M m)).qualified mu) ⟨mu',c⟩ ->
+  ReachRoot Γ ({x@mu:=x}) ⟨mu',c⟩
+| cvar_alias :
+  Context.LookupC Γ c (calias C) ->
+  ReachRoot Γ (C.qualified mu) ⟨mu',c'⟩ ->
+  ReachRoot Γ ({c@mu:=c}) ⟨mu',c'⟩
+| cvar :
+  Context.LookupC Γ c (cparam K) ->
+  ReachRoot Γ ({c@mu:=c}) ⟨mu,c⟩
+
+inductive RORoot : Context n m k -> CaptureRoot k -> Prop where
+| ro :
+  RORoot Γ ⟨ro,c⟩
+| imm :
+  Context.LookupC Γ c (cparam (CKind.Sep ⟨SepMode.Imm, D⟩)) ->
+  RORoot Γ ⟨Mode.M m,c⟩
+
+end Capybara
