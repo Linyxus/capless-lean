@@ -1,6 +1,7 @@
 import Capybara.Syntax.CaptureSet
 import Capybara.Syntax.Type.Renaming
 import Capybara.Syntax.Type.Weakening
+import Capybara.Syntax.Type.Opening
 namespace Capybara
 
 
@@ -133,5 +134,9 @@ theorem SType.rename_tweaken {S : SType n m k} :
 theorem SType.rename_cweaken {S : SType n m k} :
   (S.rename ρ).cweaken = S.cweaken.rename ρ.cext := by
   simp [SType.cweaken, SType.rename_comp, Renaming.comp_cweaken]
+
+theorem CType.copen_rename {T : CType n m (k+1)} :
+  (T.copen c).rename ρ = (T.rename ρ.cext).copen (ρ.cvar c) := by
+  simp [CType.copen, CType.rename_comp, Renaming.copen_comp]
 
 end Capybara

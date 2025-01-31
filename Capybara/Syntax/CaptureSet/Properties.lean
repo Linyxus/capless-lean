@@ -63,4 +63,8 @@ theorem CaptureSet.qualified_rename {C : CaptureSet n k} :
     cases m <;> try simp [CaptureSet.qualified, CaptureSet.rename]
     case M mu => cases mu <;> simp [CaptureSet.qualified, CaptureSet.rename]
 
+theorem CaptureSet.rename_union {C1 C2 : CaptureSet n k} {ρ : CaptureRenaming n k n' k'} :
+  (C1 ∪ C2).rename ρ = (C1.rename ρ) ∪ (C2.rename ρ) := by
+  simp [CaptureSet.union, CaptureSet.rename]
+
 end Capybara

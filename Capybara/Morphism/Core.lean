@@ -199,6 +199,16 @@ theorem Renaming.ext_var_succ {ρ : Renaming n m k n' m' k'} {x : Fin n} : ρ.ex
 
 theorem FinFun.id_comp_id {n : Nat} : FinFun.comp (n:=n) FinFun.id FinFun.id = FinFun.id := by rfl
 
+@[simp]
+theorem FinFun.id_comp_left {f : FinFun n n'} : FinFun.comp (n:=n) FinFun.id f = f := by
+  funext x
+  simp [FinFun.comp, FinFun.id]
+
+@[simp]
+theorem FinFun.id_comp_right {f : FinFun n n'} : FinFun.comp (n:=n) f FinFun.id = f := by
+  funext x
+  simp [FinFun.comp, FinFun.id]
+
 theorem Renaming.id_comp_id {n m k : Nat} : Renaming.comp (n:=n) (m:=m) (k:=k) Renaming.id Renaming.id = Renaming.id := by rfl
 
 theorem FinFun.id_ext {n : Nat} : FinFun.ext (n:=n) FinFun.id = FinFun.id := by
@@ -282,5 +292,11 @@ theorem Renaming.text_asCapt {ρ : Renaming n m k n' m' k'} :
 theorem Renaming.asCapt_var {ρ : Renaming n m k n' m' k'} :
   ρ.asCapt.var = ρ.var := by
   simp [asCapt]
+
+theorem Renaming.copen_comp {ρ : Renaming n m k n' m' k'} :
+  (Renaming.copen c).comp ρ = (ρ.cext).comp (Renaming.copen (ρ.cvar c)) := by
+  simp [Renaming.copen, Renaming.cext, Renaming.comp]
+  funext x
+  cases x using Fin.cases <;> simp [FinFun.comp, FinFun.open, FinFun.ext]
 
 end Capybara
