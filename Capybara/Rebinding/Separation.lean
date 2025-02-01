@@ -28,6 +28,6 @@ theorem RootSeparation.rebind
     apply s_fresh
     { have hc1' := θ.cvar hc1; easy }
     { have hc2' := θ.cvar hc2; easy }
-    sorry
+    apply θ.fresh_inj hc1 hc2 hneq
 
 end Capybara

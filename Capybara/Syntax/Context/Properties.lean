@@ -1,3 +1,4 @@
+import Capless.Tactics
 import Capybara.Syntax.Context.Core
 namespace Capybara
 
@@ -70,5 +71,29 @@ theorem CBinding.rename_cweaken {B : CBinding n k} {ρ : Renaming n m k n' m' k'
   case capturealias C =>
     simp [CBinding.cweaken]; simp [CBinding.rename]
     apply CaptureSet.rename_cweaken
+
+theorem Context.var_lookupc_inv {Γ : Context n m k}
+  (hb : (Γ,x:T).LookupC c B) :
+  ∃ B0, Γ.LookupC c B0 ∧ B = B0.weaken := by cases hb; aesop
+
+theorem Context.var_lookupc_fresh_inv {Γ : Context n m k}
+  (hb : (Γ,x:T).LookupC c (CBinding.param CKind.Fresh)) :
+  Γ.LookupC c (CBinding.param CKind.Fresh) := by
+  have ⟨B0, hb0, heq⟩ := Context.var_lookupc_inv hb
+  cases B0 <;> try cases heq
+  rename_i K; cases K <;> try cases heq
+  easy
+
+theorem Context.tvar_lookupc_inv {Γ : Context n m k}
+  (hb : (Γ,X:S).LookupC c B) :
+  Γ.LookupC c B := by cases hb; aesop
+
+theorem Context.cvar_lookupc_inv {Γ : Context n m k}
+  (hb : (Γ,c:K).LookupC c B) :
+  (c = 0 ∧ B = K.cweaken) ∨
+  (∃ c0 B0, Γ.LookupC c0 B0 ∧ c = c0.succ ∧ B = B0.cweaken) := by
+  cases hb
+  case here => apply Or.inl; aesop
+  case cthere hb0 => apply Or.inr; aesop
 
 end Capybara
