@@ -2,11 +2,11 @@ import Capybara.Morphism.Rebinding
 import Capybara.StaticSemantics
 namespace Capybara
 
-def CaptureRoot.rename (r : CaptureRoot k) (f : FinFun k k') : CaptureRoot k' :=
-  match r with
-  | ⟨m,c⟩ => ⟨m,f c⟩
+/-!
+This file proves that rebinding preserves capture root reachability.
+-/
 
-theorem ReachRoot.rename
+theorem ReachRoot.rebind
   (h : ReachRoot Γ C r)
   (θ : Rebinding Γ Δ) :
   ReachRoot Δ (C.rename θ.ρ.asCapt) (r.rename θ.ρ.cvar) := by
@@ -36,8 +36,19 @@ theorem ReachRoot.rename
     { repeat rw [<-CaptureSet.qualified_rename]
       easy }
   case cvar hb =>
-    simp [CaptureSet.rename, ReachRoot.rename]
+    simp [CaptureSet.rename]
     apply cvar
     have hb' := θ.cvar hb; easy
+
+theorem RORoot.rebind
+  (h : RORoot Γ r)
+  (θ : Rebinding Γ Δ) :
+  RORoot Δ (r.rename θ.ρ.cvar) := by
+  cases h
+  case r_ro =>
+    apply r_ro
+  case r_imm hc =>
+    apply r_imm
+    have hc' := θ.cvar hc; easy
 
 end Capybara

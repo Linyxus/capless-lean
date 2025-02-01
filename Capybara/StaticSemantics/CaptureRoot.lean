@@ -1,9 +1,16 @@
 import Capybara.Syntax
 namespace Capybara
 
+/-!
+A capture root is described by an abstract capture parameter and an access mode. A capture root `m c` being reachable from a capture set `C` means that `C` could access `c` at mode `m`.
+-/
 structure CaptureRoot (k : Nat) : Type where
   m : Mode
   c : Fin k
+
+def CaptureRoot.rename (r : CaptureRoot k) (f : FinFun k k') : CaptureRoot k' :=
+  match r with
+  | ⟨m,c⟩ => ⟨m,f c⟩
 
 /-!
 `ReachRoot Γ C m c` means that the root `c` is reachable at access mode `m` from the capture set `C` under the context `Γ`.
@@ -28,9 +35,9 @@ inductive ReachRoot : Context n m k -> CaptureSet n k -> CaptureRoot k -> Prop w
   ReachRoot Γ ({c@mu:=c}) ⟨mu,c⟩
 
 inductive RORoot : Context n m k -> CaptureRoot k -> Prop where
-| ro :
+| r_ro :
   RORoot Γ ⟨ro,c⟩
-| imm :
+| r_imm :
   Context.LookupC Γ c (cparam (CKind.Sep ⟨SepMode.Imm, D⟩)) ->
   RORoot Γ ⟨Mode.M m,c⟩
 
