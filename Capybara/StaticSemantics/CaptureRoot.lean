@@ -41,4 +41,25 @@ inductive RORoot : Context n m k -> CaptureRoot k -> Prop where
   Context.LookupC Γ c (cparam (CKind.Sep ⟨SepMode.Imm, D⟩)) ->
   RORoot Γ ⟨Mode.M m,c⟩
 
+def RootPred (k : Nat) := CaptureRoot k -> Prop
+
+inductive ForallRoot : Context n m k -> CaptureSet n k -> RootPred k -> Prop where
+| r_union :
+  ForallRoot Γ C1 P ->
+  ForallRoot Γ C2 P ->
+  ForallRoot Γ (C1 ∪ C2) P
+| r_var :
+  Context.Lookup Γ x (S^[m]C) ->
+  ForallRoot Γ ((C.qualified (Mode.M m)).qualified mu) P ->
+  ForallRoot Γ ({x@mu:=x}) P
+| r_cvar_alias :
+  Context.LookupC Γ c (calias C) ->
+  ForallRoot Γ (C.qualified mu) P ->
+  ForallRoot Γ ({c@mu:=c}) P
+| r_cvar :
+  Context.LookupC Γ c (cparam K) ->
+  (P ⟨mu,c⟩) ->
+  ForallRoot Γ ({c@mu:=c}) P
+
+
 end Capybara
