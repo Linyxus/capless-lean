@@ -51,4 +51,38 @@ theorem RORoot.rebind
     apply r_imm
     have hc' := θ.cvar hc; easy
 
+theorem ReachRoot.rebind_inv'
+  (θ : Rebinding Γ Δ)
+  (he : C0 = C.rename θ.ρ.asCapt)
+  (h : ReachRoot Δ C0 r) :
+  ∃ r0, ReachRoot Γ C r0 ∧ r0.rename θ.ρ.cvar = r := by
+  induction h generalizing C
+  case union_l ih =>
+    cases C <;> simp [CaptureSet.rename] at he
+    case union D1 D2 =>
+      have ⟨he, _⟩ := he
+      have ⟨r0, h0, h1⟩ := ih he
+      apply Exists.intro r0
+      constructor
+      { apply union_l; easy }
+      { easy }
+  case union_r ih =>
+    cases C <;> simp [CaptureSet.rename] at he
+    case union D1 D2 =>
+      have ⟨_, he⟩ := he
+      have ⟨r0, h0, h1⟩ := ih he
+      apply Exists.intro r0
+      constructor
+      { apply union_r; easy }
+      { easy }
+  case var => sorry
+  case cvar_alias => sorry
+  case cvar => sorry
+
+theorem ReachRoot.rebind_inv
+  (θ : Rebinding Γ Δ)
+  (h : ReachRoot Δ (C.rename θ.ρ.asCapt) r) :
+  ∃ r0, ReachRoot Γ C r0 ∧ r0.rename θ.ρ.cvar = r := sorry
+
+
 end Capybara
