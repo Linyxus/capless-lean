@@ -62,8 +62,18 @@ theorem ForallRoot.rebind {n m k n' m' k'}
   case r_union ih1 ih2 =>
     rw [CaptureSet.rename_union]
     apply r_union <;> aesop
-  case r_var => sorry
-  case r_cvar_alias => sorry
+  case r_var hb _ ih =>
+    simp [CaptureSet.rename]
+    apply r_var
+    { have hb' := θ.var hb; easy }
+    { repeat rw [<-CaptureSet.qualified_rename]
+      apply ih; easy }
+  case r_cvar_alias hb _ ih =>
+    simp [CaptureSet.rename]
+    apply r_cvar_alias
+    { have hb' := θ.cvar hb; easy }
+    { repeat rw [<-CaptureSet.qualified_rename]
+      apply ih; easy }
   case r_cvar hc hp =>
     apply r_cvar
     have hc' := θ.cvar hc; easy
