@@ -3,9 +3,12 @@ import Capybara.StaticSemantics
 namespace Capybara
 
 /-!
-This file proves that rebinding preserves capture root reachability.
+This file proves that rebinding preserves judgements over capture roots.
 -/
 
+/-!
+Rebinding preserves root reachability (deprecated)
+-/
 theorem ReachRoot.rebind
   (h : ReachRoot Γ C r)
   (θ : Rebinding Γ Δ) :
@@ -40,17 +43,9 @@ theorem ReachRoot.rebind
     apply cvar
     have hb' := θ.cvar hb; easy
 
-theorem RORoot.rebind
-  (h : RORoot Γ r)
-  (θ : Rebinding Γ Δ) :
-  RORoot Δ (r.rename θ.ρ.cvar) := by
-  cases h
-  case r_ro =>
-    apply r_ro
-  case r_imm hc =>
-    apply r_imm
-    have hc' := θ.cvar hc; easy
-
+/-!
+Rebinding preserves the "forall roots" judgement.
+-/
 theorem ForallRoot.rebind {n m k n' m' k'}
   {Γ : Context n m k} {Δ : Context n' m' k'} {C : CaptureSet n k}
   (P : RootPred k) (Q : RootPred k')
@@ -78,5 +73,34 @@ theorem ForallRoot.rebind {n m k n' m' k'}
     apply r_cvar
     have hc' := θ.cvar hc; easy
     have hp' := transport _ hp; easy
+
+/-!
+The following three theorems show that rebinding preserves the kinding of capture roots.
+-/
+theorem RORoot.rebind
+  (h : RORoot Γ r)
+  (θ : Rebinding Γ Δ) :
+  RORoot Δ (r.rename θ.ρ.cvar) := by
+  cases h
+  case r_ro =>
+    apply r_ro
+  case r_imm hc =>
+    apply r_imm
+    have hc' := θ.cvar hc; easy
+theorem MutRoot.rebind
+  (h : MutRoot Γ r)
+  (θ : Rebinding Γ Δ) :
+  MutRoot Δ (r.rename θ.ρ.cvar) := by
+  cases h
+  case r_mut =>
+    apply r_mut
+theorem FreshRoot.rebind
+  (h : FreshRoot Γ r)
+  (θ : Rebinding Γ Δ) :
+  FreshRoot Δ (r.rename θ.ρ.cvar) := by
+  cases h
+  case r_fresh hc =>
+    apply r_fresh
+    have hc' := θ.cvar hc; easy
 
 end Capybara

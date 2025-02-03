@@ -34,13 +34,6 @@ inductive ReachRoot : Context n m k -> CaptureSet n k -> CaptureRoot k -> Prop w
   Context.LookupC Γ c (cparam K) ->
   ReachRoot Γ ({c@mu:=c}) ⟨mu,c⟩
 
-inductive RORoot : Context n m k -> CaptureRoot k -> Prop where
-| r_ro :
-  RORoot Γ ⟨ro,c⟩
-| r_imm :
-  Context.LookupC Γ c (cparam (CKind.Sep ⟨SepMode.Imm, D⟩)) ->
-  RORoot Γ ⟨Mode.M m,c⟩
-
 def RootPred (k : Nat) := CaptureRoot k -> Prop
 
 inductive ForallRoot : Context n m k -> CaptureSet n k -> RootPred k -> Prop where
@@ -61,5 +54,25 @@ inductive ForallRoot : Context n m k -> CaptureSet n k -> RootPred k -> Prop whe
   (P ⟨mu,c⟩) ->
   ForallRoot Γ ({c@mu:=c}) P
 
+/-!
+The following judgements are predicates on the *kinds* of a capture root.
+A capture root can be:
+- read-only (`RORoot`), signifying a readonly access;
+- mutable (`MutRoot`), signifying a read-write access;
+- fresh (`FreshRoot`), signifying a read-write access to root that is known to be fresh.
+-/
+inductive RORoot : Context n m k -> CaptureRoot k -> Prop where
+| r_ro :
+  RORoot Γ ⟨ro,c⟩
+| r_imm :
+  Context.LookupC Γ c (cparam (CKind.Sep ⟨SepMode.Imm, D⟩)) ->
+  RORoot Γ ⟨Mode.M m,c⟩
+inductive MutRoot : Context n m k -> CaptureRoot k -> Prop where
+| r_mut :
+  MutRoot Γ ⟨Mode.M m,c⟩
+inductive FreshRoot : Context n m k -> CaptureRoot k -> Prop where
+| r_fresh :
+  Context.LookupC Γ c (cparam CKind.Fresh) ->
+  FreshRoot Γ ⟨Mode.M m,c⟩
 
 end Capybara
