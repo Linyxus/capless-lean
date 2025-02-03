@@ -11,6 +11,7 @@ inductive RootChaining : Context n m k -> CaptureRoot k -> CaptureRoot k -> Prop
 | c_rw :
   RootChaining Γ ⟨Mode.M m1, c1⟩ r2
 | c_drop :
+  Γ.LookupC c1 (cparam CKind.Fresh) ->
   (c1 ≠ c2) ->
   RootChaining Γ ⟨drop,c1⟩ ⟨m,c2⟩
 
@@ -21,6 +22,7 @@ def Chaining (Γ : Context n m k) (C1 C2 : CaptureSet n k) : Prop :=
 
 inductive DroppedRootChaining : Context n m k -> CaptureRoot k -> CaptureRoot k -> Prop
 | c_chain :
+  Γ.LookupC c1 (cparam CKind.Fresh) ->
   (c1 ≠ c2) ->
   DroppedRootChaining Γ ⟨m1,c1⟩ ⟨m2,c2⟩
 

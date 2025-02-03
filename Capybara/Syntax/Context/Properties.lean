@@ -96,4 +96,40 @@ theorem Context.cvar_lookupc_inv {Γ : Context n m k}
   case here => apply Or.inl; aesop
   case cthere hb0 => apply Or.inr; aesop
 
+theorem Context.lookupc_complete {Γ : Context n m k} {c : Fin k} :
+  ∃ B, Γ.LookupC c B := by
+  induction Γ
+  case empty => apply Fin.elim0 c
+  case cons Γ0 P ih =>
+    have ⟨B0,ih⟩ := ih (c:=c)
+    apply Exists.intro B0.weaken
+    constructor; easy
+  case tcons Γ0 P ih =>
+    have ⟨B0,ih⟩ := ih (c:=c)
+    apply Exists.intro B0
+    constructor; easy
+  case ccons Γ0 P ih =>
+    cases c using Fin.cases
+    case zero =>
+      apply Exists.intro P.cweaken
+      constructor
+    case succ c0 =>
+      have ⟨B0,ih⟩ := ih (c:=c0)
+      apply Exists.intro B0.cweaken
+      constructor; easy
+
+theorem Context.lookupc_functional {Γ : Context n m k} {c : Fin k}
+  (h1 : Γ.LookupC c B1) (h2 : Γ.LookupC c B2) : B1 = B2 := by
+  induction h1
+  case here => cases h2; rfl
+  case there ih =>
+    cases h2; rename_i h2
+    have ih := ih h2
+    aesop
+  case tthere ih =>
+    cases h2; rename_i h2
+    have ih := ih h2
+    aesop
+  case cthere ih => sorry
+
 end Capybara
