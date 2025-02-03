@@ -27,6 +27,8 @@ inductive RootSeparation : Context n m k -> CaptureRoot k -> CaptureRoot k -> Pr
   RootSeparation Γ ⟨μ1,c1⟩ ⟨μ2,c2⟩
 
 def Separation (Γ : Context n m k) (C1 C2 : CaptureSet n k) : Prop :=
-  ∀r1 r2, ReachRoot Γ C1 r1 -> ReachRoot Γ C2 r2 -> RootSeparation Γ r1 r2
+  ForallRoot Γ C1 (λ r1 =>
+    ForallRoot Γ C2 (λ r2 =>
+      RootSeparation Γ r1 r2))
 
 end Capybara

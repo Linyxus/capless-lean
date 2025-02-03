@@ -34,7 +34,18 @@ theorem Separation.rebind
   (h : Separation Γ C1 C2)
   (θ : Rebinding Γ Δ) :
   Separation Δ (C1.rename θ.ρ.asCapt) (C2.rename θ.ρ.asCapt) := by
-  intro r1 r2 h1 h2
-  sorry
+  apply ForallRoot.rebind
+    (P := λ r1 => ForallRoot Γ C2 (λ r2 => RootSeparation Γ r1 r2))
+    (Q := λ r1 => ForallRoot Δ (C2.rename θ.ρ.asCapt) (λ r2 => RootSeparation Δ r1 r2))
+    (h := h)
+    (θ := θ)
+  intro r1 h'
+  apply ForallRoot.rebind
+    (P := λ r2 => RootSeparation Γ r1 r2)
+    (Q := λ r2 => RootSeparation Δ (r1.rename θ.ρ.cvar) r2)
+    (h := h')
+    (θ := θ)
+  intro r2 h''
+  apply RootSeparation.rebind h''
 
 end Capybara
