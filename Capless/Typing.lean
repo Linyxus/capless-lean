@@ -14,7 +14,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (Term.var x) (Label[S]^{x=x}) {x=x}
 | pack :
   Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} ->
-  Typed Γ (Term.pack C x) (∃c.T) {x=x}
+  Typed Γ (Term.pack C x) (∃c.T) {}
 | sub :
   Typed Γ t E1 C1 ->
   (Γ ⊢ C1 <:c C2) ->
