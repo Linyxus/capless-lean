@@ -14,3 +14,5 @@ require mathlib from git
 @[default_target]
 lean_lib «Capless» where
   -- add any library configuration options here
+
+lean_lib «Capybara» where
