@@ -25,10 +25,10 @@ notation:50 "λ(x:" T ")" t => Term.lam T t
 notation:50 "λ[X<:" S "]" t => Term.tlam S t
 notation:50 "λ[c<:" B "]" t => Term.clam B t
 notation:50 C " o- " x => Term.unbox C x
-notation:40 "let x=" t " in " u => Term.letin t u
-notation:40 "let (c,x)=" t " in " u => Term.letex t u
-notation:40 "let X=" S " in " t => Term.bindt S t
-notation:40 "let c=" C " in " t => Term.bindc C t
+notation:40 "let" "x=" t " in " u => Term.letin t u
+notation:40 "let" "(c,x)=" t " in " u => Term.letex t u
+notation:40 "let" "X=" S " in " t => Term.bindt S t
+notation:40 "let" "c=" C " in " t => Term.bindc C t
 notation:40 "boundary:" S " in " t => Term.boundary S t
 
 @[aesop safe constructors]

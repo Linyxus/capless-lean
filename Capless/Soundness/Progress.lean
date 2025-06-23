@@ -159,6 +159,9 @@ inductive Progress : State n m k -> Prop where
   Reduce state state' ->
   Progress state
 
+-- Needed for the `aesop` searches in `progress` to terminate.
+set_option maxHeartbeats 314159265358
+
 theorem progress
   (ht : TypedState state Γ E) :
   Progress state := by
