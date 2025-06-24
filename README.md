@@ -20,7 +20,6 @@ The mechanization uses Lean version `4.21.0-rc3`. If you compile from source, th
     ```
 The whole process takes a little bit under 2 minutes on an Apple M3 Pro Macbook Pro.
 
-
 ### Exploring in VSCode
 The virtual machine images also come with VSCode and the Lean 4 extension pre-configured. You
 can open the folder containing this mechanization from VSCode and start exploring.
@@ -55,7 +54,7 @@ can open the folder containing this mechanization from VSCode and start explorin
 
 ### Libraries and Frameworks Used in the Proofs
 
-TODO: intrinsically scoped, deBruijn, mathlib ...
+The mechanization uses [mathlib4](https://github.com/leanprover-community/mathlib4) for basic data structures like `Fin` and [aesop](https://github.com/leanprover-community/aesop) for automation.
 
 ### Project Structure
 
@@ -78,7 +77,7 @@ sh ./gen_docs.sh
 ```
 and will be located in the (hidden) folder `.lake/build/doc`.
 
-Note that `doc-gen4` also includes the docs for all dependencies of this mechanization, such as `mathlib4`. Note that the tool will be emit some warnings regarding those dependencies while generating the documentation. This is normal and outside of our control.
+Note that `doc-gen4` also includes the docs for all dependencies of this mechanization, such as `mathlib4`. Note that the tool will emit some warnings regarding those dependencies while generating the documentation. This is normal and can be safely ignored.
 
 #### Dependency Graph
 
@@ -95,7 +94,6 @@ TODO: Differences to the pencil and paper formalization, if any.
 Substitution/renaming lemmas
 
 Well-scopedness predicate
-
 
 ### Used Axioms and Unfinished Parts
 
