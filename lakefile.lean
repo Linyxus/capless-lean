@@ -4,10 +4,9 @@ open Lake DSL
 package «capless» where
   -- Settings applied to both builds and interactive editing
   leanOptions := #[
-    ⟨`pp.unicode.fun, true⟩
-  ]
-  leanOptions := #[
-    ⟨`autoImplicit, true⟩
+    ⟨`pp.unicode.fun, true⟩,
+    ⟨`autoImplicit, true⟩,
+    ⟨`linter.unusedVariables, false⟩
   ]
   -- add any additional package configuration options here
 
