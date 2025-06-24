@@ -87,11 +87,32 @@ using the using the [import-graph](https://github.com/leanprover-community/impor
 lake exe graph dependencies.pdf
 ```
 
-### Notes & Differences to Pencil and Paper
+### Proof Details
 
-TODO: Differences to the pencil and paper formalization, if any.
+This section describes some important details of the mechanization
+and highlights the differences to the pencil and paper formalization.
 
-Substitution/renaming lemmas
+#### Intrinsically-Scoped Syntax
+
+The formalization is deBruijn-indexed and intrinsically-scoped.
+
+explain intrinsically-scoped syntax: everything is indexed
+
+the benefits: well-formed by construction
+
+point to PLFA
+
+#### Context Morphisms
+
+Substitution/renaming lemmas are formulated with context morphisms
+
+point out that everything is in MNF, including captures and types
+
+point to PLFA
+
+#### Evaluation State
+
+Evaluation state is a triplet of a store, a continuation stack, and a redex.
 
 Well-scopedness predicate
 
