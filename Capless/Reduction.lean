@@ -13,9 +13,6 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
 | capply {σ : Store n m k} :
   σ.Bound x (Term.clam B t) ->
   Reduce ⟨σ, cont, Term.capp x c⟩ ⟨σ, cont, t.copen c⟩
-| unbox {σ : Store n m k} :
-  σ.Bound x (Term.boxed y) ->
-  Reduce ⟨σ, cont, Term.unbox C x⟩ ⟨σ, cont, Term.var y⟩
 | enter :
   Reduce
     ⟨σ, cont, boundary:S in t⟩

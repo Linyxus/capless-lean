@@ -69,18 +69,6 @@ theorem Typed.subst
     have ih1 := ih σ
     simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
     exact ih1
-  case box ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply box
-    have ih1 := ih σ
-    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
-    exact ih1
-  case unbox ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply unbox
-    have ih1 := ih σ
-    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
-    exact ih1
   case letin ih1 ih2 =>
     simp [Term.rename]
     apply letin

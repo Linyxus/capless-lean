@@ -214,32 +214,6 @@ theorem Typed.capp_inv
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
 
-theorem Typed.unbox_inv'
-  (he : t0 = Term.unbox C x)
-  (h : Typed Γ t0 E Ct0) :
-  ∃ S,
-    Typed Γ (Term.var x) (EType.type (CType.capt {} (SType.box (CType.capt C S)))) {} ∧
-    ESubtyp Γ (EType.type (CType.capt C S)) E := by
-  induction h <;> try (solve | cases he)
-  case unbox =>
-    cases he
-    apply Exists.intro
-    constructor; trivial
-    apply ESubtyp.refl
-  case sub hs ih =>
-    have ih1 := ih he
-    obtain ⟨S, hx, hsub⟩ := ih1
-    apply Exists.intro S
-    constructor; trivial
-    apply? ESubtyp.trans
-
-theorem Typed.unbox_inv
-  (h : Typed Γ (C o- x) E Ct) :
-  ∃ S,
-    Typed Γ (Term.var x) (EType.type ((SType.box (S^C))^{})) {} ∧
-    ESubtyp Γ (EType.type (CType.capt C S)) E :=
-  Typed.unbox_inv' rfl h
-
 theorem Typed.letin_inv' {Γ : Context n m k}
   (he : t0 = Term.letin t u)
   (h : Typed Γ t0 E Ct0) :
@@ -414,38 +388,6 @@ theorem Typed.canonical_form_clam
   apply Typed.canonical_form_clam' <;> try trivial
   constructor
 
-theorem Typed.canonical_form_boxed'
-  (ht : Γ.IsTight)
-  (hd : SType.Dealias Γ S0 (SType.box (CType.capt C S)))
-  (he1 : t0 = Term.boxed x)
-  (he2 : E0 = EType.type (CType.capt Cf S0))
-  (h : Typed Γ t0 E0 Ct) :
-  Typed Γ (Term.var x) (EType.type (CType.capt C S)) {x=x} := by
-  induction h <;> try (solve | cases he1 | cases he2)
-  case box =>
-    cases he1; cases he2; cases hd
-    trivial
-  case sub hs ih =>
-    subst he2
-    cases hs
-    rename_i hs
-    cases hs
-    rename_i hsc hs
-    have ⟨T1, hd3⟩ := SSubtyp.dealias_right_boxed hs ht hd
-    cases T1
-    have ih := ih ht hd3 he1 rfl
-    have h := SSubtyp.sub_dealias_boxed_inv ht hd3 hd hs
-    apply Typed.sub
-    exact ih
-    apply Subcapt.refl
-    constructor; trivial
-
-theorem Typed.canonical_form_boxed
-  (ht : Γ.IsTight)
-  (h : Typed Γ (Term.boxed x) (EType.type (CType.capt Cb (SType.box (CType.capt C S)))) Ct) :
-  Typed Γ (Term.var x) (EType.type (CType.capt C S)) {x=x} :=
-  Typed.canonical_form_boxed' ht (by constructor) rfl rfl h
-
 theorem Typed.canonical_form_pack'
   (ht : Γ.IsTight)
   (he1 : t0 = Term.pack C x)
@@ -548,32 +490,6 @@ theorem Typed.cforall_inv {v : Term n m k}
   ∃ B0 t, v = Term.clam B0 t :=
   Typed.cforall_inv' hg (by constructor) rfl hv ht
 
-theorem Typed.boxed_inv' {v : Term n m k}
-  (ht : Γ.IsTight)
-  (hd : SType.Dealias Γ S0 (SType.box (CType.capt C S)))
-  (he : E0 = EType.type (CType.capt Cv S0))
-  (hv : v.IsValue)
-  (ht : Typed Γ v E0 Ct) :
-  ∃ t, v = Term.boxed t := by
-  induction ht <;> try (solve | cases hv | cases he | cases hv; cases he; cases hd)
-  case sub hsub ih =>
-    subst he
-    cases hsub
-    rename_i hsub
-    cases hsub
-    rename_i hsc hss
-    have ⟨T1, hd1⟩ := SSubtyp.dealias_right_boxed hss ht hd
-    cases T1
-    aesop
-  case box => aesop
-
-theorem Typed.boxed_inv {v : Term n m k}
-  (hg : Γ.IsTight)
-  (hv : v.IsValue)
-  (ht : Typed Γ v (EType.type (CType.capt Cv (SType.box (CType.capt C S)))) Ct):
-  ∃ t, v = Term.boxed t :=
-  Typed.boxed_inv' hg (by constructor) rfl hv ht
-
 theorem Typed.var_inv_capt'
   (he : t0 = Term.var x)
   (hx : Typed Γ t0 E Cx) :
@@ -635,21 +551,6 @@ theorem Typed.capp_inv_capt
   Γ ⊢ ({x=x}) <:c Ct :=
   Typed.capp_inv_capt' rfl ht
 
-theorem Typed.unbox_inv_capt'
-  (he : t0 = Term.unbox C x)
-  (ht : Typed Γ t0 E Ct) :
-  Γ ⊢ C <:c Ct := by
-  induction ht <;> try (solve | cases he)
-  case unbox => cases he; apply Subcapt.refl
-  case sub ih =>
-    have ih := ih he
-    apply! Subcapt.trans
-
-theorem Typed.unbox_inv_capt
-  (ht : Typed Γ (C o- x) E Ct) :
-  Γ ⊢ C <:c Ct :=
-  Typed.unbox_inv_capt' rfl ht
-
 theorem Typed.var_inv_cs'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type (S^C))
@@ -687,9 +588,6 @@ theorem Typed.val_precise_cv'
   case cabs =>
     cases he
     apply Typed.cabs; easy
-  case box =>
-    cases he
-    apply Typed.box; easy
   case sub hsub ih =>
     subst_vars
     cases hsub

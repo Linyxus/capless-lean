@@ -29,9 +29,6 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | cabs {C : CaptureSet n k} :
   Typed (Γ,c<:B) t E C.cweaken ->
   Typed Γ (λ[c<:B]t) ((∀[c<:B]E)^C) {}
-| box :
-  Typed Γ (Term.var x) (EType.type T) {x=x} ->
-  Typed Γ (Term.boxed x) ((SType.box T)^{}) {}
 | app :
   Typed Γ (Term.var x) (EType.type (∀(x:T)E)^C) {x=x} ->
   Typed Γ (Term.var y) T {x=y} ->
@@ -46,9 +43,6 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | capp :
   Typed Γ (Term.var x) (EType.type (∀[c<:CBound.upper {c=c}]E)^C) {x=x} ->
   Typed Γ (Term.capp x c) (E.copen c) {x=x}
-| unbox :
-  Typed Γ (Term.var x) (EType.type (SType.box (S^C))^{}) {} ->
-  Typed Γ (C o- x) (S^C) C
 | letin :
   Typed Γ t (EType.type T) C ->
   Typed (Γ,x: T) u E.weaken C.weaken ->  -- which means that x ∉ C and x ∉ fv(E)

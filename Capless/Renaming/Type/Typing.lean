@@ -52,12 +52,6 @@ theorem Typed.trename
     apply cabs
     have ih1 := ih (ρ.cext _)
     trivial
-  case unbox ih =>
-    simp [Term.trename, EType.trename, CType.trename]
-    apply unbox
-    have ih := ih ρ
-    simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih
-    trivial
   case tapp ih =>
     simp [Term.trename]
     rw [EType.trename_topen]
@@ -71,12 +65,6 @@ theorem Typed.trename
     apply capp
     have ih := ih ρ
     simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih
-    trivial
-  case box ih =>
-    simp [Term.trename, EType.trename, CType.trename, SType.trename]
-    apply box
-    have ih := ih ρ
-    simp [Term.trename, EType.trename] at ih
     trivial
   case letin ih1 ih2 =>
     simp [Term.trename]

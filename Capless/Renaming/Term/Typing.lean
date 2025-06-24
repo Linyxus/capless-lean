@@ -67,19 +67,6 @@ theorem Typed.rename
     have ih := ih ρ
     simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih
     trivial
-  case box ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply Typed.box
-    have ih := ih ρ
-    simp [Term.rename, EType.rename] at ih
-    trivial
-  case unbox ih =>
-    simp [Term.rename, EType.rename, CType.rename]
-    apply Typed.unbox
-    have ih := ih ρ
-    simp [Term.rename, EType.rename, CType.rename, CaptureSet.rename_empty] at ih
-    simp [SType.rename, CType.rename] at ih
-    trivial
   case letin ih1 ih2 =>
     simp [Term.rename]
     apply Typed.letin

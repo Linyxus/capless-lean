@@ -64,18 +64,6 @@ theorem Typed.tsubst
       have ih1 := ih σ
       simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
       exact ih1
-    case box ih =>
-      simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      apply box
-      have ih1 := ih σ
-      simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
-      exact ih1
-    case unbox ih =>
-      simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      apply unbox
-      have ih1 := ih σ
-      simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
-      exact ih1
     case letin ih1 ih2 =>
       simp [Term.trename]
       apply letin

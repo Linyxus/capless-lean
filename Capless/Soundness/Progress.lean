@@ -200,13 +200,6 @@ theorem progress
       have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨t0, he⟩ := Typed.cforall_inv hg hv0 htv
       aesop
-    case box => cases hc <;> aesop
-    case unbox x _ _ hx _ σ _ _ =>
-      have hg := TypedStore.is_tight hs
-      have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
-      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
-      have ⟨t0, he⟩ := Typed.boxed_inv hg hv0 htv
-      aesop
     case letin => aesop
     case letex => aesop
     case bindt => aesop
