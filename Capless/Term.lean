@@ -77,10 +77,6 @@ notation:40 "let" "X=" S " in " t => Term.bindt S t
 notation:40 "let" "c=" C " in " t => Term.bindc C t
 notation:40 "boundary:" S " in " t => Term.boundary S t
 
-/-!
-## Operations
--/
-
 /-- Whether this term is a value? -/
 @[aesop safe constructors]
 inductive Term.IsValue : Term n m k -> Prop where
@@ -88,6 +84,11 @@ inductive Term.IsValue : Term n m k -> Prop where
 | tlam : Term.IsValue (tlam S t)
 | clam : Term.IsValue (clam B t)
 | pack : Term.IsValue (pack c x)
+
+/-!
+## Renaming Operations on `Term`
+-/
+
 
 def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   match t with
