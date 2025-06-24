@@ -5,6 +5,10 @@ import Capless.Context
 import Capless.Typing
 namespace Capless
 
+/-!
+# Store
+-/
+
 inductive Store : Nat -> Nat -> Nat -> Type where
 | empty : Store 0 0 0
 | val :

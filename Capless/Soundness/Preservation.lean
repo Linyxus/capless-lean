@@ -16,6 +16,13 @@ import Capless.Narrowing.TypedCont
 import Capless.Typing.Boundary
 namespace Capless
 
+/-!
+
+# Preservation Theorem
+
+One of the main soundness results of System Capless: the reduction of a well-typed term preserves its type.
+-/
+
 inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
 | mk :
   TypedState state Γ E ->

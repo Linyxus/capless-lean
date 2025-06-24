@@ -3,23 +3,51 @@ import Capless.Type
 import Capless.Basic
 namespace Capless
 
+/-!
+# Terms in System Capless
+
+This module defines the syntax of terms (Fig. 1) in System Capless.
+
+## Main Definitions
+-/
+
+/-- A `Term n m k` is a Capless term in a context with `n` term variables, `m` type variables, and `k` capture variables. -/
 inductive Term : Nat -> Nat -> Nat -> Type where
+/-- Variable `x`. -/
 | var : Fin n -> Term n m k
+/-- Term lambda `λ(x: T)t`. -/
 | lam : CType n m k -> Term (n+1) m k -> Term n m k
+/-- Type lambda `λ[X<:S]t`. -/
 | tlam : SType n m k -> Term n (m+1) k -> Term n m k
+/-- Capture lambda `λ[c<:B]t`. -/
 | clam : CBound n k -> Term n m (k+1) -> Term n m k
+-- [TODO] Is this needed?
 | boxed : Fin n -> Term n m k
+/-- Packed term `<c,x>`. -/
 | pack : CaptureSet n k -> Fin n -> Term n m k
+/-- Application `x y`. -/
 | app : Fin n -> Fin n -> Term n m k
 | invoke : Fin n -> Fin n -> Term n m k
+/-- Type application `x[X]`. -/
 | tapp : Fin n -> Fin m -> Term n m k
+/-- Capture application `x[c]`. -/
 | capp : Fin n -> Fin k -> Term n m k
+/-- Let `let x = t in u`. -/
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
+/-- Existential-let `let <c,x> = t in u`. -/
 | letex : Term n m k -> Term (n+1) m (k+1) -> Term n m k
+/-- Type binding `let X = S in t`. -/
 | bindt : SType n m k -> Term n (m+1) k -> Term n m k
+/-- Capture binding `let c = C in t`. -/
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
+/-- Boundary form `boundary[S] as <c,x> in t`. -/
 | boundary : SType n m k -> Term (n+1) m (k+1) -> Term n m k
+-- [TODO] Is this needed?
 | unbox : CaptureSet n k -> Fin n -> Term n m k
+
+/-!
+## Notations
+-/
 
 notation:50 "λ(x:" T ")" t => Term.lam T t
 notation:50 "λ[X<:" S "]" t => Term.tlam S t
@@ -31,6 +59,11 @@ notation:40 "let" "X=" S " in " t => Term.bindt S t
 notation:40 "let" "c=" C " in " t => Term.bindc C t
 notation:40 "boundary:" S " in " t => Term.boundary S t
 
+/-!
+## Operations
+-/
+
+/-- Whether this term is a value? -/
 @[aesop safe constructors]
 inductive Term.IsValue : Term n m k -> Prop where
 | lam : Term.IsValue (lam E t)
@@ -95,6 +128,10 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
   | Term.unbox c x => Term.unbox (c.crename f) x
   | Term.boundary S t => Term.boundary (S.crename f) (t.crename f.ext)
+
+/-!
+## Basic Properties
+-/
 
 theorem IsValue.rename_l' {t : Term n m k} {t0 : Term n' m k}
   (he : t0 = t.rename f)
