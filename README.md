@@ -30,7 +30,7 @@ can open the folder containing this mechanization from VSCode and start explorin
 `Capless.lean` is the entry file. `Capless/Soundness/` contains the type soundness results.
 
 | Definition/Theorem | Paper | File (in `Capless/`) | Name of formalization | Notation |
-|--------------------|-------|------|-----------------------|----------|
+|--------------------|-------|----------------------|-----------------------|----------|
 | Term    | Fig. 1 & 5 & 6 | `Term.lean` | `inductive Term` |
 | Value               | Fig. 1 | `Term.lean` | `inductive Term.IsValue` |
 | Capture & Capture Set | Fig. 1 & 6 | `CaptureSet.lean` | Merged into `inductive CaptureSet`, `x` = `singleton`, `c` = `csingleton`
