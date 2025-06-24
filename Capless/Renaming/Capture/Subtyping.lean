@@ -57,7 +57,7 @@ theorem SSubtyp.crename
     apply ESubtyp.exist
     rename_i ih _ _ _ _
     apply ih; try assumption
-    apply CVarMap.cext <;> trivial
+    apply CVarMap.cext; trivial
   case type =>
     unfold crename_motive2 crename_motive1
     repeat intro
@@ -133,7 +133,7 @@ theorem SSubtyp.crename
     aesop
     rename_i ih _ _ _ _
     apply ih; try assumption
-    apply CVarMap.ext <;> trivial
+    apply CVarMap.ext; trivial
   case tforall =>
     unfold crename_motive1 crename_motive3
     repeat intro

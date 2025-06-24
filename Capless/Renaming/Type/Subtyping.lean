@@ -53,7 +53,7 @@ theorem SSubtyp.trename
     simp [EType.trename]
     apply ESubtyp.exist
     rename_i ih _ _ _ _
-    apply ih; apply TVarMap.cext <;> trivial
+    apply ih; apply TVarMap.cext; trivial
   case type =>
     unfold trename_motive1 trename_motive2
     repeat intro
