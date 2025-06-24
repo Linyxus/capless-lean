@@ -64,18 +64,6 @@ theorem Typed.crename
     have ih1 := ih1 ρ
     simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
     exact ih1
-  case box ih =>
-    simp [Term.crename, EType.crename, CType.crename, SType.crename, CaptureSet.crename_empty]
-    apply box
-    have ih := ih ρ
-    simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih
-    exact ih
-  case unbox ih =>
-    simp [Term.crename, EType.crename, CType.crename, SType.crename]
-    apply unbox
-    have ih := ih ρ
-    simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih
-    exact ih
   case letin ih1 ih2 =>
     simp [Term.crename]
     apply letin
