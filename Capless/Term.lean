@@ -8,6 +8,28 @@ namespace Capless
 
 This module defines the syntax of terms (Fig. 1) in System Capless.
 
+## Intrinsically-Scoped Syntax
+
+The terms are deBruijn-indexed and intrinsically-scoped. The type `Term` is parameterized by three natural numbers representing the number of available binders in each category:
+- `n`: number of term variables
+- `m`: number of type variables
+- `k`: number of capture variables
+
+A binder reference is always valid and represented as a `Fin` index, ensuring well-formedness by construction.
+
+## Full Monadic Normal Form
+
+The system defined in the paper applies monadic normal form (MNF) to terms. Deviating from the paper, this mechanization applies MNF to types and captures as well. As demonstrated in `Term.tapp` and `Term.capp`, type and capture applications only accept type and capture variables as arguments, respectively.
+
+Full expressiveness is recovered through the `Term.bindt` and `Term.bindc` binding forms, which bind concrete types and capture sets as type and capture variables. For example, a term `x[{y,z}]` can be equivalently represented in full-MNF as:
+
+```lean
+let c = {y,z} in
+  x[c]
+```
+
+Such a formalization largely simplifies the metatheory: the only term and type transformation is needed is renaming (i.e. substituting a index for another index). By contrast, the original definition on the paper requires substitution for types and captures (i.e. substituting a type/capture variable index for a concrete type/capture-set).
+
 ## Main Definitions
 -/
 
@@ -35,9 +57,9 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | letin : Term n m k -> Term (n+1) m k -> Term n m k
 /-- Existential-let `let <c,x> = t in u`. -/
 | letex : Term n m k -> Term (n+1) m (k+1) -> Term n m k
-/-- Type binding `let X = S in t`. -/
+/-- Type binding. -/
 | bindt : SType n m k -> Term n (m+1) k -> Term n m k
-/-- Capture binding `let c = C in t`. -/
+/-- Capture binding. -/
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
 /-- Boundary form `boundary[S] as <c,x> in t`. -/
 | boundary : SType n m k -> Term (n+1) m (k+1) -> Term n m k

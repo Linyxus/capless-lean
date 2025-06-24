@@ -24,7 +24,7 @@ import «Capless».Store
 import «Capless».Reduction
 
 /-
-## The First Layer of Substitution Theorems: Renaming
+## Renaming Context Morphisms
 ### Term Variable Renaming
 -/
 import «Capless».Renaming.Term.Subcapturing
@@ -44,7 +44,7 @@ import «Capless».Renaming.Capture.Subtyping
 import «Capless».Renaming.Capture.Typing
 
 /-
-## The Second Layer of Substitution Theorems: Substitution
+## Substitution Context Morphisms
 ### Term Variable Substitution
 -/
 import «Capless».Subst.Term.Subcapturing
@@ -76,9 +76,6 @@ import «Capless».Inversion.Lookup
 import «Capless».Inversion.Subtyping
 /-
 ### Typing
-Main results:
-- Inversion of redex typing. For instance, an application `x y` is well-typed implies
-  that x is typed at a function and y can be typed at the argument type of the function.
 -/
 import «Capless».Inversion.Typing
 
