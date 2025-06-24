@@ -3,6 +3,14 @@ import Capless.Basic
 import Capless.Type.Core
 namespace Capless
 
+/-!
+# Renaming Operations
+
+This file defines the renaming operations for types.
+
+## Core Definitions
+-/
+
 def CBound.rename (b : CBound n k) (f : FinFun n n') : CBound n' k :=
   match b with
   | upper C => upper (C.rename f)
@@ -78,6 +86,10 @@ def SType.crename : SType n m k -> FinFun k k' -> SType n m k'
 | SType.label S, f => SType.label (S.crename f)
 
 end
+
+/-!
+## Weakening and Opening
+-/
 
 def EType.weaken (E : EType n m k) : EType (n+1) m k :=
   E.rename FinFun.weaken

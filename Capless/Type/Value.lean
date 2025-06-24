@@ -1,6 +1,12 @@
 import Capless.Type.Core
 namespace Capless
 
+/-!
+# Value Type Predicates
+
+`SType.IsValue` and `CType.IsValue` are predicates for identifying value types. `SType.IsVar` checks whether a type is a type variable.
+-/
+
 @[aesop safe [constructors, cases]]
 inductive SType.IsValue : SType n m k -> Prop where
 | xforall : SType.IsValue (∀(x:T)U)
