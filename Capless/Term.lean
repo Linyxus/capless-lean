@@ -27,6 +27,7 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | pack : CaptureSet n k -> Fin n -> Term n m k
 /-- Application `x y`. -/
 | app : Fin n -> Fin n -> Term n m k
+/-- Application `x y` for capabilities. -/
 | invoke : Fin n -> Fin n -> Term n m k
 /-- Type application `x[X]`. -/
 | tapp : Fin n -> Fin m -> Term n m k

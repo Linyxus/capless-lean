@@ -4,7 +4,7 @@ This folder contains the Lean 4 mechanization of System Capless including its ty
 
 ## Step-by-step Instructions
 
-The mechanization uses Lean version `4.21.0-rc3`. If you compile from source, then some version of Lean 4 and `lake` needs to be installed on your system. Or you can just explore through one of the supplied virtual machine images.
+The mechanization uses Lean version `4.21.0-rc3`. If you compile from source, then Lean 4 needs to be installed on your system, which can be conveniently done with [elan](https://github.com/leanprover/elan). The Lean manual also documents a way to quickly install Lean 4 with VSCode (see [here](https://docs.lean-lang.org/lean4/doc/quickstart.html)). Alternatively, you can just explore through one of the virtual machine images we supplied, where everything is set up.
 
 ### Compiling
 
