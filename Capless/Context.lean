@@ -2,6 +2,12 @@ import Capless.Type
 import Capless.CaptureSet
 namespace Capless
 
+/-!
+# Typing Contexts
+
+This module defines the syntax of typing contexts `Γ` (Fig. 1) in System Capless.
+-/
+
 inductive TBinding : Nat -> Nat -> Nat -> Type where
 | bound : SType n m k -> TBinding n m k
 | inst : SType n m k -> TBinding n m k
