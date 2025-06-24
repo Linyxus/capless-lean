@@ -2,6 +2,13 @@ import Capless.Context
 import Capless.CaptureSet
 namespace Capless
 
+/-!
+
+# Subcapturing
+
+`Subcapt Γ C1 C2` defines the subcapturing judgement `Γ ⊢ C1 <: C2` in Fig. 2. Most rules correspond directly to the rules on the paper. The `Subcapt.cinstl` and `Subcapt.cinstr` rules are for capture set variables bound by `Term.bindc`--they are transparent in the subcapturing relation.
+-/
+
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
 | trans :
   Subcapt Γ C1 C2 ->
