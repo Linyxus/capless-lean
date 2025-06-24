@@ -6,7 +6,7 @@ import Capless.Typing
 namespace Capless
 
 /-!
-# Store
+# Evaluation States
 -/
 
 inductive Store : Nat -> Nat -> Nat -> Type where
@@ -218,6 +218,7 @@ def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 | Cont.scope x cont => Cont.scope x cont.cweaken
 
+/-- A typing context is tight if it contains only term bindings and instance type/capture bindings. -/
 @[aesop safe [constructors]]
 inductive Context.IsTight : Context n m k -> Prop where
 | empty : Context.IsTight Context.empty
@@ -234,6 +235,7 @@ inductive Context.IsTight : Context n m k -> Prop where
   Context.IsTight Γ ->
   Context.IsTight (Γ.label S)
 
+/-- The typing context of a store is always tight. -/
 theorem TypedStore.is_tight
   (h : TypedStore σ Γ) :
   Γ.IsTight := by
