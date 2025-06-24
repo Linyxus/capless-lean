@@ -49,6 +49,8 @@ structure State (n : Nat) (m : Nat) (k : Nat) where
   cont : Cont n m k
   t : Term n m k
 
+notation:max "⟨" σ " | " cont " | " t "⟩" => State.mk σ cont t
+
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
