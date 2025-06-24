@@ -1,5 +1,5 @@
 /-
-# Mechanisation of Capless
+# Mechanisation of System Capless
 
 This is the entry of the mechanisation of System Capless.
 
