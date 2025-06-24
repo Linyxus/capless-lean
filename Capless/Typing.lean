@@ -3,6 +3,12 @@ import Capless.Subtyping
 import Capless.Type
 import Capless.Term
 
+/-!
+
+# Typing Rules of Capless
+
+-/
+
 namespace Capless
 
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -> Prop where
