@@ -140,12 +140,14 @@ let c = {y,z} in x[c]
 
 This design choice simplifies the metatheory: the only required transformation operation is **renaming** (mapping indices to indices), eliminating the need for complex substitution operations that replace variables with other syntactic objects (like types and capture sets).
 
-
 #### Evaluation State
 
-Evaluation state is a triplet of a store, a continuation stack, and a redex.
+The paper defines evaluation states as pairs `⟨σ | t⟩` where `σ` is a store and `t` is a term that decomposes into an evaluation context and redex `t = e[u]`. The mechanization refactors this representation into an explicit triplet `⟨σ | cont | t⟩` of type `State n m k`, where:
+- `σ : Store n m k` is the store containing bindings and values,
+- `cont : Cont n m k` is a continuation stack representing the evaluation context,
+- `t : Term n m k` is the redex currently being evaluated.
 
-Well-scopedness predicate
+This design makes the evaluation context explicit as a continuation stack. For example, the nested context `let z2 = (let z1 = [] in t1) in t2` becomes a stack with continuation `t1` followed by continuation `t2`, eliminating the need to syntactically decompose terms during evaluation.
 
 ### Used Axioms and Unfinished Parts
 
