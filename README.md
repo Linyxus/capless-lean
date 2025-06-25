@@ -94,21 +94,52 @@ and highlights the differences to the pencil and paper formalization.
 
 #### Intrinsically-Scoped Syntax
 
-The formalization is deBruijn-indexed and intrinsically-scoped.
+The formalization is deBruijn-indexed and intrinsically-scoped. All syntactic categories in this mechanization are parameterized by the exact number of available binders in scope:
 
-explain intrinsically-scoped syntax: everything is indexed
+- `Term n m k`: A term in a context with `n` term variables, `m` type variables, and `k` capture variables
+- `CType n m k`: A capturing type with the same indexing
+- `CaptureSet n k`: A capture set in a context with `n` term variables and `k` capture variables  
+- `Context n m k`: A typing context defining exactly `n`, `m`, and `k` bindings respectively
 
-the benefits: well-formed by construction
+Variable references use `Fin n` indices, ensuring that every variable reference is statically guaranteed to be within bounds. For example, in a `Term 5 3 2`, any term variable reference must be a `Fin 5` (so between 0 and 4), any type variable reference must be a `Fin 3`, and any capture variable reference must be a `Fin 2`.
 
-point to PLFA
+The key benefit is **well-formedness by construction**: it is impossible to construct ill-scoped terms, types, or capture sets. Traditional approaches require separate well-formedness predicates and must prove that operations preserve well-formedness. Here, well-formedness is by construction and there is no need for carrying through an additional predicate.
 
 #### Context Morphisms
 
-Substitution/renaming lemmas are formulated with context morphisms
+Both substitution and renaming lemmas are formulated using **context morphisms**, which provide a principled way to handle variable transformations while preserving typing relationships. The mechanization defines two families of context morphisms:
 
-point out that everything is in MNF, including captures and types
+**Renaming Morphisms** (mapping bindings to bindings):
+- `VarMap Γ f Δ`: Maps term variable bindings via function `f : FinFun n n'`
+- `TVarMap Γ f Δ`: Maps type variable bindings via function `f : FinFun m m'`  
+- `CVarMap Γ f Δ`: Maps capture variable bindings via function `f : FinFun k k'`
 
-point to PLFA
+**Substitution Morphisms** (mapping bindings to typing derivations):
+- `VarSubst Γ f Δ`: Maps term variable bindings to typing judgments for `Term.var (f x)`
+- `TVarSubst Γ f Δ`: Maps type variable bindings to subtyping relationships
+- `CVarSubst Γ f Δ`: Maps capture variable bindings to appropriate subcapturing relationships
+
+The key difference is that renaming morphisms (`VarMap`) map bindings to bindings (e.g., `Γ.Bound x E → Δ.Bound (f x) (E.rename f)`), while substitution morphisms (`VarSubst`) map bindings to typing derivations (e.g., `Γ.Bound x E → Typed Δ (Term.var (f x)) (...)`). Both families use `FinFun` for index-to-index mappings, but substitution morphisms produce the stronger guarantee of well-typed terms.
+
+The substitution morphisms (`VarSubst` family) are used to prove traditional substitution theorems, such as showing that function application preserves typing when substituting arguments for parameters. Besides, the substitution morphism family builds upon and depends on the renaming morphism family (`VarMap` family).
+
+The approach is inspired by techniques from [Programming Language Foundations in Agda (PLFA)](https://plfa.github.io/), particularly the treatment of intrinsically-typed syntax and context morphisms.
+
+#### Full Monadic Normal Form (MNF)
+
+The mechanization uses **Full Monadic Normal Form** for all syntactic categories. Unlike the paper presentation which applies MNF only to terms, this formalization extends MNF to types and capture sets as well:
+
+- Type applications (`Term.tapp`) accept only type variables, not arbitrary type expressions
+- Capture applications (`Term.capp`) accept only capture variables, not arbitrary capture sets
+- Complex types and captures are bound as variables using `Term.bindt` and `Term.bindc`
+
+For example, instead of writing `x[{y,z}]` directly, the MNF representation would be:
+```lean
+let c = {y,z} in x[c]
+```
+
+This design choice simplifies the metatheory: the only required transformation operation is **renaming** (mapping indices to indices), eliminating the need for complex substitution operations that replace variables with other syntactic objects (like types and capture sets).
+
 
 #### Evaluation State
 
