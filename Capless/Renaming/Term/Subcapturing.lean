@@ -1,6 +1,15 @@
 import Capless.Subcapturing
 import Capless.Renaming.Basic
 import Mathlib.Data.Finset.Image
+
+/-!
+# Term Variable Renaming for Subcapturing
+
+This module proves that subcapturing relationships are preserved under term variable
+renaming. The main theorem `Subcapt.rename` shows that if `Γ ⊢ C1 <: C2`, then
+after renaming term variables with a valid renaming map, we have `Δ ⊢ C1.rename f <: C2.rename f`.
+-/
+
 namespace Capless
 
 theorem CaptureSet.Subset.rename {C1 C2 : CaptureSet n k}

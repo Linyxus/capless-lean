@@ -1,6 +1,14 @@
 import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Type.Subtyping
+
+/-!
+# Type Variable Renaming for Typing
+
+This module proves that typing judgments are preserved under type variable renaming.
+The main theorem `Typed.trename` shows that if `Γ ⊢ t : E @ Ct`, then after renaming
+type variables with a valid renaming map, we have `Δ ⊢ t.trename f : E.trename f @ Ct`.
+-/
 namespace Capless
 
 theorem Typed.trename

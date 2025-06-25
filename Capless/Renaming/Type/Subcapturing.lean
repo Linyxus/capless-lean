@@ -1,6 +1,14 @@
 import Capless.Subcapturing
 import Capless.Renaming.Basic
 import Mathlib.Data.Finset.Image
+
+/-!
+# Type Variable Renaming for Subcapturing
+
+This module proves that subcapturing relationships are preserved under type variable
+renaming. The main theorem `Subcapt.trename` shows that subcapturing judgments
+remain valid when type variables are renamed consistently between contexts.
+-/
 namespace Capless
 
 theorem Subcapt.trename

@@ -2,6 +2,19 @@ import Capless.Basic
 import Capless.Context
 import Capless.CaptureSet
 import Capless.Typing
+
+/-!
+# Renaming Context Morphisms
+
+This module defines the fundamental structures and operations for renaming context morphisms in System Capless. It provides three main renaming map structures:
+
+- `VarMap`: Maps for renaming term variables
+- `CVarMap`: Maps for renaming capture variables
+- `TVarMap`: Maps for renaming type variables
+
+Each structure maintains consistency between contexts under renaming operations in the sense that each binding in the source context is mapped to a binding in the target context.
+-/
+
 namespace Capless
 
 structure VarMap (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) where

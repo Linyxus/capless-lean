@@ -2,6 +2,14 @@ import Capless.Tactics
 import Capless.Subtyping
 import Capless.Renaming.Basic
 import Capless.Renaming.Type.Subcapturing
+
+/-!
+# Type Variable Renaming for Subtyping
+
+This module proves that subtyping relationships are preserved under type variable
+renaming. It provides theorems showing that `SSubtyp`, `CSubtyp`, and `ESubtyp`
+judgments are preserved when type variables are renamed consistently between contexts.
+-/
 namespace Capless
 
 theorem Subbound.trename

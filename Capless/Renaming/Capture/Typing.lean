@@ -1,6 +1,15 @@
 import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subtyping
+
+/-!
+# Capture Variable Renaming for Typing
+
+This module proves that typing judgments are preserved under capture variable renaming.
+The main theorem `Typed.crename` shows that if `Γ ⊢ t : E @ Ct`, then after renaming
+capture variables with a valid renaming map, we have `Δ ⊢ t.crename f : E.crename f @ Ct.crename f`.
+-/
+
 namespace Capless
 
 theorem Typed.crename
