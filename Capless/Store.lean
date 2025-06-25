@@ -14,7 +14,7 @@ This module defines the evaluation states in System Capless.
 - `Store.tval` and `Store.cval` are for type and capture set bindings bound by `Term.bindt` and `Term.bindc`. During evaluation, `Term.bindt` and `Term.bindc` are lifted as `Store.tval` and `Store.cval` bindings in the store.
 - `Store.label` declares a label in the store.
 
-`Cont n m k` defines a continuation stack that is valid in a store `Store n m k`. On the paper, the evaluation state is defined as a pair of a store and a term, `⟨σ | t⟩`. `t` is then decomposed into a evaluation context and a redex `t = e[u]`. In the mechanization, we define evaluation state `State n m k` as a triple of a store, a continuation stack and the redex, `⟨σ | cont | t⟩`. The continuation stack corresponds to the evaluation context.
+`Cont n m k` defines a continuation stack that is valid in a store `Store n m k`. On the paper, the evaluation state is defined as a pair of a store and a term, `⟨σ | t⟩`. `t` is then decomposed into a evaluation context and a redex `t = e[u]`. In the mechanization, we define evaluation state `State n m k` as a triplet of a store, a continuation stack and the redex, `⟨σ | cont | t⟩`. The continuation stack corresponds to the evaluation context.
 -/
 
 namespace Capless

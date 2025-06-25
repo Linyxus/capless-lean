@@ -4,6 +4,10 @@ namespace Capless
 
 /-!
 # Operational Semantics of System Capless
+
+The reduction relation works on evaluation states, which is a triplet of a store, a continuation stack and a redex. See `Store`.
+
+Most rules of `Reduce` correspond directly to the paper definitions, and adapted for the triplet representation of the evaluation state.
 -/
 
 /-- The reduction relation defined in Fig. 10 and 6. -/
