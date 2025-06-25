@@ -66,8 +66,6 @@ import «Capless».Subst.Capture.Typing
 /-
 ## Inversion Theorems
 ### Store Lookup
-It is mainly composed of the following results:
-- The type of the value stored in the store matches that in the corresponding typing context.
 -/
 import «Capless».Inversion.Lookup
 /-
