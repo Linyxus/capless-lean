@@ -1,6 +1,11 @@
 import Capless.Subst.Basic
 import Capless.Subtyping
 import Capless.Subst.Term.Subcapturing
+
+/-
+Substitution theorems for term variable substitution in subtyping judgments.
+-/
+
 namespace Capless
 
 theorem Subbound.subst

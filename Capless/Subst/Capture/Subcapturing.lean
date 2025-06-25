@@ -1,5 +1,10 @@
 import Capless.Subcapturing
 import Capless.Subst.Basic
+
+/-
+Substitution theorems for capture variable substitution in subcapturing judgments.
+-/
+
 namespace Capless
 
 theorem Subcapt.csubst

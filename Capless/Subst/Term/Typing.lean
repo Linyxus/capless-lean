@@ -2,6 +2,11 @@ import Capless.Typing
 import Capless.Subst.Basic
 import Capless.Subst.Term.Subtyping
 import Capless.Renaming.Term.Typing
+
+/-
+Substitution theorems for term variable substitution in typing judgments.
+-/
+
 namespace Capless
 
 theorem Typed.subst

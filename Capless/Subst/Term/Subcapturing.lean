@@ -2,6 +2,11 @@ import Capless.Subst.Basic
 import Capless.Subcapturing
 import Capless.Typing.Basic
 import Capless.Renaming.Term.Subcapturing
+
+/-
+Substitution theorems for term variable substitution in subcapturing judgments.
+-/
+
 namespace Capless
 
 theorem Subcapt.subst

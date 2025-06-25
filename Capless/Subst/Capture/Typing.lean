@@ -1,6 +1,11 @@
 import Capless.Subst.Basic
 import Capless.Subst.Capture.Subtyping
 import Capless.Typing
+
+/-
+Substitution theorems for capture variable substitution in typing judgments.
+-/
+
 namespace Capless
 
 theorem Typed.csubst
