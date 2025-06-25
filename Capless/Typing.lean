@@ -4,9 +4,11 @@ import Capless.Type
 import Capless.Term
 
 /-!
-
 # Typing Rules of Capless
 
+This defines the typing judgement `C; Γ ⊢ t: E` in Fig. 2, 5 and 6. Most rules correspond directly to the paper definitions, except for the `Typed.bindc` and `Typed.bindt` rules, which are for type and capture set bindings introduced in the mechanization.
+
+Note that the rules for boundary/break extension are also included in this definition.
 -/
 
 namespace Capless
