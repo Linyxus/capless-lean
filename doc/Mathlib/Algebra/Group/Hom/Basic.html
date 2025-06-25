@@ -1,0 +1,784 @@
+<html lang="en"><head><meta charset="UTF-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1"></meta><link rel="stylesheet" href="../../../.././style.css"></link><link rel="icon" href="../../../.././favicon.svg"></link><link rel="mask-icon" href="../../../.././favicon.svg" color="#000000"></link><link rel="prefetch" href="../../../.././/declarations/declaration-data.bmp" as="image"></link><title>Mathlib.Algebra.Group.Hom.Basic</title><script defer="true" src="../../../.././mathjax-config.js"></script><script defer="true" src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="true" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>const SITE_ROOT="../../../.././";</script><script>const MODULE_NAME="Mathlib.Algebra.Group.Hom.Basic";</script><script type="module" src="../../../.././jump-src.js"></script><script type="module" src="../../../.././search.js"></script><script type="module" src="../../../.././expand-nav.js"></script><script type="module" src="../../../.././how-about.js"></script><script type="module" src="../../../.././instances.js"></script><script type="module" src="../../../.././importedBy.js"></script></head><body><input id="nav_toggle" type="checkbox"></input><header><h1><label for="nav_toggle"></label><span>Documentation</span></h1><h2 class="header_filename break_within"><span class="name">Mathlib</span>.<span class="name">Algebra</span>.<span class="name">Group</span>.<span class="name">Hom</span>.<span class="name">Basic</span></h2><form id="search_form"><input type="text" name="q" autocomplete="off"></input>&#32;<button id="search_button" onclick="javascript: form.action='../../../.././search.html';">Search</button></form></header><nav class="internal_nav"><p><a href="#top">return to top</a></p><p class="gh_nav_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean">source</a></p><div class="imports"><details><summary>Imports</summary><ul><li><a href="../../../.././Init.html">Init</a></li><li><a href="../../../.././Mathlib/Algebra/Group/Basic.html">Mathlib.Algebra.Group.Basic</a></li><li><a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html">Mathlib.Algebra.Group.Hom.Defs</a></li></ul></details><details><summary>Imported by</summary><ul id="imported-by-Mathlib.Algebra.Group.Hom.Basic" class="imported-by-list"></ul></details></div><div class="nav_link"><a class="break_within" href="#powMonoidHom"><span class="name">powMonoidHom</span></a></div><div class="nav_link"><a class="break_within" href="#nsmulAddMonoidHom"><span class="name">nsmulAddMonoidHom</span></a></div><div class="nav_link"><a class="break_within" href="#nsmulAddMonoidHom_apply"><span class="name">nsmulAddMonoidHom_apply</span></a></div><div class="nav_link"><a class="break_within" href="#powMonoidHom_apply"><span class="name">powMonoidHom_apply</span></a></div><div class="nav_link"><a class="break_within" href="#zpowGroupHom"><span class="name">zpowGroupHom</span></a></div><div class="nav_link"><a class="break_within" href="#zsmulAddGroupHom"><span class="name">zsmulAddGroupHom</span></a></div><div class="nav_link"><a class="break_within" href="#zsmulAddGroupHom_apply"><span class="name">zsmulAddGroupHom_apply</span></a></div><div class="nav_link"><a class="break_within" href="#zpowGroupHom_apply"><span class="name">zpowGroupHom_apply</span></a></div><div class="nav_link"><a class="break_within" href="#invMonoidHom"><span class="name">invMonoidHom</span></a></div><div class="nav_link"><a class="break_within" href="#negAddMonoidHom"><span class="name">negAddMonoidHom</span></a></div><div class="nav_link"><a class="break_within" href="#coe_invMonoidHom"><span class="name">coe_invMonoidHom</span></a></div><div class="nav_link"><a class="break_within" href="#invMonoidHom_apply"><span class="name">invMonoidHom_apply</span></a></div><div class="nav_link"><a class="break_within" href="#MulHom.instMul"><span class="name">MulHom</span>.<span class="name">instMul</span></a></div><div class="nav_link"><a class="break_within" href="#AddHom.instAdd"><span class="name">AddHom</span>.<span class="name">instAdd</span></a></div><div class="nav_link"><a class="break_within" href="#MulHom.mul_apply"><span class="name">MulHom</span>.<span class="name">mul_apply</span></a></div><div class="nav_link"><a class="break_within" href="#AddHom.add_apply"><span class="name">AddHom</span>.<span class="name">add_apply</span></a></div><div class="nav_link"><a class="break_within" href="#MulHom.mul_comp"><span class="name">MulHom</span>.<span class="name">mul_comp</span></a></div><div class="nav_link"><a class="break_within" href="#AddHom.add_comp"><span class="name">AddHom</span>.<span class="name">add_comp</span></a></div><div class="nav_link"><a class="break_within" href="#MulHom.comp_mul"><span class="name">MulHom</span>.<span class="name">comp_mul</span></a></div><div class="nav_link"><a class="break_within" href="#AddHom.comp_add"><span class="name">AddHom</span>.<span class="name">comp_add</span></a></div><div class="nav_link"><a class="break_within" href="#injective_iff_map_eq_one"><span class="name">injective_iff_map_eq_one</span></a></div><div class="nav_link"><a class="break_within" href="#injective_iff_map_eq_zero"><span class="name">injective_iff_map_eq_zero</span></a></div><div class="nav_link"><a class="break_within" href="#injective_iff_map_eq_one'"><span class="name">injective_iff_map_eq_one'</span></a></div><div class="nav_link"><a class="break_within" href="#injective_iff_map_eq_zero'"><span class="name">injective_iff_map_eq_zero'</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.ofMapMulInv"><span class="name">MonoidHom</span>.<span class="name">ofMapMulInv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.ofMapAddNeg"><span class="name">AddMonoidHom</span>.<span class="name">ofMapAddNeg</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.coe_of_map_mul_inv"><span class="name">MonoidHom</span>.<span class="name">coe_of_map_mul_inv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.coe_of_map_add_neg"><span class="name">AddMonoidHom</span>.<span class="name">coe_of_map_add_neg</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.ofMapDiv"><span class="name">MonoidHom</span>.<span class="name">ofMapDiv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.ofMapSub"><span class="name">AddMonoidHom</span>.<span class="name">ofMapSub</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.coe_of_map_div"><span class="name">MonoidHom</span>.<span class="name">coe_of_map_div</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.coe_of_map_sub"><span class="name">AddMonoidHom</span>.<span class="name">coe_of_map_sub</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.mul"><span class="name">MonoidHom</span>.<span class="name">mul</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.add"><span class="name">AddMonoidHom</span>.<span class="name">add</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.mul_apply"><span class="name">MonoidHom</span>.<span class="name">mul_apply</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.add_apply"><span class="name">AddMonoidHom</span>.<span class="name">add_apply</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.mul_comp"><span class="name">MonoidHom</span>.<span class="name">mul_comp</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.add_comp"><span class="name">AddMonoidHom</span>.<span class="name">add_comp</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.comp_mul"><span class="name">MonoidHom</span>.<span class="name">comp_mul</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.comp_add"><span class="name">AddMonoidHom</span>.<span class="name">comp_add</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.instInv"><span class="name">MonoidHom</span>.<span class="name">instInv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.instNeg"><span class="name">AddMonoidHom</span>.<span class="name">instNeg</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.inv_apply"><span class="name">MonoidHom</span>.<span class="name">inv_apply</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.neg_apply"><span class="name">AddMonoidHom</span>.<span class="name">neg_apply</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.inv_comp"><span class="name">MonoidHom</span>.<span class="name">inv_comp</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.neg_comp"><span class="name">AddMonoidHom</span>.<span class="name">neg_comp</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.comp_inv"><span class="name">MonoidHom</span>.<span class="name">comp_inv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.comp_neg"><span class="name">AddMonoidHom</span>.<span class="name">comp_neg</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.instDiv"><span class="name">MonoidHom</span>.<span class="name">instDiv</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.instSub"><span class="name">AddMonoidHom</span>.<span class="name">instSub</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.div_apply"><span class="name">MonoidHom</span>.<span class="name">div_apply</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.sub_apply"><span class="name">AddMonoidHom</span>.<span class="name">sub_apply</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.div_comp"><span class="name">MonoidHom</span>.<span class="name">div_comp</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.sub_comp"><span class="name">AddMonoidHom</span>.<span class="name">sub_comp</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.comp_div"><span class="name">MonoidHom</span>.<span class="name">comp_div</span></a></div><div class="nav_link"><a class="break_within" href="#AddMonoidHom.comp_sub"><span class="name">AddMonoidHom</span>.<span class="name">comp_sub</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.commGroupOfInjective"><span class="name">MonoidHom</span>.<span class="name">commGroupOfInjective</span></a></div><div class="nav_link"><a class="break_within" href="#MonoidHom.commGroupOfSurjective"><span class="name">MonoidHom</span>.<span class="name">commGroupOfSurjective</span></a></div></nav><main>
+<div class="mod_doc"><h1 class="markdown-heading" id="Additional-lemmas-about-monoid-and-group-homomorphisms">Additional lemmas about monoid and group homomorphisms <a class="hover-link" href="#Additional-lemmas-about-monoid-and-group-homomorphisms">#</a></h1></div><div class="decl" id="powMonoidHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:30:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#powMonoidHom"><span class="name">powMonoidHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Prelude.html#Nat">ℕ</a>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">α</span></div></div><p>The <code>n</code>th power map on a commutative monoid for a natural <code>n</code>, considered as a morphism of
+monoids.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-powMonoidHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="nsmulAddMonoidHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:32:3">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#nsmulAddMonoidHom"><span class="name">nsmulAddMonoidHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Prelude.html#Nat">ℕ</a>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">α</span></div></div><p>Multiplication by a natural <code>n</code> on a commutative additive monoid,
+considered as a morphism of additive monoids.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-nsmulAddMonoidHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="nsmulAddMonoidHom_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:32:24">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#nsmulAddMonoidHom_apply"><span class="name">nsmulAddMonoidHom_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Prelude.html#Nat">ℕ</a>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x✝</span> : <span class="fn">α</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#nsmulAddMonoidHom">nsmulAddMonoidHom</a> <span class="fn">n</span>)</span> <span class="fn">x✝</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">n</span> <a href="../../../.././Init/Prelude.html#HSMul.hSMul">•</a> <span class="fn">x✝</span></div></div></div></div><div class="decl" id="powMonoidHom_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:32:24">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#powMonoidHom_apply"><span class="name">powMonoidHom_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Prelude.html#Nat">ℕ</a>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x✝</span> : <span class="fn">α</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#powMonoidHom">powMonoidHom</a> <span class="fn">n</span>)</span> <span class="fn">x✝</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">x✝</span> <a href="../../../.././Init/Prelude.html#HPow.hPow">^</a> <span class="fn">n</span></div></div></div></div><div class="decl" id="zpowGroupHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:45:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zpowGroupHom"><span class="name">zpowGroupHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#DivisionCommMonoid">DivisionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Data/Int/Basic.html#Int">ℤ</a>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">α</span></div></div><p>The <code>n</code>-th power map (for an integer <code>n</code>) on a commutative group, considered as a group
+homomorphism.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-zpowGroupHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="zsmulAddGroupHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:47:3">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zsmulAddGroupHom"><span class="name">zsmulAddGroupHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#SubtractionCommMonoid">SubtractionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Data/Int/Basic.html#Int">ℤ</a>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">α</span></div></div><p>Multiplication by an integer <code>n</code> on a commutative additive group,
+considered as an additive group homomorphism.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-zsmulAddGroupHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="zsmulAddGroupHom_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:47:24">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zsmulAddGroupHom_apply"><span class="name">zsmulAddGroupHom_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#SubtractionCommMonoid">SubtractionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Data/Int/Basic.html#Int">ℤ</a>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x✝</span> : <span class="fn">α</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zsmulAddGroupHom">zsmulAddGroupHom</a> <span class="fn">n</span>)</span> <span class="fn">x✝</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">n</span> <a href="../../../.././Init/Prelude.html#HSMul.hSMul">•</a> <span class="fn">x✝</span></div></div></div></div><div class="decl" id="zpowGroupHom_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:47:24">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zpowGroupHom_apply"><span class="name">zpowGroupHom_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#DivisionCommMonoid">DivisionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">n</span> : <a href="../../../.././Init/Data/Int/Basic.html#Int">ℤ</a>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x✝</span> : <span class="fn">α</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#zpowGroupHom">zpowGroupHom</a> <span class="fn">n</span>)</span> <span class="fn">x✝</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">x✝</span> <a href="../../../.././Init/Prelude.html#HPow.hPow">^</a> <span class="fn">n</span></div></div></div></div><div class="decl" id="invMonoidHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:54:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#invMonoidHom"><span class="name">invMonoidHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#DivisionCommMonoid">DivisionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">α</span></div></div><p>Inversion on a commutative group, considered as a monoid homomorphism.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-invMonoidHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="negAddMonoidHom"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:55:3">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#negAddMonoidHom"><span class="name">negAddMonoidHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#SubtractionCommMonoid">SubtractionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn">α</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">α</span></div></div><p>Negation on a commutative additive group, considered as an additive monoid
+homomorphism.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-negAddMonoidHom" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="coe_invMonoidHom"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:62:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#coe_invMonoidHom"><span class="name">coe_invMonoidHom</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#DivisionCommMonoid">DivisionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn">⇑<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#invMonoidHom">invMonoidHom</a></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <a href="../../../.././Init/Prelude.html#Inv.inv">Inv.inv</a></div></div></div></div><div class="decl" id="invMonoidHom_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:65:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#invMonoidHom_apply"><span class="name">invMonoidHom_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">α</span> : <a href="../../../.././foundational_types.html">Type</a> u_1}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#DivisionCommMonoid">DivisionCommMonoid</a> <span class="fn">α</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">a</span> : <span class="fn">α</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#invMonoidHom">invMonoidHom</a> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">a</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></div></div></div></div><div class="decl" id="MulHom.instMul"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:72:1">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MulHom.instMul"><span class="name">MulHom</span>.<span class="name">instMul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommSemigroup">CommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">N</span>)</span></div></div><p>Given two mul morphisms <code>f</code>, <code>g</code> to a commutative semigroup, <code>f * g</code> is the mul morphism
+sending <code>x</code> to <code>f x * g x</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="AddHom.instAdd"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:74:3">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddHom.instAdd"><span class="name">AddHom</span>.<span class="name">instAdd</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommSemigroup">AddCommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">N</span>)</span></div></div><p>Given two additive morphisms <code>f</code>, <code>g</code> to an additive commutative semigroup,
+<code>f + g</code> is the additive morphism sending <code>x</code> to <code>f x + g x</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="MulHom.mul_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:83:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MulHom.mul_apply"><span class="name">MulHom</span>.<span class="name">mul_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommSemigroup">CommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="AddHom.add_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:83:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddHom.add_apply"><span class="name">AddHom</span>.<span class="name">add_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommSemigroup">AddCommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="MulHom.mul_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:87:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MulHom.mul_comp"><span class="name">MulHom</span>.<span class="name">mul_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommSemigroup">CommSemigroup</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g₁ </span><span class="fn">g₂</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">g₁</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">g₂</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g₁</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">g₂</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> <span class="fn">f</span></span></div></div></div></div><div class="decl" id="AddHom.add_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:87:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddHom.add_comp"><span class="name">AddHom</span>.<span class="name">add_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommSemigroup">AddCommSemigroup</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g₁ </span><span class="fn">g₂</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">g₁</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">g₂</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g₁</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn"><span class="fn">g₂</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> <span class="fn">f</span></span></div></div></div></div><div class="decl" id="MulHom.comp_mul"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:91:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MulHom.comp_mul"><span class="name">MulHom</span>.<span class="name">comp_mul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommSemigroup">CommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommSemigroup">CommSemigroup</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f₁ </span><span class="fn">f₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom">→ₙ*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> (<span class="fn">f₁</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">f₂</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> <span class="fn">f₁</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MulHom.comp">comp</a></span> <span class="fn">f₂</span></span></div></div></div></div><div class="decl" id="AddHom.comp_add"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:91:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddHom.comp_add"><span class="name">AddHom</span>.<span class="name">comp_add</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommSemigroup">AddCommSemigroup</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommSemigroup">AddCommSemigroup</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f₁ </span><span class="fn">f₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom">→ₙ+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> (<span class="fn">f₁</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">f₂</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> <span class="fn">f₁</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddHom.comp">comp</a></span> <span class="fn">f₂</span></span></div></div></div></div><div class="decl" id="injective_iff_map_eq_one"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:103:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_one"><span class="name">injective_iff_map_eq_one</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">F</span> : <a href="../../../.././foundational_types.html">Type</a> u_7}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Data/FunLike/Basic.html#FunLike">FunLike</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHomClass">MonoidHomClass</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">F</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Injective">Function.Injective</a> <span class="fn">⇑<span class="fn">f</span></span></span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">∀ (<span class="fn">a</span> : <span class="fn">G</span>), <span class="fn"><span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">1</span> → <span class="fn">a</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">1</span></span></span></div></div><p>A homomorphism from a group to a monoid is injective iff its kernel is trivial.
+For the iff statement on the triviality of the kernel, see <code><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_one'">injective_iff_map_eq_one'</a></code>.</p></div></div><div class="decl" id="injective_iff_map_eq_zero"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:105:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_zero"><span class="name">injective_iff_map_eq_zero</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">F</span> : <a href="../../../.././foundational_types.html">Type</a> u_7}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Data/FunLike/Basic.html#FunLike">FunLike</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHomClass">AddMonoidHomClass</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">F</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Injective">Function.Injective</a> <span class="fn">⇑<span class="fn">f</span></span></span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">∀ (<span class="fn">a</span> : <span class="fn">G</span>), <span class="fn"><span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">0</span> → <span class="fn">a</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">0</span></span></span></div></div><p>A homomorphism from an additive group to an additive monoid is injective iff
+its kernel is trivial. For the iff statement on the triviality of the kernel,
+see <code><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_zero'">injective_iff_map_eq_zero'</a></code>.</p></div></div><div class="decl" id="injective_iff_map_eq_one'"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:115:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_one'"><span class="name">injective_iff_map_eq_one'</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">F</span> : <a href="../../../.././foundational_types.html">Type</a> u_7}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Data/FunLike/Basic.html#FunLike">FunLike</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHomClass">MonoidHomClass</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">F</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Injective">Function.Injective</a> <span class="fn">⇑<span class="fn">f</span></span></span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">∀ (<span class="fn">a</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">1</span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">a</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">1</span></span></div></div><p>A homomorphism from a group to a monoid is injective iff its kernel is trivial,
+stated as an iff on the triviality of the kernel.
+For the implication, see <code><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_one">injective_iff_map_eq_one</a></code>.</p></div></div><div class="decl" id="injective_iff_map_eq_zero'"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:118:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_zero'"><span class="name">injective_iff_map_eq_zero'</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">F</span> : <a href="../../../.././foundational_types.html">Type</a> u_7}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_9}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Data/FunLike/Basic.html#FunLike">FunLike</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHomClass">AddMonoidHomClass</a> <span class="fn">F</span> <span class="fn">G</span> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">F</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Injective">Function.Injective</a> <span class="fn">⇑<span class="fn">f</span></span></span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">∀ (<span class="fn">a</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">0</span> <a href="../../../.././Init/Core.html#Iff">↔</a> <span class="fn">a</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">0</span></span></div></div><p>A homomorphism from an additive group to an additive monoid is injective iff its
+kernel is trivial, stated as an iff on the triviality of the kernel. For the implication, see
+<code><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#injective_iff_map_eq_zero">injective_iff_map_eq_zero</a></code>.</p></div></div><div class="decl" id="MonoidHom.ofMapMulInv"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:128:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.ofMapMulInv"><span class="name">MonoidHom</span>.<span class="name">ofMapMulInv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">map_div</span> : <span class="fn">∀ (<span class="fn">a </span><span class="fn">b</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">a</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">b</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">(<span class="fn">f</span> <span class="fn">b</span>)</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span></div></div><p>Makes a group homomorphism from a proof that the map preserves right division
+<code>fun x y =&gt; x * y⁻¹</code>. See also <code>MonoidHom.of_map_div</code> for a version using <code>fun x y =&gt; x / y</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-MonoidHom.ofMapMulInv" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="AddMonoidHom.ofMapAddNeg"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:131:3">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.ofMapAddNeg"><span class="name">AddMonoidHom</span>.<span class="name">ofMapAddNeg</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">map_div</span> : <span class="fn">∀ (<span class="fn">a </span><span class="fn">b</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">a</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn">b</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn"><span class="fn">f</span> <span class="fn">b</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">H</span></div></div><p>Makes an additive group homomorphism from a proof that the map preserves
+the operation <code>fun a b =&gt; a + -b</code>. See also <code><a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.ofMapSub">AddMonoidHom.ofMapSub</a></code> for a version using
+<code>fun a b =&gt; a - b</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-AddMonoidHom.ofMapAddNeg" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="MonoidHom.coe_of_map_mul_inv"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:145:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.coe_of_map_mul_inv"><span class="name">MonoidHom</span>.<span class="name">coe_of_map_mul_inv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">map_div</span> : <span class="fn">∀ (<span class="fn">a </span><span class="fn">b</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">a</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">b</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">(<span class="fn">f</span> <span class="fn">b</span>)</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">⇑<span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.ofMapMulInv">ofMapMulInv</a> <span class="fn">f</span> <span class="fn">map_div</span>)</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">f</span></div></div></div></div><div class="decl" id="AddMonoidHom.coe_of_map_add_neg"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:145:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.coe_of_map_add_neg"><span class="name">AddMonoidHom</span>.<span class="name">coe_of_map_add_neg</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">map_div</span> : <span class="fn">∀ (<span class="fn">a </span><span class="fn">b</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">a</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn">b</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">a</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn"><span class="fn">f</span> <span class="fn">b</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">⇑<span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.ofMapAddNeg">ofMapAddNeg</a> <span class="fn">f</span> <span class="fn">map_div</span>)</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">f</span></div></div></div></div><div class="decl" id="MonoidHom.ofMapDiv"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:150:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.ofMapDiv"><span class="name">MonoidHom</span>.<span class="name">ofMapDiv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn">∀ (<span class="fn">x </span><span class="fn">y</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">x</span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">y</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn"><span class="fn">f</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span></div></div><p>Define a morphism of additive groups given a map which respects ratios.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-MonoidHom.ofMapDiv" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="AddMonoidHom.ofMapSub"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:151:3">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.ofMapSub"><span class="name">AddMonoidHom</span>.<span class="name">ofMapSub</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn">∀ (<span class="fn">x </span><span class="fn">y</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">x</span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn">y</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><span class="fn">f</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">H</span></div></div><p>Define a morphism of additive groups given a map which respects difference.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-AddMonoidHom.ofMapSub" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="MonoidHom.coe_of_map_div"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:155:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.coe_of_map_div"><span class="name">MonoidHom</span>.<span class="name">coe_of_map_div</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn">∀ (<span class="fn">x </span><span class="fn">y</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">x</span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">y</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn"><span class="fn">f</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">⇑<span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.ofMapDiv">ofMapDiv</a> <span class="fn">f</span> <span class="fn">hf</span>)</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">f</span></div></div></div></div><div class="decl" id="AddMonoidHom.coe_of_map_sub"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:155:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.coe_of_map_sub"><span class="name">AddMonoidHom</span>.<span class="name">coe_of_map_sub</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_8}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddGroup">AddGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn"><span class="fn">G</span> → <span class="fn">H</span></span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn">∀ (<span class="fn">x </span><span class="fn">y</span> : <span class="fn">G</span>), <span class="fn"><span class="fn">f</span> (<span class="fn">x</span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn">y</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><span class="fn">f</span> <span class="fn">y</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">⇑<span class="fn">(<a href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.ofMapSub">ofMapSub</a> <span class="fn">f</span> <span class="fn">hf</span>)</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">f</span></div></div></div></div><div class="decl" id="MonoidHom.mul"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:164:1">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.mul"><span class="name">MonoidHom</span>.<span class="name">mul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Mul">Mul</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></div></div><p>Given two monoid morphisms <code>f</code>, <code>g</code> to a commutative monoid, <code>f * g</code> is the monoid morphism
+sending <code>x</code> to <code>f x * g x</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="AddMonoidHom.add"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:166:3">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.add"><span class="name">AddMonoidHom</span>.<span class="name">add</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Add">Add</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></div></div><p>Given two additive monoid morphisms <code>f</code>, <code>g</code> to an additive commutative monoid,
+<code>f + g</code> is the additive monoid morphism sending <code>x</code> to <code>f x + g x</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="MonoidHom.mul_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:178:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.mul_apply"><span class="name">MonoidHom</span>.<span class="name">mul_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.add_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:178:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.add_apply"><span class="name">AddMonoidHom</span>.<span class="name">add_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="MonoidHom.mul_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:180:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.mul_comp"><span class="name">MonoidHom</span>.<span class="name">mul_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g₁ </span><span class="fn">g₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">P</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">g₁</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">g₂</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g₁</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">g₂</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">f</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.add_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:180:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.add_comp"><span class="name">AddMonoidHom</span>.<span class="name">add_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g₁ </span><span class="fn">g₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">P</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">g₁</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">g₂</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g₁</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">f</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn"><span class="fn">g₂</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">f</span></span></div></div></div></div><div class="decl" id="MonoidHom.comp_mul"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:184:1">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.comp_mul"><span class="name">MonoidHom</span>.<span class="name">comp_mul</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommMonoid">CommMonoid</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f₁ </span><span class="fn">f₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> (<span class="fn">f₁</span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn">f₂</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">f₁</span></span> <a href="../../../.././Init/Prelude.html#HMul.hMul">*</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">f₂</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.comp_add"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:184:3">source</a></div><div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.comp_add"><span class="name">AddMonoidHom</span>.<span class="name">comp_add</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">P</span> : <a href="../../../.././foundational_types.html">Type</a> u_4}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommMonoid">AddCommMonoid</a> <span class="fn">P</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">P</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">f₁ </span><span class="fn">f₂</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> (<span class="fn">f₁</span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn">f₂</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">f₁</span></span> <a href="../../../.././Init/Prelude.html#HAdd.hAdd">+</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">f₂</span></span></div></div></div></div><div class="decl" id="MonoidHom.instInv"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:194:1">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.instInv"><span class="name">MonoidHom</span>.<span class="name">instInv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Inv">Inv</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></div></div><p>If <code>f</code> is a monoid homomorphism to a commutative group, then <code>f⁻¹</code> is the homomorphism sending
+<code>x</code> to <code>(f x)⁻¹</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="AddMonoidHom.instNeg"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:196:3">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.instNeg"><span class="name">AddMonoidHom</span>.<span class="name">instNeg</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Neg">Neg</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></div></div><p>If <code>f</code> is an additive monoid homomorphism to an additive commutative group,
+then <code>-f</code> is the homomorphism sending <code>x</code> to <code>-(f x)</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="MonoidHom.inv_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:201:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.inv_apply"><span class="name">MonoidHom</span>.<span class="name">inv_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">f</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">(<span class="fn">f</span> <span class="fn">x</span>)</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></div></div></div></div><div class="decl" id="AddMonoidHom.neg_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:201:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.neg_apply"><span class="name">AddMonoidHom</span>.<span class="name">neg_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn">f</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn"><span class="fn">f</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="MonoidHom.inv_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:203:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.inv_comp"><span class="name">MonoidHom</span>.<span class="name">inv_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">φ</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">ψ</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">φ</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">ψ</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">(<span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">ψ</span>)</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></div></div></div></div><div class="decl" id="AddMonoidHom.neg_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:203:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.neg_comp"><span class="name">AddMonoidHom</span>.<span class="name">neg_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">φ</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">ψ</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn">φ</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">ψ</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn"><span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">ψ</span></span></div></div></div></div><div class="decl" id="MonoidHom.comp_inv"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:206:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.comp_inv"><span class="name">MonoidHom</span>.<span class="name">comp_inv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">φ</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">ψ</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">ψ</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn">(<span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">ψ</span>)</span><a href="../../../.././Init/Prelude.html#Inv.inv">⁻¹</a></div></div></div></div><div class="decl" id="AddMonoidHom.comp_neg"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:206:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.comp_neg"><span class="name">AddMonoidHom</span>.<span class="name">comp_neg</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">φ</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">ψ</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> (<a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn">ψ</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <a href="../../../.././Init/Prelude.html#Neg.neg">-</a><span class="fn"><span class="fn"><span class="fn">φ</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">ψ</span></span></div></div></div></div><div class="decl" id="MonoidHom.instDiv"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:211:1">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.instDiv"><span class="name">MonoidHom</span>.<span class="name">instDiv</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Div">Div</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></div></div><p>If <code>f</code> and <code>g</code> are monoid homomorphisms to a commutative group, then <code>f / g</code> is the homomorphism
+sending <code>x</code> to <code>(f x) / (g x)</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="AddMonoidHom.instSub"><div class="instance"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:213:3">source</a></div><div class="decl_header"><span class="decl_kind">instance</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.instSub"><span class="name">AddMonoidHom</span>.<span class="name">instSub</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Init/Prelude.html#Sub">Sub</a> (<span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></div></div><p>If <code>f</code> and <code>g</code> are monoid homomorphisms to an additive commutative group,
+then <code>f - g</code> is the homomorphism sending <code>x</code> to <code>(f x) - (g x)</code>.</p><details><summary>Equations</summary><ul class="equations"></ul></details></div></div><div class="decl" id="MonoidHom.div_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:219:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.div_apply"><span class="name">MonoidHom</span>.<span class="name">div_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.sub_apply"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:219:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.sub_apply"><span class="name">AddMonoidHom</span>.<span class="name">sub_apply</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">x</span> : <span class="fn">M</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn">g</span>) <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn">f</span> <span class="fn">x</span></span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><span class="fn">g</span> <span class="fn">x</span></span></div></div></div></div><div class="decl" id="MonoidHom.div_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:221:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.div_comp"><span class="name">MonoidHom</span>.<span class="name">div_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">h</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">g</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">h</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">h</span></span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">h</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.sub_comp"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:221:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.sub_comp"><span class="name">AddMonoidHom</span>.<span class="name">sub_comp</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">N</span> : <a href="../../../.././foundational_types.html">Type</a> u_3}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">N</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f </span><span class="fn">g</span> : <span class="fn">N</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">h</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">N</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn">(<span class="fn">f</span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn">g</span>).<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">h</span></span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">h</span></span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><span class="fn"><span class="fn">g</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">h</span></span></div></div></div></div><div class="decl" id="MonoidHom.comp_div"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:224:1">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.comp_div"><span class="name">MonoidHom</span>.<span class="name">comp_div</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#MulOneClass">MulOneClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">g </span><span class="fn">h</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> (<span class="fn">g</span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn">h</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">g</span></span> <a href="../../../.././Init/Prelude.html#HDiv.hDiv">/</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom.comp">comp</a></span> <span class="fn">h</span></span></div></div></div></div><div class="decl" id="AddMonoidHom.comp_sub"><div class="theorem"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:224:3">source</a></div><div class="attributes">@[simp]</div>
+<div class="decl_header"><span class="decl_kind">theorem</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#AddMonoidHom.comp_sub"><span class="name">AddMonoidHom</span>.<span class="name">comp_sub</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">M</span> : <a href="../../../.././foundational_types.html">Type</a> u_2}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddZeroClass">AddZeroClass</a> <span class="fn">M</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#AddCommGroup">AddCommGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">g </span><span class="fn">h</span> : <span class="fn">M</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom">→+</a> <span class="fn">G</span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> (<span class="fn">g</span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn">h</span>)</span> <a href="../../../.././Init/Prelude.html#Eq">=</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">g</span></span> <a href="../../../.././Init/Prelude.html#HSub.hSub">-</a> <span class="fn"><span class="fn"><span class="fn">f</span>.<a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#AddMonoidHom.comp">comp</a></span> <span class="fn">h</span></span></div></div></div></div><div class="decl" id="MonoidHom.commGroupOfInjective"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:230:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.commGroupOfInjective"><span class="name">MonoidHom</span>.<span class="name">commGroupOfInjective</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Injective">Function.Injective</a> <span class="fn">⇑<span class="fn">f</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span></div></div><p>If <code>H</code> is commutative and <code>G →* H</code> is injective, then <code>G</code> is commutative.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-MonoidHom.commGroupOfInjective" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div><div class="decl" id="MonoidHom.commGroupOfSurjective"><div class="def"><div class="gh_link"><a href="vscode://file//Users/linyxus/Workspace/capless-lean/.lake/packages/mathlib/Mathlib/Algebra/Group/Hom/Basic.lean:235:1">source</a></div><div class="decl_header"><span class="decl_kind">def</span>
+<span class="decl_name"><a class="break_within" href="../../../.././Mathlib/Algebra/Group/Hom/Basic.html#MonoidHom.commGroupOfSurjective"><span class="name">MonoidHom</span>.<span class="name">commGroupOfSurjective</span></a></span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">G</span> : <a href="../../../.././foundational_types.html">Type</a> u_5}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">{<span class="fn">H</span> : <a href="../../../.././foundational_types.html">Type</a> u_6}</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">G</span></span>]</span></span>
+</span><span class="impl_arg"><span class="decl_args">
+<span class="fn">[<span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#Group">Group</a> <span class="fn">H</span></span>]</span></span>
+</span><span class="decl_args">
+<span class="fn">(<span class="fn">f</span> : <span class="fn">G</span> <a href="../../../.././Mathlib/Algebra/Group/Hom/Defs.html#MonoidHom">→*</a> <span class="fn">H</span>)</span></span>
+<span class="decl_args">
+<span class="fn">(<span class="fn">hf</span> : <span class="fn"><a href="../../../.././Mathlib/Logic/Function/Defs.html#Function.Surjective">Function.Surjective</a> <span class="fn">⇑<span class="fn">f</span></span></span>)</span></span>
+<span class="decl_args"> :</span><div class="decl_type"><span class="fn"><a href="../../../.././Mathlib/Algebra/Group/Defs.html#CommGroup">CommGroup</a> <span class="fn">H</span></span></div></div><p>If <code>G</code> is commutative and <code>G →* H</code> is surjective, then <code>H</code> is commutative.</p><details><summary>Equations</summary><ul class="equations"></ul></details><details id="instances-for-list-MonoidHom.commGroupOfSurjective" class="instances-for-list"><summary>Instances For</summary><ul class="instances-for-enum"></ul></details></div></div></main>
+<nav class="nav"><iframe src="../../../.././navbar.html" class="navframe" frameBorder="0"></iframe></nav></body></html>
