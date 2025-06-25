@@ -14,14 +14,17 @@ import Capless.Tactics
 import Capless.WellScoped.Basic
 import Capless.Narrowing.TypedCont
 import Capless.Typing.Boundary
-namespace Capless
 
 /-!
 
 # Preservation Theorem
 
-One of the main soundness results of System Capless: the reduction of a well-typed term preserves its type.
+This module proves that the reduction of a well-typed term preserves its type. Theorem `preservation` is the main result.
+
+`Preserve Γ E state'` is a device for checking whether the output state `state'` preserves the original type. It takes into account the possible new binding lifted to the store.
 -/
+
+namespace Capless
 
 inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
 | mk :

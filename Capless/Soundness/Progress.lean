@@ -5,6 +5,13 @@ import Capless.Inversion.Lookup
 import Capless.Inversion.Typing
 import Capless.Weakening.IsValue
 import Capless.WellScoped.Basic
+
+/-!
+# Progress Theorem
+
+This module proves that a well-typed term is either an answer (in which case the reduction halts), or can be further reduced. Theorem `progress` is the main result.
+-/
+
 namespace Capless
 
 theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
