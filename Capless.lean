@@ -1,5 +1,5 @@
 /-
-# Mechanisation of Capless
+# Mechanisation of System Capless
 
 This is the entry of the mechanisation of System Capless.
 
@@ -24,7 +24,7 @@ import «Capless».Store
 import «Capless».Reduction
 
 /-
-## The First Layer of Substitution Theorems: Renaming
+## Renaming Context Morphisms
 ### Term Variable Renaming
 -/
 import «Capless».Renaming.Term.Subcapturing
@@ -44,7 +44,7 @@ import «Capless».Renaming.Capture.Subtyping
 import «Capless».Renaming.Capture.Typing
 
 /-
-## The Second Layer of Substitution Theorems: Substitution
+## Substitution Context Morphisms
 ### Term Variable Substitution
 -/
 import «Capless».Subst.Term.Subcapturing
@@ -66,8 +66,6 @@ import «Capless».Subst.Capture.Typing
 /-
 ## Inversion Theorems
 ### Store Lookup
-It is mainly composed of the following results:
-- The type of the value stored in the store matches that in the corresponding typing context.
 -/
 import «Capless».Inversion.Lookup
 /-
@@ -76,9 +74,6 @@ import «Capless».Inversion.Lookup
 import «Capless».Inversion.Subtyping
 /-
 ### Typing
-Main results:
-- Inversion of redex typing. For instance, an application `x y` is well-typed implies
-  that x is typed at a function and y can be typed at the argument type of the function.
 -/
 import «Capless».Inversion.Typing
 

@@ -2,13 +2,59 @@ import Capless.Type
 import Capless.CaptureSet
 namespace Capless
 
+/-!
+# Typing Contexts
+
+This module defines the syntax of typing contexts `Γ` (Fig. 1) in System Capless.
+
+A `Context` is a list of bindings. The `Context n m k` type is parameterized by the number of binders defined in this context, in each category:
+- `n`: number of term variables
+- `m`: number of type variables
+- `k`: number of capture variables
+
+## Main Definitions
+
+- `Context`: The main context type with constructors:
+  - `empty`: Empty context
+  - `var Γ T`: Add term variable with type `T`
+  - `label Γ S`: Add label variable with type `S`
+  - `tvar Γ b`: Add type variable with type binding `b`
+  - `cvar Γ b`: Add capture variable with capture binding `b`
+-/
+
+/-- A type binding. It is either a bounded type variable `X<:S` or a type instance bound by `Term.bindt`. -/
 inductive TBinding : Nat -> Nat -> Nat -> Type where
 | bound : SType n m k -> TBinding n m k
 | inst : SType n m k -> TBinding n m k
 
+/-- A capture binding. It is either a bounded capture variable `c<:B` or a capture instance bound by `Term.bindc`. -/
 inductive CBinding : Nat -> Nat -> Type where
 | bound : CBound n k -> CBinding n k
 | inst : CaptureSet n k -> CBinding n k
+
+/-- A typing context. -/
+inductive Context : Nat -> Nat -> Nat -> Type where
+| empty : Context 0 0 0
+| var : Context n m k -> CType n m k -> Context (n+1) m k
+| label : Context n m k -> SType n m k -> Context (n+1) m k
+| tvar : Context n m k -> TBinding n m k -> Context n (m+1) k
+| cvar : Context n m k -> CBinding n k -> Context n m (k+1)
+
+/-!
+
+## Notations for `Context`
+-/
+
+notation:30 Γ ",x:" T => Context.var Γ T
+notation:30 Γ ",X<:" T => Context.tvar Γ (TBinding.bound T)
+notation:30 Γ ",X:=" T => Context.tvar Γ (TBinding.inst T)
+notation:30 Γ ",c<:" B => Context.cvar Γ (CBinding.bound B)
+notation:30 Γ ",c<:*" => Context.cvar Γ (CBinding.bound CBound.star)
+notation:30 Γ ",c:=" C => Context.cvar Γ (CBinding.inst C)
+
+/-!
+## Renaming Operations of Bindings
+-/
 
 def TBinding.rename (b : TBinding n m k) (f : FinFun n n') : TBinding n' m k :=
   match b with
@@ -50,19 +96,23 @@ def TBinding.cweaken (b : TBinding n m k) : TBinding n m (k+1) :=
 def CBinding.cweaken (b : CBinding n k) : CBinding n (k+1) :=
   b.crename FinFun.weaken
 
-inductive Context : Nat -> Nat -> Nat -> Type where
-| empty : Context 0 0 0
-| var : Context n m k -> CType n m k -> Context (n+1) m k
-| label : Context n m k -> SType n m k -> Context (n+1) m k
-| tvar : Context n m k -> TBinding n m k -> Context n (m+1) k
-| cvar : Context n m k -> CBinding n k -> Context n m (k+1)
+/-!
+## Lookup Predicates of `Context`
 
-notation:30 Γ ",x:" T => Context.var Γ T
-notation:30 Γ ",X<:" T => Context.tvar Γ (TBinding.bound T)
-notation:30 Γ ",X:=" T => Context.tvar Γ (TBinding.inst T)
-notation:30 Γ ",c<:" B => Context.cvar Γ (CBinding.bound B)
-notation:30 Γ ",c<:*" => Context.cvar Γ (CBinding.bound CBound.star)
-notation:30 Γ ",c:=" C => Context.cvar Γ (CBinding.inst C)
+This section defines predicates for looking up bindings in typing contexts. These predicates
+establish the relationship between De Bruijn indices and their corresponding bindings in the context.
+
+Each lookup predicate follows the same pattern:
+- `here`: The binding is at the top of the context (index 0)
+- `there_*`: The binding is found in a sub-context, with appropriate weakening applied
+
+### Main Lookup Predicates
+
+- `Context.Bound Γ x E`: Term variable `x` has type `E` in context `Γ`
+- `Context.TBound Γ X b`: Type variable `X` has binding `b` in context `Γ`
+- `Context.CBound Γ c b`: Capture variable `c` has binding `b` in context `Γ`
+- `Context.LBound Γ l S`: Label variable `l` has type `S` in context `Γ`
+-/
 
 inductive Context.Bound : Context n m k -> Fin n -> CType n m k -> Prop where
 | here : Bound (var Γ0 E) 0 E.weaken
@@ -123,6 +173,58 @@ inductive Context.LBound : Context n m k -> Fin n -> SType n m k -> Prop where
 | there_label :
   LBound Γ x S ->
   LBound (label Γ S') x.succ S.weaken
+
+/-!
+
+## Properties
+
+This section establishes fundamental properties of binding operations, particularly focusing on
+renaming and weakening operations for type and capture bindings.
+
+### Renaming Composition Properties
+
+These theorems show that renaming operations are functorial and compose properly:
+
+- `rename_rename`: Sequential renaming composes as function composition: `(b.rename f).rename g = b.rename (g ∘ f)`
+- `trename_trename`: Type renaming composition for type bindings
+- `crename_crename`: Capture renaming composition for capture bindings
+
+### Commutativity Properties
+
+These properties establish when different renaming operations commute:
+
+- `crename_rename_comm`: Capture and term renaming commute for both binding types
+- `trename_rename_comm`: Type and term renaming commute for type bindings
+- `crename_trename_comm`: Capture and type renaming commute for type bindings
+
+### Weakening and Renaming Interaction
+
+These theorems show how weakening (adding a new variable) interacts with explicit renaming:
+
+- `weaken_rename`: Weakening after renaming equals renaming with extended function
+- `cweaken_rename_comm`: Capture weakening commutes with term renaming
+- `tweaken_rename_comm`: Type weakening commutes with term renaming
+- Similar properties for other combinations of weakening and renaming
+
+### Identity Properties
+
+These establish that renaming with the identity function is a no-op:
+
+- `rename_id`, `trename_id`, `crename_id`: Identity renaming preserves bindings
+
+### Context Inversion Properties
+
+These properties help with reasoning about context lookups in extended contexts:
+
+- `Context.cvar_bound_var_inv`: If a term variable is bound in a capture-extended context,
+  it was bound in the original context with appropriate weakening
+- `Context.cvar_bound_cvar_inst_inv`: Inversion principles for capture variable lookups
+  in capture-extended contexts
+
+### Simplification Lemmas
+
+The `@[simp]` lemmas provide automatic simplification for weakening operations on concrete binding constructors.
+-/
 
 theorem CBinding.crename_rename_comm {b : CBinding n k} :
   (b.crename f).rename g = (b.rename g).crename f := by

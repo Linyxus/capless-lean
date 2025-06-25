@@ -1,6 +1,11 @@
 import Capless.Subst.Basic
 import Capless.Subst.Capture.Subtyping
 import Capless.Typing
+
+/-
+Substitution theorems for capture variable substitution in typing judgments.
+-/
+
 namespace Capless
 
 theorem Typed.csubst
@@ -63,18 +68,6 @@ theorem Typed.csubst
       simp [Term.crename]
       rw [EType.crename_copen]
       apply capp
-      have ih1 := ih σ
-      simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
-      exact ih1
-    case box ih =>
-      simp [Term.crename, EType.crename, CType.crename, SType.crename]
-      apply box
-      have ih1 := ih σ
-      simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
-      exact ih1
-    case unbox ih =>
-      simp [Term.crename, EType.crename, CType.crename, SType.crename]
-      apply unbox
       have ih1 := ih σ
       simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
       exact ih1

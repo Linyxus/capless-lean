@@ -6,11 +6,26 @@ import Capless.Tactics
 namespace Capless
 
 /-!
-
 # Capture Sets
 
-!-/
+This file contains the definition of capture sets.
+-/
 
+/-- Capture sets in System Capless.
+
+The type of capture sets is parameterized by:
+- `n` : the number of term variables in scope
+- `k` : the number of capture variables in scope
+This is due to the intrisincally-scoped method used in this mechanization.
+
+Capture sets are defined inductively with four constructors:
+- `empty` : the empty capture set
+- `union` : the union of two capture sets
+- `singleton` : a singleton set containing a term variable. The term variable is represented by a `Fin n`.
+- `csingleton` : a singleton set containing a capture variable. The capture variable is represented by a `Fin k`.
+
+Since the capture sets are indexed with the number of available binders, and each binder reference is represented by a `Fin`, capture sets are well-formed by construction.
+-/
 inductive CaptureSet : Nat -> Nat -> Type where
 | empty : CaptureSet n k
 | union : CaptureSet n k -> CaptureSet n k -> CaptureSet n k
@@ -28,6 +43,7 @@ notation:max "{c=" c "}" => CaptureSet.csingleton c
 instance : Union (CaptureSet n k) where
   union := CaptureSet.union
 
+/-- Subset relation on capture sets. -/
 inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | empty : Subset {} C
 | rfl : Subset C C
@@ -45,6 +61,10 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 @[simp]
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
+
+/-!
+## Renaming operations
+-/
 
 @[simp]
 def CaptureSet.rename (C : CaptureSet n k) (f : FinFun n n') : CaptureSet n' k :=
@@ -79,6 +99,10 @@ def CaptureSet.open (C : CaptureSet (n+1) k) (x : Fin n) : CaptureSet n k :=
 
 def CaptureSet.copen (C : CaptureSet n (k+1)) (x : Fin k) : CaptureSet n k :=
   C.crename (FinFun.open x)
+
+/-!
+## Basic Properties
+-/
 
 theorem CaptureSet.rename_union {C1 C2 : CaptureSet n k} {f : FinFun n n'} :
   (C1 ∪ C2).rename f = C1.rename f ∪ C2.rename f := by simp

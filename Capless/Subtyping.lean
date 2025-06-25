@@ -2,6 +2,12 @@ import Capless.Context
 import Capless.Subcapturing
 import Capless.Type
 
+/-!
+# Subtyping Rules of Capless
+
+`Subbound Γ B1 B2` corresponds to Bound Subtyping in Fig. 2. The mutually-recursive inductive definitions `ESubtyp`, `CSubtyp`, and `SSubtyp` correspond to the subtyping rules in Fig. 2.
+-/
+
 namespace Capless
 
 inductive Subbound : Context n m k -> CBound n k -> CBound n k -> Prop where

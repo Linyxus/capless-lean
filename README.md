@@ -1,85 +1,158 @@
-# A Lean Mechanisation of Capless
+# Lean 4 Mechanization of System Capless
 
-This mechanisation takes a extrinsically-typed and DeBruijn-indexed representation. `Capless.lean` is the index file.
+This folder contains the Lean 4 mechanization of System Capless including its type soundness proof (Section 3 & 5 in the paper). This mechanized system also includes the scoped capabilities extension described in Section 5.2 of the paper, i.e., type soundness also implies scope safety.
 
-## Well-Scoped Terms
+## Step-by-step Instructions
 
-The inductive data types are indexed by the number of bound variables. For instance, a term of type `Term n m k` has `n`, `m`, `k` term, type, and capture variables bound respectively.
+The mechanization uses Lean version `4.21.0-rc3`. If you compile from source, then Lean 4 needs to be installed on your system, which can be conveniently done with [elan](https://github.com/leanprover/elan). The Lean manual also documents a way to quickly install Lean 4 with VSCode (see [here](https://docs.lean-lang.org/lean4/doc/quickstart.html)). Alternatively, you can just explore through one of the virtual machine images we supplied, where everything is set up.
 
-This, basically, enforces the well-formedness of any syntactic constructs by construction. So no well-formedness judgements are needed.
+### Compiling
 
-## Monadic Normal Forms
+1. Navigate to the folder containing this README in a terminal and enter
+    ```bash
+    lake exe cache get
+    ```
+    which fetches all library dependencies. TODO: can we skip this in the VM?
 
-The calculus is in Monadic Normal Form (MNF). On the paper, only term variables are in MNF, yet type and capture applications require general substitution (substitute a type variable for a shape type, or a capture variable for a capture set).
+2. Then, to build and prove the metatheory of System Capless, enter
+    ```bash
+    lake build
+    ```
+The whole process takes a little bit under 2 minutes on an Apple M3 Pro Macbook Pro.
 
-In the calculus MNF is extended to type and capture variables. So we have added binding forms for them.
+### Exploring in VSCode
+The virtual machine images also come with VSCode and the Lean 4 extension pre-configured. You
+can open the folder containing this mechanization from VSCode and start exploring.
 
-Translating non-MNF type and capture variables to an MNF one is trivial.
+## Paper-to-Artifact Correspondence
 
-With this change, the infrastructure is greatly simplified: renaming is sufficient for all syntactic constructs.
+`Capless.lean` is the entry file. `Capless/Soundness/` contains the type soundness results.
 
-## Substitution Theorems
+| Definition/Theorem | Paper | File (in `Capless/`) | Name of formalization | Notation |
+|--------------------|-------|----------------------|-----------------------|----------|
+| Term    | Fig. 1 & 5 & 6 | `Term.lean` | `inductive Term` |
+| Value               | Fig. 1 | `Term.lean` | `inductive Term.IsValue` |
+| Capture & Capture Set | Fig. 1 & 6 | `CaptureSet.lean` | Merged into `inductive CaptureSet`, `x` = `singleton`, `c` = `csingleton`
+| Existential Type | Fig. 1 | `Type/Core.lean` | `inductive EType` |
+| Capture Bound | Fig. 1 | `Type/Core.lean` | `inductive CBound` |
+| Shape Type | Fig. 1 & 5 | `Type/Core.lean` | `inductive SType` |
+| Type | Fig. 1 | `Type/Core.lean` | `inductive CType` (includes pure case through empty capture set) |
+| Context | Fig. 1 | `Context.lean` | `inductive Context` |
+| Store | Fig. 1 | `Store.lean` | `inductive Store` |
+| Evaluation Context | Fig. 1 & 6 | `Store.lean` | `inductive Cont` |
+| Typing | Fig. 2 | `Typing.lean` | `inductive Typed` | `Γ ⊢ t : E @  C` |
+| Subcapturing | Fig. 2| `Subcapturing.lean` | `inductive Subcapt` | `Γ ⊢ C1 <:c C2` |
+| Bound Subtyping | Fig. 2 | `Subtyping.lean` | `inductive Subbound` | |
+| Subtyping (on Existential Type) | Fig. 2 | `Subtyping.lean` | `inductive ESubTyp` | `Γ ⊢ E1 <:e E2` |
+| Subtyping (on Shape Type) | Fig. 2 | `Subtyping.lean` | `inductive SSubTyp` | `Γ ⊢ S1 <:s S2` |
+| Subtyping (on Type) | Fig. 2 | `Subtyping.lean` | `inductive CSubTyp` | `Γ ⊢ T1 <: T2` |
+| Well-formedness | Appendix A.1 (Fig. 7) | | By construction using intrinsically-scoped syntax (see below) |
+| Reduction Relation | Appendix A.2 & Main Paper Fig. 6 | `Reduction.lean` | `inductive Reduce` | |
+| Store Typing | Appendix C.1 | `Store.lean` | `inductive TypedStore` | |
+| Preservation | Theorem 5.1 | `Soundness/Preservation.lean` | `theorem preservation` | |
+| Progress | Theorem 5.2 | `Soundness/Progress.lean` | `theorem progress` | |
 
-Substitution theorems are stratified into two layers.
+### Libraries and Frameworks Used in the Proofs
 
-### Renaming
+The mechanization uses [mathlib4](https://github.com/leanprover-community/mathlib4) for basic data structures like `Fin` and [aesop](https://github.com/leanprover-community/aesop) for automation.
 
-The first layer is renaming, of which relevant proof scripts are located in `Capless/Renaming`. The renaming theorems show that environment renaming morphisms preserve typing judgements. For instance, given:
-(1) A typing judgement `h : Γ ⊢ t : E`,
-(2) a renaming morphism `ρ : VarRename Γ f Δ`, which basically says that for any `x : E ∈ Γ`, there is a corresponding binding `f x : E.rename f ∈ Δ` in the mapped context,
-then with the renaming theorem we derive that `Δ ⊢ t.rename f : E.rename f`.
+### Project Structure
 
-With the renaming theorems, structural rules like weakening and permutation could be proven.
+Please refer to the top-level file `Capless.lean` for an overview of relevant Lean modules of the System Capless mechanization.
+The project can be inspected using the VSCode Lean extension, which is installed on the virtual machine images. We also provide a
+HTML documentation (see below).
 
-### Substitution
+#### HTML Documentation
 
-The second layer is the actual substitution, whose relevant proof scripts are located in `Capless/Subst`. The substitution theorems show that environment substitution morphisms preserve typing judgements. Similar to the renaming layer, given:
-(1) A typing judgement `h : Γ ⊢ t : E`,
-(2) a substitution morphism `σ : VarSubst Γ f Δ`, which basically says that for any `x : E ∈ Γ` one could derive `Δ ⊢ x : E` in the mapped context,
-then it can be derived that `Δ ⊢ t.rename f : E.rename f`.
+The folder [`doc`](./doc/) contains autogenerated html documentation from [doc-gen4](https://github.com/leanprover/doc-gen4). To view it, navigate to
+that folder and invoke a local http server, e.g.,
+```bash
+ python3 -m http.server 8080
+ ```
+ then open a browser and enter the URL `localhost:8080`.
 
-These are the actual substitution theorems that the preservation proof relies on. This layer depends on the first one.
+This documentation can be (re)generated by invoking
+```bash
+sh ./gen_docs.sh
+```
+and will be located in the (hidden) folder `.lake/build/doc`.
 
-## Roadmap
+Note that `doc-gen4` also includes the docs for all dependencies of this mechanization, such as `mathlib4`. Note that the tool will emit some warnings regarding those dependencies while generating the documentation. This is normal and can be safely ignored.
 
-- [x] Renaming
-  - [x] Term
-    - [x] Subcapturing
-    - [x] Subtyping
-    - [x] Typing
-  - [x] Type
-    - [x] Subcapturing
-    - [x] Subtyping
-    - [x] Typing
-  - [x] Capture
-    - [x] Subcapturing
-    - [x] Subtyping
-    - [x] Typing
-- [X] Substitution
-  - [x] Term
-    - [x] Subcapturing
-    - [x] Subtyping
-    - [x] Typing
-  - [X] Type
-    - [X] Subcapturing
-    - [X] Subtyping
-    - [X] Typing
-  - [X] Capture
-    - [X] Subcapturing
-    - [X] Subtyping
-    - [X] Typing
-- [x] Store lookup
-  - [x] Lookup inversion
-  - [x] Canonical forms (WIP)
-    - [x] Term abstraction
-    - [x] Type abstraction
-    - [x] Capture abstraction
-    - [x] Box
-    - [x] Pack
-- [x] Soundness
-  - [x] Preservation
-  - [x] Progress
+#### Dependency Graph
 
+The top-level file [`dependencies.pdf`](./dependencies.pdf) visualizes the dependency graph among the mechanization's modules generated
+using the using the [import-graph](https://github.com/leanprover-community/import-graph) library. It can be (re)generated by invoking
+```bash
+lake exe graph dependencies.pdf
+```
 
+### Proof Details
+
+This section describes some important details of the mechanization
+and highlights the differences to the pencil and paper formalization.
+
+#### Intrinsically-Scoped Syntax
+
+The formalization is deBruijn-indexed and intrinsically-scoped. All syntactic categories in this mechanization are parameterized by the exact number of available binders in scope:
+
+- `Term n m k`: A term in a context with `n` term variables, `m` type variables, and `k` capture variables
+- `CType n m k`: A capturing type with the same indexing
+- `CaptureSet n k`: A capture set in a context with `n` term variables and `k` capture variables  
+- `Context n m k`: A typing context defining exactly `n`, `m`, and `k` bindings respectively
+
+Variable references use `Fin n` indices, ensuring that every variable reference is statically guaranteed to be within bounds. For example, in a `Term 5 3 2`, any term variable reference must be a `Fin 5` (so between 0 and 4), any type variable reference must be a `Fin 3`, and any capture variable reference must be a `Fin 2`.
+
+The key benefit is **well-formedness by construction**: it is impossible to construct ill-scoped terms, types, or capture sets. Traditional approaches require separate well-formedness predicates and must prove that operations preserve well-formedness. Here, well-formedness is by construction and there is no need for carrying through an additional predicate.
+
+#### Context Morphisms
+
+Both substitution and renaming lemmas are formulated using **context morphisms**, which provide a principled way to handle variable transformations while preserving typing relationships. The mechanization defines two families of context morphisms:
+
+**Renaming Morphisms** (mapping bindings to bindings):
+- `VarMap Γ f Δ`: Maps term variable bindings via function `f : FinFun n n'`
+- `TVarMap Γ f Δ`: Maps type variable bindings via function `f : FinFun m m'`  
+- `CVarMap Γ f Δ`: Maps capture variable bindings via function `f : FinFun k k'`
+
+**Substitution Morphisms** (mapping bindings to typing derivations):
+- `VarSubst Γ f Δ`: Maps term variable bindings to typing judgments for `Term.var (f x)`
+- `TVarSubst Γ f Δ`: Maps type variable bindings to subtyping relationships
+- `CVarSubst Γ f Δ`: Maps capture variable bindings to appropriate subcapturing relationships
+
+The key difference is that renaming morphisms (`VarMap`) map bindings to bindings (e.g., `Γ.Bound x E → Δ.Bound (f x) (E.rename f)`), while substitution morphisms (`VarSubst`) map bindings to typing derivations (e.g., `Γ.Bound x E → Typed Δ (Term.var (f x)) (...)`). Both families use `FinFun` for index-to-index mappings, but substitution morphisms produce the stronger guarantee of well-typed terms.
+
+The substitution morphisms (`VarSubst` family) are used to prove traditional substitution theorems, such as showing that function application preserves typing when substituting arguments for parameters. Besides, the substitution morphism family builds upon and depends on the renaming morphism family (`VarMap` family).
+
+The approach is inspired by techniques from [Programming Language Foundations in Agda (PLFA)](https://plfa.github.io/), particularly the treatment of intrinsically-typed syntax and context morphisms.
+
+#### Full Monadic Normal Form (MNF)
+
+The mechanization uses **Full Monadic Normal Form** for all syntactic categories. Unlike the paper presentation which applies MNF only to terms, this formalization extends MNF to types and capture sets as well:
+
+- Type applications (`Term.tapp`) accept only type variables, not arbitrary type expressions
+- Capture applications (`Term.capp`) accept only capture variables, not arbitrary capture sets
+- Complex types and captures are bound as variables using `Term.bindt` and `Term.bindc`
+
+For example, instead of writing `x[{y,z}]` directly, the MNF representation would be:
+```lean
+let c = {y,z} in x[c]
+```
+
+This design choice simplifies the metatheory: the only required transformation operation is **renaming** (mapping indices to indices), eliminating the need for complex substitution operations that replace variables with other syntactic objects (like types and capture sets).
+
+#### Evaluation State
+
+The paper defines evaluation states as pairs `⟨σ | t⟩` where `σ` is a store and `t` is a term that decomposes into an evaluation context and redex `t = e[u]`. The mechanization refactors this representation into an explicit triplet `⟨σ | cont | t⟩` of type `State n m k`, where:
+- `σ : Store n m k` is the store containing bindings and values,
+- `cont : Cont n m k` is a continuation stack representing the evaluation context,
+- `t : Term n m k` is the redex currently being evaluated.
+
+This design makes the evaluation context explicit as a continuation stack. For example, the nested context `let z2 = (let z1 = [] in t1) in t2` becomes a stack with continuation `t1` followed by continuation `t2`, eliminating the need to syntactically decompose terms during evaluation.
+
+### Used Axioms and Unfinished Parts
+
+There are none. Everything is proved end-to-end within Lean 4's standard type theory. (TODO: do any of the dependencies like mathlib4 require non-standard axioms?)
+
+To verify that there are no added assumptions, run TODO
 
 

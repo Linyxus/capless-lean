@@ -2,6 +2,16 @@ import Capless.Type.Core
 import Capless.Type.Renaming
 namespace Capless
 
+/-!
+# Basic Properties
+
+This file includes basic properties of renaming operations on types.
+The main properties are:
+- Commutativity: renaming commutes with other renamings
+- Composition: consecutive renamings are equivalent to a single composed renaming
+- Identity: renaming with the identity renaming is an identity function
+-/
+
 theorem CBound.crename_rename_comm {b : CBound n k} :
   (b.crename f).rename g = (b.rename g).crename f := by
   cases b <;>

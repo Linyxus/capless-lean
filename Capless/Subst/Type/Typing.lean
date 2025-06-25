@@ -1,6 +1,11 @@
 import Capless.Subst.Basic
 import Capless.Subst.Type.Subtyping
 import Capless.Typing
+
+/-
+Substitution theorems for type variable substitution in typing judgments.
+-/
+
 namespace Capless
 
 theorem Typed.tsubst
@@ -61,18 +66,6 @@ theorem Typed.tsubst
       simp [Term.trename]
       rw [EType.trename_copen]
       apply capp
-      have ih1 := ih σ
-      simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
-      exact ih1
-    case box ih =>
-      simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      apply box
-      have ih1 := ih σ
-      simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
-      exact ih1
-    case unbox ih =>
-      simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      apply unbox
       have ih1 := ih σ
       simp [Term.trename, EType.trename, CType.trename, SType.trename] at ih1
       exact ih1

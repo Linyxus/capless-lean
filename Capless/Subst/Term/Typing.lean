@@ -2,6 +2,11 @@ import Capless.Typing
 import Capless.Subst.Basic
 import Capless.Subst.Term.Subtyping
 import Capless.Renaming.Term.Typing
+
+/-
+Substitution theorems for term variable substitution in typing judgments.
+-/
+
 namespace Capless
 
 theorem Typed.subst
@@ -66,18 +71,6 @@ theorem Typed.subst
     simp [Term.rename]
     rw [EType.rename_copen]
     apply capp
-    have ih1 := ih σ
-    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
-    exact ih1
-  case box ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply box
-    have ih1 := ih σ
-    simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
-    exact ih1
-  case unbox ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply unbox
     have ih1 := ih σ
     simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
     exact ih1

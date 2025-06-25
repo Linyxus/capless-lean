@@ -3,6 +3,14 @@ import Capless.Subtyping
 import Capless.Type
 import Capless.Term
 
+/-!
+# Typing Rules of Capless
+
+This defines the typing judgement `C; Γ ⊢ t: E` in Fig. 2, 5 and 6. Most rules correspond directly to the paper definitions, except for the `Typed.bindc` and `Typed.bindt` rules, which are for type and capture set bindings introduced in the mechanization.
+
+Note that the rules for boundary/break extension are also included in this definition.
+-/
+
 namespace Capless
 
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -> Prop where
@@ -29,9 +37,6 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | cabs {C : CaptureSet n k} :
   Typed (Γ,c<:B) t E C.cweaken ->
   Typed Γ (λ[c<:B]t) ((∀[c<:B]E)^C) {}
-| box :
-  Typed Γ (Term.var x) (EType.type T) {x=x} ->
-  Typed Γ (Term.boxed x) ((SType.box T)^{}) {}
 | app :
   Typed Γ (Term.var x) (EType.type (∀(x:T)E)^C) {x=x} ->
   Typed Γ (Term.var y) T {x=y} ->
@@ -46,9 +51,6 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | capp :
   Typed Γ (Term.var x) (EType.type (∀[c<:CBound.upper {c=c}]E)^C) {x=x} ->
   Typed Γ (Term.capp x c) (E.copen c) {x=x}
-| unbox :
-  Typed Γ (Term.var x) (EType.type (SType.box (S^C))^{}) {} ->
-  Typed Γ (C o- x) (S^C) C
 | letin :
   Typed Γ t (EType.type T) C ->
   Typed (Γ,x: T) u E.weaken C.weaken ->  -- which means that x ∉ C and x ∉ fv(E)

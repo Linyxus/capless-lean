@@ -7,6 +7,65 @@ import Capless.Typing.Basic
 import Capless.Weakening.Subtyping
 import Capless.Weakening.Typing
 import Capless.Inversion.Context
+
+/-!
+# Substitution Context Morphisms
+
+This module defines substitution context morphisms, which are fundamental structures
+for reasoning about variable substitutions in the Capless type system. Context morphisms
+provide a principled way to transport typing, subtyping, and bounding judgments through
+variable renamings while preserving the well-formedness of contexts and the validity
+of all typing relationships.
+
+A **context morphism** is a structure that witnesses how a renaming function `f` between
+variables preserves the typing structure when transforming one context into another.
+Given contexts `Γ` and `Δ` and a renaming function `f`, a context morphism ensures that:
+
+1. **Structure preservation**: The bindings in `Γ` correspond to appropriate bindings in `Δ`
+2. **Type safety**: All typing judgments remain valid after the transformation
+3. **Compositionality**: Morphisms can be composed and extended systematically
+
+Context morphisms are essential for proving substitution lemmas, which are cornerstone
+results in type safety proofs. They allow us to show that substituting well-typed terms
+for variables preserves typing, subtyping, and capture relationships.
+
+## The Three Morphism Types
+
+This module introduces three specialized context morphisms, each handling a different
+kind of variable renaming:
+
+### `VarSubst Γ f Δ` – Term Variable Substitution Morphism
+
+Represents a context morphism for renaming **term variables** via function `f : FinFun n n'`.
+This morphism ensures that:
+- `map`: If term variable `x` has type `E` in `Γ`, then `f x` is well-typed with the
+  appropriately renamed type `E.rename f` in `Δ`
+- `tmap`: Type variable bindings are preserved under the renaming
+- `cmap`: Capture variable bindings are preserved under the renaming
+- `lmap`: Label bindings are transformed appropriately (labels are also term-level)
+
+### `TVarSubst Γ f Δ` – Type Variable Substitution Morphism
+
+Represents a context morphism for renaming **type variables** via function `f : FinFun m m'`.
+This morphism handles the more complex case of type-level substitutions:
+- `map`: Term variable bindings have their types renamed appropriately
+- `tmap`: Type variable bounds are preserved - if `X <: S` in `Γ`, then there's a subtyping
+  relationship between `f X` and the renamed bound `S.trename f` in `Δ`
+- `tmap_inst`: Instantiated type variables are handled specially
+- `cmap`: Capture variable bindings remain unchanged (they don't depend on type variables)
+- `lmap`: Label bindings have their types renamed
+
+### `CVarSubst Γ f Δ` – Capture Variable Substitution Morphism
+
+Represents a context morphism for renaming **capture variables** via function `f : FinFun k k'`.
+This handles the most complex case due to the interaction with capture sets:
+- `map`: Term variable bindings have their capture sets renamed appropriately
+- `tmap`: Type variable bindings have their capture sets renamed
+- `cmap`: Instantiated capture variables are renamed directly
+- `cmap_bound`: Bounded capture variables require subbound relationships in the target context
+- `lmap`: Label bindings have their capture sets renamed
+-/
+
 namespace Capless
 
 structure VarSubst (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) where

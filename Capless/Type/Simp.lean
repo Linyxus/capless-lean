@@ -1,6 +1,12 @@
 import Capless.Type.Renaming
 namespace Capless
 
+/-!
+# Simplification Lemmas
+
+Useful equations for simplifying types.
+-/
+
 @[simp]
 def EType.weaken_type :
   (EType.type T).weaken = EType.type (T.weaken) := by

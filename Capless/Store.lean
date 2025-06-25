@@ -3,8 +3,23 @@ import Capless.Type
 import Capless.CaptureSet
 import Capless.Context
 import Capless.Typing
+
+/-!
+# Evaluation States
+
+This module defines the evaluation states in System Capless.
+
+`Store n m k` defines the store (Fig. 1). It is indexed by the number of term, type and capture bindings in the store.
+- `Store.empty` and `Store.val` corresponds directly to the paper definition.
+- `Store.tval` and `Store.cval` are for type and capture set bindings bound by `Term.bindt` and `Term.bindc`. During evaluation, `Term.bindt` and `Term.bindc` are lifted as `Store.tval` and `Store.cval` bindings in the store.
+- `Store.label` declares a label in the store.
+
+`Cont n m k` defines a continuation stack that is valid in a store `Store n m k`. On the paper, the evaluation state is defined as a pair of a store and a term, `⟨σ | t⟩`. `t` is then decomposed into a evaluation context and a redex `t = e[u]`. In the mechanization, we define evaluation state `State n m k` as a triplet of a store, a continuation stack and the redex, `⟨σ | cont | t⟩`. The continuation stack corresponds to the evaluation context.
+-/
+
 namespace Capless
 
+/-- Store. -/
 inductive Store : Nat -> Nat -> Nat -> Type where
 | empty : Store 0 0 0
 | val :
@@ -25,6 +40,7 @@ inductive Store : Nat -> Nat -> Nat -> Type where
   SType n m k ->
   Store (n+1) m k
 
+/-- Continuation stack. -/
 inductive Cont : Nat -> Nat -> Nat -> Type where
 | none : Cont n m k
 | cons :
@@ -40,11 +56,15 @@ inductive Cont : Nat -> Nat -> Nat -> Type where
   Cont n m k ->
   Cont n m k
 
+/-- Evaluation state. -/
 structure State (n : Nat) (m : Nat) (k : Nat) where
   σ : Store n m k
   cont : Cont n m k
   t : Term n m k
 
+notation:max "⟨" σ " | " cont " | " t "⟩" => State.mk σ cont t
+
+/-- Store Typing (Fig. 11). Note that the definition here is extended with the forms in the scoped capability extension. -/
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
@@ -62,6 +82,8 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
   TypedStore σ Γ ->
   TypedStore (Store.label σ S) (Γ.label S)
 
+/-- Checks whether a label is in the scope of a continuation stack. This corresponds to the paper definition of finding whether there exists a `scope` form for that label in the evaluation context, like in the (BREAKOUT) rule of Fig. 6.
+ -/
 inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
 | here :
   Cont.HasLabel (Cont.scope l tail) l tail
@@ -78,6 +100,7 @@ inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
   Cont.HasLabel cont l tail ->
   Cont.HasLabel (Cont.scope l' cont) l tail
 
+/-- Checks whether a capture set is well-scoped under a context and a continuation stack. A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`). This is an invariant to be maintained thoroughout evaluation. -/
 inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop where
 | empty :
   WellScoped Γ cont {}
@@ -102,6 +125,7 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   Cont.HasLabel cont x tail ->
   WellScoped Γ cont {x=x}
 
+/-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
 | none :
   ESubtyp Γ E E' ->
@@ -122,6 +146,7 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   (Γ ⊢ T0 <: S^{}) ->
   TypedCont Γ (EType.type T0) (Cont.scope x cont) E' C
 
+/-- Typecheck an evaluation state. -/
 inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
 | mk :
   TypedStore σ Γ ->
@@ -129,6 +154,12 @@ inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
   WellScoped Γ cont Ct ->
   TypedCont Γ E cont E' C ->
   TypedState (State.mk σ cont t) Γ E'
+
+/-!
+## Store Lookup
+
+The following definitions look up bindings in the store.
+-/
 
 inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
 | here :
@@ -194,6 +225,12 @@ inductive Store.LBound : Store n m k -> (Fin n) -> SType n m k -> Prop where
   Store.LBound σ x S ->
   Store.LBound (Store.label σ S') x.succ S.weaken
 
+/-!
+## Weakening of Continuation Stack
+
+Weakning each frame in the continuation stack. It is used when a new binding is lifted to the store.
+-/
+
 def Cont.weaken : Cont n m k -> Cont (n+1) m k
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
@@ -212,6 +249,11 @@ def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 | Cont.scope x cont => Cont.scope x cont.cweaken
 
+/-!
+## Tightness
+-/
+
+/-- A typing context is tight if it contains only term bindings and instance type/capture bindings. -/
 @[aesop safe [constructors]]
 inductive Context.IsTight : Context n m k -> Prop where
 | empty : Context.IsTight Context.empty
@@ -228,6 +270,7 @@ inductive Context.IsTight : Context n m k -> Prop where
   Context.IsTight Γ ->
   Context.IsTight (Γ.label S)
 
+/-- The typing context of a store is always tight. -/
 theorem TypedStore.is_tight
   (h : TypedStore σ Γ) :
   Γ.IsTight := by

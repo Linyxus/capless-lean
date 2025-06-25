@@ -1,6 +1,14 @@
 import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Term.Subtyping
+
+/-!
+# Term Variable Renaming for Typing
+
+This module proves that typing judgments are preserved under term variable renaming.
+The main theorem `Typed.rename` shows that if `Γ ⊢ t : E @ Ct`, then after renaming
+term variables with a valid renaming map, we have `Δ ⊢ t.rename f : E.rename f @ Ct.rename f`.
+-/
 namespace Capless
 
 theorem Typed.rename
@@ -66,19 +74,6 @@ theorem Typed.rename
     apply Typed.capp
     have ih := ih ρ
     simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih
-    trivial
-  case box ih =>
-    simp [Term.rename, EType.rename, CType.rename, SType.rename]
-    apply Typed.box
-    have ih := ih ρ
-    simp [Term.rename, EType.rename] at ih
-    trivial
-  case unbox ih =>
-    simp [Term.rename, EType.rename, CType.rename]
-    apply Typed.unbox
-    have ih := ih ρ
-    simp [Term.rename, EType.rename, CType.rename, CaptureSet.rename_empty] at ih
-    simp [SType.rename, CType.rename] at ih
     trivial
   case letin ih1 ih2 =>
     simp [Term.rename]

@@ -5,6 +5,13 @@ import Capless.Inversion.Lookup
 import Capless.Inversion.Typing
 import Capless.Weakening.IsValue
 import Capless.WellScoped.Basic
+
+/-!
+# Progress Theorem
+
+This module proves that a well-typed term is either an answer (in which case the reduction halts), or can be further reduced. Theorem `progress` is the main result.
+-/
+
 namespace Capless
 
 theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
@@ -159,6 +166,9 @@ inductive Progress : State n m k -> Prop where
   Reduce state state' ->
   Progress state
 
+-- Needed for the `aesop` searches in `progress` to terminate.
+set_option maxHeartbeats 314159265358
+
 theorem progress
   (ht : TypedState state Γ E) :
   Progress state := by
@@ -196,13 +206,6 @@ theorem progress
       have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
       have ⟨Cv, Ct0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
       have ⟨t0, he⟩ := Typed.cforall_inv hg hv0 htv
-      aesop
-    case box => cases hc <;> aesop
-    case unbox x _ _ hx _ σ _ _ =>
-      have hg := TypedStore.is_tight hs
-      have ⟨v0, hb0, hv0⟩ := Store.val_lookup_exists (σ := σ) (x := x) hs hx (by aesop)
-      have ⟨Cv, Cv0, htv⟩ := Store.lookup_inv_typing_alt hb0 hs hx
-      have ⟨t0, he⟩ := Typed.boxed_inv hg hv0 htv
       aesop
     case letin => aesop
     case letex => aesop

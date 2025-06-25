@@ -1,5 +1,10 @@
 import Capless.Subtyping
 import Capless.Subst.Basic
+
+/-
+Substitution theorems for capture variable substitution in subtyping judgments.
+-/
+
 import Capless.Subst.Capture.Subcapturing
 namespace Capless
 
