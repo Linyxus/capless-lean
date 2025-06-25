@@ -64,7 +64,7 @@ structure State (n : Nat) (m : Nat) (k : Nat) where
 
 notation:max "⟨" σ " | " cont " | " t "⟩" => State.mk σ cont t
 
-/-- Store Typing (Fig. 11). -/
+/-- Store Typing (Fig. 11). Note that the definition here is extended with the forms in the scoped capability extension. -/
 inductive TypedStore : Store n m k -> Context n m k -> Prop where
 | empty : TypedStore Store.empty Context.empty
 | val :
