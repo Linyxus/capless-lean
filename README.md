@@ -151,8 +151,6 @@ This design makes the evaluation context explicit as a continuation stack. For e
 
 ### Used Axioms and Unfinished Parts
 
-There are none. Everything is proved end-to-end within Lean 4's standard type theory. (TODO: do any of the dependencies like mathlib4 require non-standard axioms?)
+The mechanization uses functional extensionality for etablishiing the equality between renaming functions.
 
-To verify that there are no added assumptions, run TODO
-
-
+The metatheory of System Capless is completely mechanized. There are no unfinished parts.
