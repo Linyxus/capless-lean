@@ -1038,8 +1038,10 @@ theorem SSubtyp.sub_dealias_boxed_inv
   case boxed =>
     unfold dealias_boxed_inv.cmotive dealias_boxed_inv.smotive
     repeat intro
-    rename_i hd
-    cases hd
+    rename_i hd1 hd2
+    cases hd1; cases hd2
+    rename_i ih _ _
+    trivial
   case xforall =>
     unfold dealias_boxed_inv.smotive
     repeat intro
