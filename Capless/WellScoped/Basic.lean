@@ -1,6 +1,13 @@
 import Capless.Store
 import Capless.Subcapturing
 import Capless.Inversion.Context
+
+/-!
+# Basic Properties of Well-Scopedness
+
+This file contains basic properties of the well-scopedness relation.
+-/
+
 namespace Capless
 
 theorem WellScoped.subset

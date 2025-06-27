@@ -1,6 +1,13 @@
 import Capless.Subtyping
 import Capless.Subcapturing
 import Capless.Subcapturing.Basic
+
+/-!
+# Basic Properties of Subtyping
+
+This file contains basic properties of the subtyping relation.
+-/
+
 namespace Capless
 
 theorem Subbound.refl {B : CBound n k} :

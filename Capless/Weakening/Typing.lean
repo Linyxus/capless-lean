@@ -2,6 +2,31 @@ import Capless.Weakening.Basic
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
+
+/-!
+# Typing Weakening
+
+This file establishes weakening properties for typing judgments in the Capless type system.
+The main result is that well-typed terms remain well-typed when the context is extended
+with new variables.
+
+The file provides comprehensive weakening operations for `Typed` judgments:
+
+## Basic weakening:
+- `Typed.weaken`: Extend context with a new term variable
+- `Typed.lweaken`: Extend context with a new label variable
+- `Typed.tweaken`: Extend context with a new type variable
+- `Typed.cweaken`: Extend context with a new capture variable
+
+## Extended weakening:
+- `Typed.weaken_ext`, `Typed.lweaken_ext`: For nested variable contexts
+- `Typed.weaken_cext_ext`, `Typed.lweaken_cext_ext`: For capture-extended contexts
+- `Typed.tweaken_ext`, `Typed.tweaken_cext_ext`: For type variable extensions
+- `Typed.cweaken_ext`, `Typed.cweaken_cext_ext`: For capture variable extensions
+
+These operations are fundamental to proving type preservation and other soundness properties.
+-/
+
 namespace Capless
 
 theorem Typed.weaken

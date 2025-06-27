@@ -2,6 +2,13 @@ import Capless.Typing
 import Capless.Subcapturing
 import Capless.Subcapturing.Basic
 import Capless.Subtyping.Basic
+
+/-!
+# Basic Properties of Typing
+
+This file contains basic properties of the typing relation.
+-/
+
 namespace Capless
 
 theorem Typing.inv_subcapt'

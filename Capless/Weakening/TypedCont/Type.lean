@@ -2,6 +2,31 @@ import Capless.Store
 import Capless.Weakening.Typing
 import Capless.Weakening.Subtyping
 import Capless.Weakening.Subcapturing
+
+/-!
+# Typed Continuation Weakening for Type Variables
+
+This file proves weakening properties for typed continuations when extending contexts with
+type variables. It shows that continuation typing judgments are preserved under type variable
+weakening operations.
+
+## Key Results:
+
+### Helper lemmas:
+- Type variable weakening commutation for effect types (`EType.tweaken_ex`, `EType.tweaken_weaken`, etc.)
+- Label preservation under type weakening for continuations
+
+### Well-scoping preservation:
+- `WellScoped.tweaken`: Well-scoping is preserved under type variable weakening
+
+### Main weakening theorem:
+- `TypedCont.tweaken`: Typed continuations remain valid when extending contexts with type variables
+
+The weakening handles all continuation constructs (empty, value-consuming, existential, and scoped)
+and ensures that type variable extensions do not invalidate existing continuation typing judgments.
+This is crucial for maintaining soundness when type abstractions are introduced.
+-/
+
 namespace Capless
 
 theorem EType.tweaken_ex (T : CType n m (k+1)) :

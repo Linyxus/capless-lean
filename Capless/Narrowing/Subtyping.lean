@@ -1,6 +1,29 @@
 import Capless.Subst.Term.Subtyping
 import Capless.Subst.Type.Subtyping
 import Capless.Subst.Capture.Subtyping
+
+/-!
+# Narrowing Lemmas for Subtyping
+
+This file provides narrowing lemmas for the expression subtyping relation (`ESubtyp`).
+Narrowing is a fundamental property in type theory that states: if a judgment holds in a
+context with a stronger assumption, then it also holds when that assumption is weakened
+to a subtype.
+
+## Main Results
+
+- `ESubtyp.narrow`: Narrowing for term variable bindings - if `Γ,x:T ⊢ E1 <: E2` and `T' <: T`,
+  then `Γ,x:T' ⊢ E1 <: E2`
+- `ESubtyp.tnarrow`: Narrowing for type variable bindings - if `Γ,X<:S ⊢ E1 <: E2` and `S' <: S`,
+  then `Γ,X<:S' ⊢ E1 <: E2`
+- `ESubtyp.cnarrow`: Narrowing for capture variable bindings - if `Γ,c<:B ⊢ E1 <: E2` and `B' <: B`,
+  then `Γ,c<:B' ⊢ E1 <: E2`
+
+These lemmas are implemented using substitution with the identity renaming function,
+showing that narrowing is a special case of substitution where we substitute variables
+with themselves but in a strengthened context.
+-/
+
 namespace Capless
 
 theorem ESubtyp.narrow

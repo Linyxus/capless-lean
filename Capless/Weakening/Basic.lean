@@ -1,4 +1,22 @@
 import Capless.Renaming.Basic
+
+/-!
+# Basic Weakening Operations
+
+This file defines fundamental weakening operations for variable mappings in the Capless type system.
+Weakening allows extending typing contexts by adding new variables while preserving the validity
+of existing judgments.
+
+The file provides:
+- `VarMap.weaken`, `VarMap.lweaken`: Basic variable map weakening for term and label variables
+- `CVarMap.weaken`: Capture variable map weakening
+- `TVarMap.weaken`: Type variable map weakening
+- Extended weakening operations for nested contexts (`weaken_ext`, `weaken_cext_ext`, etc.)
+
+These operations are essential for proving that typing judgments remain valid when new variables
+are introduced into the context.
+-/
+
 namespace Capless
 
 def VarMap.weaken {Γ : Context n m k} :

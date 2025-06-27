@@ -2,6 +2,27 @@ import Capless.Weakening.Basic
 import Capless.Renaming.Term.Subtyping
 import Capless.Renaming.Type.Subtyping
 import Capless.Renaming.Capture.Subtyping
+
+/-!
+# Subtyping Weakening
+
+This file proves weakening properties for various subtyping judgments in the Capless type system.
+Subtyping relations must be preserved when contexts are extended with new variables, which is
+essential for the soundness of the type system.
+
+The file covers weakening for:
+- `SSubtyp`: Simple type subtyping (with `weaken`, `lweaken`, `tweaken`, `cweaken`)
+- `CSubtyp`: Capability type subtyping (with `weaken`, `lweaken`, `tweaken`, `cweaken`)
+- `ESubtyp`: Effect type subtyping (with `weaken`, `lweaken`, `tweaken`, `cweaken`)
+- `Subbound`: Capture bound subtyping (with `weaken`, `tweaken`, `cweaken`)
+
+Each type of weakening corresponds to extending the context with:
+- Regular variables (`weaken`)
+- Label variables (`lweaken`)
+- Type variables (`tweaken`)
+- Capture variables (`cweaken`)
+-/
+
 namespace Capless
 
 theorem SSubtyp.weaken

@@ -1,6 +1,28 @@
 import Capless.Subst.Term.Typing
 import Capless.Subst.Type.Typing
 import Capless.Subst.Capture.Typing
+
+/-!
+# Narrowing Lemmas for Typing
+
+This file establishes narrowing properties for the typing relation (`Typed`).
+Narrowing allows strengthening the assumptions in typing contexts while preserving
+typing judgments - a crucial property for modular reasoning about programs.
+
+## Main Results
+
+- `Typed.narrow`: Term variable narrowing - if `Γ,x:T ⊢ t : E ⊢ C` and `T' <: T`,
+  then `Γ,x:T' ⊢ t : E ⊢ C`
+- `Typed.tnarrow`: Type variable narrowing - if `Γ,X<:S ⊢ t : E ⊢ C` and `S' <: S`,
+  then `Γ,X<:S' ⊢ t : E ⊢ C`
+- `Typed.cnarrow`: Capture variable narrowing - if `Γ,c<:B ⊢ t : E ⊢ C` and `B' <: B`,
+  then `Γ,c<:B' ⊢ t : E ⊢ C`
+
+These lemmas demonstrate that typing is contravariant in assumption types - we can
+always strengthen our assumptions about variables without affecting the conclusion.
+The proofs utilize identity renamings combined with substitution lemmas.
+-/
+
 namespace Capless
 
 theorem Typed.narrow

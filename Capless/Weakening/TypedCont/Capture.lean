@@ -2,6 +2,31 @@ import Capless.Store
 import Capless.Weakening.Typing
 import Capless.Weakening.Subtyping
 import Capless.Weakening.Subcapturing
+
+/-!
+# Typed Continuation Weakening for Capture Variables
+
+This file proves weakening properties for typed continuations when extending contexts with
+capture variables. It establishes that continuation typing judgments remain valid under
+capture variable weakening operations.
+
+## Key Results:
+
+### Helper lemmas:
+- Capture variable weakening commutation for effect types and capture sets
+- Weakening relationships between different capture operations (`cweaken1_cweaken`, etc.)
+
+### Well-scoping preservation:
+- `WellScoped.cweaken`: Well-scoping is preserved under capture variable weakening
+
+### Main weakening theorem:
+- `TypedCont.cweaken`: Typed continuations remain valid when extending contexts with capture variables
+
+The file handles the interaction between capture variables and all continuation forms,
+ensuring that capture variable extensions preserve the validity of continuation typing
+judgments. This is essential for soundness in the presence of capture-polymorphic abstractions.
+-/
+
 namespace Capless
 
 theorem EType.cweaken_ex (T : CType n m (k+1)) :

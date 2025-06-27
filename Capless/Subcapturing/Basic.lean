@@ -1,4 +1,11 @@
 import Capless.Subcapturing
+
+/-!
+# Basic Properties of Subcapturing
+
+This file contains basic properties of the subcapturing relation.
+-/
+
 namespace Capless
 
 theorem Subcapt.refl :
