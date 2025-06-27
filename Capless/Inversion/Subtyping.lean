@@ -4,6 +4,22 @@ import Capless.Inversion.Basic
 import Capless.Inversion.Context
 import Capless.Subtyping.Basic
 import Capless.Narrowing
+
+/-! # Subtyping Inversion Lemmas
+
+This file contains inversion lemmas for the subtyping relation. These lemmas allow
+reasoning about the structure of subtyping derivations by analyzing what can be
+concluded when we know a subtyping judgment holds.
+
+Key results include:
+- Inversion for expression subtyping to type expressions
+- Dealias-based inversion for function types (forall, tforall, cforall)
+- Inversion for boxed types and label types
+- Preservation of structural properties through subtyping
+
+These lemmas are crucial for the type safety proof and enable canonical forms reasoning.
+-/
+
 namespace Capless
 
 theorem ESubtyp.sub_type_inv'
@@ -708,7 +724,8 @@ theorem SSubtyp.sub_dealias_cforall_inv
     cases hd2
   case refl =>
     unfold dealias_cforall_inv.smotive
-    intros _ _ _ _ _ _ _ _ _ _ hd1 hd2
+    repeat intro
+    rename_i hd1 hd2
     have h := SType.dealias_cforall_inj hd1 hd2
     cases h; subst_vars
     apply And.intro
@@ -716,7 +733,8 @@ theorem SSubtyp.sub_dealias_cforall_inv
     { apply ESubtyp.refl }
   case trans =>
     unfold dealias_cforall_inv.smotive
-    intros _ _ _ _ _ _ _ _ hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
+    repeat intro
+    rename_i hs2 ih1 ih2 B1 E1 B2 E2 ht hd1 hd2
     have h := SSubtyp.dealias_right_cforall hs2 ht hd2
     have ⟨B3, E3, hd3⟩ := h
     have ⟨he11, he12⟩ := ih1 ht hd1 hd3
@@ -1020,10 +1038,8 @@ theorem SSubtyp.sub_dealias_boxed_inv
   case boxed =>
     unfold dealias_boxed_inv.cmotive dealias_boxed_inv.smotive
     repeat intro
-    rename_i hd1 hd2
-    cases hd1; cases hd2
-    rename_i ih _ _
-    trivial
+    rename_i hd
+    cases hd
   case xforall =>
     unfold dealias_boxed_inv.smotive
     repeat intro

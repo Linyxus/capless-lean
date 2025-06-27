@@ -6,6 +6,23 @@ import Capless.Narrowing
 import Capless.Weakening.Subcapturing
 import Capless.Inversion.Context
 import Capless.Inversion.Subtyping
+
+/-! # Typing Inversion Lemmas
+
+This file contains comprehensive inversion lemmas for the typing relation. These lemmas
+decompose typing judgments to extract structural information about terms and their types.
+
+The inversion lemmas cover:
+- Function application (app, tapp, capp) inversions
+- Variable lookup inversions with subtyping
+- Canonical form lemmas for lambda abstractions
+- Let-binding inversions (letin, letex, bindt, bindc)
+- Capture set analysis for various term forms
+- Label and boundary analysis
+- Type-level abstractions (forall, tforall, cforall)
+
+These lemmas are fundamental for proving type safety, enabling progress and preservation proofs.
+-/
 namespace Capless
 
 theorem Typed.app_inv'

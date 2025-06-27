@@ -4,6 +4,17 @@ import Capless.Renaming.Type.Typing
 import Capless.Renaming.Capture.Typing
 import Capless.Inversion.Context
 import Capless.Inversion.Typing
+
+/-! # Store and Continuation Lookup Inversion
+
+This file provides inversion lemmas for store lookups and continuation analysis.
+It includes:
+- Store lookup inversion lemmas that relate store bindings to typing judgments
+- Properties connecting store contents with their types in the context
+- Continuation label analysis for control flow
+
+These lemmas are essential for proving soundness properties of the operational semantics.
+-/
 namespace Capless
 
 def Store.lookup_inv_bound

@@ -1,5 +1,14 @@
 import Capless.Inversion.Basic
 import Capless.Inversion.Context
+
+/-! # Type Dealias Inversion Properties
+
+This file contains properties and inversion lemmas for the `SType.Dealias` relation.
+The main result is the injectivity property for dealias, showing that if a type
+dealias to two different results, then at least one must be a type variable
+or the results are equal.
+-/
+
 namespace Capless
 
 theorem SType.dealias_inj {S : SType n m k}

@@ -1,6 +1,22 @@
 import Mathlib.Logic.Function.Defs
 import Aesop
 
+/-!
+# Renaming Functions
+
+This module defines renaming functions (`FinFun`), which are functions from finite indices to finite indices. In this mechanization, binder references are represented as `Fin` indices, and renaming functions are used to transform variable references during operations like weakening, substitution, and context extension.
+
+## Main Definitions
+
+- `FinFun n n'`: Functions from `Fin n` to `Fin n'`
+- `FinFun.id`: Identity renaming function
+- `FinFun.weaken`: Shifts indices up by one (for weakening contexts)
+- `FinFun.open`: Substitutes a specific index and shifts others down
+- `FinFun.ext`: Extends a renaming function to handle one additional binder
+
+The module provides key lemmas about composition and interaction of these operations.
+-/
+
 namespace Capless
 
 def FinFun (n n' : Nat) : Type :=

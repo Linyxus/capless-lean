@@ -1,5 +1,19 @@
 import Capless.Context
 import Capless.Store
+
+/-! # Context Inversion Lemmas
+
+This file contains inversion lemmas for context lookups and bindings. These lemmas provide
+ways to analyze and destructure information stored in typing contexts, including:
+- Variable bound inversions for different context extensions
+- Type variable bound inversions
+- Capture variable bound inversions
+- Label bound inversions
+
+These are fundamental tools used throughout the type system to reason about what information
+can be extracted from contexts in different structural situations.
+-/
+
 namespace Capless
 
 theorem Context.var_bound_succ_inv'
