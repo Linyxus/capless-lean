@@ -1,3 +1,5 @@
+namespace Capless
+
 inductive Classifier : Type where
   | top : Classifier
   | child : Nat -> Classifier -> Classifier

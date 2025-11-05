@@ -14,12 +14,12 @@ This file defines the renaming operations for types.
 def CBound.rename (b : CBound n k) (f : FinFun n n') : CBound n' k :=
   match b with
   | upper C => upper (C.rename f)
-  | star => star
+  | kind k => kind k
 
 def CBound.crename (b : CBound n k) (f : FinFun k k') : CBound n k' :=
   match b with
   | upper C => upper (C.crename f)
-  | star => star
+  | kind k => kind k
 
 def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
   b.rename FinFun.weaken
@@ -27,10 +27,13 @@ def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
 def CBound.cweaken (b : CBound n k) : CBound n (k+1) :=
   b.crename FinFun.weaken
 
+def CBound.cweaken1 (b : CBound n (k + 1)) : CBound n (k+2) :=
+  b.crename FinFun.weaken.ext
+
 mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k
-| EType.ex T, f => EType.ex (T.rename f)
+| EType.ex B T, f => EType.ex (B.rename f) (T.rename f)
 | EType.type T, f => EType.type (T.rename f)
 
 def CType.rename : CType n m k -> FinFun n n' -> CType n' m k
@@ -50,7 +53,7 @@ end
 mutual
 
 def EType.trename : EType n m k -> FinFun m m' -> EType n m' k
-| EType.ex T, f => EType.ex (T.trename f)
+| EType.ex B T, f => EType.ex B (T.trename f)
 | EType.type T, f => EType.type (T.trename f)
 
 def CType.trename : CType n m k -> FinFun m m' -> CType n m' k
@@ -70,7 +73,7 @@ end
 mutual
 
 def EType.crename : EType n m k -> FinFun k k' -> EType n m k'
-| EType.ex T, f => EType.ex (T.crename f.ext)
+| EType.ex B T, f => EType.ex (B.crename f) (T.crename f.ext)
 | EType.type T, f => EType.type (T.crename f)
 
 def CType.crename : CType n m k -> FinFun k k' -> CType n m k'

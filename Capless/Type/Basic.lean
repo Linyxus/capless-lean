@@ -47,9 +47,9 @@ mutual
 theorem EType.crename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun k k') :
   (E.rename f).crename g = (E.crename g).rename f :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.crename_rename_comm T f g.ext
-    simp [EType.rename, EType.crename, ih]
+    simp [EType.rename, EType.crename, ih, CBound.crename_rename_comm]
   | EType.type T => by
     have ih := CType.crename_rename_comm T f g
     simp [EType.rename, EType.crename, ih]
@@ -111,9 +111,9 @@ mutual
 theorem EType.rename_rename (E : EType n m k) (f : FinFun n n') (g : FinFun n' n'') :
   (E.rename f).rename g = E.rename (g ∘ f) :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.rename_rename T f g
-    simp [EType.rename, ih]
+    simp [EType.rename, ih, CBound.rename_rename]
   | EType.type T => by
     have ih := CType.rename_rename T f g
     simp [EType.rename, ih]
@@ -169,7 +169,7 @@ mutual
 theorem EType.trename_rename_comm (E : EType n m k) (f : FinFun n n') (g : FinFun m m') :
   (E.trename g).rename f = (E.rename f).trename g :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.trename_rename_comm T f g
     simp [EType.trename, EType.rename, ih]
   | EType.type T => by
@@ -213,9 +213,9 @@ mutual
 theorem EType.crename_crename (E : EType n m k) (f : FinFun k k') (g : FinFun k' k'') :
   (E.crename f).crename g = E.crename (g ∘ f) :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.crename_crename T f.ext g.ext
-    simp [EType.crename, CType.crename, ih, FinFun.ext_comp_ext]
+    simp [EType.crename, CType.crename, ih, FinFun.ext_comp_ext, CBound.crename_crename]
   | EType.type T => by
     have ih := CType.crename_crename T f g
     simp [EType.crename, CType.crename, ih]
@@ -257,7 +257,7 @@ mutual
 theorem EType.crename_trename_comm (E : EType n m k) (f : FinFun k k') (g : FinFun m m') :
   (E.crename f).trename g = (E.trename g).crename f :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.crename_trename_comm T f.ext g
     simp [EType.crename, EType.trename, ih]
   | EType.type T => by
@@ -389,7 +389,7 @@ mutual
 theorem EType.trename_trename (E : EType n m k) (f : FinFun m m') (g : FinFun m' m'') :
   (E.trename f).trename g = E.trename (g ∘ f) :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.trename_trename T f g
     simp [EType.trename, ih]
   | EType.type T => by
@@ -492,14 +492,14 @@ theorem EType.cweaken_eq_inv {E : EType n m k}
     simp [CaptureSet.cweaken, SType.cweaken]; aesop
 
 theorem EType.ex_cweaken_eq_inv {E : EType n m k}
-  (heq : EType.ex (CType.capt C S) = E.cweaken) :
-  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ C0.cweaken1 = C ∧ S0.cweaken1 = S := by
+  (heq : EType.ex B (CType.capt C S) = E.cweaken) :
+  ∃ B0 C0 S0, E = EType.ex B0 (CType.capt C0 S0) ∧ B0.cweaken = B ∧ C0.cweaken1 = C ∧ S0.cweaken1 = S := by
   cases E
   case type => simp [cweaken, crename] at heq
-  case ex T =>
+  case ex B T =>
     cases T; rename_i C0 S0
-    simp [EType.cweaken, EType.crename, CType.crename] at heq
-    exists C0, S0
+    simp [EType.cweaken, EType.crename, CType.crename, CBound.cweaken] at heq
+    exists B, C0, S0
     simp [CaptureSet.cweaken1, SType.cweaken1]; aesop
 
 mutual
@@ -507,9 +507,9 @@ mutual
 theorem EType.rename_id {E : EType n m k} :
   E.rename FinFun.id = E :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.rename_id (T := T)
-    simp [EType.rename, ih]
+    simp [EType.rename, CBound.rename_id, ih]
   | EType.type T => by
     have ih := CType.rename_id (T := T)
     simp [EType.rename, ih]
@@ -552,7 +552,7 @@ mutual
 theorem EType.trename_id {E : EType n m k} :
   E.trename FinFun.id = E :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.trename_id (T := T)
     simp [EType.trename, ih]
   | EType.type T => by
@@ -596,9 +596,9 @@ mutual
 theorem EType.crename_id {E : EType n m k} :
   E.crename FinFun.id = E :=
   match E with
-  | EType.ex T => by
+  | EType.ex B T => by
     have ih := CType.crename_id (T := T)
-    simp [EType.crename, FinFun.id_ext, ih]
+    simp [EType.crename, FinFun.id_ext, CBound.crename_id, ih]
   | EType.type T => by
     have ih := CType.crename_id (T := T)
     simp [EType.crename, ih]

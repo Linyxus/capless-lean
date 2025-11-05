@@ -1,5 +1,6 @@
 import Capless.CaptureSet
 import Capless.Basic
+import Capless.Classifier
 namespace Capless
 
 /-!
@@ -19,11 +20,11 @@ mutual
 /-- Capture bound. -/
 inductive CBound : Nat -> Nat -> Type where
 | upper : CaptureSet n k -> CBound n k
-| star : CBound n k
+| kind : Kind -> CBound n k
 
 /-- Existential type. -/
 inductive EType : Nat -> Nat -> Nat -> Type where
-| ex : CType n m (k+1) -> EType n m k
+| ex : CBound n k -> CType n m (k+1) -> EType n m k
 | type : CType n m k -> EType n m k
 
 /-- Capturing type. -/
@@ -51,7 +52,7 @@ notation:50 "∀(x:" T ")" U => SType.forall T U
 notation:50 "∀[X<:" S "]" T => SType.tforall S T
 notation:50 "∀[c<:" B "]" T => SType.cforall B T
 notation:max S " ^ " C => CType.capt C S
-notation:40 "∃c." T => EType.ex T
+notation:40 "∃c<:" B "." T => EType.ex B T
 notation:40 "Label[" S "]" => SType.label S
 notation:60 "□" T => SType.box T
 
