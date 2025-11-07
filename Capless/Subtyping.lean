@@ -1,6 +1,7 @@
 import Capless.Context
 import Capless.Subcapturing
 import Capless.Type
+import Capless.Classifier
 
 /-!
 # Subtyping Rules of Capless
@@ -14,15 +15,15 @@ inductive Subbound : Context n m k -> CBound n k -> CBound n k -> Prop where
 | set :
   (Γ ⊢ C1 <:c C2) ->
   Subbound Γ (CBound.upper C1) (CBound.upper C2)
-| star :
-  Subbound Γ B CBound.star
+| kind :
+  Kind.Subkind k1 k2 -> Subbound Γ (CBound.kind k1) (CBound.kind k2)
 
 mutual
 
 inductive ESubtyp : Context n m k -> EType n m k -> EType n m k -> Prop where
 | exist :
-  CSubtyp (Context.cvar Γ (CBinding.bound CBound.star)) T1 T2 ->
-  ESubtyp Γ (EType.ex T1) (EType.ex T2)
+  CSubtyp (Context.cvar Γ (CBinding.bound B)) T1 T2 ->
+  ESubtyp Γ (EType.ex B T1) (EType.ex B T2)
 | type :
   CSubtyp Γ T1 T2 ->
   ESubtyp Γ (EType.type T1) (EType.type T2)
