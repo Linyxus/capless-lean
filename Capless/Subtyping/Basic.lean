@@ -25,8 +25,13 @@ theorem Subbound.trans
   Subbound Γ B1 B3 := by
   cases h1 <;> cases h2 <;> constructor
   apply Subcapt.trans <;> easy
+  rename_i hsub K hk
+  apply CaptureKind.csub hsub hk
   rename_i k1 k2 h1 k3 h2
   apply Kind.Subkind.trans h1 h2
+  rename_i hk K2 hs
+  apply CaptureKind.sub hs hk
+
 
 theorem ESubtyp.type_inv_subcapt'
   (heq : E1 = EType.type (CType.capt C S))

@@ -27,6 +27,10 @@ theorem CaptureKind.trename
   case sub hs hk ih =>
     apply sub hs
     apply ih ρ
+  case csub hs hk ih =>
+    have hs1 := hs.trename ρ
+    apply csub hs1
+    apply ih ρ
   case union hc1 hc2 ih1 ih2 =>
     apply union <;> aesop
   case empty => apply empty

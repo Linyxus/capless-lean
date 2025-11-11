@@ -1,6 +1,7 @@
 import Capless.Subtyping
 import Capless.Renaming.Basic
 import Capless.Renaming.Term.Subcapturing
+import Capless.Renaming.Term.CaptureBound
 
 /-!
 # Term Variable Renaming for Subtyping
@@ -21,6 +22,10 @@ theorem Subbound.rename
     constructor
     apply Subcapt.rename <;> easy
   case kind => simp [CBound.rename]; constructor; trivial
+  case set_kind =>
+    simp [CBound.rename]
+    constructor
+    apply CaptureKind.rename <;> easy
 
 def SSubtyp.rename_motive1
   (Γ : Context n m k)
