@@ -20,7 +20,7 @@ theorem Subbound.trename
   case set =>
     apply Subbound.set
     apply Subcapt.trename <;> trivial
-  case star => apply Subbound.star
+  case kind => apply Subbound.kind; assumption
 
 def SSubtyp.trename_motive1
   (Γ : Context n m k)

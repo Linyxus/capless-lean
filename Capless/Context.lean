@@ -49,7 +49,6 @@ notation:30 Γ ",x:" T => Context.var Γ T
 notation:30 Γ ",X<:" T => Context.tvar Γ (TBinding.bound T)
 notation:30 Γ ",X:=" T => Context.tvar Γ (TBinding.inst T)
 notation:30 Γ ",c<:" B => Context.cvar Γ (CBinding.bound B)
-notation:30 Γ ",c<:*" => Context.cvar Γ (CBinding.bound CBound.star)
 notation:30 Γ ",c:=" C => Context.cvar Γ (CBinding.inst C)
 
 /-!

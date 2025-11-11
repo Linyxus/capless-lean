@@ -20,7 +20,7 @@ theorem Subbound.rename
     simp [CBound.rename]
     constructor
     apply Subcapt.rename <;> easy
-  case star => simp [CBound.rename]; constructor
+  case kind => simp [CBound.rename]; constructor; trivial
 
 def SSubtyp.rename_motive1
   (Γ : Context n m k)

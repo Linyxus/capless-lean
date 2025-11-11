@@ -33,7 +33,7 @@ inductive Kind.Subkind : Kind -> Kind -> Prop where
   | union_r2 : Subkind a b2 -> Subkind a (union b1 b2)
   | excl_l : Subkind a b -> Subkind (excl a c) b
   | excl_r : Subkind a b -> Kind.Disjoint a (classifier k) -> Subkind a (excl b k)
-
+  | trans : Subkind a b -> Subkind b c -> Subkind a c
 
 theorem Classifier.subclass_top : Subclass k .top := by
   induction k
@@ -83,3 +83,25 @@ theorem Classifier.disjoint_up : Disjoint (child n a) b -> Disjoint a b ∨ Subc
     cases disjoint_up r
     . left; apply Disjoint.sub_r; assumption
     . right; apply Subclass.sub_l; assumption
+
+theorem Kind.subkind_refl : Kind.Subkind k k := by
+  cases k
+  case classifier a =>
+    constructor
+    constructor
+  case union a b =>
+    apply Subkind.union_l
+    apply Subkind.union_r1
+    apply subkind_refl
+    apply Subkind.union_r2
+    apply subkind_refl
+  case excl k a =>
+    apply Subkind.excl_r
+    apply Subkind.excl_l
+    apply subkind_refl
+    apply Disjoint.excl_this
+    constructor
+
+/- Classifiers fixed for boundary. -/
+def Classifier.control := Classifier.child 0 Classifier.top
+def Kind.control := Kind.classifier .control

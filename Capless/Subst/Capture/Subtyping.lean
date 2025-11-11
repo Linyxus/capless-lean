@@ -177,7 +177,7 @@ theorem ESubtyp.csubst
     apply hs.csubst; trivial
 
 theorem CSubtyp.cinstantiate {Γ : Context n m k}
-  (h : CSubtyp (Γ.cvar (CBinding.bound CBound.star)) T1 T2) :
+  (h : CSubtyp (Γ.cvar (CBinding.bound B)) T1 T2) :
   CSubtyp (Γ.cvar (CBinding.inst C)) T1 T2 := by
   rw [<- CType.crename_id (T := T1), <- CType.crename_id (T := T2)]
   apply? CSubtyp.csubst

@@ -16,7 +16,7 @@ theorem Subbound.subst
   case set =>
     constructor
     apply Subcapt.subst <;> easy
-  case star => constructor
+  case kind => constructor
 
 def SSubtyp.subst_motive1
   (Γ : Context n m k)

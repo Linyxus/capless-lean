@@ -1,6 +1,7 @@
 import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Type.Subtyping
+import Capless.Renaming.Type.CaptureBound
 
 /-!
 # Type Variable Renaming for Typing
@@ -27,6 +28,8 @@ theorem Typed.trename
   case pack ih =>
     simp [Term.trename, EType.trename]
     apply pack
+    apply CaptureBound.trename _ ρ
+    trivial
     have ih := ih (ρ.cext _)
     simp [Term.trename, EType.trename] at ih
     trivial

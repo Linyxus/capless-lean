@@ -2,6 +2,7 @@ import Capless.Context
 import Capless.Subtyping
 import Capless.Type
 import Capless.Term
+import Capless.CaptureBound
 
 /-!
 # Typing Rules of Capless
@@ -21,8 +22,9 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Context.LBound Γ x S ->
   Typed Γ (Term.var x) (Label[S]^{x=x}) {x=x}
 | pack :
+  CaptureBound Γ C B ->
   Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} ->
-  Typed Γ (Term.pack C x) (∃c.T) {}
+  Typed Γ (Term.pack C x) (∃[c<:B]T) {}
 | sub :
   Typed Γ t E1 C1 ->
   (Γ ⊢ C1 <:c C2) ->
@@ -56,8 +58,8 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed (Γ,x: T) u E.weaken C.weaken ->  -- which means that x ∉ C and x ∉ fv(E)
   Typed Γ (let x=t in u) E C
 | letex :
-  Typed Γ t (EType.ex T) C ->
-  Typed ((Γ,c<:*),x: T) u E.cweaken.weaken C.cweaken.weaken ->
+  Typed Γ t (EType.ex B T) C ->
+  Typed ((Γ,c<:B),x: T) u E.cweaken.weaken C.cweaken.weaken ->
   Typed Γ (let (c,x)=t in u) E C
 | bindt :
   Typed (Γ,X:=S) t E.tweaken C ->
@@ -67,7 +69,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (let c=C in t) E C0
 | boundary {Γ : Context n m k} {S : SType n m k} :
   Typed
-    ((Γ,c<:CBound.star),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:CBound.kind .control),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
   Typed Γ (boundary: S in t) (S^CaptureSet.empty) C

@@ -21,9 +21,10 @@ theorem Subbound.crename
     simp [CBound.crename]
     apply Subbound.set
     apply Subcapt.crename <;> easy
-  case star =>
+  case kind =>
     simp [CBound.crename]
-    apply Subbound.star
+    apply Subbound.kind
+    trivial
 
 def SSubtyp.crename_motive1
   (Γ : Context n m k)

@@ -52,7 +52,7 @@ notation:50 "∀(x:" T ")" U => SType.forall T U
 notation:50 "∀[X<:" S "]" T => SType.tforall S T
 notation:50 "∀[c<:" B "]" T => SType.cforall B T
 notation:max S " ^ " C => CType.capt C S
-notation:40 "∃c<:" B "." T => EType.ex B T
+notation:40 "∃[c<:" B "]" T => EType.ex B T
 notation:40 "Label[" S "]" => SType.label S
 notation:60 "□" T => SType.box T
 
