@@ -1,5 +1,6 @@
 import Capless.Subtyping
 import Capless.Subst.Basic
+import Capless.Subst.Capture.CaptureBound
 
 /-
 Substitution theorems for capture variable substitution in subtyping judgments.
@@ -14,6 +15,8 @@ theorem Subbound.csubst
   Subbound Δ (B1.crename f) (B2.crename f) := by
   cases h <;> constructor
   apply Subcapt.csubst <;> easy
+  assumption
+  apply CaptureKind.csubst <;> easy
 
 def SSubtyp.csubst_motive1
   (Γ : Context n m k)
@@ -177,7 +180,8 @@ theorem ESubtyp.csubst
     apply hs.csubst; trivial
 
 theorem CSubtyp.cinstantiate {Γ : Context n m k}
-  (h : CSubtyp (Γ.cvar (CBinding.bound B)) T1 T2) :
+  (h : CSubtyp (Γ.cvar (CBinding.bound B)) T1 T2)
+  (hb : CaptureBound Γ C B) :
   CSubtyp (Γ.cvar (CBinding.inst C)) T1 T2 := by
   rw [<- CType.crename_id (T := T1), <- CType.crename_id (T := T2)]
   apply? CSubtyp.csubst

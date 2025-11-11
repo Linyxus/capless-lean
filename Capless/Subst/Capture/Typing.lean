@@ -1,5 +1,6 @@
 import Capless.Subst.Basic
 import Capless.Subst.Capture.Subtyping
+import Capless.Subst.Capture.CaptureBound
 import Capless.Typing
 
 /-
@@ -19,9 +20,9 @@ theorem Typed.csubst
       have hb1 := σ.map _ _ hb
       simp [CType.crename] at hb1
       apply Typed.var; trivial
-    case pack ih =>
+    case pack hb _ ih =>
       simp [Term.crename, EType.crename]
-      apply pack
+      apply pack (hb.csubst σ)
       have ih := ih σ.cext
       simp [EType.crename] at ih
       exact ih
@@ -139,7 +140,8 @@ theorem Typed.copen
   apply? CVarSubst.open
 
 theorem Typed.cinstantiate {Γ : Context n m k}
-  (h : Typed (Γ,c<:CBound.star) t E Ct) :
+  (h : Typed (Γ,c<:B) t E Ct)
+  (hb: CaptureBound Γ C B) :
   Typed (Γ,c:= C) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]
@@ -147,7 +149,8 @@ theorem Typed.cinstantiate {Γ : Context n m k}
   apply? CVarSubst.instantiate
 
 theorem Typed.cinstantiate_extvar {Γ : Context n m k}
-  (h : Typed ((Γ,c<:CBound.star).var P) t E Ct) :
+  (h : Typed ((Γ,c<:B).var P) t E Ct)
+  (hb: CaptureBound Γ C B) :
   Typed ((Γ,c:=C).var P) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]
@@ -156,6 +159,6 @@ theorem Typed.cinstantiate_extvar {Γ : Context n m k}
     arg 3
     rw [<- CType.crename_id (T := P)]
   apply CVarSubst.ext
-  apply CVarSubst.instantiate
+  apply? CVarSubst.instantiate
 
 end Capless

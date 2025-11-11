@@ -5,6 +5,8 @@ import Capless.Type.Basic
 import Capless.Typing
 import Capless.Typing.Basic
 import Capless.Weakening.Subtyping
+import Capless.Weakening.Subcapturing
+import Capless.Weakening.CaptureBound
 import Capless.Weakening.Typing
 import Capless.Inversion.Context
 
@@ -592,8 +594,10 @@ def CVarSubst.cext {Γ : Context n m k}
       simp [FinFun.ext_zero]
       rename_i cb
       cases cb
-      case star =>
+      case kind k =>
         simp [CBinding.crename, CBound.crename]
+        constructor
+        apply CaptureKind.cvar
         constructor
       case upper D0 =>
         constructor
@@ -727,6 +731,8 @@ def CVarSubst.narrow
       apply Subbound.trans (B2:=B'.cweaken)
       { cases B' <;> constructor
         apply Subcapt.cbound
+        constructor
+        constructor
         constructor }
       { apply Subbound.cweaken; easy }
     case inr h =>
@@ -740,6 +746,11 @@ def CVarSubst.narrow
       have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
       simp [CBinding.cweaken] at hb1'
       exact hb1'
+      simp [CBound.crename] at hb
+      apply CaptureKind.cvar
+      have h1 := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
+      simp [CBinding.cweaken, CBinding.crename, CBound.crename] at h1
+      assumption
 
 def TVarSubst.narrow
   (hs : SSubtyp Γ S' S) :
@@ -890,7 +901,9 @@ def CVarSubst.open :
       simp [CBound.crename_crename]
       simp [FinFun.open_comp_weaken, CBound.crename_id]
       rename_i cb; cases cb
-      case star => constructor
+      case kind K =>
+        apply Subbound.set_kind
+        apply CaptureKind.cvar hb1
       case upper D0 =>
         constructor
         apply Subcapt.cbound
@@ -902,9 +915,10 @@ def CVarSubst.open :
     simp [SType.crename_id]
     trivial
 
-def CVarSubst.instantiate {Γ : Context n m k} :
+def CVarSubst.instantiate {Γ : Context n m k}
+  (hk : CaptureBound Γ C B) :
   CVarSubst
-    (Γ.cvar (CBinding.bound CBound.star))
+    (Γ.cvar (CBinding.bound B))
     FinFun.id
     (Γ.cvar (CBinding.inst C)) := by
   constructor
@@ -940,8 +954,20 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     case inl h =>
       have ⟨he1, he2⟩ := h
       subst he1
-      cases b0 <;> cases he2
+      cases hk <;> cases b0 <;> cases he2
       constructor
+      rename_i C2 hsub
+      apply Subcapt.trans
+      apply Subcapt.cinstr .here
+      simp [CaptureSet.crename_id]
+      exact hsub.cweaken (b:=CBinding.inst C)
+      constructor
+      rename_i hk
+      have h1 := CaptureKind.cweaken (b:=.inst C) hk
+      apply CaptureKind.csub (C2:=C.cweaken)
+      apply Subcapt.cinstr
+      apply Context.CBound.here
+      assumption
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases he2
@@ -949,7 +975,12 @@ def CVarSubst.instantiate {Γ : Context n m k} :
       rename_i cb
       simp [FinFun.id, CBound.crename_id]
       cases cb
-      case star => constructor
+      case kind K1 =>
+        simp [CBound.crename]
+        constructor
+        apply CaptureKind.cvar
+        exact hb1.there_cvar (b':=.inst C)
+        -- have hb2 := hb1
       case upper D0 =>
         constructor
         apply Subcapt.cbound
@@ -957,5 +988,4 @@ def CVarSubst.instantiate {Γ : Context n m k} :
         rw [<- CBound.cweaken_upper]
         rw [<- CBinding.cweaken_bound]
         constructor; easy
-
 end Capless

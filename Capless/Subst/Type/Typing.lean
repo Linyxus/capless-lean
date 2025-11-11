@@ -1,5 +1,6 @@
 import Capless.Subst.Basic
 import Capless.Subst.Type.Subtyping
+import Capless.Subst.Type.CaptureBound
 import Capless.Typing
 
 /-
@@ -19,9 +20,9 @@ theorem Typed.tsubst
       have hb1 := σ.map _ _ hb
       simp [CType.trename] at hb1
       apply Typed.var; trivial
-    case pack ih =>
+    case pack hb _ ih =>
       simp [Term.trename, EType.trename]
-      apply pack
+      apply pack (hb.tsubst σ)
       have ih := ih σ.cext
       simp [EType.trename] at ih
       exact ih

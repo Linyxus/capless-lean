@@ -2,6 +2,7 @@ import Capless.Typing
 import Capless.Subst.Basic
 import Capless.Subst.Term.Subtyping
 import Capless.Renaming.Term.Typing
+import Capless.Renaming.Term.CaptureBound
 
 /-
 Substitution theorems for term variable substitution in typing judgments.
@@ -21,9 +22,9 @@ theorem Typed.subst
     simp [CType.rename] at hb1
     apply Typed.precise_capture
     trivial
-  case pack ih =>
+  case pack hb _ ih =>
     simp [Term.rename, EType.rename]
-    apply pack
+    apply pack (hb.subst σ)
     have ih := ih σ.cext
     simp [EType.rename] at ih
     exact ih
