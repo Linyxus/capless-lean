@@ -10,9 +10,9 @@ It is a prerequisite for the (ENTER) case in the preservation theorem.
 
 def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
   VarMap
-    ((Γ,c<:*),x:(Label[S.cweaken])^{c=0})
+    ((Γ,c<:CBound.kind .control),x:(Label[S.cweaken])^{c=0})
     FinFun.weaken.ext
-    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0}) := by
+    (((Γ.label S),c<:CBound.kind .control),x:(Label[S.weaken.cweaken])^{c=0}) := by
   constructor
   case map =>
     intro x E hb
@@ -65,9 +65,9 @@ def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
 
 def CVarRename.boundary {Γ : Context n m k} {S : SType n m k} :
   CVarMap
-    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0})
+    (((Γ.label S),c<:CBound.kind .control),x:(Label[S.weaken.cweaken])^{c=0})
     FinFun.weaken.ext
-    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0}) := by
+    ((((Γ.label S),c:={x=0}),c<:CBound.kind .control),x:(Label[S.weaken.cweaken.cweaken])^{c=0}) := by
   constructor
   case map =>
     intro x T hb
@@ -141,7 +141,7 @@ theorem TBinding.cweaken_copen_id {b : TBinding n m k} :
 
 def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
   CVarSubst
-    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0})
+    ((((Γ.label S),c:={x=0}),c<:.kind .control),x:(Label[S.weaken.cweaken.cweaken])^{c=0})
     (FinFun.open 0)
     (((Γ.label S),c:={x=0}),x:(Label[S.weaken.cweaken])^{c=0}) := by
   constructor
@@ -193,8 +193,15 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     case inl h =>
       have ⟨he1, he2⟩ := h
       rename_i cb0
-      cases cb0; cases he2
+      cases cb0; repeat cases he2
       constructor
+      subst he1
+      simp [FinFun.open]
+      apply CaptureKind.csub
+      apply Subcapt.cinstr (.there_var .here)
+      simp [CaptureSet.crename, FinFun.weaken]
+      apply CaptureKind.var (.there_var .here)
+
     case inr h =>
       have ⟨b2, c2, hb2, he3, he4⟩ := h
       rename_i cb0

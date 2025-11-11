@@ -272,9 +272,9 @@ theorem Typed.letin_inv {Γ : Context n m k}
 theorem Typed.letex_inv' {Γ : Context n m k}
   (he : t0 = Term.letex t u)
   (h : Typed Γ t0 E Ct0) :
-  ∃ T E0,
-    Typed Γ t (EType.ex T) Ct0 ∧
-    Typed ((Γ.cvar (CBinding.bound CBound.star)).var T) u E0.cweaken.weaken Ct0.cweaken.weaken ∧
+  ∃ B T E0,
+    Typed Γ t (EType.ex B T) Ct0 ∧
+    Typed ((Γ.cvar (CBinding.bound B)).var T) u E0.cweaken.weaken Ct0.cweaken.weaken ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
   case letex =>
@@ -285,7 +285,7 @@ theorem Typed.letex_inv' {Γ : Context n m k}
     apply ESubtyp.refl
   case sub hs ih =>
     have ih := ih he
-    obtain ⟨T, E0, ht, hu, hs0⟩ := ih
+    obtain ⟨B, T, E0, ht, hu, hs0⟩ := ih
     have hs1 := ESubtyp.trans hs0 hs
     repeat apply Exists.intro
     repeat any_goals apply And.intro
@@ -301,9 +301,9 @@ theorem Typed.letex_inv' {Γ : Context n m k}
 
 theorem Typed.letex_inv {Γ : Context n m k}
   (h : Typed Γ (Term.letex t u) E Ct) :
-  ∃ T E0,
-    Typed Γ t (EType.ex T) Ct ∧
-    Typed ((Γ,c<:*).var T) u E0.cweaken.weaken Ct.cweaken.weaken ∧
+  ∃ B T E0,
+    Typed Γ t (EType.ex B T) Ct ∧
+    Typed ((Γ,c<:B).var T) u E0.cweaken.weaken Ct.cweaken.weaken ∧
     ESubtyp Γ E0 E :=
   Typed.letex_inv' rfl h
 
@@ -408,9 +408,10 @@ theorem Typed.canonical_form_clam
 theorem Typed.canonical_form_pack'
   (ht : Γ.IsTight)
   (he1 : t0 = Term.pack C x)
-  (he2 : E0 = EType.ex T)
+  (he2 : E0 = EType.ex B T)
   (h : Typed Γ t0 E0 Ct) :
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} := by
+  CaptureBound Γ C B ∧
+    Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} := by
   induction h <;> try (solve | cases he1 | cases he2)
   case pack =>
     cases he1; cases he2
@@ -419,17 +420,19 @@ theorem Typed.canonical_form_pack'
     subst he2
     cases hs
     rename_i hs
-    have ih := ih ht he1 rfl
+    have ⟨ihb, ih⟩ := ih ht he1 rfl
+    apply And.intro
+    assumption
     apply Typed.sub
     exact ih
     apply Subcapt.refl
     constructor
-    apply hs.cinstantiate
+    apply hs.cinstantiate ihb
 
 theorem Typed.canonical_form_pack
   (ht : Γ.IsTight)
-  (h : Typed Γ (Term.pack C x) (EType.ex T) Ct) :
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} :=
+  (h : Typed Γ (Term.pack C x) (EType.ex B T) Ct) :
+  CaptureBound Γ C B ∧ Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} :=
   Typed.canonical_form_pack' ht rfl rfl h
 
 theorem Typed.forall_inv' {v : Term n m k}
@@ -681,7 +684,7 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
   (he : t0 = (boundary:S in t))
   (ht : Typed Γ t0 E Ct) :
   Typed
-    ((Γ,c<:*),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:(.kind Kind.control)),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{})
     (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
@@ -706,7 +709,7 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
 theorem Typed.boundary_inv {Γ : Context n m k} {S : SType n m k}
   (ht : Typed Γ (boundary:S in t) E Ct) :
   Typed
-    ((Γ,c<:*),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:(.kind Kind.control)),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{})
     (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧

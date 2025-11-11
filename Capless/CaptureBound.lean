@@ -6,6 +6,7 @@ namespace Capless
 
 inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
+  -- | label : Context.LBound Γ x S -> CaptureKind Γ {x=x} Kind.control
   | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
   | csub : Subcapt Γ C1 C2 -> CaptureKind Γ C2 K -> CaptureKind Γ C1 K -- Should cover all the cinst cases, otherwise we can prove
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
