@@ -200,7 +200,8 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       apply CaptureKind.csub
       apply Subcapt.cinstr (.there_var .here)
       simp [CaptureSet.crename, FinFun.weaken]
-      apply CaptureKind.var (.there_var .here)
+      apply CaptureKind.label
+      apply Context.LBound.there_var (.there_cvar .here)
 
     case inr h =>
       have ⟨b2, c2, hb2, he3, he4⟩ := h
@@ -209,7 +210,11 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       cases he4
       rename_i cb0
       cases cb0
-      case star => constructor
+      case kind K =>
+        constructor
+        simp [FinFun.open]
+        apply CaptureKind.cvar
+        apply Context.CBound.there_var hb2
       case upper D0 =>
         constructor
         simp [FinFun.open]
@@ -317,7 +322,7 @@ theorem CaptureSet.open_weaken_ext {C : CaptureSet (n+1) k} :
   simp [CaptureSet.rename_id]
 
 theorem Typed.boundary_body_typing {Γ : Context n m k} {S : SType n m k}
-  (ht : Typed ((Γ,c<:*),x:(Label[S.cweaken])^{c=0}) t E Ct) :
+  (ht : Typed ((Γ,c<:(.kind .control)),x:(Label[S.cweaken])^{c=0}) t E Ct) :
   Typed ((Γ.label S),c:={x=0}) t E Ct := by
   have h := ht.rename VarRename.boundary
   have h := h.crename CVarRename.boundary

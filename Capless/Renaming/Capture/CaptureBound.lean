@@ -22,6 +22,10 @@ theorem CaptureKind.crename
     simp [EType.crename, CType.crename] at hb1
     exact hb1
     apply ih ρ
+  case label hl =>
+    apply label
+    have hl1 := ρ.lmap _ _ hl
+    exact hl1
   case cvar hc =>
     apply cvar
     exact ρ.cmap _ _ hc

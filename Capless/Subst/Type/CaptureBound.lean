@@ -17,6 +17,9 @@ theorem CaptureKind.tsubst
     have hb1 := σ.map _ _ hb
     simp [CType.trename] at hb1
     apply var hb1 (ih σ)
+  case label hl =>
+    have hl1 := σ.lmap _ _ hl
+    apply label hl1
   case cvar hb =>
     have hb1 := σ.cmap _ _ hb
     apply cvar hb1

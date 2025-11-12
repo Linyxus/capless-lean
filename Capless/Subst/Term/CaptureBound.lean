@@ -18,6 +18,9 @@ theorem CaptureKind.subst
     simp [EType.rename, CType.rename] at hb1
     have h := Typing.inv_subcapt hb1
     apply csub h (ih σ)
+  case label hl =>
+    have hl1 := σ.lmap _ _ hl
+    apply label hl1
   case cvar hb =>
     have hb1 := σ.cmap _ _ hb
     apply cvar hb1

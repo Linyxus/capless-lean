@@ -16,6 +16,9 @@ theorem CaptureKind.csubst
   case var hb hk ih =>
     have hb1 := σ.map _ _ hb
     apply CaptureKind.var hb1 (ih σ)
+  case label hl =>
+    have hl1 := σ.lmap _ _ hl
+    apply label hl1
   case cvar hb =>
     cases σ.cmap_bound _ _ hb
     assumption
