@@ -159,7 +159,7 @@ theorem preservation
   case push_ex =>
     cases ht
     case mk hs hsc ht hc =>
-      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
+      have ⟨B, T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
       constructor
       constructor
       { exact hs }
@@ -193,9 +193,9 @@ theorem preservation
       cases hc
       case conse hu hsc hc0 =>
         have hg := TypedStore.is_tight hs
-        have hx := Typed.canonical_form_pack hg ht
-        rename_i C _ _ _ _ _ _ _
-        have hu1 := hu.cinstantiate_extvar (C := C)
+        have ⟨hb, hx⟩ := Typed.canonical_form_pack hg ht
+        rename_i C _ _ _ _ _ _ _ _
+        have hu1 := hu.cinstantiate_extvar (C := C) hb
         have hu2 := hu1.open hx
         simp [EType.weaken, EType.open, EType.rename_rename] at hu2
         simp [FinFun.open_comp_weaken] at hu2

@@ -30,7 +30,7 @@ This is crucial for maintaining soundness when type abstractions are introduced.
 namespace Capless
 
 theorem EType.tweaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).tweaken = EType.ex T.tweaken := by
+  (EType.ex B T).tweaken = EType.ex B T.tweaken := by
   simp [EType.tweaken, EType.trename, CType.tweaken]
 
 -- theorem EType.tweaken_type (T : CType n m k) :

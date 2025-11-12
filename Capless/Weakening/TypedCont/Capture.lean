@@ -30,8 +30,8 @@ judgments. This is essential for soundness in the presence of capture-polymorphi
 namespace Capless
 
 theorem EType.cweaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).cweaken = EType.ex T.cweaken1 := by
-  simp [EType.cweaken, EType.crename, CType.cweaken1]
+  (EType.ex B T).cweaken = EType.ex B.cweaken T.cweaken1 := by
+  simp [EType.cweaken, EType.crename, CType.cweaken1, CBound.cweaken]
 
 -- theorem EType.cweaken_type (T : CType n m k) :
 --   (EType.type T).cweaken = EType.type T.cweaken := by

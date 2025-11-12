@@ -40,8 +40,8 @@ theorem CaptureSet.weaken1_weaken (C : CaptureSet n k) :
   rw [<- FinFun.comp_weaken]
 
 theorem EType.weaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).weaken = EType.ex T.weaken := by
-  simp [EType.weaken, EType.rename, CType.weaken]
+  (EType.ex B T).weaken = EType.ex B.weaken T.weaken := by
+  simp [EType.weaken, EType.rename, CType.weaken, CBound.weaken]
 
 theorem EType.weaken_cweaken (E : EType n m k) :
   E.cweaken.weaken = E.weaken.cweaken := by
