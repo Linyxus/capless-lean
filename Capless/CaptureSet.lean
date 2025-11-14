@@ -2,6 +2,7 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.PImage
 import Capless.Basic
+import Capless.Classifier
 import Capless.Tactics
 namespace Capless
 
@@ -10,6 +11,15 @@ namespace Capless
 
 This file contains the definition of capture sets.
 -/
+
+inductive Singleton : Nat -> Nat -> Type where
+  | singl : Fin n -> Singleton n k
+  | csingl : Fin k -> Singleton n k
+
+/-- Projected captures -/
+inductive Proj : Nat -> Nat -> Type where
+  | proj : Singleton n k -> Kind -> Proj n k
+  | capt : Singleton n k -> Proj n k
 
 /-- Capture sets in System Capless.
 
@@ -29,15 +39,14 @@ Since the capture sets are indexed with the number of available binders, and eac
 inductive CaptureSet : Nat -> Nat -> Type where
 | empty : CaptureSet n k
 | union : CaptureSet n k -> CaptureSet n k -> CaptureSet n k
-| singleton : Fin n -> CaptureSet n k
-| csingleton : Fin k -> CaptureSet n k
+| singleton : Proj n k -> CaptureSet n k
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
   emptyCollection := CaptureSet.empty
 
-notation:max "{x=" x "}" => CaptureSet.singleton x
-notation:max "{c=" c "}" => CaptureSet.csingleton c
+notation:max "{x=" x "}" => CaptureSet.singleton (Proj.capt (Singleton.singl x))
+notation:max "{c=" c "}" => CaptureSet.singleton (Proj.capt (Singleton.csingl c))
 
 @[simp]
 instance : Union (CaptureSet n k) where
@@ -62,25 +71,55 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
+-- @[simp]
+-- def CaptureSet.proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
+  -- match C with
+  -- | empty => empty
+  -- | union C1 C2 => union (C1.proj K) (C2.proj K)
+  -- | singleton
+
+
 /-!
 ## Renaming operations
 -/
+
+@[simp]
+def Singleton.rename (s: Singleton n k) (f : FinFun n n') : Singleton n' k :=
+  match s with
+  | singl x => singl $ f x
+  | csingl c => csingl c
+
+@[simp]
+def Proj.rename (s: Proj n k) (f : FinFun n n') : Proj n' k :=
+  match s with
+  | proj x k => proj (x.rename f) k
+  | capt x => capt $ x.rename f
 
 @[simp]
 def CaptureSet.rename (C : CaptureSet n k) (f : FinFun n n') : CaptureSet n' k :=
   match C with
   | empty => empty
   | union C1 C2 => (C1.rename f) ∪ (C2.rename f)
-  | singleton x => {x=f x}
-  | csingleton c => {c=c}
+  | singleton x => singleton $ x.rename f
+
+@[simp]
+def Singleton.crename (s: Singleton n k) (f : FinFun k k') : Singleton n k' :=
+  match s with
+  | singl x => singl x
+  | csingl c => csingl $ f c
+
+@[simp]
+def Proj.crename (s: Proj n k) (f : FinFun k k') : Proj n k' :=
+  match s with
+  | proj x k => proj (x.crename f) k
+  | capt x => capt $ x.crename f
 
 @[simp]
 def CaptureSet.crename (C : CaptureSet n k) (f : FinFun k k') : CaptureSet n k' :=
   match C with
   | empty => empty
   | union C1 C2 => (C1.crename f) ∪ (C2.crename f)
-  | singleton x => {x=x}
-  | csingleton c => {c=f c}
+  | singleton x => singleton $ x.crename f
 
 def CaptureSet.weaken (C : CaptureSet n k) : CaptureSet (n+1) k :=
   C.rename FinFun.weaken
@@ -176,12 +215,12 @@ theorem CaptureSet.subset_refl {C : CaptureSet n k} :
   C ⊆ C := by constructor
 
 theorem CaptureSet.cweaken_csingleton {c : Fin k} :
-  (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
-  simp [csingleton, cweaken, crename, FinFun.weaken]
+  ({c=c} : CaptureSet n k).cweaken = {c=c.succ} := by
+  simp [singleton, cweaken, crename, FinFun.weaken]
 
 theorem CaptureSet.weaken_csingleton :
   ({c=c} : CaptureSet n k).weaken = {c=c} := by
-  simp [csingleton, weaken]
+  simp [singleton, weaken]
 
 theorem CaptureSet.rename_id {C : CaptureSet n k} :
   C.rename FinFun.id = C := by
