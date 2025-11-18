@@ -23,4 +23,14 @@ theorem Subcapt.join
   { apply Subcapt.trans; exact h2
     apply Subcapt.subset; apply CaptureSet.Subset.union_rr; apply CaptureSet.subset_refl }
 
+theorem CaptureKind.var (hb : Context.Bound Γ x (S^C)) (hk : CaptureKind Γ C K) : CaptureKind Γ {x=x} K := by
+  apply csub
+  apply Subcapt.var hb
+  assumption
+
+theorem CaptureKind.proj_disj (hd : Kind.Disjoint K1 K2) (hk : CaptureKind Γ C K1) : CaptureKind Γ (C.proj K2) K3 := by
+  apply csub
+  apply Subcapt.proj_disj hd hk
+  apply empty
+
 end Capless

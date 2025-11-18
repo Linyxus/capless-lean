@@ -262,9 +262,3 @@ theorem Kind.subkind_refl : Kind.Subkind k k := by
 /- Classifiers fixed for boundary. -/
 def Classifier.control := Classifier.child 0 Classifier.top
 def Kind.control := Kind.classifier .control
-
-/- Merging kinds -/
-@[simp]
-def Kind.merge (K1: Kind) (K2: Kind) : Kind := by
-  match K1 with
-  |
