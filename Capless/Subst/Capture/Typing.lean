@@ -56,7 +56,7 @@ theorem Typed.csubst
         simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
         exact ih1 }
       { have ih2 := ih2 σ
-        simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih2
+        simp [Term.crename, EType.crename] at ih2
         exact ih2 }
     case tapp ih =>
       simp [Term.crename]
@@ -121,7 +121,7 @@ theorem Typed.csubst
       apply ih2; assumption
     case boundary ih =>
       simp [Term.crename]
-      simp [EType.crename, CType.crename, SType.crename]
+      simp [EType.crename, CType.crename]
       apply boundary
       have ih := ih (σ.cext.ext _)
       simp [CBinding.crename, EType.crename, CType.crename, SType.crename, FinFun.ext] at ih

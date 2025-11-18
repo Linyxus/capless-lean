@@ -357,12 +357,12 @@ def TVarSubst.text {Γ : Context n m k}
         simp [FinFun.ext]
         apply SSubtyp.tvar
         cases T
-        case bound T =>
+        case a.bound T =>
           simp at hbnd
           rw [hbnd]
           rw [<-SType.tweaken_trename]
           constructor
-        case inst T =>
+        case a.inst T =>
           simp at hbnd
       case inr hb' =>
         obtain ⟨T', X',  hb', heq, heq'⟩ := hb'
@@ -851,7 +851,7 @@ def TVarSubst.open :
       trivial
   , lmap := fun l S hb => by
       cases hb
-      simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
+      simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id]
       assumption
   }
 
@@ -890,7 +890,7 @@ def CVarSubst.open :
       have ⟨he1, he2⟩ := h
       cases he1; cases b0 <;> cases he2
       simp [FinFun.open]
-      simp [CBound.crename, CaptureSet.crename_csingleton]
+      simp [CBound.crename]
       simp [FinFun.weaken, FinFun.open]
       constructor; apply Subcapt.refl
     case inr h =>

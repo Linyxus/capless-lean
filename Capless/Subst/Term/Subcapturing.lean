@@ -9,40 +9,76 @@ Substitution theorems for term variable substitution in subcapturing judgments.
 
 namespace Capless
 
+mutual
+theorem CaptureKind.subst
+  (h : CaptureKind Γ C K)
+  (σ : VarSubst Γ f Δ) :
+  CaptureKind Δ (C.rename f) K :=
+  match h with
+  | .label hl =>
+    have hl1 := σ.lmap _ _ hl
+    .label hl1
+  | .cvar hb => by
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.rename, CBound.rename] at hb1
+    apply CaptureKind.cvar hb1
+  | .csub hsub hk =>
+    have hsub1 := hsub.subst σ
+    .csub hsub1 (hk.subst σ)
+  | .sub hs hk => .sub hs (hk.subst σ)
+  | .empty => .empty
+  | .proj_kind => by
+    rw [← CaptureSet.proj_rename_comm]
+    apply CaptureKind.proj_kind
+  | .proj hk => by
+    rw [← CaptureSet.proj_rename_comm]
+    apply CaptureKind.proj $ hk.subst σ
+
+
 theorem Subcapt.subst
   (h : Subcapt Γ C1 C2)
   (σ : VarSubst Γ f Δ) :
-  Subcapt Δ (C1.rename f) (C2.rename f) := by
-  induction h
-  case trans => apply trans <;> aesop
-  case subset hsub =>
-    apply subset
-    apply! CaptureSet.Subset.rename
-  case union h1 h2 =>
-    simp [CaptureSet.rename_union]
-    apply union <;> aesop
-  case var hb =>
+  Subcapt Δ (C1.rename f) (C2.rename f) :=
+  match h with
+  | .trans ha hb => .trans (ha.subst σ) (hb.subst σ)
+  | .subset hsub => by
+    apply Subcapt.subset
+    apply CaptureSet.Subset.rename hsub
+  | .union h1 h2 => by
+    have ih1 := h1.subst σ
+    have ih2 := h2.subst σ
+    rw [CaptureSet.rename_union]
+    apply Subcapt.union <;> trivial
+  | .var hb => by
     have ht := σ.map _ _ hb
-    simp [EType.rename, CType.rename] at ht
+    simp [CType.rename] at ht
     have h := Typing.inv_subcapt ht
-    simp [CaptureSet.rename_singleton]; trivial
-  case cinstl hb =>
-    have hb1 := σ.cmap _ _ hb
-    simp [CaptureSet.rename_csingleton]
-    apply cinstl
-    simp [CBinding.rename] at hb1
     trivial
-  case cinstr hb =>
+  | .cinstl hb =>
     have hb1 := σ.cmap _ _ hb
-    simp [CaptureSet.rename_csingleton]
-    apply cinstr
-    simp [CBinding.rename] at hb1
-    trivial
-  case cbound hb =>
+    .cinstl hb1
+  | .cinstr hb =>
     have hb1 := σ.cmap _ _ hb
-    simp [CaptureSet.rename_csingleton]
-    apply cbound
-    simp [CBinding.rename] at hb1
-    easy
+    .cinstr hb1
+  | .cbound hb => by
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.rename, CBound.rename] at hb1
+    apply Subcapt.cbound hb1
+  | .proj h1 => by
+    repeat rw [← CaptureSet.proj_rename_comm]
+    apply Subcapt.proj (h1.subst σ)
+  | .proj_sub hs => by
+    repeat rw [← CaptureSet.proj_rename_comm]
+    apply Subcapt.proj_sub hs
+  | .proj_l => by
+    rw [← CaptureSet.proj_rename_comm]
+    apply Subcapt.proj_l
+  | .proj_r hk => by
+    rw [← CaptureSet.proj_rename_comm]
+    apply Subcapt.proj_r (hk.subst σ)
+  | .proj_disj hd hk => by
+    rw [← CaptureSet.proj_rename_comm]
+    apply Subcapt.proj_disj hd (hk.subst σ)
+end
 
 end Capless

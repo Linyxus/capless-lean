@@ -6,7 +6,8 @@ package «capless» where
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩,
     ⟨`autoImplicit, true⟩,
-    ⟨`linter.unusedVariables, false⟩
+    ⟨`linter.unusedVariables, false⟩,
+    ⟨`linter.unusedSimpArgs, false⟩,
   ]
   -- add any additional package configuration options here
 

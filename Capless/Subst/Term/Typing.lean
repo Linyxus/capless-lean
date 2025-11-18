@@ -59,7 +59,7 @@ theorem Typed.subst
       simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih1
       exact ih1 }
     { have ih2 := ih2 σ
-      simp [Term.rename, EType.rename, CType.rename, SType.rename] at ih2
+      simp [Term.rename, EType.rename] at ih2
       exact ih2 }
   case tapp ih =>
     simp [Term.rename]
@@ -125,12 +125,11 @@ theorem Typed.subst
     apply ih2; assumption
   case boundary ih =>
     simp [Term.rename]
-    simp [EType.rename, CType.rename, SType.rename] at *
+    simp [EType.rename, CType.rename] at *
     apply boundary
     have ih := ih (σ.cext.ext _)
     simp
       [ CBinding.rename
-      , EType.rename
       , CType.rename
       , SType.rename
       , <- SType.weaken_rename
