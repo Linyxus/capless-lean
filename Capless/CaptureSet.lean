@@ -69,17 +69,6 @@ instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
 /-!
-## Projections
--/
-
-@[simp]
-def CaptureSet.proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
-  match C with
-  | empty => empty
-  | union C1 C2 => union (C1.proj K) (C2.proj K)
-  | singleton s => singleton $ s.proj K
-
-/-!
 ## Renaming operations
 -/
 
@@ -259,6 +248,23 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
 
 theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
   C.cweaken = C.crename FinFun.weaken := by
+  induction C <;> aesop
+
+/-!
+## Projections
+-/
+
+@[simp]
+def CaptureSet.proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
+  match C with
+  | empty => empty
+  | union C1 C2 => union (C1.proj K) (C2.proj K)
+  | singleton s => singleton $ s.proj K
+
+theorem CaptureSet.proj_crename_comm {C: CaptureSet n k} : (C.crename f).proj K = (C.proj K).crename f := by
+  induction C <;> aesop
+
+theorem CaptureSet.proj_rename_comm {C: CaptureSet n k} : (C.rename f).proj K = (C.proj K).rename f := by
   induction C <;> aesop
 
 end Capless
