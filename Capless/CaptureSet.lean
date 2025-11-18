@@ -15,11 +15,7 @@ This file contains the definition of capture sets.
 inductive Singleton : Nat -> Nat -> Type where
   | singl : Fin n -> Singleton n k
   | csingl : Fin k -> Singleton n k
-
-/-- Projected captures -/
-inductive Proj : Nat -> Nat -> Type where
-  | proj : Singleton n k -> Kind -> Proj n k
-  | capt : Singleton n k -> Proj n k
+  | proj : Singleton n k -> Kind -> Singleton n k
 
 /-- Capture sets in System Capless.
 
@@ -39,14 +35,15 @@ Since the capture sets are indexed with the number of available binders, and eac
 inductive CaptureSet : Nat -> Nat -> Type where
 | empty : CaptureSet n k
 | union : CaptureSet n k -> CaptureSet n k -> CaptureSet n k
-| singleton : Proj n k -> CaptureSet n k
+| singleton : Singleton n k -> CaptureSet n k
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
   emptyCollection := CaptureSet.empty
 
-notation:max "{x=" x "}" => CaptureSet.singleton (Proj.capt (Singleton.singl x))
-notation:max "{c=" c "}" => CaptureSet.singleton (Proj.capt (Singleton.csingl c))
+notation:max "{x=" x "}" => CaptureSet.singleton (Singleton.singl x)
+notation:max "{c=" c "}" => CaptureSet.singleton (Singleton.csingl c)
+notation:max "{s=" s "}" => CaptureSet.singleton s
 
 @[simp]
 instance : Union (CaptureSet n k) where
@@ -71,13 +68,16 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
 
--- @[simp]
--- def CaptureSet.proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
-  -- match C with
-  -- | empty => empty
-  -- | union C1 C2 => union (C1.proj K) (C2.proj K)
-  -- | singleton
+/-!
+## Projections
+-/
 
+@[simp]
+def CaptureSet.proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
+  match C with
+  | empty => empty
+  | union C1 C2 => union (C1.proj K) (C2.proj K)
+  | singleton s => singleton $ s.proj K
 
 /-!
 ## Renaming operations
@@ -88,12 +88,7 @@ def Singleton.rename (s: Singleton n k) (f : FinFun n n') : Singleton n' k :=
   match s with
   | singl x => singl $ f x
   | csingl c => csingl c
-
-@[simp]
-def Proj.rename (s: Proj n k) (f : FinFun n n') : Proj n' k :=
-  match s with
-  | proj x k => proj (x.rename f) k
-  | capt x => capt $ x.rename f
+  | proj s k => (s.rename f).proj k
 
 @[simp]
 def CaptureSet.rename (C : CaptureSet n k) (f : FinFun n n') : CaptureSet n' k :=
@@ -107,12 +102,8 @@ def Singleton.crename (s: Singleton n k) (f : FinFun k k') : Singleton n k' :=
   match s with
   | singl x => singl x
   | csingl c => csingl $ f c
+  | proj s k => (s.crename f).proj k
 
-@[simp]
-def Proj.crename (s: Proj n k) (f : FinFun k k') : Proj n k' :=
-  match s with
-  | proj x k => proj (x.crename f) k
-  | capt x => capt $ x.crename f
 
 @[simp]
 def CaptureSet.crename (C : CaptureSet n k) (f : FinFun k k') : CaptureSet n k' :=
@@ -175,9 +166,13 @@ theorem CaptureSet.rename_empty :
 theorem CaptureSet.crename_empty :
   ({} : CaptureSet n k).crename f = {} := by simp
 
+theorem Singleton.crename_rename_comm {s : Singleton n k} {f: FinFun n n'} {g: FinFun k k'} :
+  (s.rename f).crename g = (s.crename g).rename f := by
+  induction s <;> aesop
+
 theorem CaptureSet.crename_rename_comm {C : CaptureSet n k} {f : FinFun n n'} {g : FinFun k k'} :
   (C.rename f).crename g = (C.crename g).rename f := by
-  induction C <;> aesop
+  induction C <;> aesop (add safe apply Singleton.crename_rename_comm)
 
 theorem CaptureSet.copen_rename_comm {C : CaptureSet n (k+1)} {x : Fin k} {f : FinFun n n'} :
   (C.copen x).rename f = (C.rename f).copen x := by
@@ -187,9 +182,13 @@ theorem CaptureSet.cweaken_rename_comm {C : CaptureSet n k} {f : FinFun n n'} :
   (C.cweaken).rename f = (C.rename f).cweaken := by
   simp [cweaken, crename_rename_comm]
 
+theorem Singleton.rename_rename {s : Singleton n k} :
+  (s.rename f).rename g = s.rename (g ∘ f) := by
+  induction s <;> aesop
+
 theorem CaptureSet.rename_rename {C : CaptureSet n k} :
   (C.rename f).rename g = C.rename (g ∘ f) := by
-  induction C <;> aesop
+  induction C <;> aesop (add safe 1 Singleton.rename_rename)
 
 theorem CaptureSet.weaken_rename {C : CaptureSet n k} :
   (C.rename f).weaken = C.weaken.rename f.ext := by
@@ -199,9 +198,13 @@ theorem CaptureSet.weaken_crename {C : CaptureSet n k} :
   (C.crename f).weaken = C.weaken.crename f := by
   simp [weaken, crename_rename_comm]
 
+theorem Singleton.crename_crename {s : Singleton n k} :
+  (s.crename f).crename g = s.crename (g ∘ f) := by
+  induction s <;> aesop
+
 theorem CaptureSet.crename_crename {C : CaptureSet n k} :
   (C.crename f).crename g = C.crename (g ∘ f) := by
-  induction C <;> aesop
+  induction C <;> aesop (add safe 1 Singleton.crename_crename)
 
 theorem CaptureSet.crename_copen {C : CaptureSet n (k+1)} :
   (C.copen c).crename f = (C.crename f.ext).copen (f c) :=
@@ -222,13 +225,21 @@ theorem CaptureSet.weaken_csingleton :
   ({c=c} : CaptureSet n k).weaken = {c=c} := by
   simp [singleton, weaken]
 
+theorem Singleton.rename_id {s : Singleton n k} :
+  s.rename FinFun.id = s := by
+  induction s <;> aesop
+
 theorem CaptureSet.rename_id {C : CaptureSet n k} :
   C.rename FinFun.id = C := by
-  induction C <;> aesop
+  induction C <;> aesop (add safe 1 Singleton.rename_id)
+
+theorem Singleton.crename_id {s : Singleton n k} :
+  s.crename FinFun.id = s := by
+  induction s <;> aesop
 
 theorem CaptureSet.crename_id {C : CaptureSet n k} :
   C.crename FinFun.id = C := by
-  induction C <;> aesop
+  induction C <;> aesop (add safe 1 Singleton.crename_id)
 
 theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
   (h : C1 ⊆ C2) :
