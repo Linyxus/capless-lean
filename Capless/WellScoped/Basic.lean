@@ -70,24 +70,35 @@ theorem WellScoped.scope
 theorem WellScoped.subcapt
   (hsc : WellScoped Γ cont C)
   (hs : Γ ⊢ C' <:c C) :
-  WellScoped Γ cont C' := by
-  induction hs generalizing cont
-  case trans => aesop
-  case subset => apply WellScoped.subset <;> easy
-  case union => apply union <;> aesop
-  case var => apply WellScoped.singleton <;> aesop
-  case cinstl =>
+  WellScoped Γ cont C' :=
+  match hs with
+  | .trans ha hb => .subcapt (.subcapt hsc hb) ha
+  | .subset hs => .subset hsc hs
+  | .union ha hb => .union (.subcapt hsc ha) (.subcapt hsc hb)
+  | .var hb => .singleton hb hsc
+  | .cinstl hb1 => by
     cases hsc
-    rename_i hb1 _ _ hb2
-    have h := Context.cbound_injective hb1 hb2
-    cases h
-    rename_i h
-    exact h
-    rename_i hb1 _ _ hb2
-    have h := Context.cbound_injective hb1 hb2
-    cases h
-  case cinstr => apply WellScoped.csingleton <;> aesop
-  case cbound => apply WellScoped.cbound <;> aesop
+    case csingleton =>
+      rename_i hb2
+      have h := Context.cbound_injective hb1 hb2
+      cases h
+      rename_i h
+      exact h
+    case cbound =>
+      rename_i hb2
+      have h := Context.cbound_injective hb1 hb2
+      cases h
+    case ckind =>
+      rename_i hb2
+      have h := Context.cbound_injective hb1 hb2
+      cases h
+  | .cinstr hb => .csingleton hb hsc
+  | .cbound hb => .cbound hb hsc
+  | .proj h1 => _
+  | .proj_sub _ => _
+  | .proj_l => _
+  | .proj_r _ => _
+  | .proj_disj _ _ => _
 
 theorem WellScoped.var_inv
   (hsc : WellScoped Γ cont {x=x})
