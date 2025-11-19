@@ -24,6 +24,33 @@ theorem WellScoped.subset
   case union_rr =>
     cases hsc
     aesop
+  case proj_empty =>
+    constructor
+  case empty_proj =>
+    constructor
+    constructor
+  case proj_union =>
+    constructor
+    cases hsc
+    rename_i ha hb
+    constructor
+    cases ha; assumption
+    cases hb; assumption
+  case union_proj =>
+    constructor <;> constructor
+    cases hsc
+    rename_i h1
+    cases h1; assumption
+    cases hsc
+    rename_i h1
+    cases h1; assumption
+  case proj_proj =>
+    cases hsc
+    rename_i h1
+    cases h1
+    constructor
+    constructor
+    assumption
 
 theorem WellScoped.cons
   (hsc : WellScoped Γ cont C) :
@@ -34,9 +61,12 @@ theorem WellScoped.cons
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
+  case ckind ih => apply ckind <;> aesop
   case label =>
     apply label
     easy
+    constructor; easy
+  case proj =>
     constructor; easy
 
 theorem WellScoped.conse
@@ -48,10 +78,12 @@ theorem WellScoped.conse
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
+  case ckind ih => apply ckind <;> aesop
   case label =>
     apply label
     easy
     constructor; easy
+  case proj => constructor; easy
 
 theorem WellScoped.scope
   (hsc : WellScoped Γ cont C) :
@@ -62,10 +94,12 @@ theorem WellScoped.scope
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
+  case ckind ih => apply ckind <;> aesop
   case label =>
     apply label
     easy
     constructor; easy
+  case proj => constructor; easy
 
 theorem WellScoped.subcapt
   (hsc : WellScoped Γ cont C)
@@ -94,10 +128,18 @@ theorem WellScoped.subcapt
       cases h
   | .cinstr hb => .csingleton hb hsc
   | .cbound hb => .cbound hb hsc
-  | .proj h1 => _
-  | .proj_sub _ => _
-  | .proj_l => _
-  | .proj_r _ => _
+  | .proj h1 => by
+    constructor
+    cases hsc
+    apply WellScoped.subcapt _ h1; assumption
+  | .proj_sub hs => by
+    constructor
+    cases hsc
+    assumption
+  | .proj_l => by constructor; assumption
+  | .proj_r hs => by
+    cases hsc
+    assumption
   | .proj_disj _ _ => _
 
 theorem WellScoped.var_inv

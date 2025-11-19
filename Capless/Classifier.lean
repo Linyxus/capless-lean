@@ -42,6 +42,9 @@ inductive Kind : Type where
   | union : Kind -> Kind -> Kind
   | excl : Kind -> Classifier -> Kind
 
+/-- The top kind -/
+def Kind.any := Kind.classifier .top
+
 inductive Kind.Disjoint : Kind -> Kind -> Prop where
   | base : a.disjoint b -> Disjoint (classifier a) (classifier b)
   | union : Disjoint a b1 -> Disjoint a b2 -> Disjoint a (union b1 b2)
@@ -241,7 +244,7 @@ theorem Classifier.disjoint_up : disjoint a b -> disjoint a (child m b) := by
         { left; right; assumption }
 
 
-theorem Kind.subkind_refl : Kind.Subkind k k := by
+theorem Kind.Subkind.rfl : Kind.Subkind k k := by
   cases k
   case classifier a =>
     constructor
@@ -249,15 +252,24 @@ theorem Kind.subkind_refl : Kind.Subkind k k := by
   case union a b =>
     apply Subkind.union_l
     apply Subkind.union_r1
-    apply subkind_refl
+    apply rfl
     apply Subkind.union_r2
-    apply subkind_refl
+    apply rfl
   case excl k a =>
     apply Subkind.excl_r
     apply Subkind.excl_l
-    apply subkind_refl
+    apply rfl
     apply Disjoint.excl_this
     unfold Classifier.subclass; simp
+
+theorem Kind.subkind_any : Kind.Subkind K .any := by
+  induction K
+  case classifier a =>
+    apply Subkind.base; apply Classifier.subclass_top
+  case union a b iha ihb =>
+    apply Subkind.union_l <;> assumption
+  case excl K c ih =>
+    apply Subkind.excl_l ih
 
 /- Classifiers fixed for boundary. -/
 def Classifier.control := Classifier.child 0 Classifier.top

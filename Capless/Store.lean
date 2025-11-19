@@ -123,6 +123,9 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
   WellScoped Γ cont {c=c}
+| proj :
+  WellScoped Γ cont C ->
+  WellScoped Γ cont (C.proj K)
 | label :
   Context.LBound Γ x S ->
   Cont.HasLabel cont x tail ->

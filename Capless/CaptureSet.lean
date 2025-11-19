@@ -61,15 +61,146 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
   Subset C C2 ->
   Subset C (C1 ∪ C2)
 /- projection distributivity -/
-| proj_empty : Subset .empty (.proj .empty K)
-| empty_proj : Subset (.proj .empty K) .empty
-| proj_union : Subset (.proj (C1 ∪ C2) K) (.union (C1.proj K) (C2.proj K))
-| union_proj : Subset  (.union (C1.proj K) (C2.proj K)) (.proj (C1 ∪ C2) K)
-| proj_proj : Subset (.proj (.proj C K1) K2) (.proj (.proj C K2) K1)
+| proj_empty : Subset C D -> Subset C .empty -> Subset (.proj C K) D
+| proj_union_l : Subset (.union (C1.proj K) (C2.proj K)) C -> Subset (.proj (C1 ∪ C2) K) C
+| proj_union_eq : Subset (.union (C1.proj K) (C2.proj K)) (.proj (C1 ∪ C2) K)
+| proj_union_rl : Subset C (C1.proj K) -> Subset C (.proj (C1 ∪ C2) K)
+| proj_union_rr : Subset C (C2.proj K) -> Subset C (.proj (C1 ∪ C2) K)
+| proj_proj_l : Subset (.proj (.proj C1 K1) K2) C2 -> Subset (.proj (.proj C1 K2) K1) C2
+| proj_proj_r : Subset C1 (.proj (.proj C2 K1) K2) -> Subset C1 (.proj (.proj C2 K2) K1)
+
+theorem CaptureSet.Subset.union_l_inv (h1 : Subset (C1 ∪ C2) C3) : (Subset C1 C3) ∧ (Subset C2 C3) := by
+  generalize h0 : C1 ∪ C2 = C at h1
+  induction h1 generalizing C1 C2 <;> (subst_vars; simp_all)
+  case rfl =>
+    apply And.intro
+    apply union_rl .rfl
+    apply union_rr .rfl
+  case union_rl ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply union_rl; assumption)
+  case union_rr ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply union_rr; assumption)
+  case proj_union_rl ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_union_rl; assumption)
+  case proj_union_rr ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_union_rr; assumption)
+  case proj_union_eq =>
+    have ⟨_, _⟩ := h0
+    subst_vars; simp_all
+    apply And.intro
+    apply proj_union_rl .rfl
+    apply proj_union_rr .rfl
+  case proj_proj_r ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_proj_r; assumption)
+
+theorem CaptureSet.Subset.proj_union_l_inv (h1 : Subset (.proj (C1 ∪ C2) K)  C3) : (Subset (C1.proj K) C3) ∧ (Subset (C2.proj K) C3) := by
+  generalize h0 : (C1 ∪ C2).proj K = C at h1
+  induction h1 generalizing C1 C2 <;> (subst_vars; simp_all)
+  case rfl =>
+    apply And.intro
+    apply proj_union_rl .rfl
+    apply proj_union_rr .rfl
+  case union_rl ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply union_rl; assumption)
+  case union_rr ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply union_rr; assumption)
+  case proj_empty ha hc iha ihc =>
+    have ⟨_, _⟩ := h0
+    subst_vars; simp_all
+    have ⟨hl, hr⟩ := ha.union_l_inv
+    have ⟨_, _⟩ := hc.union_l_inv
+    apply And.intro <;> apply proj_empty <;> assumption
+  case proj_union_l ha =>
+    have ⟨_, _⟩ := h0
+    subst_vars; simp_all
+    have ⟨hl, hr⟩ := ha.union_l_inv
+    apply And.intro <;> assumption
+  case proj_union_rl ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_union_rl; assumption)
+  case proj_union_rr ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_union_rr; assumption)
+  case proj_proj_r ha ih =>
+    have ⟨hl, hr⟩ := ih
+    apply And.intro <;> (apply proj_proj_r; assumption)
+
+
+theorem CaptureSet.Subset.trans (h1 : Subset C1 C2) (h2 : Subset C2 C3) : Subset C1 C3 := by
+  induction h1 generalizing C3
+  case empty => apply empty
+  case rfl => assumption
+  case union_l ha hb iha ihb =>
+    apply union_l (iha h2) (ihb h2)
+  case union_rl ha ih =>
+    have ⟨hl, hr⟩ := h2.union_l_inv; apply ih; assumption
+  case union_rr ha ih =>
+    have ⟨hl, hr⟩ := h2.union_l_inv; apply ih; assumption
+  case proj_empty ha hc iha ihc =>
+    apply proj_empty
+    apply ihc .empty
+    assumption
+  case proj_union_l ha ih =>
+    apply proj_union_l
+    apply ih h2
+  case proj_union_rl ha ih =>
+    have ⟨hl, hr⟩ := h2.proj_union_l_inv
+    apply ih; assumption
+  case proj_union_rr ha ih =>
+    have ⟨hl, hr⟩ := h2.proj_union_l_inv
+    apply ih; assumption
+  case proj_union_eq =>
+    have ⟨hl, hr⟩ := h2.proj_union_l_inv
+    apply union_l <;> assumption
+  case proj_proj_l ha ih =>
+    apply proj_proj_l
+    apply ih h2
+  case proj_proj_r ha ih =>
+    apply ih
+    apply proj_proj_l h2
+
+theorem CaptureSet.Subset.proj_union_l_rev (h1 : Subset (.proj (C1 ∪ C2) K) C) : Subset (.union (C1.proj K) (C2.proj K)) C := by
+  have ⟨hl, hr⟩ := h1.proj_union_l_inv
+  apply union_l <;> assumption
+
+theorem CaptureSet.Subset.proj_union_r_rev (h1 : Subset C (.proj (C1 ∪ C2) K)) : Subset C (.union (C1.proj K) (C2.proj K)) := by
+  cases h1
+  case empty => apply empty
+  case rfl => apply proj_union_l .rfl
+  case union_l ha hb =>
+    apply union_l (ha.proj_union_r_rev) (hb.proj_union_r_rev)
+  case proj_empty ha hc =>
+    apply proj_empty
+    apply hc.proj_union_r_rev
+    assumption
+  case proj_union_l ha =>
+    -- apply proj_union_l
+    -- apply ha.proj_union_r_rev
+    sorry
+  case proj_union_rl ha =>
+    apply union_rl ha
+  case proj_union_rr ha =>
+    apply union_rr ha
+  case proj_union_eq =>
+    apply rfl
+  case proj_proj_l ha =>
+
+
 
 @[simp]
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
+
+@[simp]
+instance : IsTrans (CaptureSet n k) Subset where
+  trans a b c ha hb := CaptureSet.Subset.trans ha hb
 
 /-!
 ## Renaming operations
@@ -210,12 +341,13 @@ theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
   case union_rr =>
     simp
     apply! Subset.union_rr
-  case proj_union =>
+  case proj_union_l ha hb iha ihb =>
     simp
-    apply Subset.proj_union
-  case union_proj =>
+    apply Subset.proj_union_l; assumption
+  case proj_proj_l ha iha =>
     simp
-    apply Subset.union_proj
+    apply Subset.proj_proj_l; assumption
+
 
 theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
   (h : C1 ⊆ C2) :
@@ -224,12 +356,12 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
   case union_rr =>
     simp
     apply! Subset.union_rr
-  case proj_union =>
+  case proj_union_l ha hb iha ihb =>
     simp
-    apply Subset.proj_union
-  case union_proj =>
+    apply Subset.proj_union_l; assumption
+  case proj_proj_l ha iha =>
     simp
-    apply Subset.union_proj
+    apply Subset.proj_proj_l; assumption
 
 theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
   C.cweaken = C.crename FinFun.weaken := by
