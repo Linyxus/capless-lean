@@ -52,7 +52,6 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | empty : CaptureKind Γ .empty K
   | proj_kind {C : CaptureSet n k} : CaptureKind Γ (C.proj K) K
   | proj : CaptureKind Γ C K -> CaptureKind Γ (C.proj K1) K
-
 end
 
 
