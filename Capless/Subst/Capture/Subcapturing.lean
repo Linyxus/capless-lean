@@ -25,10 +25,10 @@ theorem CaptureKind.csubst
   | .sub hs hk => .sub hs (hk.csubst σ)
   | .empty => .empty
   | .proj_kind => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply CaptureKind.proj_kind
   | .proj hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply CaptureKind.proj $ hk.csubst σ
 
 
@@ -60,19 +60,19 @@ theorem Subcapt.csubst
     cases hb1
     easy
   | .proj h1 => by
-    repeat rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj (h1.csubst σ)
   | .proj_sub hs => by
-    repeat rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_sub hs
   | .proj_l => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_l
   | .proj_r hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_r (hk.csubst σ)
   | .proj_disj hd hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_disj hd (hk.csubst σ)
 end
 

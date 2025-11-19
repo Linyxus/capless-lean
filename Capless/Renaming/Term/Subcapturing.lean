@@ -17,6 +17,12 @@ theorem CaptureSet.Subset.rename {C1 C2 : CaptureSet n k}
   C1.rename f ⊆ C2.rename f := by
   induction h <;> try (solve | simp | constructor <;> try trivial)
   apply CaptureSet.Subset.union_rr; trivial
+  case proj_union =>
+    simp
+    apply proj_union
+  case union_proj =>
+    simp
+    apply union_proj
 
 mutual
 theorem CaptureKind.rename
@@ -29,10 +35,10 @@ theorem CaptureKind.rename
   | .csub hs hk => .csub (hs.rename ρ) (hk.rename ρ)
   | .sub hs hk => .sub hs (hk.rename ρ)
   | .proj_kind => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply CaptureKind.proj_kind
   | .proj hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply CaptureKind.proj (hk.rename ρ)
 
 theorem Subcapt.rename
@@ -50,19 +56,19 @@ theorem Subcapt.rename
   | .cinstr hb => .cinstr (ρ.cmap _ _ hb)
   | .cbound hb => .cbound (ρ.cmap _ _ hb)
   | .proj h1 => by
-    repeat rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj (h1.rename ρ)
   | .proj_sub hs => by
-    repeat rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_sub hs
   | .proj_l => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_l
   | .proj_r hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_r (hk.rename ρ)
   | .proj_disj hd hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_disj hd (hk.rename ρ)
 end
 

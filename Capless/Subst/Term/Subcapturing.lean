@@ -28,10 +28,10 @@ theorem CaptureKind.subst
   | .sub hs hk => .sub hs (hk.subst σ)
   | .empty => .empty
   | .proj_kind => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply CaptureKind.proj_kind
   | .proj hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply CaptureKind.proj $ hk.subst σ
 
 
@@ -65,19 +65,19 @@ theorem Subcapt.subst
     simp [CBinding.rename, CBound.rename] at hb1
     apply Subcapt.cbound hb1
   | .proj h1 => by
-    repeat rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj (h1.subst σ)
   | .proj_sub hs => by
-    repeat rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_sub hs
   | .proj_l => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_l
   | .proj_r hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_r (hk.subst σ)
   | .proj_disj hd hk => by
-    rw [← CaptureSet.proj_rename_comm]
+    simp
     apply Subcapt.proj_disj hd (hk.subst σ)
 end
 

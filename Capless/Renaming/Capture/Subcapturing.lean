@@ -16,6 +16,12 @@ theorem CaptureSet.Subset.crename {C1 C2 : CaptureSet n k}
   C1.crename f ⊆ C2.crename f := by
   induction h <;> try (solve | simp | constructor <;> try trivial)
   apply CaptureSet.Subset.union_rr; trivial
+  case proj_union =>
+    simp
+    apply proj_union
+  case union_proj =>
+    simp
+    apply union_proj
 
 mutual
 
@@ -37,10 +43,10 @@ theorem CaptureKind.crename
     apply hk1
   | .empty => CaptureKind.empty
   | .proj_kind => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply CaptureKind.proj_kind
   | .proj hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply CaptureKind.proj
     apply hk.crename ρ
 
@@ -71,21 +77,21 @@ theorem Subcapt.crename
     have hb1 := ρ.cmap _ _ hb
     apply Subcapt.cbound hb1
   | .proj hs => by
-    repeat rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj
     apply hs.crename ρ
   | .proj_sub hs => by
-    repeat rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_sub hs
   | .proj_l => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_l
   | .proj_r hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_r
     apply hk.crename ρ
   | .proj_disj hd hk => by
-    rw [← CaptureSet.proj_crename_comm]
+    simp
     apply Subcapt.proj_disj hd
     apply hk.crename ρ
 
