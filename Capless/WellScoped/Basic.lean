@@ -11,53 +11,55 @@ This file contains basic properties of the well-scopedness relation.
 namespace Capless
 
 theorem WellScoped.subset
-  (hsc : WellScoped Γ cont C)
-  (hs : C' ⊆ C) :
-  WellScoped Γ cont C' := by
+  (hsc : WellScoped Γ cont C2)
+  (hs : C1 ⊆ C2) : WellScoped Γ cont C1 := by
   induction hs
   case empty => apply empty
-  case rfl => easy
-  case union_l => apply WellScoped.union <;> aesop
-  case union_rl =>
-    cases hsc
-    aesop
-  case union_rr =>
-    cases hsc
-    aesop
-  case proj_empty =>
-    constructor
-  case empty_proj =>
-    constructor
-    constructor
-  case proj_union =>
-    constructor
-    cases hsc
-    rename_i ha hb
-    constructor
-    cases ha; assumption
-    cases hb; assumption
-  case union_proj =>
-    constructor <;> constructor
+  case rfl => apply hsc
+  case union_l ha hb iha ihb => apply union (iha hsc) (ihb hsc)
+  case union_rl ha iha => cases hsc; aesop
+  case union_rr ha iha => cases hsc; aesop
+  case trans ha hb iha ihb => apply iha $ ihb hsc
+  case proj_empty => apply proj .empty .proj_empty
+  case proj_union_l =>
     cases hsc
     rename_i h1
-    cases h1; assumption
+    have ⟨hl, hr⟩ := CaptureSet.Subset.proj_union_l_inv h1
+    apply union <;> apply proj <;> aesop
+  case proj_union_r =>
     cases hsc
-    rename_i h1
-    cases h1; assumption
+    rename_i h1 h2
+    apply proj
+    apply union h1 h2
+    apply CaptureSet.Subset.proj_union_r
   case proj_proj =>
     cases hsc
-    rename_i h1
-    cases h1
-    constructor
-    constructor
-    assumption
+    rename_i h1 h2
+    apply proj h1
+    apply CaptureSet.Subset.trans .proj_proj h2
+  case proj_l =>
+    apply proj hsc .proj_l
+  case proj ha ih =>
+    cases hsc
+    case proj =>
+      rename_i h1 ih2
+      apply proj h1
+      apply CaptureSet.Subset.trans _ ih2
+      apply! CaptureSet.Subset.proj
+    case label_disj =>
+      apply proj
+      apply! label_disj
+      apply! CaptureSet.Subset.proj
+
+
 
 theorem WellScoped.cons
   (hsc : WellScoped Γ cont C) :
   WellScoped Γ (Cont.cons u cont) C := by
   induction hsc
   case empty => apply empty
-  case union ih1 ih2 => apply union <;> aesop
+  case union => apply union <;> aesop
+  case proj => apply proj <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
@@ -66,15 +68,16 @@ theorem WellScoped.cons
     apply label
     easy
     constructor; easy
-  case proj =>
-    constructor; easy
+  case label_disj hb hd =>
+    apply! label_disj
 
 theorem WellScoped.conse
   (hsc : WellScoped Γ cont C) :
   WellScoped Γ (Cont.conse u cont) C := by
   induction hsc
   case empty => apply empty
-  case union ih1 ih2 => apply union <;> aesop
+  case union => apply union <;> aesop
+  case proj => apply proj <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
@@ -83,14 +86,15 @@ theorem WellScoped.conse
     apply label
     easy
     constructor; easy
-  case proj => constructor; easy
+  case label_disj => apply! label_disj
 
 theorem WellScoped.scope
   (hsc : WellScoped Γ cont C) :
   WellScoped Γ (Cont.scope x cont) C := by
   induction hsc
   case empty => apply empty
-  case union ih1 ih2 => apply union <;> aesop
+  case union => apply union <;> aesop
+  case proj => apply proj <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
@@ -99,7 +103,7 @@ theorem WellScoped.scope
     apply label
     easy
     constructor; easy
-  case proj => constructor; easy
+  case label_disj => apply! label_disj
 
 theorem WellScoped.subcapt
   (hsc : WellScoped Γ cont C)
@@ -111,27 +115,13 @@ theorem WellScoped.subcapt
   | .union ha hb => .union (.subcapt hsc ha) (.subcapt hsc hb)
   | .var hb => .singleton hb hsc
   | .cinstl hb1 => by
-    cases hsc
-    case csingleton =>
-      rename_i hb2
-      have h := Context.cbound_injective hb1 hb2
-      cases h
-      rename_i h
-      exact h
-    case cbound =>
-      rename_i hb2
-      have h := Context.cbound_injective hb1 hb2
-      cases h
-    case ckind =>
-      rename_i hb2
-      have h := Context.cbound_injective hb1 hb2
-      cases h
+    cases hsc <;> (rename_i hb2; cases Context.cbound_injective hb1 hb2)
+    assumption
   | .cinstr hb => .csingleton hb hsc
   | .cbound hb => .cbound hb hsc
   | .proj h1 => by
-    constructor
     cases hsc
-    apply WellScoped.subcapt _ h1; assumption
+    rename_i s D2 K D3 hsc hs
   | .proj_sub hs => by
     constructor
     cases hsc
@@ -140,7 +130,8 @@ theorem WellScoped.subcapt
   | .proj_r hs => by
     cases hsc
     assumption
-  | .proj_disj _ _ => _
+  | .proj_disj hd hk => by sorry
+
 
 theorem WellScoped.var_inv
   (hsc : WellScoped Γ cont {x=x})

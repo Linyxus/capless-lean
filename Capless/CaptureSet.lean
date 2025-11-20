@@ -65,6 +65,8 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | proj_empty : Subset (.proj .empty K) .empty
 | proj_union_l : Subset (.union (.proj C1 K) (.proj C2 K)) (.proj (C1 ∪ C2) K)
 | proj_union_r : Subset (.proj (C1 ∪ C2) K) (.union (.proj C1 K) (.proj C2 K))
+| proj_proj : Subset (.proj (.proj C K1) K2) (.proj (.proj C K2) K1) -- allows us to consider only the relevant projection
+| proj_l : Subset (.proj C K) C -- allows introducing projections anywhere
 | proj : Subset C D -> Subset (.proj C K) (.proj D K)
 
 theorem CaptureSet.Subset.union_l_inv (h1 : Subset (C1 ∪ C2) C3) : (Subset C1 C3) ∧ (Subset C2 C3) := by
@@ -112,6 +114,12 @@ theorem CaptureSet.Subset.proj_union_l_inv (h1 : Subset (.proj (C1 ∪ C2) K)  C
     apply And.intro
     apply union_rl .rfl
     apply union_rr .rfl
+  case proj_l =>
+    have ⟨_, _⟩ := h0
+    subst_vars; simp_all
+    apply And.intro
+    apply union_rl .proj_l
+    apply union_rr .proj_l
   case proj ha ih =>
     have ⟨_, _⟩ := h0
     subst_vars; simp_all
@@ -273,6 +281,8 @@ theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
   case proj_empty => simp; apply! Subset.proj_empty
   case proj_union_l => simp; apply! Subset.proj_union_l
   case proj_union_r => simp; apply! Subset.proj_union_r
+  case proj_proj => simp; apply! Subset.proj_proj
+  case proj_l => simp; apply! Subset.proj_l
   case proj => simp; apply! Subset.proj
 
 
@@ -286,6 +296,8 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
   case proj_empty => simp; apply! Subset.proj_empty
   case proj_union_l => simp; apply! Subset.proj_union_l
   case proj_union_r => simp; apply! Subset.proj_union_r
+  case proj_proj => simp; apply! Subset.proj_proj
+  case proj_l => simp; apply! Subset.proj_l
   case proj => simp; apply! Subset.proj
 
 theorem CaptureSet.cweaken_def {C : CaptureSet n k} :

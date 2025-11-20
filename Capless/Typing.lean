@@ -19,7 +19,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Context.Bound Γ x (S^C) ->
   Typed Γ (Term.var x) (S^{x=x}) {x=x}
 | label :
-  Context.LBound Γ x S ->
+  Context.LBound Γ x c S ->
   Typed Γ (Term.var x) (Label[S]^{x=x}) {x=x}
 | pack :
   CaptureBound Γ C B ->
@@ -68,11 +68,12 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed (Γ,c:=C) t E.cweaken C0.cweaken ->
   Typed Γ (let c=C in t) E C0
 | boundary {Γ : Context n m k} {S : SType n m k} :
+  c.subclass .control ->
   Typed
-    ((Γ,c<:CBound.kind .control),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:CBound.kind (.classifier c)),x: Label[S.cweaken]^{c=0})
     t
     (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
-  Typed Γ (boundary: S in t) (S^CaptureSet.empty) C
+  Typed Γ (boundary[c]: S in t) (S^CaptureSet.empty) C
 
 notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
 

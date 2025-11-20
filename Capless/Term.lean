@@ -61,8 +61,8 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | bindt : SType n m k -> Term n (m+1) k -> Term n m k
 /-- Capture binding. -/
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
-/-- Boundary form `boundary[S] as <c,x> in t`. -/
-| boundary : SType n m k -> Term (n+1) m (k+1) -> Term n m k
+/-- Boundary form `boundary[c] as <c,x> in t`. -/
+| boundary : Classifier -> SType n m k -> Term (n+1) m (k+1) -> Term n m k
 
 /-!
 ## Notations
@@ -75,7 +75,7 @@ notation:40 "let" "x=" t " in " u => Term.letin t u
 notation:40 "let" "(c,x)=" t " in " u => Term.letex t u
 notation:40 "let" "X=" S " in " t => Term.bindt S t
 notation:40 "let" "c=" C " in " t => Term.bindc C t
-notation:40 "boundary:" S " in " t => Term.boundary S t
+notation:40 "boundary[" c "]:" S " in " t => Term.boundary c S t
 
 /-- Whether this term is a value? -/
 @[aesop safe constructors]
@@ -105,7 +105,7 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.letex t u => Term.letex (t.rename f) (u.rename f.ext)
   | Term.bindt S t => Term.bindt (S.rename f) (t.rename f)
   | Term.bindc c t => Term.bindc (c.rename f) (t.rename f)
-  | Term.boundary S t => Term.boundary (S.rename f) (t.rename f.ext)
+  | Term.boundary c S t => Term.boundary c (S.rename f) (t.rename f.ext)
 
 def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   match t with
@@ -122,7 +122,7 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.letex t u => Term.letex (t.trename f) (u.trename f)
   | Term.bindt S t => Term.bindt (S.trename f) (t.trename f.ext)
   | Term.bindc c t => Term.bindc c (t.trename f)
-  | Term.boundary S t => Term.boundary (S.trename f) (t.trename f)
+  | Term.boundary c S t => Term.boundary c (S.trename f) (t.trename f)
 
 def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   match t with
@@ -139,7 +139,7 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.letex t u => Term.letex (t.crename f) (u.crename f.ext)
   | Term.bindt S t => Term.bindt (S.crename f) (t.crename f)
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
-  | Term.boundary S t => Term.boundary (S.crename f) (t.crename f.ext)
+  | Term.boundary c S t => Term.boundary c (S.crename f) (t.crename f.ext)
 
 def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
 

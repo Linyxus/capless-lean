@@ -273,4 +273,4 @@ theorem Kind.subkind_any : Kind.Subkind K .any := by
 
 /- Classifiers fixed for boundary. -/
 def Classifier.control := Classifier.child 0 Classifier.top
-def Kind.control := Kind.classifier .control
+def Kind.only_control := Kind.classifier .control

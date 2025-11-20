@@ -37,6 +37,7 @@ inductive Store : Nat -> Nat -> Nat -> Type where
   Store n m (k+1)
 | label :
   Store n m k ->
+  Classifier ->
   SType n m k ->
   Store (n+1) m k
 
@@ -80,7 +81,7 @@ inductive TypedStore : Store n m k -> Context n m k -> Prop where
   TypedStore (Store.cval σ C) (Γ.cvar (CBinding.inst C))
 | label :
   TypedStore σ Γ ->
-  TypedStore (Store.label σ S) (Γ.label S)
+  TypedStore (Store.label σ c S) (Γ.label c S)
 
 /-- Checks whether a label is in the scope of a continuation stack. This corresponds to the paper definition of finding whether there exists a `scope` form for that label in the evaluation context, like in the (BREAKOUT) rule of Fig. 6.
  -/
@@ -107,7 +108,11 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
 | union :
   WellScoped Γ cont C1 ->
   WellScoped Γ cont C2 ->
-  WellScoped Γ cont (C1 ∪ C2)
+  WellScoped Γ cont (.union C1 C2)
+| proj :
+  WellScoped Γ cont C1 ->
+  (.proj C2 K) ⊆ C1 ->
+  WellScoped Γ cont (.proj C2 K)
 | singleton :
   Context.Bound Γ x (S^C) ->
   WellScoped Γ cont C ->
@@ -123,13 +128,14 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
   WellScoped Γ cont {c=c}
-| proj :
-  WellScoped Γ cont C ->
-  WellScoped Γ cont (C.proj K)
 | label :
-  Context.LBound Γ x S ->
+  Context.LBound Γ x c S ->
   Cont.HasLabel cont x tail ->
   WellScoped Γ cont {x=x}
+| label_disj :
+  Context.LBound Γ x c S ->
+  Kind.Disjoint K (.classifier c) ->
+  WellScoped Γ cont (.proj {x=x} K)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
@@ -147,7 +153,7 @@ inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k 
   TypedCont Γ E cont E' C ->
   TypedCont Γ (EType.ex B T) (Cont.conse t cont) E' (C ∪ Ct)
 | scope :
-  Context.LBound Γ x S ->
+  Context.LBound Γ x c S ->
   TypedCont Γ (S^{}) cont E' C ->
   (Γ ⊢ T0 <: S^{}) ->
   TypedCont Γ (EType.type T0) (Cont.scope x cont) E' C
@@ -181,7 +187,7 @@ inductive Store.Bound : Store n m k -> (Fin n) -> Term n m k -> Prop where
   Store.Bound (Store.cval σ C) x t.cweaken
 | there_label :
   Store.Bound σ x t ->
-  Store.Bound (Store.label σ S) (Fin.succ x) t.weaken
+  Store.Bound (Store.label σ c S) (Fin.succ x) t.weaken
 
 inductive Store.TBound : Store n m k -> (Fin m) -> SType n m k -> Prop where
 | here :
@@ -197,7 +203,7 @@ inductive Store.TBound : Store n m k -> (Fin m) -> SType n m k -> Prop where
   Store.TBound (Store.cval σ C) x S.cweaken
 | there_label :
   Store.TBound σ x S ->
-  Store.TBound (Store.label σ S') x S.weaken
+  Store.TBound (Store.label σ c S') x S.weaken
 
 inductive Store.CBound : Store n m k -> (Fin k) -> CaptureSet n k -> Prop where
 | here :
@@ -213,23 +219,23 @@ inductive Store.CBound : Store n m k -> (Fin k) -> CaptureSet n k -> Prop where
   Store.CBound (Store.cval σ C') (Fin.succ x) C.cweaken
 | there_label :
   Store.CBound σ x C ->
-  Store.CBound (Store.label σ S) x C.weaken
+  Store.CBound (Store.label σ c S) x C.weaken
 
-inductive Store.LBound : Store n m k -> (Fin n) -> SType n m k -> Prop where
+inductive Store.LBound : Store n m k -> (Fin n) -> Classifier -> SType n m k -> Prop where
 | here :
-  Store.LBound (Store.label σ S) 0 S.weaken
+  Store.LBound (Store.label σ c S) 0 c S.weaken
 | there_val :
-  Store.LBound σ x S ->
-  Store.LBound (Store.val σ t hv) x.succ S.weaken
+  Store.LBound σ x c S ->
+  Store.LBound (Store.val σ t hv) x.succ c S.weaken
 | there_tval :
-  Store.LBound σ x S ->
-  Store.LBound (Store.tval σ S') x S.tweaken
+  Store.LBound σ x c S ->
+  Store.LBound (Store.tval σ S') x c S.tweaken
 | there_cval :
-  Store.LBound σ x S ->
-  Store.LBound (Store.cval σ C) x S.cweaken
+  Store.LBound σ x c S ->
+  Store.LBound (Store.cval σ C) x c S.cweaken
 | there_label :
-  Store.LBound σ x S ->
-  Store.LBound (Store.label σ S') x.succ S.weaken
+  Store.LBound σ x c S ->
+  Store.LBound (Store.label σ c' S') x.succ c S.weaken
 
 /-!
 ## Weakening of Continuation Stack
@@ -274,7 +280,7 @@ inductive Context.IsTight : Context n m k -> Prop where
   Context.IsTight (Γ.cvar (CBinding.inst C))
 | label :
   Context.IsTight Γ ->
-  Context.IsTight (Γ.label S)
+  Context.IsTight (Γ.label c S)
 
 /-- The typing context of a store is always tight. -/
 theorem TypedStore.is_tight
