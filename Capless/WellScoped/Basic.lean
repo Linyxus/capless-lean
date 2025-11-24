@@ -20,12 +20,16 @@ theorem WellScoped.subset
   case union_rl ha iha => cases hsc; aesop
   case union_rr ha iha => cases hsc; aesop
   case trans ha hb iha ihb => apply iha $ ihb hsc
-  case proj_empty => apply proj .empty .proj_empty
+  case proj_empty =>
+    apply proj .empty .proj_empty
+    simp
   case proj_union_l =>
     cases hsc
-    rename_i h1
-    have ⟨hl, hr⟩ := CaptureSet.Subset.proj_union_l_inv h1
-    apply union <;> apply proj <;> aesop
+    rename_i h1 h2 h3
+    have ⟨hl, hr⟩ := CaptureSet.Subset.proj_union_l_inv h3
+    apply union
+    { apply proj h1 hl;  }
+
   case proj_union_r =>
     cases hsc
     rename_i h1 h2

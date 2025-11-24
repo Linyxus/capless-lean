@@ -112,6 +112,7 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
 | proj :
   WellScoped Γ cont C1 ->
   (.proj C2 K) ⊆ C1 ->
+  C1.depth ≤ C2.depth + 1 ->
   WellScoped Γ cont (.proj C2 K)
 | singleton :
   Context.Bound Γ x (S^C) ->

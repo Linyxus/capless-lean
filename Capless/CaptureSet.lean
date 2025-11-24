@@ -35,6 +35,14 @@ inductive CaptureSet : Nat -> Nat -> Type where
 | proj : CaptureSet n k -> Kind -> CaptureSet n k
 
 @[simp]
+def CaptureSet.depth : CaptureSet n k -> Nat
+  | empty => 0
+  | union a b => 1 + max a.depth b.depth
+  | singleton _ => 1
+  | csingleton _ => 1
+  | proj c _ => 1 + c.depth
+
+@[simp]
 instance : EmptyCollection (CaptureSet n k) where
   emptyCollection := CaptureSet.empty
 
@@ -316,67 +324,80 @@ inductive ProjectedSingletonsOnly: (isSingleton : Bool) -> CaptureSet n k -> Pro
   | proj : ProjectedSingletonsOnly true C -> ProjectedSingletonsOnly true (C.proj K)
   | union : ProjectedSingletonsOnly a C1 -> ProjectedSingletonsOnly b C2 -> ProjectedSingletonsOnly false (.union C1 C2)
 
-theorem CaptureSet.push_projection_down (h1 : ProjectedSingletonsOnly a C) : ∃ C1, ProjectedSingletonsOnly a C1 ∧ C1 ⊆ (C.proj K) ∧ (C.proj K) ⊆ C1 := by
+theorem CaptureSet.push_projection_down (h1 : ProjectedSingletonsOnly a C) : ∃ C1, ProjectedSingletonsOnly a C1 ∧ C1.depth ≤ (C.proj K).depth ∧ C1 ⊆ (C.proj K) ∧ (C.proj K) ⊆ C1 := by
   induction h1 generalizing K
   case union ha hb iha ihb =>
-    have ⟨Ca, ha1, ha2, ha3⟩ := iha (K:=K)
-    have ⟨Cb, hb1, hb2, hb3⟩ := ihb (K:=K)
+    have ⟨Ca, ha1, ha2, ha3, ha4⟩ := iha (K:=K)
+    have ⟨Cb, hb1, hb2, hb3, hb4⟩ := ihb (K:=K)
     exists (.union Ca Cb)
     apply And.intro
     apply! ProjectedSingletonsOnly.union
     apply And.intro
+    simp at ha2 hb2
+    simp; omega
+    apply And.intro
     apply Subset.trans _ .proj_union_l
-    apply Subset.union_monotone ha2 hb2
+    apply Subset.union_monotone ha3 hb3
     apply Subset.trans .proj_union_r _
     apply! Subset.union_monotone
   case proj C K2 ha iha =>
-    have ⟨Ca, ha1, ha2, ha3⟩ := iha (K:=K2)
+    have ⟨Ca, ha1, ha2, ha3, ha4⟩ := iha (K:=K2)
     exists Ca.proj K
     apply And.intro
     apply! ProjectedSingletonsOnly.proj
+    apply And.intro
+    simp at ha2
+    simp; assumption
     apply And.intro <;> apply! Subset.proj
   case empty =>
     exists .empty
     apply And.intro .empty
+    apply And.intro; simp
     apply And.intro .empty .proj_empty
   case singleton n =>
     exists (.proj (.singleton n) K)
     apply And.intro (.proj .singleton)
+    apply And.intro; simp
     apply And.intro <;> apply Subset.rfl
   case csingleton n =>
     exists (.proj (.csingleton n) K)
     apply And.intro (.proj .csingleton)
+    apply And.intro; simp
     apply And.intro <;> apply Subset.rfl
 
 /-- There always exists a capture set equivalent to the given C, whose projections are only on top of singletons. -/
-theorem CaptureSet.exists_projected_singleton_only (C : CaptureSet n k) : ∃ C1 a, ProjectedSingletonsOnly a C1 ∧ C1 ⊆ C ∧ C ⊆ C1 := by
+theorem CaptureSet.exists_projected_singleton_only (C : CaptureSet n k) : ∃ C1 a, ProjectedSingletonsOnly a C1 ∧ C1.depth ≤ C.depth ∧ C1 ⊆ C ∧ C ⊆ C1 := by
   induction C
   case empty =>
     exists .empty, false
-    apply And.intro
-    apply ProjectedSingletonsOnly.empty
+    apply And.intro ProjectedSingletonsOnly.empty
+    apply And.intro; simp
     apply And.intro <;> apply Subset.rfl
   case union a b ha hb =>
-    have ⟨Ca, _, ha1, ha2, ha3⟩ := ha
-    have ⟨Cb, _, hb1, hb2, hb3⟩ := hb
+    have ⟨Ca, _, ha1, ha2, ha3, ha4⟩ := ha
+    have ⟨Cb, _, hb1, hb2, hb3, hb4⟩ := hb
     exists (.union Ca Cb), false
     apply And.intro
     apply! ProjectedSingletonsOnly.union
+    apply And.intro; simp; omega
     apply And.intro <;> apply! Subset.union_monotone
   case singleton n =>
     exists .singleton n, true
     apply And.intro ProjectedSingletonsOnly.singleton
+    apply And.intro; simp
     apply And.intro <;> apply Subset.rfl
   case csingleton k =>
     exists .csingleton k, true
     apply And.intro ProjectedSingletonsOnly.csingleton
+    apply And.intro; simp
     apply And.intro <;> apply Subset.rfl
   case proj C K ih =>
-    have ⟨Ca, a, ha1, ha2, ha3⟩ := ih
-    have ⟨Cb, hb1, hb2, hb3⟩ := CaptureSet.push_projection_down ha1 (K:=K)
+    have ⟨Ca, a, ha1, ha2, ha3, ha4⟩ := ih
+    have ⟨Cb, hb1, hb2, hb3, hb4⟩ := CaptureSet.push_projection_down ha1 (K:=K)
     exists Cb, a
     apply And.intro hb1
+    apply And.intro; simp at hb2; simp; omega
     apply And.intro
-    apply Subset.trans hb2 (.proj ha2)
-    apply Subset.trans (.proj ha3) hb3
+    apply Subset.trans hb3 (.proj ha3)
+    apply Subset.trans (.proj ha4) hb4
 end Capless
