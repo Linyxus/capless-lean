@@ -48,104 +48,152 @@ instance : EmptyCollection (CaptureSet n k) where
 
 notation:max "{x=" x "}" => CaptureSet.singleton x
 notation:max "{c=" c "}" => CaptureSet.csingleton c
-notation:max "{s=" s "}" => CaptureSet.singleton s
 
 @[simp]
 instance : Union (CaptureSet n k) where
   union := CaptureSet.union
 
 /-- Subset relation on capture sets. -/
-inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
-| empty : Subset {} C
-| rfl : Subset C C
+inductive CaptureSet.Subset : Nat -> CaptureSet n k → CaptureSet n k → Prop where
+| empty : Subset 0 {} C
+| rfl : Subset 0 C C
 | union_l :
-  Subset C1 C ->
-  Subset C2 C ->
-  Subset (C1 ∪ C2) C
+  Subset a C1 C ->
+  Subset b C2 C ->
+  Subset (1 + a + b) (C1 ∪ C2) C
 | union_rl :
-  Subset C C1 ->
-  Subset C (C1 ∪ C2)
+  Subset a C C1 ->
+  Subset (1 + a) C (C1 ∪ C2)
 | union_rr :
-  Subset C C2 ->
-  Subset C (C1 ∪ C2)
-| trans : Subset C1 C2 -> Subset C2 C3 -> Subset C1 C3
+  Subset a C C2 ->
+  Subset (1 + a) C (C1 ∪ C2)
+| trans : Subset a C1 C2 -> Subset b C2 C3 -> Subset (1 + a + b) C1 C3
 /- projection distributivity -/
-| proj_empty : Subset (.proj .empty K) .empty
-| proj_union_l : Subset (.union (.proj C1 K) (.proj C2 K)) (.proj (C1 ∪ C2) K)
-| proj_union_r : Subset (.proj (C1 ∪ C2) K) (.union (.proj C1 K) (.proj C2 K))
-| proj_proj : Subset (.proj (.proj C K1) K2) (.proj (.proj C K2) K1) -- allows us to consider only the relevant projection
-| proj_l : Subset (.proj C K) C -- allows introducing projections anywhere
-| proj : Subset C D -> Subset (.proj C K) (.proj D K)
+| proj_empty : Subset 0 (.proj .empty K) .empty
+| proj_union_l : Subset 0 (.union (.proj C1 K) (.proj C2 K)) (.proj (C1 ∪ C2) K)
+| proj_union_r : Subset 0 (.proj (C1 ∪ C2) K) (.union (.proj C1 K) (.proj C2 K))
+| proj : Subset a C D -> Subset (1 + a) (.proj C K) (.proj D K)
 
-theorem CaptureSet.Subset.union_l_inv (h1 : Subset (C1 ∪ C2) C3) : (Subset C1 C3) ∧ (Subset C2 C3) := by
-  generalize h0 : C1 ∪ C2 = C at h1
+@[simp]
+instance : HasSubset (CaptureSet n k) where
+  Subset A B := ∃ n: Nat, CaptureSet.Subset n A B
+
+/- Existentialification -/
+
+theorem CaptureSet.Subset.empty' : CaptureSet.empty ⊆ C := by exists 0; apply empty
+theorem CaptureSet.Subset.rfl' {C : CaptureSet n k} : C ⊆ C := by exists 0; apply rfl
+theorem CaptureSet.Subset.union_l' {C1 C2 C : CaptureSet n k} (h1 : C1 ⊆ C) (h2 : C2 ⊆ C) : (C1 ∪ C2) ⊆ C := by
+  have ⟨n1, _⟩ := h1
+  have ⟨n2, _⟩ := h2
+  exists 1 + n1 + n2; apply! union_l
+theorem CaptureSet.Subset.union_rl' {C1 C2 C : CaptureSet n k} (h1 : C ⊆ C1) : C ⊆ (C1 ∪ C2) := by
+  have ⟨n1, _⟩ := h1
+  exists 1 + n1; apply! union_rl
+theorem CaptureSet.Subset.union_rr' {C1 C2 C : CaptureSet n k} (h1 : C ⊆ C2) : C ⊆ (C1 ∪ C2) := by
+  have ⟨n1, _⟩ := h1
+  exists 1 + n1; apply! union_rr
+theorem CaptureSet.Subset.trans' {C1 C2 C3 : CaptureSet n k} (h1 : C1 ⊆ C2) (h2 : C2 ⊆ C3) : C1 ⊆ C3 := by
+  have ⟨n1, _⟩ := h1
+  have ⟨n2, _⟩ := h2
+  exists 1 + n1 + n2; apply! trans
+theorem CaptureSet.Subset.proj_empty' : (CaptureSet.proj CaptureSet.empty K : CaptureSet n k) ⊆ CaptureSet.empty := by
+  exists 0; apply proj_empty
+theorem CaptureSet.Subset.proj_union_l' {C1 C2 : CaptureSet n k} : (CaptureSet.union (CaptureSet.proj C1 K) (CaptureSet.proj C2 K)) ⊆ (CaptureSet.proj (C1 ∪ C2) K) := by
+  exists 0; apply proj_union_l
+theorem CaptureSet.Subset.proj_union_r' {C1 C2 : CaptureSet n k} : (CaptureSet.proj (C1 ∪ C2) K) ⊆ (CaptureSet.union (CaptureSet.proj C1 K) (CaptureSet.proj C2 K)) := by
+  exists 0; apply proj_union_r
+theorem CaptureSet.Subset.proj' {C D : CaptureSet n k} (h : C ⊆ D) : (CaptureSet.proj C K) ⊆ (CaptureSet.proj D K) := by
+  have ⟨n1, _⟩ := h
+  exists 1 + n1; apply! proj
+
+
+
+@[simp]
+instance : IsTrans (CaptureSet n k) (HasSubset.Subset) where
+  trans a b c ha hb := by
+    have ⟨a, ha⟩ := ha
+    have ⟨b, hb⟩ := hb
+    exists (1 + a + b)
+    apply CaptureSet.Subset.trans ha hb
+
+theorem CaptureSet.Subset.union_l_inv {C1 C2 C3 : CaptureSet n k} (h1' : (C1 ∪ C2) ⊆ C3) : (C1 ⊆ C3) ∧ (C2 ⊆ C3) := by
+  generalize h0 : C1 ∪ C2 = C at h1'
+  have ⟨n, h1⟩ := h1'
   induction h1 generalizing C1 C2 <;> (subst_vars; simp_all)
   case rfl =>
     apply And.intro
-    apply union_rl .rfl
-    apply union_rr .rfl
+    apply Exists.intro 1 $ union_rl .rfl
+    apply Exists.intro 1 $ union_rr .rfl
+  case union_l a _ _ b _ h1 h2 ih1 ih2 =>
+    apply And.intro
+    exists a
+    exists b
   case union_rl ha ih =>
-    have ⟨hl, hr⟩ := ih
-    apply And.intro <;> (apply union_rl; assumption)
+    have ⟨⟨l, hl⟩, r, hr⟩ := ih _ ha
+    apply And.intro
+    apply Exists.intro (1 + l) $ .union_rl hl
+    apply Exists.intro (1 + r) $ .union_rl hr
   case union_rr ha ih =>
-    have ⟨hl, hr⟩ := ih
-    apply And.intro <;> (apply union_rr; assumption)
-  case trans h1 h2 ih1 ih2 =>
-    have ⟨_, _⟩ := ih2
-    apply And.intro <;> apply! trans _ h1
+    have ⟨⟨l, hl⟩, r, hr⟩ := ih _ ha
+    apply And.intro
+    apply Exists.intro (1 + l) $ .union_rr hl
+    apply Exists.intro (1 + r) $ .union_rr hr
+  case trans b _ h1 _ h2 ih2 =>
+    have ⟨⟨l, hl⟩, r, hr⟩ := ih2 _ h2
+    apply And.intro
+    exists (1 + l + b); apply trans hl h1
+    exists (1 + r + b); apply trans hr h1
   case proj_union_l =>
     have ⟨_, _⟩ := h0
     subst_vars; simp_all
-    apply And.intro <;> apply proj
-    apply union_rl .rfl
-    apply union_rr .rfl
+    apply And.intro
+    exists 1 + 1; apply proj; apply union_rl .rfl
+    exists 1 + 1; apply proj; apply union_rr .rfl
 
-theorem CaptureSet.Subset.proj_union_l_inv (h1 : Subset (.proj (C1 ∪ C2) K)  C3) : (Subset (C1.proj K) C3) ∧ (Subset (C2.proj K) C3) := by
-  generalize h0 : (C1 ∪ C2).proj K = C at h1
+theorem CaptureSet.Subset.proj_union_l_inv {C1 C2 C3 : CaptureSet n k} (h1' : (.proj (C1 ∪ C2) K) ⊆ C3) : ((C1.proj K) ⊆ C3) ∧ ((C2.proj K) ⊆ C3) := by
+  generalize h0 : (C1 ∪ C2).proj K = C at h1'
+  have ⟨n, h1⟩ := h1'
   induction h1 generalizing C1 C2 <;> (subst_vars; simp_all)
   case rfl =>
-    apply And.intro <;> apply proj
-    apply union_rl .rfl
-    apply union_rr .rfl
+    apply And.intro
+    exists 1 + 1; apply proj $ union_rl .rfl
+    exists 1 + 1; apply proj $ union_rr .rfl
   case union_rl ha ih =>
-    have ⟨hl, hr⟩ := ih
-    apply And.intro <;> (apply union_rl; assumption)
+    have ⟨⟨l, hl⟩, r, hr⟩ := ih _ ha
+    apply And.intro
+    exists 1 + l; apply! union_rl
+    exists 1 + r; apply! union_rl
   case union_rr ha ih =>
-    have ⟨hl, hr⟩ := ih
-    apply And.intro <;> (apply union_rr; assumption)
-  case trans ha hb iha ihb =>
-    have ⟨_, _⟩ := ihb
-    apply And.intro <;> apply! trans
+    have ⟨⟨l, hl⟩, r, hr⟩ := ih _ ha
+    apply And.intro
+    exists 1 + l; apply! union_rr
+    exists 1 + r; apply! union_rr
+  case trans b _ ha hb iha ihb =>
+    have ⟨⟨l, hl⟩, r, hr⟩ := ihb _ iha
+    apply And.intro
+    exists (1 + l + b); apply! trans
+    exists (1 + r + b); apply! trans
   case proj_union_r =>
     have ⟨⟨_, _⟩, _⟩ := h0
     subst_vars; simp_all
     apply And.intro
-    apply union_rl .rfl
-    apply union_rr .rfl
-  case proj_l =>
-    have ⟨_, _⟩ := h0
-    subst_vars; simp_all
-    apply And.intro
-    apply union_rl .proj_l
-    apply union_rr .proj_l
+    exists 1; apply union_rl .rfl
+    exists 1; apply union_rr .rfl
   case proj ha ih =>
     have ⟨_, _⟩ := h0
     subst_vars; simp_all
-    have ⟨_, _⟩ := ha.union_l_inv
-    apply And.intro <;> apply! proj
+    have ⟨⟨l, hl⟩, r, hr⟩ := union_l_inv $ Exists.intro _ ha
+    apply And.intro
+    exists 1 + l; apply! proj
+    exists 1 + r; apply! proj
 
-theorem CaptureSet.Subset.union_monotone (hc : Subset C1 C2) (hd : Subset D1 D2) : Subset (C1 ∪ D1) (C2 ∪ D2) := by
+theorem CaptureSet.Subset.union_monotone {C1 C2 D1 D2 : CaptureSet n k} (hc : C1 ⊆ C2) (hd : D1 ⊆ D2) : (C1 ∪ D1) ⊆ (C2 ∪ D2) := by
+  have ⟨n1, hc1⟩ := hc
+  have ⟨n2, hc2⟩ := hd
+  exists 1 + (1 + n1) + (1 + n2)
   apply union_l
   apply! union_rl
   apply! union_rr
-
-@[simp]
-instance : HasSubset (CaptureSet n k) where
-  Subset := CaptureSet.Subset
-
-@[simp]
-instance : IsTrans (CaptureSet n k) Subset where
-  trans a b c ha hb := CaptureSet.Subset.trans ha hb
 
 /-!
 ## Renaming operations
@@ -261,7 +309,7 @@ theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
   simp [cweaken, crename_crename, FinFun.comp_weaken]
 
 theorem CaptureSet.subset_refl {C : CaptureSet n k} :
-  C ⊆ C := by constructor
+  C ⊆ C := by exists 0; constructor
 
 theorem CaptureSet.cweaken_csingleton {c : Fin k} :
   ({c=c} : CaptureSet n k).cweaken = {c=c.succ} := by
@@ -280,33 +328,70 @@ theorem CaptureSet.crename_id {C : CaptureSet n k} :
   induction C <;> aesop
 
 theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
-  (h : C1 ⊆ C2) :
+  (h' : C1 ⊆ C2) :
   C1.crename f ⊆ C2.crename f := by
-  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
-  case union_rr =>
-    simp
+  have ⟨n, h⟩ := h'
+  induction h <;> simp
+  case empty => exists 0; constructor
+  case rfl => exists 0; constructor
+  case proj_empty => exists 0; constructor
+  case proj_union_l => exists 0; constructor
+  case proj_union_r => exists 0; apply Subset.proj_union_r
+  case union_l ha hb iha ihb =>
+    have ⟨l, hl⟩ := iha $ Exists.intro _ ha
+    have ⟨r, hr⟩ := ihb $ Exists.intro _ hb
+    exists 1 + l + r
+    apply! Subset.union_l
+  case union_rl ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
+    apply! Subset.union_rl
+  case union_rr ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
     apply! Subset.union_rr
-  case proj_empty => simp; apply! Subset.proj_empty
-  case proj_union_l => simp; apply! Subset.proj_union_l
-  case proj_union_r => simp; apply! Subset.proj_union_r
-  case proj_proj => simp; apply! Subset.proj_proj
-  case proj_l => simp; apply! Subset.proj_l
-  case proj => simp; apply! Subset.proj
-
+  case trans ha hb iha ihb =>
+    have ⟨l, hl⟩ := iha $ Exists.intro _ ha
+    have ⟨r, hr⟩ := ihb $ Exists.intro _ hb
+    exists 1 + l + r
+    apply! Subset.trans
+  case proj ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
+    apply! Subset.proj
 
 theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
-  (h : C1 ⊆ C2) :
+  (h' : C1 ⊆ C2) :
   C1.cweaken ⊆ C2.cweaken := by
-  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
-  case union_rr =>
-    simp
+  have ⟨n, h⟩ := h'
+  induction h <;> simp
+  case empty => exists 0; constructor
+  case rfl => exists 0; constructor
+  case proj_empty => exists 0; constructor
+  case proj_union_l => exists 0; constructor
+  case proj_union_r => exists 0; apply Subset.proj_union_r
+  case union_l ha hb iha ihb =>
+    have ⟨l, hl⟩ := iha $ Exists.intro _ ha
+    have ⟨r, hr⟩ := ihb $ Exists.intro _ hb
+    exists 1 + l + r
+    apply! Subset.union_l
+  case union_rl ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
+    apply! Subset.union_rl
+  case union_rr ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
     apply! Subset.union_rr
-  case proj_empty => simp; apply! Subset.proj_empty
-  case proj_union_l => simp; apply! Subset.proj_union_l
-  case proj_union_r => simp; apply! Subset.proj_union_r
-  case proj_proj => simp; apply! Subset.proj_proj
-  case proj_l => simp; apply! Subset.proj_l
-  case proj => simp; apply! Subset.proj
+  case trans ha hb iha ihb =>
+    have ⟨l, hl⟩ := iha $ Exists.intro _ ha
+    have ⟨r, hr⟩ := ihb $ Exists.intro _ hb
+    exists 1 + l + r
+    apply! Subset.trans
+  case proj ha ih =>
+    have ⟨l, hl⟩ := ih $ Exists.intro _ ha
+    exists 1 + l
+    apply! Subset.proj
 
 theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
   C.cweaken = C.crename FinFun.weaken := by
@@ -316,88 +401,167 @@ theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
 ## Projections
 -/
 
+inductive ProjectedSingleton: CaptureSet n k -> (CaptureSet n k) -> Prop where
+  | var : ProjectedSingleton {x=x} {x=x}
+  | cvar : ProjectedSingleton {c=c} {c=c}
+  | proj : ProjectedSingleton s C -> ProjectedSingleton s (.proj C K)
+
+inductive ProjectedSingletonWith : (CaptureSet n k) -> (K : Kind) -> (CaptureSet n k) -> Prop where
+  | here : ProjectedSingleton s C -> ProjectedSingletonWith s K (.proj C K)
+  | there : ProjectedSingletonWith s K C -> ProjectedSingletonWith s K (.proj C K')
+
+def ProjectedSingletonWith.erase (hp : ProjectedSingletonWith s K C) : ProjectedSingleton s C := by
+  induction hp <;> apply! ProjectedSingleton.proj
+
 /-- A capture set that only has projections on top of singletons. -/
-inductive ProjectedSingletonsOnly: (isSingleton : Bool) -> CaptureSet n k -> Prop where
-  | empty : ProjectedSingletonsOnly false (.empty)
-  | singleton : ProjectedSingletonsOnly true (.singleton s)
-  | csingleton : ProjectedSingletonsOnly true (.csingleton s)
-  | proj : ProjectedSingletonsOnly true C -> ProjectedSingletonsOnly true (C.proj K)
-  | union : ProjectedSingletonsOnly a C1 -> ProjectedSingletonsOnly b C2 -> ProjectedSingletonsOnly false (.union C1 C2)
+inductive ProjectedSingletonsOnly: CaptureSet n k -> Prop where
+  | empty : ProjectedSingletonsOnly .empty
+  | singleton : ProjectedSingleton s C -> ProjectedSingletonsOnly C
+  | union : ProjectedSingletonsOnly C1 -> ProjectedSingletonsOnly C2 -> ProjectedSingletonsOnly (.union C1 C2)
 
-theorem CaptureSet.push_projection_down (h1 : ProjectedSingletonsOnly a C) : ∃ C1, ProjectedSingletonsOnly a C1 ∧ C1.depth ≤ (C.proj K).depth ∧ C1 ⊆ (C.proj K) ∧ (C.proj K) ⊆ C1 := by
-  induction h1 generalizing K
-  case union ha hb iha ihb =>
-    have ⟨Ca, ha1, ha2, ha3, ha4⟩ := iha (K:=K)
-    have ⟨Cb, hb1, hb2, hb3, hb4⟩ := ihb (K:=K)
-    exists (.union Ca Cb)
-    apply And.intro
-    apply! ProjectedSingletonsOnly.union
-    apply And.intro
-    simp at ha2 hb2
-    simp; omega
-    apply And.intro
-    apply Subset.trans _ .proj_union_l
-    apply Subset.union_monotone ha3 hb3
-    apply Subset.trans .proj_union_r _
+@[simp]
+def CaptureSet.push_proj (C: CaptureSet n k) (K: Kind) : CaptureSet n k :=
+  match C with
+  | .empty => .empty
+  | .singleton c => proj (.singleton c) K
+  | .csingleton c => proj (.csingleton c) K
+  | .proj C1 K1 => proj (.proj C1 K1) K
+  | .union C1 C2 => .union (C1.push_proj K) (C2.push_proj K)
+
+@[simp]
+def CaptureSet.canonicalize (C : CaptureSet n k) : CaptureSet n k :=
+  match C with
+  | .empty => .empty
+  | .singleton c => .singleton c
+  | .csingleton c => .csingleton c
+  | .union C1 C2 => .union (C1.canonicalize) (C2.canonicalize)
+  | .proj C1 K => C1.canonicalize.push_proj K
+
+theorem CaptureSet.push_proj_is_superset (C : CaptureSet n k) : (C.proj K) ⊆ C.push_proj K := by
+  induction C <;> simp only [push_proj]
+  case empty => exists 0; apply Subset.proj_empty
+  case union C1 C2 ih1 ih2 =>
+    apply IsTrans.trans (r := HasSubset.Subset)
+    exists 0; apply Subset.proj_union_r
     apply! Subset.union_monotone
-  case proj C K2 ha iha =>
-    have ⟨Ca, ha1, ha2, ha3, ha4⟩ := iha (K:=K2)
-    exists Ca.proj K
-    apply And.intro
-    apply! ProjectedSingletonsOnly.proj
-    apply And.intro
-    simp at ha2
-    simp; assumption
-    apply And.intro <;> apply! Subset.proj
-  case empty =>
-    exists .empty
-    apply And.intro .empty
-    apply And.intro; simp
-    apply And.intro .empty .proj_empty
-  case singleton n =>
-    exists (.proj (.singleton n) K)
-    apply And.intro (.proj .singleton)
-    apply And.intro; simp
-    apply And.intro <;> apply Subset.rfl
-  case csingleton n =>
-    exists (.proj (.csingleton n) K)
-    apply And.intro (.proj .csingleton)
-    apply And.intro; simp
-    apply And.intro <;> apply Subset.rfl
+  case singleton => exists 0; apply Subset.rfl
+  case csingleton => exists 0; apply Subset.rfl
+  case proj => apply Subset.proj' Subset.rfl'
 
-/-- There always exists a capture set equivalent to the given C, whose projections are only on top of singletons. -/
-theorem CaptureSet.exists_projected_singleton_only (C : CaptureSet n k) : ∃ C1 a, ProjectedSingletonsOnly a C1 ∧ C1.depth ≤ C.depth ∧ C1 ⊆ C ∧ C ⊆ C1 := by
-  induction C
-  case empty =>
-    exists .empty, false
-    apply And.intro ProjectedSingletonsOnly.empty
-    apply And.intro; simp
-    apply And.intro <;> apply Subset.rfl
-  case union a b ha hb =>
-    have ⟨Ca, _, ha1, ha2, ha3, ha4⟩ := ha
-    have ⟨Cb, _, hb1, hb2, hb3, hb4⟩ := hb
-    exists (.union Ca Cb), false
-    apply And.intro
+theorem CaptureSet.canonicalize_is_superset {C : CaptureSet n k} : C ⊆ C.canonicalize := by
+  induction C <;> (simp; try apply Subset.rfl')
+  case union ih1 ih2 => apply Subset.union_monotone ih1 ih2
+  case proj C1 K ih =>
+    apply Subset.trans'
+    apply Subset.proj' ih
+    apply push_proj_is_superset
+
+theorem CaptureSet.push_proj_is_subset {C : CaptureSet n k} : C.push_proj K ⊆ C.proj K := by
+  induction C <;> (simp; try apply Subset.rfl')
+  case empty => apply Subset.empty'
+  case union C1 C2 ih1 ih2 =>
+    apply Subset.trans' _ Subset.proj_union_l'
+    apply! Subset.union_monotone
+
+theorem CaptureSet.canonicalize_is_subset {C : CaptureSet n k} : C.canonicalize ⊆ C := by
+  induction C <;> (simp; try apply Subset.rfl')
+  case union ih1 ih2 => apply Subset.union_monotone ih1 ih2
+  case proj C1 K ih =>
+    apply Subset.trans' C1.canonicalize.push_proj_is_subset
+    apply Subset.proj' ih
+
+theorem CaptureSet.push_proj_singleton {C : CaptureSet n k} (hp: ProjectedSingletonsOnly C) : ProjectedSingletonsOnly (C.push_proj K) := by
+  induction hp <;> try simp_all
+  case empty => constructor
+  case singleton hp =>
+    induction hp
+    case var => apply ProjectedSingletonsOnly.singleton (.proj .var)
+    case cvar => apply ProjectedSingletonsOnly.singleton (.proj .cvar)
+    case proj =>
+      apply ProjectedSingletonsOnly.singleton
+      apply ProjectedSingleton.proj
+      apply! ProjectedSingleton.proj
+  case union C1 C2 ih1 ih2 =>
     apply! ProjectedSingletonsOnly.union
-    apply And.intro; simp; omega
-    apply And.intro <;> apply! Subset.union_monotone
-  case singleton n =>
-    exists .singleton n, true
-    apply And.intro ProjectedSingletonsOnly.singleton
-    apply And.intro; simp
-    apply And.intro <;> apply Subset.rfl
-  case csingleton k =>
-    exists .csingleton k, true
-    apply And.intro ProjectedSingletonsOnly.csingleton
-    apply And.intro; simp
-    apply And.intro <;> apply Subset.rfl
+
+theorem CaptureSet.canonicalize_is_projected_singletons_only {C : CaptureSet n k} : ProjectedSingletonsOnly C.canonicalize := by
+  induction C <;> try simp
+  case empty => apply ProjectedSingletonsOnly.empty
+  case singleton => apply ProjectedSingletonsOnly.singleton .var
+  case csingleton => apply ProjectedSingletonsOnly.singleton .cvar
+  case union C1 C2 ih1 ih2 => apply ProjectedSingletonsOnly.union ih1 ih2
   case proj C K ih =>
-    have ⟨Ca, a, ha1, ha2, ha3, ha4⟩ := ih
-    have ⟨Cb, hb1, hb2, hb3, hb4⟩ := CaptureSet.push_projection_down ha1 (K:=K)
-    exists Cb, a
-    apply And.intro hb1
-    apply And.intro; simp at hb2; simp; omega
-    apply And.intro
-    apply Subset.trans hb3 (.proj ha3)
-    apply Subset.trans (.proj ha4) hb4
+    apply push_proj_singleton
+    assumption
+
+lemma CaptureSet.push_proj_depth {C : CaptureSet n k} : (C.push_proj K).depth ≤ 1 + C.depth := by
+  induction C <;> simp; omega
+
+theorem CaptureSet.canonicalize_depth {C : CaptureSet n k} : C.canonicalize.depth ≤ C.depth := by
+  induction C <;> simp
+  case union ih1 ih2 => omega
+  case proj C K ih =>
+    apply IsTrans.trans
+    apply C.canonicalize.push_proj_depth
+    simp; exact ih
+
+lemma CaptureSet.push_proj_singleton_eq {C : CaptureSet n k} (hp : ProjectedSingleton s C) : (C.push_proj K) = (C.proj K) := by
+  induction hp <;> simp
+
+theorem CaptureSet.canonicalize_projected_singletons {C : CaptureSet n k} (hp : ProjectedSingletonsOnly C) : C.canonicalize = C := by
+  induction hp
+  case singleton s C hs =>
+    induction hs <;> simp
+    case proj ha ih =>
+      rw [ih]
+      apply! push_proj_singleton_eq
+  case empty => simp
+  case union ha hb iha ihb =>
+    simp; aesop
+
+theorem CaptureSet.canonicalize_idempt {C : CaptureSet n k} : C.canonicalize.canonicalize = C.canonicalize := by
+  have h := C.canonicalize_is_projected_singletons_only
+  rw [C.canonicalize.canonicalize_projected_singletons h]
+
+theorem CaptureSet.Subset.canonicalize {A B : CaptureSet n k} (hs : A ⊆ B) : A.canonicalize ⊆ B.canonicalize := by
+  apply trans'
+  apply A.canonicalize_is_subset
+  apply trans' hs
+  apply B.canonicalize_is_superset
+
+inductive EmptyOnly : CaptureSet n k -> Prop where
+  | base : EmptyOnly .empty
+  | union : EmptyOnly C1 -> EmptyOnly C2 -> EmptyOnly (C1.union C2)
+
+theorem CaptureSet.Subset.empty_only' {C : CaptureSet n k} (hs : Subset t C D) (he : EmptyOnly D.canonicalize) : EmptyOnly C.canonicalize := by
+  cases hs
+  case empty => constructor
+  case rfl => assumption
+  case union_l ha hb =>
+    apply EmptyOnly.union (empty_only' ha he) (empty_only' hb he)
+  case trans ha hb =>
+    have h1 := empty_only' hb he
+    apply empty_only' ha h1
+  case union_rl ha =>
+    cases he
+    apply! empty_only'
+  case union_rr ha =>
+    cases he
+    apply! empty_only'
+  case proj_empty => repeat constructor
+  case proj_union_l =>
+    cases he
+    apply EmptyOnly.union <;> simp <;> assumption
+  case proj_union_r =>
+    cases he
+    simp
+    apply EmptyOnly.union <;> assumption
+  case proj =>
+
+
+theorem CaptureSet.Subset.empty_only {C : CaptureSet n k} (hs : C ⊆ D) (he : EmptyOnly D) : EmptyOnly C := by
+  have ⟨_, hs1⟩ := hs
+  apply empty_only' hs1 he
+
+
 end Capless

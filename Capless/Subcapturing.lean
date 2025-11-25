@@ -36,9 +36,10 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c} C
 | proj :
-  Subcapt Γ {s=s} C2 -> Subcapt Γ ({s=s}.proj K) (C2.proj K)
+  Subcapt Γ C1 C2 -> Subcapt Γ (C1.proj K) (C2.proj K)
 | proj_sub {C : CaptureSet n k} {K1 K2 : Kind}:
   K1.Subkind K2 -> Subcapt Γ (C.proj K1) (C.proj K2)
+| proj_l : Subcapt Γ (C.proj K) C
 | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
 | proj_disj : Kind.Disjoint K1 K2 -> CaptureKind Γ C K1 -> Subcapt Γ (C.proj K2) .empty
 
@@ -52,10 +53,6 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | proj_kind {C : CaptureSet n k} : CaptureKind Γ (C.proj K) K
   | proj : CaptureKind Γ C K -> CaptureKind Γ (C.proj K1) K
 end
-
-theorem Subcapt.proj_l :  Subcapt Γ (C.proj K) C := by
-  apply Subcapt.subset .proj_l
-
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K
