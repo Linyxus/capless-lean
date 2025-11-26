@@ -43,9 +43,40 @@ theorem WellScoped.push_proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (
     rw [CaptureSet.push_proj_singleton_eq $ hp.erase]
     apply! ProjectedSingletonWith.there
 
--- theorem WellScoped.singleton_inv (hsc : WellScoped Γ cont C') (hs : C ⊆ C') (hp : ProjectedSingleton S C) : WellScoped Γ cont C := by
---   induction hsc
---   case empty =>
+theorem WellScoped.has_singleton
+  (hsc : WellScoped Γ cont C2)
+  (hh : HasSingleton C C2) :
+  WellScoped Γ cont C := by
+  induction hsc generalizing C
+  case empty => cases hh
+  case union ha hb iha ihb =>
+    cases hh
+    case union_l hh => apply! iha
+    case union_r hh => apply! ihb
+  case singleton =>
+    cases hh
+    apply! singleton
+  case csingleton =>
+    cases hh
+    apply! csingleton
+  case cbound =>
+    cases hh
+    apply! cbound
+  case ckind =>
+    cases hh
+    apply! ckind
+  case proj_singleton hsc hp ih =>
+    have hh1 := CaptureSet.projected_singleton_unique_singleton hp hh
+    subst_vars
+    apply! proj_singleton
+  case label hb hl =>
+    cases hh
+    apply! label
+  case label_disj hb hd hp =>
+    have hh1 := CaptureSet.projected_singleton_unique_singleton hp.erase hh
+    subst_vars
+    apply! label_disj
+
 
 theorem WellScoped.subset' (hsc : WellScoped Γ cont C2)
   (hs : C1 ⊆ C2)
@@ -58,80 +89,16 @@ theorem WellScoped.subset' (hsc : WellScoped Γ cont C2)
     apply union
     apply! iha
     apply! ihb
-  case singleton =>
-    induction hp2
-    case empty =>
-      have h1 := CaptureSet.Subset.empty_only hs .base
-      induction h1
-      case base => apply empty
-      case union h1 h2 ih1 ih2 => cases ih2
-      case proj ih h1 =>
-        cases h1
-
-
+  case singleton hp =>
+    have hp2 := CaptureSet.subset_has_singleton hs (CaptureSet.projected_singleton_has_singleton hp)
+    apply has_singleton hsc hp2
 
 theorem WellScoped.subset {C1 C2 : CaptureSet n k}
   (hsc : WellScoped Γ cont C2.canonicalize)
   (hs : C1 ⊆ C2) : WellScoped Γ cont C1.canonicalize := by
-  induction hs <;> simp_all
-  case empty => apply empty
-  case union_l ha hb iha ihb => apply! union
-  case union_rl ha iha =>
-    cases hsc
-    case proj_singleton hp => cases hp
-    case label_disj hp => cases hp
-    case union ha hb =>
-      apply! iha
-  case union_rr ha iha =>
-    cases hsc
-    case proj_singleton hp => cases hp
-    case label_disj hp => cases hp
-    case union ha hb => apply! iha
-  case proj_l =>
-    apply hsc.push_proj
-  case proj C D K hs ih =>
-    -- induction D <;> simp_all
-    -- case empty =>
-
-
-
-  -- case trans ha hb iha ihb => apply iha $ ihb hsc
-  -- case proj_empty =>
-  --   apply proj .empty .proj_empty
-  --   simp
-  -- case proj_union_l =>
-  --   cases hsc
-  --   rename_i h1 h2 h3
-  --   have ⟨hl, hr⟩ := CaptureSet.Subset.proj_union_l_inv h3
-  --   apply union
-  --   { apply proj h1 hl;  }
-
-  -- case proj_union_r =>
-  --   cases hsc
-  --   rename_i h1 h2
-  --   apply proj
-  --   apply union h1 h2
-  --   apply CaptureSet.Subset.proj_union_r
-  -- case proj_proj =>
-  --   cases hsc
-  --   rename_i h1 h2
-  --   apply proj h1
-  --   apply CaptureSet.Subset.trans .proj_proj h2
-  -- case proj_l =>
-  --   apply proj hsc .proj_l
-  -- case proj ha ih =>
-  --   cases hsc
-  --   case proj =>
-  --     rename_i h1 ih2
-  --     apply proj h1
-  --     apply CaptureSet.Subset.trans _ ih2
-  --     apply! CaptureSet.Subset.proj
-  --   case label_disj =>
-  --     apply proj
-  --     apply! label_disj
-  --     apply! CaptureSet.Subset.proj
-
-
+  have h := CaptureSet.Subset.canonicalize hs
+  apply subset' hsc h
+  repeat apply CaptureSet.canonicalize_is_projected_singletons_only
 
 theorem WellScoped.cons
   (hsc : WellScoped Γ cont C) :
@@ -139,11 +106,12 @@ theorem WellScoped.cons
   induction hsc
   case empty => apply empty
   case union => apply union <;> aesop
-  case proj => apply proj <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
   case ckind ih => apply ckind <;> aesop
+  case proj_singleton ha hp ih =>
+    apply proj_singleton <;> aesop
   case label =>
     apply label
     easy
@@ -157,7 +125,8 @@ theorem WellScoped.conse
   induction hsc
   case empty => apply empty
   case union => apply union <;> aesop
-  case proj => apply proj <;> aesop
+  case proj_singleton ha hp ih =>
+    apply proj_singleton <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop
@@ -174,7 +143,8 @@ theorem WellScoped.scope
   induction hsc
   case empty => apply empty
   case union => apply union <;> aesop
-  case proj => apply proj <;> aesop
+  case proj_singleton ha hp ih =>
+    apply proj_singleton <;> aesop
   case singleton ih => apply singleton <;> aesop
   case csingleton ih => apply csingleton <;> aesop
   case cbound ih => apply cbound <;> aesop

@@ -529,39 +529,67 @@ theorem CaptureSet.Subset.canonicalize {A B : CaptureSet n k} (hs : A ⊆ B) : A
   apply trans' hs
   apply B.canonicalize_is_superset
 
-inductive EmptyOnly : CaptureSet n k -> Prop where
-  | base : EmptyOnly .empty
-  | union : EmptyOnly C1 -> EmptyOnly C2 -> EmptyOnly (C1.union C2)
 
-theorem CaptureSet.Subset.empty_only' {C : CaptureSet n k} (hs : Subset t C D) (he : EmptyOnly D.canonicalize) : EmptyOnly C.canonicalize := by
-  cases hs
-  case empty => constructor
+inductive HasSingleton : CaptureSet n k -> CaptureSet n k -> Prop where
+  | var : HasSingleton {x=x} {x=x}
+  | cvar : HasSingleton {c=c} {c=c}
+  | union_l : HasSingleton s C1 -> HasSingleton s (.union C1 C2)
+  | union_r : HasSingleton s C2 -> HasSingleton s (.union C1 C2)
+  | proj : HasSingleton s C -> HasSingleton (s.proj K) (C.proj K)
+
+theorem CaptureSet.Subset.subset_has_singleton' {C1 C2 : CaptureSet n k} (hh1 : HasSingleton s C1) (hs : Subset t C1 C2) : HasSingleton s C2 := by
+  induction hs generalizing s
+  case empty => cases hh1
   case rfl => assumption
-  case union_l ha hb =>
-    apply EmptyOnly.union (empty_only' ha he) (empty_only' hb he)
-  case trans ha hb =>
-    have h1 := empty_only' hb he
-    apply empty_only' ha h1
-  case union_rl ha =>
-    cases he
-    apply! empty_only'
-  case union_rr ha =>
-    cases he
-    apply! empty_only'
-  case proj_empty => repeat constructor
+  case union_l ih1 ih2 =>
+    cases hh1
+    apply! ih1
+    apply! ih2
+  case union_rl ih => apply HasSingleton.union_l; apply ih hh1
+  case union_rr ih => apply HasSingleton.union_r; apply ih hh1
+  case trans ha hb iha ihb =>
+    apply ihb $ iha hh1
+  case proj_empty => cases hh1; rename_i hh1; cases hh1
   case proj_union_l =>
-    cases he
-    apply EmptyOnly.union <;> simp <;> assumption
+    cases hh1
+    { rename_i hh1; cases hh1; constructor; apply! HasSingleton.union_l }
+    { rename_i hh1; cases hh1; constructor; apply! HasSingleton.union_r }
   case proj_union_r =>
-    cases he
+    cases hh1
+    rename_i hh1
+    cases hh1
+    { apply HasSingleton.union_l; constructor; assumption }
+    { apply HasSingleton.union_r; constructor; assumption }
+  case proj ih =>
+    cases hh1
+    constructor
+    apply! ih
+
+theorem CaptureSet.subset_has_singleton {C1 C2 : CaptureSet n k} (hs : C1 ⊆ C2) (hh : HasSingleton C C1) : HasSingleton C C2 := by
+  have ⟨_, h⟩ := hs
+  apply Subset.subset_has_singleton' hh h
+
+theorem CaptureSet.projected_singleton_has_singleton (hp : ProjectedSingleton s C) : HasSingleton C C := by
+  induction hp
+  case var => constructor
+  case cvar => constructor
+  case proj hp => constructor; assumption
+
+theorem CaptureSet.projected_singleton_unique_singleton (hp : ProjectedSingleton s C) (hh : HasSingleton C' C) : C' = C := by
+  induction hp generalizing C'
+  case var => cases hh; rfl
+  case cvar => cases hh; rfl
+  case proj hp ih =>
+    cases hh
+    rename_i hh
+    have ih1 := ih hh
+    subst_vars
     simp
-    apply EmptyOnly.union <;> assumption
-  case proj =>
 
 
-theorem CaptureSet.Subset.empty_only {C : CaptureSet n k} (hs : C ⊆ D) (he : EmptyOnly D) : EmptyOnly C := by
-  have ⟨_, hs1⟩ := hs
-  apply empty_only' hs1 he
-
+theorem CaptureSet.Subset.empty_projected_singleton {C : CaptureSet n k} (hs : C ⊆ .empty) (hp : ProjectedSingleton s C) : False := by
+  have ⟨n, h⟩ := hs
+  have h2 := CaptureSet.Subset.subset_has_singleton' (projected_singleton_has_singleton hp) h
+  cases h2
 
 end Capless
