@@ -10,10 +10,22 @@ This file contains basic properties of the well-scopedness relation.
 
 namespace Capless
 
+theorem WellScoped.implies_canonical (hsc : WellScoped Γ cont C) : ProjectedSingletonsOnly C := by
+  induction hsc
+  case empty => constructor
+  case union ha hb iha ihb => apply! ProjectedSingletonsOnly.union
+  case singleton => apply ProjectedSingletonsOnly.singleton; constructor
+  case csingleton => apply ProjectedSingletonsOnly.singleton; constructor
+  case cbound => apply ProjectedSingletonsOnly.singleton; constructor
+  case ckind => apply ProjectedSingletonsOnly.singleton; constructor
+  case proj_singleton => apply! ProjectedSingletonsOnly.singleton
+  case label => apply ProjectedSingletonsOnly.singleton; constructor
+  case label_disj _ _ hsw => apply ProjectedSingletonsOnly.singleton; apply hsw.erase
+
 theorem WellScoped.push_proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (C.push_proj K) := by
-  induction hsc <;> try simp_all
+  induction hsc generalizing K <;> try simp_all
   case empty => apply empty
-  case union iha ihb => apply! union
+  case union iha ihb => apply union iha ihb
   case singleton hb ha ih =>
     apply proj_singleton
     apply singleton hb ha
@@ -32,7 +44,7 @@ theorem WellScoped.push_proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (
     apply ProjectedSingleton.proj .cvar
   case proj_singleton h1 hp ih =>
     apply proj_singleton h1
-    rw [CaptureSet.push_proj_singleton_eq hp]
+    rw [← CaptureSet.push_proj_singleton_eq hp]
     apply! ProjectedSingleton.proj
   case label hb hs =>
     apply proj_singleton
@@ -42,6 +54,9 @@ theorem WellScoped.push_proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (
     apply label_disj hb hd
     rw [CaptureSet.push_proj_singleton_eq $ hp.erase]
     apply! ProjectedSingletonWith.there
+
+theorem WellScoped.push_proj_sub {C : CaptureSet n k} (hsc : WellScoped Γ cont (C.push_proj K2)) (hsk : K1.Subkind K2) : WellScoped Γ cont (C.push_proj K1) := by
+  --  hsc.implies_canonical
 
 theorem WellScoped.has_singleton
   (hsc : WellScoped Γ cont C2)
@@ -156,23 +171,24 @@ theorem WellScoped.scope
   case label_disj => apply! label_disj
 
 theorem WellScoped.subcapt
-  (hsc : WellScoped Γ cont C)
+  (hsc : WellScoped Γ cont C.canonicalize)
   (hs : Γ ⊢ C' <:c C) :
-  WellScoped Γ cont C' :=
+  WellScoped Γ cont C'.canonicalize :=
   match hs with
   | .trans ha hb => .subcapt (.subcapt hsc hb) ha
   | .subset hs => .subset hsc hs
   | .union ha hb => .union (.subcapt hsc ha) (.subcapt hsc hb)
   | .var hb => .singleton hb hsc
   | .cinstl hb1 => by
-    cases hsc <;> (rename_i hb2; cases Context.cbound_injective hb1 hb2)
+    simp at hsc
+    cases hsc <;> (rename_i hb2; try cases Context.cbound_injective hb1 hb2)
     assumption
+    cases hb2
   | .cinstr hb => .csingleton hb hsc
   | .cbound hb => .cbound hb hsc
-  | .proj h1 => by
-    cases hsc
-    rename_i s D2 K D3 hsc hs
+  | .proj h1 => by sorry
   | .proj_sub hs => by
+    simp_all
     constructor
     cases hsc
     assumption

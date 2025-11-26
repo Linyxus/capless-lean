@@ -1,3 +1,6 @@
+import Capless.Basic
+import Capless.Tactics
+
 namespace Capless
 
 inductive Classifier : Type where
@@ -47,11 +50,16 @@ def Kind.any := Kind.classifier .top
 
 inductive Kind.Disjoint : Kind -> Kind -> Prop where
   | base : a.disjoint b -> Disjoint (classifier a) (classifier b)
-  | union : Disjoint a b1 -> Disjoint a b2 -> Disjoint a (union b1 b2)
-  | excl_this : a.subclass b -> Disjoint (excl c b) (classifier a)
-  | excl_union : Disjoint a (excl b1 k) -> Disjoint a (excl b2 k) -> Disjoint a (excl (union b1 b2) k)
-  | excl : Disjoint a b -> Disjoint a (excl b k)
-  | symm : Disjoint a b -> Disjoint b a
+  | union_l : Disjoint a1 b -> Disjoint a2 b -> Disjoint (union a1 a2) b
+  | union_r : Disjoint a b1 -> Disjoint a b2 -> Disjoint a (union b1 b2)
+  | excl_this_l : a.subclass b -> Disjoint (excl c b) (classifier a)
+  | excl_this_r : a.subclass b -> Disjoint (classifier a) (excl c b)
+  | excl_union_l : Disjoint (excl a1 k) b -> Disjoint (excl a2 k) b -> Disjoint (excl (union a1 a2) k) b
+  | excl_union_r : Disjoint a (excl b1 k) -> Disjoint a (excl b2 k) -> Disjoint a (excl (union b1 b2) k)
+  | excl_l : Disjoint a b -> Disjoint (excl a k) b
+  | excl_r : Disjoint a b -> Disjoint a (excl b k)
+  | empty_l : a.subclass b -> Disjoint (excl (classifier a) b) K
+  | empty_r : a.subclass b -> Disjoint K (excl (classifier a) b)
 
 inductive Kind.Subkind : Kind -> Kind -> Prop where
   | base : a.subclass b -> Subkind (classifier a) (classifier b)
@@ -184,6 +192,17 @@ theorem Classifier.subclass_up : subclass a (child m b) -> subclass a b := by
       right
       assumption
 
+theorem Classifier.subclass_trans : subclass a b -> subclass b c -> subclass a c := by
+  intro h1 h2
+  induction b
+  case top => simp_all
+  case child n k ih =>
+    have h11 := subclass_up h1
+    simp at h2
+    cases h2
+    case inl h2 => subst_vars; simp_all
+    case inr h2 => apply ih h11 h2
+
 theorem Classifier.disjoint_antisymm : disjoint a a = false := by
   induction a <;> simp
 
@@ -243,6 +262,32 @@ theorem Classifier.disjoint_up : disjoint a b -> disjoint a (child m b) := by
         { subst_vars; simp at h }
         { left; right; assumption }
 
+theorem Classifier.subclass_disjoint : subclass a1 a2 -> disjoint b a2 -> disjoint b a1 := by
+  intro hs hd
+  induction a1
+  case top =>
+    simp at hs; subst_vars; exfalso; apply disjoint_top hd
+  case child n k ih =>
+    simp at hs
+    cases hs
+    case inl h => subst_vars; simp_all
+    case inr h => apply disjoint_up; apply ih h
+
+theorem Kind.Disjoint.symm (hd : Disjoint K1 K2) : Disjoint K2 K1 := by
+  induction hd
+  case base hd =>
+    apply base
+    apply Classifier.disjoint_symm hd
+  case union_l => apply! union_r
+  case union_r => apply! union_l
+  case excl_this_l => apply! excl_this_r
+  case excl_this_r => apply! excl_this_l
+  case excl_union_l => apply! excl_union_r
+  case excl_union_r => apply! excl_union_l
+  case excl_l => apply! excl_r
+  case excl_r => apply! excl_l
+  case empty_l => apply! empty_r
+  case empty_r => apply! empty_l
 
 theorem Kind.Subkind.rfl : Kind.Subkind k k := by
   cases k
@@ -259,7 +304,7 @@ theorem Kind.Subkind.rfl : Kind.Subkind k k := by
     apply Subkind.excl_r
     apply Subkind.excl_l
     apply rfl
-    apply Disjoint.excl_this
+    apply Disjoint.excl_this_l
     unfold Classifier.subclass; simp
 
 theorem Kind.subkind_any : Kind.Subkind K .any := by
@@ -270,6 +315,137 @@ theorem Kind.subkind_any : Kind.Subkind K .any := by
     apply Subkind.union_l <;> assumption
   case excl K c ih =>
     apply Subkind.excl_l ih
+
+theorem Kind.Disjoint.union_r_inv (hd : Disjoint K (.union K1 K2)) : Disjoint K K1 ∧ Disjoint K K2 := by
+  cases hd
+  case union_l ha hb =>
+    have ⟨_, _⟩ := ha.union_r_inv
+    have ⟨_, _⟩ := hb.union_r_inv
+    apply And.intro <;> apply! union_l
+  case union_r ha hb => apply! And.intro
+  case excl_union_l ha hb =>
+    have ⟨_, _⟩ := ha.union_r_inv
+    have ⟨_, _⟩ := hb.union_r_inv
+    apply And.intro <;> apply! excl_union_l
+  case excl_l ha =>
+    have ⟨_, _⟩ := ha.union_r_inv
+    apply And.intro <;> apply! excl_l
+  case empty_l ha =>
+    apply And.intro <;> apply! empty_l
+
+
+theorem Kind.Disjoint.subclassed_excl_swap (hd : Disjoint K1 (.excl K2 b)) (hsub : b.subclass a) : Disjoint (.excl K1 a) K2 := by
+  cases hd
+  case union_l ha hb =>
+    apply excl_union_l
+    apply ha.subclassed_excl_swap hsub
+    apply hb.subclassed_excl_swap hsub
+  case excl_this_r ha =>
+    have h1 := Classifier.subclass_trans ha hsub
+    apply empty_l h1
+  case excl_union_l ha hb =>
+
+
+
+theorem Kind.Disjoint.subclassed_excl (hd : Disjoint (.excl K1 a) (.excl K2 b)) (hsub : b.subclass a) : Disjoint (.excl K1 a) K2 := by
+  cases hd
+  case excl_union_l ha hb =>
+    apply excl_union_l
+    apply ha.subclassed_excl hsub
+    apply hb.subclassed_excl hsub
+  case excl_union_r ha hb =>
+    apply union_r
+    apply ha.subclassed_excl hsub
+    apply hb.subclassed_excl hsub
+  case excl_r ha => assumption
+  case excl_l ha =>
+
+
+
+
+
+theorem Kind.Disjoint.disjointed_excl (hd : Disjoint K1 (.excl K2 a)) (hda : Disjoint K1 (.classifier a)) : Disjoint K1 K2 := by
+  cases hd
+  case union_l ha hb =>
+    have ⟨hl, hr⟩ := hda.symm.union_r_inv
+    apply union_l (ha.disjointed_excl hl.symm) (hb.disjointed_excl hr.symm)
+  case excl_this_r ha =>
+    cases hda
+    have h := Classifier.disjoint_subclass ha
+    simp_all
+  case excl_union_l ha hb =>
+    cases hda
+    case excl_this_l hsub =>
+      -- apply excl_union_l
+
+    case excl_l hda =>
+      have ⟨hl, hr⟩ := hda.symm.union_r_inv
+      apply excl_union_l
+      apply ha.disjointed_excl hl.symm.excl_l
+      apply hb.disjointed_excl hr.symm.excl_l
+
+
+
+theorem Kind.Disjoint.of_subkind (hd : Disjoint K K2) (hs : Subkind K1 K2) : Disjoint K K1 := by
+  induction hs generalizing K
+  case trans ha hb iha ihb =>
+    apply iha $ ihb hd
+  case base a b hs =>
+    generalize h : Kind.classifier b = K2 at hd
+    induction hd <;> try (subst_vars; simp_all)
+    case base hd =>
+      apply base
+      apply! Classifier.subclass_disjoint
+    case union_l ha hb => apply! union_l
+    case excl_this_l hs1 => apply excl_this_l; apply! Classifier.subclass_trans
+    case excl_union_l => apply! excl_union_l
+    case excl_l => apply! excl_l
+  case union_l ha hb iha ihb =>
+    apply union_r
+    apply! iha
+    apply! ihb
+  case union_r1 ha ih =>
+    have ⟨_, _⟩ := hd.union_r_inv
+    apply! ih
+  case union_r2 ha ih =>
+    have ⟨_, _⟩ := hd.union_r_inv
+    apply! ih
+  case excl_l ha ih => apply excl_r; apply! ih
+  case excl_r A B k hs ha ih =>
+    generalize h : Kind.excl B k = K2 at hd
+    induction hd <;> try (subst_vars; simp_all)
+    case union_l => apply! union_l
+    case excl_this_r hs =>
+      have ⟨_, _⟩ := h
+      subst_vars; simp_all
+      have ha1 := ha.symm
+      sorry
+    case excl_union_r =>
+      have ⟨_, _⟩ := h
+      subst_vars; simp_all
+      apply ih
+
+
+
+    case excl_union_l => apply! excl_union_l
+    case excl_l => apply! excl_l
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /- Classifiers fixed for boundary. -/
 def Classifier.control := Classifier.child 0 Classifier.top

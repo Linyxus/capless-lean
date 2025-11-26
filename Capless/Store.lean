@@ -126,8 +126,8 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   WellScoped Γ cont {c=c}
 | proj_singleton :
   WellScoped Γ cont C ->
-  ProjectedSingleton C C' ->
-  WellScoped Γ cont C'
+  ProjectedSingleton C (.proj C' K) ->
+  WellScoped Γ cont (.proj C' K)
 | label :
   Context.LBound Γ x c S ->
   Cont.HasLabel cont x tail ->
