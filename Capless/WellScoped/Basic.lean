@@ -56,7 +56,23 @@ theorem WellScoped.push_proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (
     apply! ProjectedSingletonWith.there
 
 theorem WellScoped.push_proj_sub {C : CaptureSet n k} (hsc : WellScoped Γ cont (C.push_proj K2)) (hsk : K1.Subkind K2) : WellScoped Γ cont (C.push_proj K1) := by
-  --  hsc.implies_canonical
+  induction C <;> simp_all
+  case union ih1 ih2 =>
+    cases hsc
+    case label_disj hsw => cases hsw
+    case union ha hb => apply union (ih1 ha) (ih2 hb)
+  case proj ih =>
+    cases hsc
+    case proj_singleton hsc hp =>
+      cases hp
+      rename_i hp
+      apply proj_singleton hsc $ .proj hp
+    case label_disj hb hd hsw =>
+      cases hsw
+      case here hs =>
+
+
+
 
 theorem WellScoped.has_singleton
   (hsc : WellScoped Γ cont C2)

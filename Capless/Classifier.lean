@@ -48,18 +48,82 @@ inductive Kind : Type where
 /-- The top kind -/
 def Kind.any := Kind.classifier .top
 
-inductive Kind.Disjoint : Kind -> Kind -> Prop where
-  | base : a.disjoint b -> Disjoint (classifier a) (classifier b)
-  | union_l : Disjoint a1 b -> Disjoint a2 b -> Disjoint (union a1 a2) b
-  | union_r : Disjoint a b1 -> Disjoint a b2 -> Disjoint a (union b1 b2)
-  | excl_this_l : a.subclass b -> Disjoint (excl c b) (classifier a)
-  | excl_this_r : a.subclass b -> Disjoint (classifier a) (excl c b)
-  | excl_union_l : Disjoint (excl a1 k) b -> Disjoint (excl a2 k) b -> Disjoint (excl (union a1 a2) k) b
-  | excl_union_r : Disjoint a (excl b1 k) -> Disjoint a (excl b2 k) -> Disjoint a (excl (union b1 b2) k)
-  | excl_l : Disjoint a b -> Disjoint (excl a k) b
-  | excl_r : Disjoint a b -> Disjoint a (excl b k)
-  | empty_l : a.subclass b -> Disjoint (excl (classifier a) b) K
-  | empty_r : a.subclass b -> Disjoint K (excl (classifier a) b)
+def KindFun : Type := Kind -> Kind
+
+@[simp]
+def KindFun.excl (f : KindFun) (c : Classifier) := (fun (x: Kind) => x.excl c) ∘ f
+
+@[simp]
+def KindFun.prepend (f: KindFun) (c : Classifier) := f ∘ (fun (x: Kind) => x.excl c)
+
+inductive UnderExcl : KindFun -> Prop where
+  | empty : UnderExcl id
+  | excl : UnderExcl f -> UnderExcl (f.excl c)
+
+theorem UnderExcl.prepend (hu : UnderExcl f) : UnderExcl (f.prepend c) := by
+  induction hu
+  case empty =>
+    simp
+    apply excl .empty
+  case excl hu ih =>
+    simp
+    rw [Function.comp_assoc]
+    apply excl ih
+
+theorem UnderExcl.one {c : Classifier} : UnderExcl (.excl id c) := .excl .empty
+
+theorem UnderExcl.injective (hu : UnderExcl f) : Function.Injective f := by
+  induction hu
+  case empty => apply Function.injective_id
+  case excl hu ih =>
+    intro a b h
+    simp at h
+    apply ih h
+
+inductive Kind.Disjoint : Nat -> Kind -> Kind -> Prop where
+  | base :
+    a.disjoint b ->
+    Disjoint 0 (classifier a) (classifier b)
+  | union_l :
+    UnderExcl f ->
+    Disjoint n (f a1) b ->
+    Disjoint m (f a2) b ->
+    Disjoint (1 + n + m) (f $ union a1 a2) b
+  | union_r :
+    UnderExcl f->
+    Disjoint n a (f b1) ->
+    Disjoint m a (f b2) ->
+    Disjoint (1 + n + m) a (f $ union b1 b2)
+  | excl_this_l :
+    a.subclass b ->
+    Disjoint 0 (excl c b) (classifier a)
+  | excl_this_r :
+    a.subclass b ->
+    Disjoint 0 (classifier a) (excl c b)
+  | excl_l :
+    UnderExcl f ->
+    Disjoint n a b ->
+    Disjoint (1 + n) (f a) b
+  | excl_r :
+    UnderExcl f ->
+    Disjoint n a b ->
+    Disjoint (1 + n) a (f b)
+  | excl_up_l :
+    UnderExcl f ->
+    Disjoint n (f $ .excl k1 a) k2 ->
+    Disjoint (1 + n) (.excl (f k1) a) k2
+  | excl_up_r :
+    UnderExcl f ->
+    Disjoint n k1 (f $ .excl k2 a) ->
+    Disjoint (1 + n) k1 (.excl (f k2) a)
+  | empty_l :
+    UnderExcl f ->
+    a.subclass b ->
+    Disjoint 0 (excl (f $ classifier a) b) K
+  | empty_r :
+    UnderExcl f ->
+    a.subclass b ->
+    Disjoint 0 K (excl (f $ classifier a) b)
 
 inductive Kind.Subkind : Kind -> Kind -> Prop where
   | base : a.subclass b -> Subkind (classifier a) (classifier b)
@@ -67,7 +131,7 @@ inductive Kind.Subkind : Kind -> Kind -> Prop where
   | union_r1 : Subkind a b1 -> Subkind a (union b1 b2)
   | union_r2 : Subkind a b2 -> Subkind a (union b1 b2)
   | excl_l : Subkind a b -> Subkind (excl a c) b
-  | excl_r : Subkind a b -> Kind.Disjoint a (classifier k) -> Subkind a (excl b k)
+  | excl_r : Subkind a b -> Kind.Disjoint n a (classifier k) -> Subkind a (excl b k)
   | trans : Subkind a b -> Subkind b c -> Subkind a c
 
 theorem Classifier.subclass_top : Classifier.subclass k .top := by
@@ -273,22 +337,6 @@ theorem Classifier.subclass_disjoint : subclass a1 a2 -> disjoint b a2 -> disjoi
     case inl h => subst_vars; simp_all
     case inr h => apply disjoint_up; apply ih h
 
-theorem Kind.Disjoint.symm (hd : Disjoint K1 K2) : Disjoint K2 K1 := by
-  induction hd
-  case base hd =>
-    apply base
-    apply Classifier.disjoint_symm hd
-  case union_l => apply! union_r
-  case union_r => apply! union_l
-  case excl_this_l => apply! excl_this_r
-  case excl_this_r => apply! excl_this_l
-  case excl_union_l => apply! excl_union_r
-  case excl_union_r => apply! excl_union_l
-  case excl_l => apply! excl_r
-  case excl_r => apply! excl_l
-  case empty_l => apply! empty_r
-  case empty_r => apply! empty_l
-
 theorem Kind.Subkind.rfl : Kind.Subkind k k := by
   cases k
   case classifier a =>
@@ -316,119 +364,373 @@ theorem Kind.subkind_any : Kind.Subkind K .any := by
   case excl K c ih =>
     apply Subkind.excl_l ih
 
-theorem Kind.Disjoint.union_r_inv (hd : Disjoint K (.union K1 K2)) : Disjoint K K1 ∧ Disjoint K K2 := by
-  cases hd
-  case union_l ha hb =>
-    have ⟨_, _⟩ := ha.union_r_inv
-    have ⟨_, _⟩ := hb.union_r_inv
+theorem Kind.Disjoint.symm (hd : Disjoint n K1 K2) : Disjoint n K2 K1 := by
+  induction hd
+  case base hd =>
+    have hd1 := Classifier.disjoint_symm hd
+    apply! base
+  case union_l => apply! union_r
+  case union_r => apply! union_l
+  case excl_this_l => apply! excl_this_r
+  case excl_this_r => apply! excl_this_l
+  -- case excl_union_l => apply! excl_union_r
+  -- case excl_union_r => apply! excl_union_l
+  case excl_l => apply! excl_r
+  case excl_r => apply! excl_l
+  case excl_up_l => apply! excl_up_r
+  case excl_up_r => apply! excl_up_l
+  case empty_l => apply! empty_r
+  case empty_r => apply! empty_l
+
+theorem Kind.Disjoint.union_r_inv (hd : Disjoint n K (.union K1 K2)) : ∃ n1 n2 : Nat, n1 ≤ n ∧ n2 ≤ n ∧ Disjoint n1 K K1 ∧ Disjoint n2 K K2 := by
+  generalize h : Kind.union K1 K2 = K at hd
+  cases hd <;> (subst_vars; try contradiction; try simp at hd)
+  case union_l hu ha hb =>
+    have ⟨na1, na2, ⟨_, _, _, _⟩⟩ := ha.union_r_inv
+    have ⟨nb1, nb2, ⟨_, _, _, _⟩⟩ := hb.union_r_inv
+    exists 1 + na1 + nb1, 1 + na2 + nb2
+    apply And.intro; omega
+    apply And.intro; omega
     apply And.intro <;> apply! union_l
-  case union_r ha hb => apply! And.intro
-  case excl_union_l ha hb =>
-    have ⟨_, _⟩ := ha.union_r_inv
-    have ⟨_, _⟩ := hb.union_r_inv
-    apply And.intro <;> apply! excl_union_l
-  case excl_l ha =>
-    have ⟨_, _⟩ := ha.union_r_inv
+  case union_r hu ha hb =>
+    cases hu <;> try cases h
+    rename_i n m
+    exists n, m
+    apply And.intro; omega
+    apply And.intro; omega
+    apply! And.intro
+  case excl_l hu ha =>
+    have ⟨na1, na2, ⟨_, _, _, _⟩⟩ := ha.union_r_inv
+    exists 1 + na1, 1 + na2
+    apply And.intro; omega
+    apply And.intro; omega
     apply And.intro <;> apply! excl_l
+  case excl_r hu ha =>
+    cases hu <;> try cases h
+    have ⟨na1, na2, ⟨_, _, _, _⟩⟩ := ha.union_r_inv
+    exists na1, na2
+    apply And.intro; omega
+    apply And.intro; omega
+    apply! And.intro
+  case excl_up_l ha =>
+    have ⟨na1, na2, ⟨_, _, _, _⟩⟩ := ha.union_r_inv
+    exists 1 + na1, 1 + na2
+    apply And.intro; omega
+    apply And.intro; omega
+    apply And.intro <;> apply! excl_up_l
   case empty_l ha =>
+    exists 0, 0
+    apply And.intro; omega
+    apply And.intro; omega
     apply And.intro <;> apply! empty_l
 
+theorem UnderExcl.excl_fold {f : KindFun} (hu : UnderExcl f) : (f.excl c) k = (f k).excl c := by
+  induction hu <;> simp_all
 
-theorem Kind.Disjoint.subclassed_excl_swap (hd : Disjoint K1 (.excl K2 b)) (hsub : b.subclass a) : Disjoint (.excl K1 a) K2 := by
-  cases hd
-  case union_l ha hb =>
-    apply excl_union_l
-    apply ha.subclassed_excl_swap hsub
-    apply hb.subclassed_excl_swap hsub
-  case excl_this_r ha =>
-    have h1 := Classifier.subclass_trans ha hsub
-    apply empty_l h1
-  case excl_union_l ha hb =>
+theorem UnderExcl.compose (hu1 : UnderExcl f) (hu2 : UnderExcl g) : UnderExcl (f ∘ g) := by
+  induction hu1
+  case empty =>
+    rw [Function.id_comp]
+    assumption
+  case excl hu ih =>
+    rw [KindFun.excl]
+    rw [Function.comp_assoc]
+    rw [← KindFun.excl]
+    constructor; assumption
+
+theorem UnderExcl.prefix (hf : UnderExcl f) (hg : UnderExcl g) (he : f k1 = g k2) : (∃ h, UnderExcl h ∧ f = g ∘ h) ∨ (∃ h, UnderExcl h ∧ g = f ∘ h) := by
+  induction hf generalizing g k1 k2
+  case empty =>
+    right
+    exists g
+  case excl f' c hf ih =>
+    simp at he
+    cases hg
+    case empty => simp at he; subst_vars; simp_all; left; apply! excl
+    case excl g' c' hg =>
+      simp at he; have ⟨_, _⟩ := he; subst_vars; simp_all
+      cases ih hg he
+      case inl ih =>
+        have ⟨h, hh1, hh2⟩ := ih
+        left
+        exists h
+        apply And.intro; assumption
+        rw [Function.comp_assoc, hh2]
+      case inr ih =>
+        have ⟨h, hh1, hh2⟩ := ih
+        right
+        exists h
+        apply And.intro; assumption
+        rw [Function.comp_assoc, hh2]
+
+theorem UnderExcl.union_eq (hf : UnderExcl f) (hg : UnderExcl g) (he : g k = f (.union k1 k2)) : ∃ h, UnderExcl h ∧ f = g ∘ h := by
+  induction hg generalizing f k k1 k2
+  case empty =>
+    exists f
+  case excl g' c hg ih =>
+    simp at he
+    cases hf
+    case empty => cases he
+    case excl f' c' hf =>
+      simp at he; have ⟨_, _⟩ := he; subst_vars
+      rename_i hf'
+      unfold KindFun.excl
+      have ⟨h, ⟨_, hh⟩⟩ := ih hf hf'
+      exists h
+      apply And.intro; assumption
+      rw [Function.comp_assoc]
+      rw [hh]
+  -- case empty =>
+  --   induction hg
+  --   case empty => simp_all; apply empty
+  --   case excl hg ih => simp_all
+  -- case excl f c hf ihf =>
+
+    -- induction hg generalizing f c k k1 k2
+    -- case empty => simp_all; constructor; apply hf
+    -- case excl hg ihg =>
+    --   simp at he; have ⟨_, _⟩ := he; subst_vars
+
+theorem Kind.Disjoint.excl_up_r_inv (hd : Disjoint n a (.excl (f b) c)) (hf : UnderExcl f) : ∃ m, Disjoint m a (f (.excl b c)) := by sorry
+  -- generalize he : (f b).excl c = K at hd
+  -- cases hd <;> (subst_vars; try simp_all)
+  -- case union_l hu ha hb =>
+  --   -- have ⟨ma, _, _⟩ := ha.excl_up_r_inv hf
+  --   -- have ⟨mb, _, _⟩ := hb.excl_up_r_inv hf
+  --   exists 1 + ma + mb
+  --   apply And.intro; omega
+  --   apply! union_l
+  -- case union_r hu ha hb =>
+  --   have ⟨h, hh1, _⟩ := UnderExcl.union_eq hu hf.excl he
+  --   subst_vars
+  --   have he1 := hf.excl.injective he
+  --   subst_vars
 
 
 
-theorem Kind.Disjoint.subclassed_excl (hd : Disjoint (.excl K1 a) (.excl K2 b)) (hsub : b.subclass a) : Disjoint (.excl K1 a) K2 := by
-  cases hd
-  case excl_union_l ha hb =>
-    apply excl_union_l
-    apply ha.subclassed_excl hsub
-    apply hb.subclassed_excl hsub
-  case excl_union_r ha hb =>
-    apply union_r
-    apply ha.subclassed_excl hsub
-    apply hb.subclassed_excl hsub
-  case excl_r ha => assumption
-  case excl_l ha =>
 
 
-
-
-
-theorem Kind.Disjoint.disjointed_excl (hd : Disjoint K1 (.excl K2 a)) (hda : Disjoint K1 (.classifier a)) : Disjoint K1 K2 := by
-  cases hd
-  case union_l ha hb =>
-    have ⟨hl, hr⟩ := hda.symm.union_r_inv
-    apply union_l (ha.disjointed_excl hl.symm) (hb.disjointed_excl hr.symm)
-  case excl_this_r ha =>
-    cases hda
-    have h := Classifier.disjoint_subclass ha
-    simp_all
-  case excl_union_l ha hb =>
-    cases hda
-    case excl_this_l hsub =>
-      -- apply excl_union_l
-
-    case excl_l hda =>
-      have ⟨hl, hr⟩ := hda.symm.union_r_inv
-      apply excl_union_l
-      apply ha.disjointed_excl hl.symm.excl_l
-      apply hb.disjointed_excl hr.symm.excl_l
-
-
-
-theorem Kind.Disjoint.of_subkind (hd : Disjoint K K2) (hs : Subkind K1 K2) : Disjoint K K1 := by
-  induction hs generalizing K
-  case trans ha hb iha ihb =>
-    apply iha $ ihb hd
-  case base a b hs =>
-    generalize h : Kind.classifier b = K2 at hd
-    induction hd <;> try (subst_vars; simp_all)
-    case base hd =>
-      apply base
-      apply! Classifier.subclass_disjoint
-    case union_l ha hb => apply! union_l
-    case excl_this_l hs1 => apply excl_this_l; apply! Classifier.subclass_trans
-    case excl_union_l => apply! excl_union_l
-    case excl_l => apply! excl_l
-  case union_l ha hb iha ihb =>
-    apply union_r
-    apply! iha
-    apply! ihb
-  case union_r1 ha ih =>
-    have ⟨_, _⟩ := hd.union_r_inv
-    apply! ih
-  case union_r2 ha ih =>
-    have ⟨_, _⟩ := hd.union_r_inv
-    apply! ih
-  case excl_l ha ih => apply excl_r; apply! ih
-  case excl_r A B k hs ha ih =>
-    generalize h : Kind.excl B k = K2 at hd
-    induction hd <;> try (subst_vars; simp_all)
-    case union_l => apply! union_l
-    case excl_this_r hs =>
-      have ⟨_, _⟩ := h
+theorem Kind.Disjoint.subclassed_excl_swap (hd : Disjoint n (g (.excl K1 b)) K2) (hg : UnderExcl g) (hsub : b.subclass a) : ∃ m, Disjoint m (g K1) (.excl K2 a) := by
+  generalize he : g (Kind.excl K1 b) = K at hd
+  cases hd <;> (subst_vars; try contradiction; try simp at hd)
+  case base hd =>
+    cases hg <;> cases he
+  case union_l hu ha hb =>
+    -- have hq : g (K1.excl b) = (g.excl b) K1 := by simp
+    have ⟨h, hh1, hh2⟩ := UnderExcl.union_eq hu hg.prepend he
+    subst_vars; simp_all
+    have ⟨ma, ha⟩ := ha.subclassed_excl_swap hg hsub
+    have ⟨mb, hb⟩ := hb.subclassed_excl_swap hg hsub
+    have he1 := hg.injective he
+    injections; subst K1
+    exists 1 + ma + mb
+    apply union_l (hg.compose hh1) ha hb
+  case union_r f _ _ _ _ hu ha hb =>
+    have ⟨ma, _⟩ := ha.subclassed_excl_swap hg hsub
+    have ⟨mb, _⟩ := hb.subclassed_excl_swap hg hsub
+    exists 1 + ma + mb
+    rw [← hu.excl_fold] at *
+    apply! union_r hu.excl
+  case excl_this_l ha =>
+    cases hg <;> (simp at he; have ⟨_, _⟩ := he; subst_vars; simp_all)
+    case empty =>
+      exists 0
+      apply empty_r .empty
+      apply! Classifier.subclass_trans
+    case excl g _ hg =>
+      exists 1 + 0
+      apply excl_r .one
+      apply! excl_this_l
+  -- case excl_union_l ha hb =>
+  --   have ⟨ma, _⟩ := ha.subclassed_excl_swap hsub
+  --   have ⟨mb, _⟩ := hb.subclassed_excl_swap hsub
+  --   exists 1 + ma + mb
+  --   apply! union_l
+  -- case excl_union_r ha hb =>
+  --   have ⟨ma, _⟩ := ha.subclassed_excl_swap hsub
+  --   have ⟨mb, _⟩ := hb.subclassed_excl_swap hsub
+  case excl_l f n a hu ha =>
+    cases hg.prefix hu he
+    case inl ih =>
+      have ⟨h, hh1, hh2⟩ := ih
       subst_vars; simp_all
-      have ha1 := ha.symm
-      sorry
-    case excl_union_r =>
-      have ⟨_, _⟩ := h
+      have he1 := hu.injective he
+      subst_vars
+      have ⟨ma, _⟩ := ha.subclassed_excl_swap hh1 hsub
+      exists 1 + ma
+      apply! excl_l
+    case inr ih =>
+      have ⟨h, hh1, hh2⟩ := ih
       subst_vars; simp_all
-      apply ih
+      have he1 := hg.injective he
+      cases hh1
+      case empty =>
+        simp at he1; subst_vars; simp_all
+        have ⟨ma, ha1⟩ := ha.subclassed_excl_swap .empty hsub
+        exists 1 + ma
+        apply! excl_l
+      case excl h' c hh1 =>
+        simp at he1; have ⟨_, _⟩ := he1; subst_vars; simp_all
+        exists 1 + (1 + n)
+        apply excl_r .one
+        apply excl_l (hg.compose hh1) ha
+    -- induction hu
+    -- case empty =>
+    --   subst_vars
+    --   apply! ha.subclassed_excl_swap
+    -- case excl hu ih =>
+    --   simp at he;
+    --   cases hg <;> (simp at he; have ⟨_, _⟩ := he; subst_vars; simp_all)
+    --   case empty =>
+    --     exists 1 + (1 + n)
+    --     apply excl_r .one
+    --     apply! excl_l
+    --   case excl hg =>
+
+      -- have ⟨_, _⟩ := he; subst_vars; simp_all
+      -- rename_i n _ _ _
+      -- exists 1 + (1 + n)
+      -- apply excl_r UnderExcl.empty.excl
+      -- apply excl_l hu ha
+  -- case excl_r c1 hu ha =>
+  --   have ⟨ma, ha1⟩ := ha.subclassed_excl_swap hsub
+  --   rw [← hu.excl_fold]
+  --   simp
+  --   exists 1 + (1 + ma)
+  --   apply excl_up_r hu
+  --   apply! excl_r
+  case excl_up_l hu ha =>
+    simp at h; have ⟨_, _⟩ := h; subst_vars; simp_all
+
+    -- have
+    -- induction hu
+    -- case empty =>
+    --   simp_all; have ⟨_, _⟩ := h; subst_vars; simp_all
+    --   apply ha.subclassed_excl_swap hsub
+    -- case excl hu _ =>
+    --   simp_all; have ⟨_, _⟩ := h; subst_vars; simp_all
+      -- have ⟨ma, _⟩ := ha.subclassed_excl_swap hsub
+
+
+    -- have ⟨ma, ha1⟩ := ha.subclassed_excl_swap hsub
 
 
 
-    case excl_union_l => apply! excl_union_l
-    case excl_l => apply! excl_l
+
+
+
+
+
+
+  -- case excl_this ha =>
+  --   exists 1 + 0
+  --   apply symm
+  --   apply empty
+  --   apply Classifier.subclass_trans ha hsub
+  -- case excl_union na a nb b ha hb =>
+  --   have ⟨ma, _⟩ := ha.subclassed_excl_swap hsub
+  --   have ⟨mb, _⟩ := hb.subclassed_excl_swap hsub
+  --   exists 1 + ma + mb
+  --   apply! union
+  -- case
+
+-- theorem Kind.Disjoint.subclassed_excl (hd : Disjoint (.excl K1 a) (.excl K2 b)) (hsub : b.subclass a) : Disjoint (.excl K1 a) K2 := by
+--   cases hd
+--   case excl_union_l ha hb =>
+--     apply excl_union_l
+--     apply ha.subclassed_excl hsub
+--     apply hb.subclassed_excl hsub
+--   case excl_union_r ha hb =>
+--     apply union_r
+--     apply ha.subclassed_excl hsub
+--     apply hb.subclassed_excl hsub
+--   case excl_r ha => assumption
+--   case excl_l ha =>
+
+
+
+
+
+-- theorem Kind.Disjoint.disjointed_excl (hd : Disjoint K1 (.excl K2 a)) (hda : Disjoint K1 (.classifier a)) : Disjoint K1 K2 := by
+--   cases hd
+--   case union_l ha hb =>
+--     have ⟨hl, hr⟩ := hda.symm.union_r_inv
+--     apply union_l (ha.disjointed_excl hl.symm) (hb.disjointed_excl hr.symm)
+--   case excl_this_r ha =>
+--     cases hda
+--     have h := Classifier.disjoint_subclass ha
+--     simp_all
+--   case excl_union_l ha hb =>
+--     cases hda
+--     case excl_this_l hsub =>
+--       -- apply excl_union_l
+
+--     case excl_l hda =>
+--       have ⟨hl, hr⟩ := hda.symm.union_r_inv
+--       apply excl_union_l
+--       apply ha.disjointed_excl hl.symm.excl_l
+--       apply hb.disjointed_excl hr.symm.excl_l
+
+
+
+-- theorem Kind.Disjoint.of_subkind (hd : Disjoint n K K2) (hs : Subkind K1 K2) : ∃ m, Disjoint m K K1 := by
+--   induction hs generalizing K n
+--   case trans ha hb iha ihb =>
+--     have ⟨m, hb⟩ := ihb hd
+--     apply! iha (n:=m)
+--   case base a b hs =>
+--     generalize h : Kind.classifier b = K2 at hd
+--     induction hd <;> try (subst_vars; simp_all)
+--     case base hd =>
+--       exists 0
+--       apply base
+--       apply! Classifier.subclass_disjoint
+--     case union_l ha hb =>
+--       have ⟨n, _⟩ := ha
+--       have ⟨m, _⟩ := hb
+--       exists 1 + n + m
+--       apply! union_l
+--     case excl_this_l hs1 =>
+--       exists 0
+--       apply excl_this_l; apply! Classifier.subclass_trans
+--     case excl_l ha =>
+--       have ⟨n, _⟩ := ha
+--       exists 1 + n
+--       apply! excl_l
+--     case union_r hu _ _ ha hb => cases hu <;> cases h
+--     case excl_r n _ _ hu ha ih =>
+--       cases hu <;> cases h
+--       exists n
+
+--   case union_l ha hb iha ihb =>
+--     apply union_r
+--     apply! iha
+--     apply! ihb
+--   case union_r1 ha ih =>
+--     have ⟨_, _⟩ := hd.union_r_inv
+--     apply! ih
+--   case union_r2 ha ih =>
+--     have ⟨_, _⟩ := hd.union_r_inv
+--     apply! ih
+--   case excl_l ha ih => apply excl_r; apply! ih
+--   case excl_r A B k hs ha ih =>
+--     generalize h : Kind.excl B k = K2 at hd
+--     induction hd <;> try (subst_vars; simp_all)
+--     case union_l => apply! union_l
+--     case excl_this_r hs =>
+--       have ⟨_, _⟩ := h
+--       subst_vars; simp_all
+--       have ha1 := ha.symm
+--       sorry
+--     case excl_union_r =>
+--       have ⟨_, _⟩ := h
+--       subst_vars; simp_all
+--       apply ih
+
+
+
+  --   case excl_union_l => apply! excl_union_l
+  --   case excl_l => apply! excl_l
 
 
 
