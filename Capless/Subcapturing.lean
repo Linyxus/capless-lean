@@ -10,7 +10,20 @@ import Capless.CaptureSet
 
 namespace Capless
 
-mutual
+
+inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
+  | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
+  -- | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
+  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
+  | cbound : Context.CBound Γ c (.bound (.upper C)) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
+  | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
+  | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
+  | empty : CaptureKind Γ .empty K
+  | singleton_proj_kind : CaptureKind Γ (.singleton $ .proj s K) K
+  | singleton_proj : CaptureKind Γ (.singleton s) K -> CaptureKind Γ (.singleton $ s.proj K1) K
+  -- | singleton_proj_disj : CaptureKind Γ (.singleton s) K1 -> K1.Disjoint K2 -> CaptureKind Γ (.singleton $ s.proj K2) K
+  | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
+
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
 | trans :
   Subcapt Γ C1 C2 ->
@@ -35,24 +48,17 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c} C
-| proj :
-  Subcapt Γ C1 C2 -> Subcapt Γ (C1.proj K) (C2.proj K)
-| proj_sub {C : CaptureSet n k} {K1 K2 : Kind}:
-  K1.Subkind K2 -> Subcapt Γ (C.proj K1) (C.proj K2)
-| proj_l : Subcapt Γ (C.proj K) C
-| proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
-| proj_disj : Kind.Disjoint K1 K2 -> CaptureKind Γ C K1 -> Subcapt Γ (C.proj K2) .empty
+-- | proj :
+--   Subcapt Γ C1 C2 -> Subcapt Γ (C1.proj K) (C2.proj K)
+| singleton_proj_sub {s : Singleton n k} {K1 K2 : Kind}:
+  K1.Subkind K2 -> Subcapt Γ (.singleton $ s.proj K1) (.singleton $ s.proj K2)
+| singleton_proj_l : Subcapt Γ (.singleton $ .proj s K) (.singleton s)
+| proj_r : Subcapt Γ C D -> CaptureKind Γ C K -> Subcapt Γ C (D.proj K)
+| singleton_proj_disj :
+  Kind.Disjoint K1 K2 ->
+  CaptureKind Γ (.singleton s) K1 ->
+  Subcapt Γ (.singleton $ s.proj K2) .empty
 
-inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
-  -- | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
-  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
-  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
-  | csub : Subcapt Γ C1 C2 -> CaptureKind Γ C2 K -> CaptureKind Γ C1 K
-  | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
-  | empty : CaptureKind Γ .empty K
-  | proj_kind {C : CaptureSet n k} : CaptureKind Γ (C.proj K) K
-  | proj : CaptureKind Γ C K -> CaptureKind Γ (C.proj K1) K
-end
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K

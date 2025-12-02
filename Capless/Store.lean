@@ -111,23 +111,23 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   WellScoped Γ cont (.union C1 C2)
 | singleton :
   Context.Bound Γ x (S^C) ->
-  WellScoped Γ cont C.canonicalize ->
+  WellScoped Γ cont C ->
   WellScoped Γ cont {x=x}
 | csingleton :
   Context.CBound Γ c (CBinding.inst C) ->
-  WellScoped Γ cont C.canonicalize ->
+  WellScoped Γ cont C ->
   WellScoped Γ cont {c=c}
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
-  WellScoped Γ cont C.canonicalize ->
+  WellScoped Γ cont C ->
   WellScoped Γ cont {c=c}
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
   WellScoped Γ cont {c=c}
 | proj_singleton :
-  WellScoped Γ cont C ->
-  ProjectedSingleton C (.proj C' K) ->
-  WellScoped Γ cont (.proj C' K)
+  WellScoped Γ cont (.singleton s) ->
+  HasSingleton (.proj s' K) s ->
+  WellScoped Γ cont (.singleton $ .proj s' K)
 | label :
   Context.LBound Γ x c S ->
   Cont.HasLabel cont x tail ->
@@ -135,8 +135,8 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
 | label_disj :
   Context.LBound Γ x c S ->
   Kind.Disjoint K (.classifier c) ->
-  ProjectedSingletonWith {x=x} K C' ->
-  WellScoped Γ cont C'
+  HasSingletonProj s (.var x) K ->
+  WellScoped Γ cont (.singleton s)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
