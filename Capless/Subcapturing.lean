@@ -45,7 +45,7 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 
 inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   -- | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
-  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.classifier c)
+  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
   | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
   | csub : Subcapt Γ C1 C2 -> CaptureKind Γ C2 K -> CaptureKind Γ C1 K
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L

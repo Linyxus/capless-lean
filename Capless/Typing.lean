@@ -68,7 +68,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed (Γ,c:=C) t E.cweaken C0.cweaken ->
   Typed Γ (let c=C in t) E C0
 | boundary {Γ : Context n m k} {S : SType n m k} :
-  c.subclass .control ->
+  c.Subclass .control ->
   Typed
     ((Γ,c<:CBound.kind (.classifier c)),x: Label[S.cweaken]^{c=0})
     t

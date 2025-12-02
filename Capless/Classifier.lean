@@ -8,6 +8,8 @@ inductive Classifier : Type where
   | child : Nat -> Classifier -> Classifier
 deriving DecidableEq
 
+def Classifier.control := child 0 .top
+
 inductive Classifier.Subclass : Classifier -> Classifier -> Prop where
   | rfl : Subclass a a
   | parent_l : Subclass a b -> Subclass (child n a) b
@@ -175,6 +177,9 @@ inductive Kind : Type where
 -- | empty : Kind
 | singleton : Classifier -> List Classifier -> Kind
 -- | union : Kind -> Kind -> Kind
+
+@[simp]
+def Kind.classifier (c : Classifier) := singleton c []
 
 @[simp]
 def Kind.excl (k : Kind) c :=
