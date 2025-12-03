@@ -309,29 +309,81 @@ theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
 -- ## Projections
 -- -/
 
-inductive HasSingleton : Singleton n k -> Singleton n k -> Prop where
-  | var : HasSingleton (.var n) (.var n)
-  | cvar : HasSingleton (.cvar k) (.cvar k)
-  | proj : HasSingleton s s' -> HasSingleton (.proj s K) s'
+-- `n` with projections widen `C'` to given `C`
+inductive WidenVar : Fin n -> Singleton n k -> CaptureSet n k -> CaptureSet n k -> Prop where
+  | var : WidenVar n (.var n) C C
+  | proj : WidenVar n s C' C -> WidenVar n (s.proj K) C' (C.proj K)
 
-inductive HasSingletonProj : Singleton n k -> Singleton n k -> Kind -> Prop where
-  | here : HasSingleton s s' -> HasSingletonProj (.proj s K) s' K
-  | there : HasSingletonProj s s' K -> HasSingletonProj (.proj s K') s' K
+-- `n` with projections widen to given `C`, including a projection to `K`
+inductive WidenVarWith : Fin n -> Singleton n k -> CaptureSet n k -> CaptureSet n k -> Kind -> Prop where
+  | here : WidenVar n s C' C -> WidenVarWith n (s.proj K) C' (C.proj K) K
+  | there : WidenVarWith n s C' C K -> WidenVarWith n (s.proj K') C' (C.proj K') K
 
-theorem HasSingleton.is_not_proj (hh : HasSingleton s (.proj s' K)) : False := by
-  cases hh
-  case proj hh => apply hh.is_not_proj
+-- `k` with projections widen `C'` to given `C`
+inductive WidenCVar : Fin k -> Singleton k k -> CaptureSet k k -> CaptureSet k k -> Prop where
+  | var : WidenCVar k (.cvar k) C C
+  | proj : WidenCVar k s C' C -> WidenCVar k (s.proj K) C' (C.proj K)
 
-theorem HasSingleton.is_target (hs1 : HasSingleton s t) (hs2 : HasSingleton t u) : t = u := by
-  induction hs1
-  case var => cases hs2; rfl
-  case cvar => cases hs2; rfl
-  case proj ih => apply! ih
+-- `k` with projections widen to given `C`, including a projection to `K`
+inductive WidenCVarWith : Fin k -> Singleton k k -> CaptureSet k k -> CaptureSet k k -> Kind -> Prop where
+  | here : WidenCVar k s C' C -> WidenCVarWith k (s.proj K) C' (C.proj K) K
+  | there : WidenCVarWith k s C' C K -> WidenCVarWith k (s.proj K') C' (C.proj K') K
 
-theorem HasSingletonProj.erase (hs : HasSingletonProj s s' K) : HasSingleton s s' := by
-  induction hs
-  case here => apply! HasSingleton.proj
-  case there ih => apply! HasSingleton.proj
+inductive Singleton.IsVar : Singleton n k -> Fin n -> Prop where
+  | var : IsVar (.var n) n
+  | proj : IsVar s n -> IsVar (s.proj K) n
+
+theorem Singleton.IsVar.proj_inv (hv : IsVar (s.proj K) n) : IsVar s n := by cases hv; assumption
+
+theorem WidenVar.is_var (hw : WidenVar n s C' C) : s.IsVar n := by
+  induction hw
+  case var => constructor
+  case proj ih => apply ih.proj
+
+inductive Singleton.IsVarWith : Singleton n k -> Fin n -> Kind -> Prop where
+  | here : IsVar s n -> IsVarWith (s.proj K) n K
+  | there : IsVarWith s n K -> IsVarWith (s.proj K') n K
+
+theorem WidenVarWith.is_var_with (hw : WidenVarWith k s C' C K) : s.IsVarWith k K := by
+  induction hw
+  case here hw => apply Singleton.IsVarWith.here hw.is_var
+  case there ih => apply ih.there
+
+inductive Singleton.IsCVar : Singleton n k -> Fin k -> Prop where
+  | var : IsCVar (.cvar n) n
+  | proj : IsCVar s n -> IsCVar (s.proj K) n
+
+theorem Singleton.IsCVar.proj_inv (hv : IsCVar (s.proj K) n) : IsCVar s n := by cases hv; assumption
+
+theorem WidenCVar.is_cvar (hw : WidenCVar n s C' C) : s.IsCVar n := by
+  induction hw
+  case var => constructor
+  case proj ih => apply ih.proj
+
+
+-- inductive HasSingleton : Singleton n k -> Singleton n k -> Prop where
+--   | var : HasSingleton (.var n) (.var n)
+--   | cvar : HasSingleton (.cvar k) (.cvar k)
+--   | proj : HasSingleton s s' -> HasSingleton (.proj s K) s'
+
+-- inductive HasSingletonProj : Singleton n k -> Singleton n k -> Kind -> Prop where
+--   | here : HasSingleton s s' -> HasSingletonProj (.proj s K) s' K
+--   | there : HasSingletonProj s s' K -> HasSingletonProj (.proj s K') s' K
+
+-- theorem HasSingleton.is_not_proj (hh : HasSingleton s (.proj s' K)) : False := by
+--   cases hh
+--   case proj hh => apply hh.is_not_proj
+
+-- theorem HasSingleton.is_target (hs1 : HasSingleton s t) (hs2 : HasSingleton t u) : t = u := by
+--   induction hs1
+--   case var => cases hs2; rfl
+--   case cvar => cases hs2; rfl
+--   case proj ih => apply! ih
+
+-- theorem HasSingletonProj.erase (hs : HasSingletonProj s s' K) : HasSingleton s s' := by
+--   induction hs
+--   case here => apply! HasSingleton.proj
+--   case there ih => apply! HasSingleton.proj
 
 -- inductive ProjectedSingleton: CaptureSet n k -> (CaptureSet n k) -> Prop where
 --   | var : ProjectedSingleton {x=x} {x=x}

@@ -101,7 +101,9 @@ inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
   Cont.HasLabel cont l tail ->
   Cont.HasLabel (Cont.scope l' cont) l tail
 
-/-- Checks whether a capture set is well-scoped under a context and a continuation stack. A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`). This is an invariant to be maintained thoroughout evaluation. -/
+/-- Checks whether a capture set is well-scoped under a context and a continuation stack.
+ -- A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`).
+ -- This is an invariant to be maintained thoroughout evaluation. -/
 inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop where
 | empty :
   WellScoped Γ cont {}
@@ -111,31 +113,32 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   WellScoped Γ cont (.union C1 C2)
 | singleton :
   Context.Bound Γ x (S^C) ->
-  WellScoped Γ cont C ->
-  WellScoped Γ cont {x=x}
+  WidenVar x s C C1 ->
+  WellScoped Γ cont C1 ->
+  WellScoped Γ cont (.singleton s)
 | csingleton :
   Context.CBound Γ c (CBinding.inst C) ->
-  WellScoped Γ cont C ->
-  WellScoped Γ cont {c=c}
+  WidenCVar c s C C1 ->
+  WellScoped Γ cont C1 ->
+  WellScoped Γ cont (.singleton s)
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
-  WellScoped Γ cont C ->
-  WellScoped Γ cont {c=c}
+  WidenCVar c s C C1 ->
+  WellScoped Γ cont C1 ->
+  WellScoped Γ cont (.singleton s)
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
-  WellScoped Γ cont {c=c}
-| proj_singleton :
-  WellScoped Γ cont (.singleton s) ->
-  HasSingleton (.proj s' K) s ->
-  WellScoped Γ cont (.singleton $ .proj s' K)
+  s.IsCVar c ->
+  WellScoped Γ cont (.singleton s)
 | label :
   Context.LBound Γ x c S ->
   Cont.HasLabel cont x tail ->
-  WellScoped Γ cont {x=x}
-| label_disj :
+  s.IsVar x ->
+  WellScoped Γ cont (.singleton s)
+| label_disj : -- label is within context but not reachable from stack
   Context.LBound Γ x c S ->
   Kind.Disjoint K (.classifier c) ->
-  HasSingletonProj s (.var x) K ->
+  s.IsVarWith x K ->
   WellScoped Γ cont (.singleton s)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
