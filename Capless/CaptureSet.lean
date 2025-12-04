@@ -311,7 +311,7 @@ theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
 
 -- `n` with projections widen `C'` to given `C`
 inductive WidenVar : Fin n -> Singleton n k -> CaptureSet n k -> CaptureSet n k -> Prop where
-  | var : WidenVar n (.var n) C C
+  | var : WidenVar x (.var x) C C
   | proj : WidenVar n s C' C -> WidenVar n (s.proj K) C' (C.proj K)
 
 -- `n` with projections widen to given `C`, including a projection to `K`
@@ -320,18 +320,18 @@ inductive WidenVarWith : Fin n -> Singleton n k -> CaptureSet n k -> CaptureSet 
   | there : WidenVarWith n s C' C K -> WidenVarWith n (s.proj K') C' (C.proj K') K
 
 -- `k` with projections widen `C'` to given `C`
-inductive WidenCVar : Fin k -> Singleton k k -> CaptureSet k k -> CaptureSet k k -> Prop where
-  | var : WidenCVar k (.cvar k) C C
-  | proj : WidenCVar k s C' C -> WidenCVar k (s.proj K) C' (C.proj K)
+inductive WidenCVar : Fin k -> Singleton n k -> CaptureSet n k -> CaptureSet n k -> Prop where
+  | var : WidenCVar c (.cvar c) C C
+  | proj : WidenCVar c s C' C -> WidenCVar c (s.proj K) C' (C.proj K)
 
 -- `k` with projections widen to given `C`, including a projection to `K`
-inductive WidenCVarWith : Fin k -> Singleton k k -> CaptureSet k k -> CaptureSet k k -> Kind -> Prop where
-  | here : WidenCVar k s C' C -> WidenCVarWith k (s.proj K) C' (C.proj K) K
-  | there : WidenCVarWith k s C' C K -> WidenCVarWith k (s.proj K') C' (C.proj K') K
+inductive WidenCVarWith : Fin k -> Singleton n k -> CaptureSet n k -> CaptureSet n k -> Kind -> Prop where
+  | here : WidenCVar c s C' C -> WidenCVarWith c (s.proj K) C' (C.proj K) K
+  | there : WidenCVarWith c s C' C K -> WidenCVarWith c (s.proj K') C' (C.proj K') K
 
 inductive Singleton.IsVar : Singleton n k -> Fin n -> Prop where
-  | var : IsVar (.var n) n
-  | proj : IsVar s n -> IsVar (s.proj K) n
+  | var : IsVar (.var x) x
+  | proj : IsVar s x -> IsVar (s.proj K) x
 
 theorem Singleton.IsVar.proj_inv (hv : IsVar (s.proj K) n) : IsVar s n := by cases hv; assumption
 
@@ -349,6 +349,10 @@ theorem WidenVarWith.is_var_with (hw : WidenVarWith k s C' C K) : s.IsVarWith k 
   case here hw => apply Singleton.IsVarWith.here hw.is_var
   case there ih => apply ih.there
 
+inductive Singleton.IsAbsurdVar : Singleton n k -> Fin n -> Prop where
+  | here : K1.Disjoint K2 -> s.IsVarWith x K1 -> IsAbsurdVar (.proj s K2) x
+  | there : IsAbsurdVar s x -> IsAbsurdVar (s.proj K) x
+
 inductive Singleton.IsCVar : Singleton n k -> Fin k -> Prop where
   | var : IsCVar (.cvar n) n
   | proj : IsCVar s n -> IsCVar (s.proj K) n
@@ -360,6 +364,23 @@ theorem WidenCVar.is_cvar (hw : WidenCVar n s C' C) : s.IsCVar n := by
   case var => constructor
   case proj ih => apply ih.proj
 
+theorem CaptureSet.proj_singleton : (singleton s).proj K = (singleton $ s.proj K) := by simp
+
+theorem CaptureSet.proj_inj {C D : CaptureSet n k} (heq : C.proj K = D.proj K) : C = D := by
+  induction C generalizing D
+  case empty =>
+    simp at heq
+    unfold proj at heq; split at heq <;> simp at heq
+    rfl
+  case union ha hb =>
+    simp at heq
+    cases D <;> simp at heq
+    have ⟨_, _⟩ := heq
+    rw [ha _, hb _]
+    repeat assumption
+  case singleton =>
+    cases D <;> simp at heq
+    aesop
 
 -- inductive HasSingleton : Singleton n k -> Singleton n k -> Prop where
 --   | var : HasSingleton (.var n) (.var n)

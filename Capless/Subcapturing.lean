@@ -13,7 +13,7 @@ namespace Capless
 
 inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
-  -- | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
+  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
   | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
   | cbound : Context.CBound Γ c (.bound (.upper C)) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
   | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
@@ -21,7 +21,7 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | empty : CaptureKind Γ .empty K
   | singleton_proj_kind : CaptureKind Γ (.singleton $ .proj s K) K
   | singleton_proj : CaptureKind Γ (.singleton s) K -> CaptureKind Γ (.singleton $ s.proj K1) K
-  -- | singleton_proj_disj : CaptureKind Γ (.singleton s) K1 -> K1.Disjoint K2 -> CaptureKind Γ (.singleton $ s.proj K2) K
+  | singleton_proj_disj : CaptureKind Γ (.singleton s) K1 -> K1.Disjoint K2 -> CaptureKind Γ (.singleton $ s.proj K2) K
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where

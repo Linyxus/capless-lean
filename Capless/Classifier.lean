@@ -85,6 +85,16 @@ theorem Classifier.StrictSub.antisymm (hs : StrictSub a b) (hs2 : Subclass b a) 
   have h2 := hs2.size
   omega
 
+theorem Classifier.StrictSub.subclass_r (hss : StrictSub a b) (hs : Subclass b c) : StrictSub a c := by
+  induction hss
+  case child n a =>
+    induction hs generalizing n
+    case rfl => apply child
+    case parent_l m k ih =>
+      apply parent_l ih
+  case parent_l n a ih =>
+    apply! parent_l $ ih _
+
 theorem Classifier.Disjoint.symm (hd : Disjoint a b) : Disjoint b a := by
   induction hd
   case base hne =>
@@ -466,3 +476,88 @@ theorem Kind.Disjoint.refine_by_subkind
       cases hs.root_is_subclass
       case inl => apply! absurd_l
       case inr => apply! root $ hd2.refines_subclass_l _
+
+theorem Kind.Subkind.trans (ha : Subkind K1 K2) (hb : Subkind K2 K3) : Subkind K1 K3 := by
+  induction hb generalizing K1
+  case absurd_l hsc =>
+    apply absurd_l $ ha.absurd_r hsc
+  case subclass_no_excl hs =>
+    cases ha.root_is_subclass
+    case inl hsc => apply! absurd_l
+    case inr hsub => apply! subclass_no_excl $ hsub.trans _
+  case excl_subclass hk hss hsc ih =>
+    cases K1 with
+    | singleton r1 es1 =>
+      cases ha.refine_has_superclass hsc
+      case inl hsc2 => apply! absurd_l
+      case inr h =>
+        cases h
+        case inl hd => apply! excl_disjoint (ih _) _ hd.symm
+        case inr hsc2 => apply! excl_subclass (ih _) _ hsc2
+  case excl_disjoint hk hss hd ih =>
+    cases K1 with
+    | singleton r1 es1 =>
+      cases ha.root_is_subclass
+      case inl hsc => apply! absurd_l
+      case inr hsub => apply! excl_disjoint (ih _) _ $ hd.refines_subclass_r _
+  case excl_irrelevant hk hd ih =>
+    apply! excl_irrelevant (ih _) _
+
+theorem Kind.subkind_disjoint_absurd (ha : Subkind K1 K2) (hb : Disjoint K1 K2) : HasSuperclassOf K1.1 K1.2 := by
+  induction ha
+  case absurd_l hsc => exact hsc
+  case subclass_no_excl hsub =>
+    cases hb
+    case absurd_l hsc => exact hsc
+    case absurd_r hsc => cases hsc
+    case root_l hsc => cases hsc
+    case root_r hsc => exact hsc.subclass hsub
+    case root hd => exact absurd hsub hd.not_subclass
+  case excl_subclass hs hss hsc ih =>
+    cases hb
+    case absurd_l hsc2 => exact hsc2
+    case absurd_r hsc2 =>
+      cases hsc2
+      case here hsub => exact (hss.antisymm hsub).elim
+      case there hsc2 => exact ih (.absurd_r hsc2)
+    case root_l hsc2 =>
+      cases hsc2
+      case here hsub => exact hsc.subclass hsub
+      case there hsc2 => exact ih (.root_l hsc2)
+    case root_r hsc2 => exact ih (.root_r hsc2)
+    case root hd => exact ih (.root hd)
+  case excl_disjoint hs hss hd ih =>
+    cases hb
+    case absurd_l hsc => exact hsc
+    case absurd_r hsc =>
+      cases hsc
+      case here hsub => exact (hss.antisymm hsub).elim
+      case there hsc => exact ih (.absurd_r hsc)
+    case root_l hsc =>
+      cases hsc
+      case here hsub => exact absurd hsub hd.symm.not_subclass
+      case there hsc => exact ih (.root_l hsc)
+    case root_r hsc => exact ih (.root_r hsc)
+    case root hd2 => exact ih (.root hd2)
+  case excl_irrelevant hs hd ih =>
+    cases hb
+    case absurd_l hsc => exact hsc
+    case absurd_r hsc =>
+      cases hsc
+      case here hsub => exact absurd hsub hd.symm.not_subclass
+      case there hsc => exact ih (.absurd_r hsc)
+    case root_l hsc =>
+      cases hsc
+      case here hsub =>
+        cases hs.root_is_subclass
+        case inl hsc2 => exact hsc2
+        case inr hsub2 => exact absurd hsub2 (hd.refines_subclass_l hsub).not_subclass
+      case there hsc => exact ih (.root_l hsc)
+    case root_r hsc => exact ih (.root_r hsc)
+    case root hd2 => exact ih (.root hd2)
+
+theorem Kind.Subkind.absurd_disjoint (ha : Subkind K1 K2) (hb : Disjoint K1 K2) : Subkind K1 K3 := by
+  cases K1; exact .absurd_l (Kind.subkind_disjoint_absurd ha hb)
+
+theorem Kind.Disjoint.absurd_subkind (hb : Disjoint K1 K2) (ha : Subkind K1 K2) : Disjoint K1 K3 := by
+  cases K1; exact .absurd_l (Kind.subkind_disjoint_absurd ha hb)

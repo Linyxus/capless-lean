@@ -140,6 +140,10 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   Kind.Disjoint K (.classifier c) ->
   s.IsVarWith x K ->
   WellScoped Γ cont (.singleton s)
+| label_absurd : -- label is projected to absurdity
+  Context.LBound Γ x c S ->
+  s.IsAbsurdVar x ->
+  WellScoped Γ cont (.singleton s)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
