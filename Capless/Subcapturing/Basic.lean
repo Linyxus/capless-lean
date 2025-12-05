@@ -42,11 +42,6 @@ theorem Subcapt.proj_l : Subcapt Γ (C.proj K) C := by
     simp
     apply! join
 
--- theorem CaptureKind.var (hb : Context.Bound Γ x (S^C)) (hk : CaptureKind Γ C K) : CaptureKind Γ {x=x} K := by
---   apply csub
---   apply Subcapt.var hb
---   assumption
-
 theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K :=
   match hk with
   | .cvar _ => by cases heq
@@ -63,34 +58,30 @@ theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2)
 termination_by structural hk
 
 
--- mutual
-theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D :=
-  match hs with
-  | .trans ha hb => by
-    have ⟨_, _⟩ := ha.union_l_inv' heq
-    apply And.intro <;> apply! Subcapt.trans _
-  | .subset hsub => by
-    rw [heq] at hsub
-    have ⟨_, _⟩ := CaptureSet.Subset.union_l_inv hsub
-    apply And.intro <;> apply! Subcapt.subset
-  | .union ha hb => by
-    injections
-    subst_vars
-    apply And.intro ha hb
-  | .cinstl hb => by
-    subst_vars
+theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := by
+  induction hs <;> (subst_vars; simp_all)
+  case trans ha hb iha ihb =>
+    have ⟨_, _⟩ := ihb
+    apply And.intro <;> apply! trans
+  case subset hsub =>
+    have ⟨_, _⟩ := hsub.union_l_inv
+    apply And.intro <;> apply! subset
+  case cinstl Γ _ hb =>
     have h1 : Subcapt Γ C1 (C1 ∪ C2) := Subcapt.subset $ .union_rl .rfl
     have h2 : Subcapt Γ C2 (C1 ∪ C2) := Subcapt.subset $ .union_rr .rfl
-    apply And.intro <;> apply! Subcapt.trans _ (.cinstl hb)
-  | .proj_r hs hk => by
-    have ⟨_, _⟩ := hs.union_l_inv' heq
-    have ⟨_, _⟩ := hk.union_l_inv' heq
-    apply And.intro <;> apply! Subcapt.proj_r
-termination_by structural hs
--- end
+    apply And.intro <;> apply! trans _ (.cinstl hb)
 
 theorem Subcapt.union_l_inv (hs : Subcapt Γ (C1 ∪ C2) D) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := hs.union_l_inv' $ .refl (a := C1 ∪ C2)
 theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := hk.union_l_inv' $ .refl (a := C1 ∪ C2)
+
+theorem Subcapt.proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj K) := by
+  induction C
+  case empty => simp; apply subset .empty
+  case union ha hb iha ihb =>
+    have ⟨_, _⟩ := hs.union_l_inv
+    simp
+    apply! union (iha _) (ihb _)
+  case singleton => apply! singleton_proj
 
 theorem CaptureKind.proj_kind : CaptureKind Γ (.proj C K) K := by
   induction C
@@ -106,12 +97,6 @@ theorem CaptureKind.proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj K1) 
     apply! union (ha _) (hb _)
   case singleton => apply! singleton_proj
 
-
-theorem Subcapt.proj (hs : Subcapt Γ C1 C2) : Subcapt Γ (C1.proj K) (C2.proj K) := by
-  apply proj_r
-  apply trans .proj_l hs
-  apply CaptureKind.proj_kind
-
 theorem Subcapt.proj_disj
   (hd : Kind.Disjoint K1 K2)
   (hk : CaptureKind Γ C K1)
@@ -123,180 +108,6 @@ theorem Subcapt.proj_disj
     have ⟨_, _⟩ := hk.union_l_inv
     apply! union (ha _) (hb _)
   case singleton => apply! singleton_proj_disj
-
-inductive Instantiated : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
-  | rfl : Instantiated Γ C C
-  | trans : Instantiated Γ C1 C2 -> Instantiated Γ C2 C3 -> Instantiated Γ C1 C3
-  | csubst : Γ.CBound c (.inst C) -> Instantiated Γ {c=c} C
-  | union : Instantiated Γ C1 D1 -> Instantiated Γ C2 D2 -> Instantiated Γ (C1 ∪ C2) (D1 ∪ D2)
-
-theorem Instantiated.empty (hi : Instantiated Γ .empty C) : C = .empty := by
-  generalize h : CaptureSet.empty = D at hi
-  induction hi <;> (subst_vars; simp_all)
-
-theorem Instantiated.union_inv (hi : Instantiated Γ (C1 ∪ C2) D) : ∃ D1 D2, D = D1 ∪ D2 ∧ Instantiated Γ C1 D1 ∧ Instantiated Γ C2 D2 := by
-  generalize h : (C1 ∪ C2) = C at hi
-  induction hi generalizing C1 C2 <;> (subst_vars; simp_all)
-  case rfl => apply And.intro <;> apply rfl
-  case trans ha hb =>
-    have ⟨D1, D2, hb1, hb2, hb3⟩ := hb
-    subst_vars
-    rename_i ih
-    have ⟨E1, E2, ha1, ha2, ha3⟩ := ih $ .refl _
-    exists E1, E2
-    apply And.intro; assumption
-    apply And.intro <;> apply! trans
-
-theorem Instantiated.singleton_var_eq (hi : Instantiated Γ {x=x} C1) : C1 = {x=x} := by
-  generalize heq : ({x=x} : CaptureSet _ _) = D at hi
-  induction hi
-  case rfl => simp_all
-  case trans ih1 ih2 =>
-    subst heq
-    rw [ih1 (.refl _)] at ih2
-    exact ih2 (.refl _)
-  case csubst => simp [CaptureSet.singleton, Singleton.var, Singleton.cvar] at heq
-  case union => simp [CaptureSet.singleton] at heq
-
-theorem Instantiated.singleton_proj_eq (hi : Instantiated Γ (.singleton (.proj s K)) C1) : C1 = .singleton (.proj s K) := by
-  generalize heq : (CaptureSet.singleton (.proj s K)) = D at hi
-  induction hi
-  case rfl => simp_all
-  case trans ih1 ih2 =>
-    subst heq
-    rw [ih1 (.refl _)] at ih2
-    exact ih2 (.refl _)
-  case csubst => simp [CaptureSet.singleton, Singleton.proj, Singleton.cvar] at heq
-  case union => simp [CaptureSet.singleton] at heq
-
-theorem Instantiated.singleton_var_inv (hi : Instantiated Γ {x=x} C1) : {x=x} ⊆ C1 := by
-  rw [hi.singleton_var_eq]; apply CaptureSet.Subset.rfl
-
-theorem Instantiated.subset_has_var (hi : Instantiated Γ C C1) (hc : {x=x} ⊆ C1) (hs1 : C ⊆ D) : ∃ D1, Instantiated Γ D D1 ∧ {x=x} ⊆ D1 := by
-  induction hs1 generalizing C1
-  case empty => cases hi.empty; cases hc
-  case rfl => exists C1
-  case union_l ha hb =>
-    have ⟨D1, D2, _, hl, hr⟩ := hi.union_inv
-    subst_vars; simp_all
-    cases hc
-    case union_rl hc =>
-      have ⟨E1, _, _⟩ := ha hl hc
-      exists E1
-    case union_rr hc =>
-      have ⟨E1, _, _⟩ := hb hr hc
-      exists E1
-  case union_rl R1 R2 _ ha =>
-    have ⟨D1, hi, hs⟩ := ha hi hc
-    exists (D1 ∪ R2)
-    apply And.intro; apply! union _ .rfl ; apply! CaptureSet.Subset.union_rl
-  case union_rr R1 R2 _ ha =>
-    have ⟨D1, hi, hs⟩ := ha hi hc
-    exists (R2 ∪ D1)
-    apply And.intro; apply! union .rfl ; apply! CaptureSet.Subset.union_rr
-
-theorem Subcapt.var_inv'
-  (hs : Subcapt Γ C1 D)
-  (hsub : Instantiated Γ C1 C2 ∧ {x=x} ⊆ C2)
-  (hb : Γ.Bound x S^C) : (∃ D1, Instantiated Γ D D1 ∧ {x=x} ⊆ D1) ∨ (Subcapt Γ C D) := by
-  induction hs
-  case trans h1 h2 ih1 ih2 =>
-    cases ih1 hsub hb
-    case inl ih1 =>
-      have ⟨D1, ha1⟩ := ih1
-      apply! ih2
-    case inr ih1 => right; apply! trans
-  case subset hs =>
-    have ⟨hi, hsx⟩ := hsub
-    left
-    apply! hi.subset_has_var
-  case union iha ihb =>
-    have ⟨hi, hsx⟩ := hsub
-    have ⟨D1, D2, _, hl, hr⟩ := hi.union_inv
-    subst_vars
-    cases hsx
-    case union_rl hsx => apply iha (And.intro hl hsx) hb
-    case union_rr hsx => apply ihb (And.intro hr hsx) hb
-  case var hb1 =>
-    have ⟨hi, hsx⟩ := hsub
-    -- hi : Instantiated Γ {x'=x'} C2, hsx : {x=x} ⊆ C2
-    -- From singleton_var_eq: C2 = {x'=x'}
-    rw [hi.singleton_var_eq] at hsx
-    -- hsx : {x=x} ⊆ {x'=x'}, so x = x'
-    cases hsx
-    case rfl =>
-      -- x = x', so hb and hb1 are about the same variable
-      cases Context.bound_injective hb hb1
-      -- C = C' (the capture sets are equal)
-      right
-      apply Subcapt.rfl
-  case cinstl hcb =>
-    -- C1 = C' for some capture set, D = {c=c}
-    -- We need to show {x=x} is in D's instantiation or Subcapt Γ C D
-    have ⟨hi, hsx⟩ := hsub
-    left
-    -- D = {c=c}, and we have hcb : CBound c (inst C')
-    -- Instantiated Γ {c=c} C' via csubst, then Instantiated Γ C' C2 via hi
-    -- So Instantiated Γ {c=c} C2 via trans
-    exists C2
-    constructor
-    · exact .trans (.csubst hcb) hi
-    · exact hsx
-  case cinstr hcb =>
-    -- C1 = {c=c}, D = C' (the instantiated capture set)
-    have ⟨hi, hsx⟩ := hsub
-    left
-    -- hi : Instantiated Γ {c=c} C2, hsx : {x=x} ⊆ C2
-    -- D = C', we need Instantiated Γ C' D1 and {x=x} ⊆ D1
-    -- We can use C2 as D1 if we can show Instantiated Γ C' C2
-    -- But hi goes from {c=c} to C2, not from C' to C2
-    -- However, {c=c} instantiates to C' via csubst, so hi factors through C'
-    -- Let's just use rfl on C' and show {x=x} ⊆ C' via hi
-    sorry
-  case cbound hcb =>
-    -- C1 = {c=c}, D = C' (the upper bound)
-    have ⟨hi, hsx⟩ := hsub
-    -- Similar issue - we need to relate hi to instantiation of D
-    sorry
-  case singleton_proj_sub hsk =>
-    have ⟨hi, hsx⟩ := hsub
-    -- C1 = singleton (s.proj K1), D = singleton (s.proj K2)
-    -- hi : Instantiated Γ (singleton (s.proj K1)) C2
-    -- By singleton_proj_eq, C2 = singleton (s.proj K1)
-    rw [hi.singleton_proj_eq] at hsx
-    -- Now hsx : {x=x} ⊆ singleton (s.proj K1)
-    -- {x=x} = singleton (var x), singleton (s.proj K1) = singleton (proj s K1)
-    -- These can only be equal via rfl if var x = proj s K1, which is impossible
-    -- Lean can figure this out automatically with cases
-    cases hsx
-  case singleton_proj_l =>
-    have ⟨hi, hsx⟩ := hsub
-    -- C1 = singleton (s.proj K), D = singleton s
-    rw [hi.singleton_proj_eq] at hsx
-    cases hsx
-  case proj_r hs hk ih =>
-    have ⟨hi, hsx⟩ := hsub
-    cases ih hsub hb
-    case inl h =>
-      left
-      have ⟨D1, hd1, hd2⟩ := h
-      sorry
-    case inr h =>
-      right
-      apply Subcapt.trans h
-      apply Subcapt.proj_r .rfl
-      sorry -- Need CaptureKind Γ D K, but we only have CaptureKind Γ C K
-  case singleton_proj_disj hd hk =>
-    have ⟨hi, hsx⟩ := hsub
-    -- C1 = singleton (s.proj K2), D = .empty
-    -- By singleton_proj_eq, C2 = singleton (s.proj K2)
-    rw [hi.singleton_proj_eq] at hsx
-    -- hsx : {x=x} ⊆ singleton (s.proj K2) is impossible
-    cases hsx
-
-
-
-
 
 theorem CaptureKind.var_inv' (hk : CaptureKind Γ D K) (heq : D = {x=x}) (hb : Γ.Bound x S^C) : CaptureKind Γ C K := by
   induction hk <;> (subst_vars; try simp_all)

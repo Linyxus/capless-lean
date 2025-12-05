@@ -21,7 +21,6 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | empty : CaptureKind Γ .empty K
   | singleton_proj_kind : CaptureKind Γ (.singleton $ .proj s K) K
   | singleton_proj : CaptureKind Γ (.singleton s) K -> CaptureKind Γ (.singleton $ s.proj K1) K
-  | singleton_proj_disj : CaptureKind Γ (.singleton s) K1 -> K1.Disjoint K2 -> CaptureKind Γ (.singleton $ s.proj K2) K
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
@@ -48,12 +47,10 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c} C
--- | proj :
---   Subcapt Γ C1 C2 -> Subcapt Γ (C1.proj K) (C2.proj K)
 | singleton_proj_sub {s : Singleton n k} {K1 K2 : Kind}:
   K1.Subkind K2 -> Subcapt Γ (.singleton $ s.proj K1) (.singleton $ s.proj K2)
 | singleton_proj_l : Subcapt Γ (.singleton $ .proj s K) (.singleton s)
-| proj_r : Subcapt Γ C D -> CaptureKind Γ C K -> Subcapt Γ C (D.proj K)
+| singleton_proj : Subcapt Γ (.singleton s) C -> Subcapt Γ (.singleton $ s.proj K) (C.proj K)
 | singleton_proj_disj :
   Kind.Disjoint K1 K2 ->
   CaptureKind Γ (.singleton s) K1 ->

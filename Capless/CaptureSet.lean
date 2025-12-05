@@ -382,6 +382,14 @@ theorem CaptureSet.proj_inj {C D : CaptureSet n k} (heq : C.proj K = D.proj K) :
     cases D <;> simp at heq
     aesop
 
+theorem CaptureSet.Subset.proj (hsub : Subset C D) : Subset (C.proj K) (D.proj K) := by
+  induction hsub <;> try simp
+  case empty => apply empty
+  case rfl => apply rfl
+  case union_l ha hb => apply! union_l
+  case union_rl ha => apply! union_rl
+  case union_rr hb => apply! union_rr
+
 -- inductive HasSingleton : Singleton n k -> Singleton n k -> Prop where
 --   | var : HasSingleton (.var n) (.var n)
 --   | cvar : HasSingleton (.cvar k) (.cvar k)

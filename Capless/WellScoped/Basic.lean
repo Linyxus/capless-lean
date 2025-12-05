@@ -240,24 +240,17 @@ theorem WellScoped.subcapt (hsc : WellScoped Γ cont C2) (hsub : Subcapt Γ C1 C
     rw [← CaptureSet.proj_singleton] at hsc
     apply! hsc.subkind
   case singleton_proj_l => apply! hsc.proj
-  case proj_r C D K hsub hk ih =>
-    induction hk
-    case union ha hb iha ihb =>
-      have ⟨_, _⟩ := hsub.union_l_inv
-      apply union
-      { apply iha
-        assumption
-        intro cont h
-        have ⟨_, _⟩ := (ih h).union_inv
-        assumption
-        assumption }
-      { apply ihb
-        assumption
-        intro cont h
-        have ⟨_, _⟩ := (ih h).union_inv
-        assumption
-        assumption }
-    case var hb hk ih2 =>
+  case singleton_proj C K hs ih =>
+    generalize h : C.proj K = D at hsc
+    cases hsc
+    case empty =>
+      unfold CaptureSet.proj at h; split at h <;> simp at h
+      rw [← CaptureSet.proj_singleton]; apply proj; apply ih .empty
+    case union iha ihb =>
+      unfold CaptureSet.proj at h; split at h <;> simp at h
+      have ⟨_, _⟩ := h; subst_vars; simp_all
+
+
 
 
 
