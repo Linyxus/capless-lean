@@ -334,10 +334,13 @@ theorem ContainsSupOf.of_append (h : ContainsSupOf (xs ++ ys) b) : ContainsSupOf
       | inl h => exact .inl (.there h)
       | inr h => exact .inr h
 
-inductive IsEmpty : Kind -> Prop where
+inductive Kind.IsEmpty : Kind -> Prop where
   | empty : IsEmpty .empty
   | absurd : ContainsSupOf exs r -> IsEmpty (.node r exs)
   | union : IsEmpty K1 -> IsEmpty K2 -> IsEmpty (.union K1 K2)
+
+theorem Kind.IsEmpty.is_absurd (he : IsEmpty (.node r exs)) : ContainsSupOf exs r := by
+  cases he; assumption
 
 inductive Intersect : Kind -> Kind -> Kind -> Prop where
   | empty_l : Intersect .empty K .empty
@@ -351,119 +354,131 @@ inductive Intersect : Kind -> Kind -> Kind -> Prop where
 inductive Kind.Subtract : Kind -> Kind -> Kind -> Prop where
   | empty_l : Subtract .empty K .empty
   | union_l : Subtract K1 K R1 -> Subtract K2 K R2 -> Subtract (.union K1 K2) K (.union R1 R2)
-  | absurd_l : ContainsSupOf ex1 r1 -> Subtract (.node r1 ex1) K .empty
-  | excl_subclass_r :
-    a.StrictSub r2 ->
-    ContainsSupOf ex1 a ->
-    Subtract (.node r1 ex1) (.node r2 ex2) R ->
-    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) R
-  | excl_disjoint_r :
-    a.StrictSub r2 ->
-    a.Disjoint r1 ->
-    Subtract (.node r1 ex1) (.node r2 ex2) R ->
-    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) R
-  | excl_absurd_r :
-    r2.Subclass a  ->
-    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) (.node r1 ex1)
-  | excl_irrelevant_r :
-    a.Disjoint r2 ->
-    Subtract (.node r1 ex1) (.node r2 ex2) R ->
-    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) R
-  | excl_r :
-    a.Disjoint r2 ->
-    a.Subclass r1 ->
-    Subtract (.node r1 ex1) (.node r2 ex2) R ->
-    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) (.union R (.node a ex1))
-  | subclass_l :
-    r2.Subclass r1 ->
-    Subtract (.node r1 ex1) (.node r2 []) (.node r1 (r2 :: ex1))
-  | subclass_r :
-    r1.Subclass r2 ->
-    Subtract (.node r1 ex1) (.node r2 []) .empty
-  | irrelevant_r :
-    r1.Disjoint r2 ->
-    Subtract (.node r1 ex1) (.node r2 []) (.node r1 ex1)
   | empty_r : Subtract (.node r1 ex1) .empty (.node r1 ex1)
   | union_r :
     Subtract (.node r1 ex1) K1 R1 ->
     Subtract R1 K2 R2 ->
     Subtract (.node r1 ex1) (.union K1 K2) R2
+  -- The singleton cases
+  -- Basically we follow a few broad strokes:
+  -- - A \ (B \ C) = (A \ B) ∪ (A ∩ B ∩ C)
+  -- - For B of the form (.node r []) (no exclusion):
+  --   - If r < A, refine A
+  --   - If r > A, empty
+  --   - If r ⊥ A, A
+  -- Base case first
+  | tree : Subtract (.node r1 ex1) (.node r2 []) (.node r1 (r2 :: ex1))
+  -- Exclusion case
+  -- First, handle the cases where (B \ C) doesn't make sense
+  | excl_absurd_r :
+    r2.Subclass a -> -- (B \ a) is just empty
+    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) (.node r1 ex1)
+  | excl_irrelevant_r :
+    r2.Disjoint a -> -- (B \ a) = B
+    Subtract (.node r1 ex1) (.node r2 ex2) R ->
+    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) R
+  -- Now, for cases where a is a subtree of r2
+  -- We use the formula A \ (B \ C) = (A \ B) ∪ (A ∩ B ∩ C)
+  | excl_subclass_r :
+    a.Subclass r2 ->
+    a.Subclass r1 -> -- A ∩ B ∩ C = a with all the exclusions
+    Subtract (.node r1 ex1) (.node r2 ex2) R ->
+    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) (.union R (.node a ex1))
+                                        -- ^ we'd need (ex1 ++ ex2) here to be exact,
+                                        -- but if an element is in the ex2 subtree
+                                        -- and not already excluded from A, it is part
+                                        -- of (A \ B), so it's okay to keep anyway.
+  | excl_subclass_l :
+    a.Subclass r2 ->
+    r1.Subclass a ->  -- B \ C excludes the entirety of A
+    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) (.node r1 ex1)
+  | excl_irrelevant_l :
+    a.Subclass r2 ->
+    r1.Disjoint a -> -- irrelevant exclusion, A ∪ B ∪ C = empty
+    Subtract (.node r1 ex1) (.node r2 ex2) R ->
+    Subtract (.node r1 ex1) (.node r2 (a :: ex2)) R
 
 inductive Kind.Subkind : Kind -> Kind -> Prop where
   | subtract : Subtract K1 K2 R -> IsEmpty R -> Subkind K1 K2
 
-theorem Kind.Subtract.from_empty (hs : Subtract K1 K2 R) (he : IsEmpty K1) : IsEmpty R := by
+theorem Kind.Subtract.is_empty_l (hs : Subtract K1 K2 R) (he : IsEmpty K1) : IsEmpty R := by
   induction hs
   case empty_l => constructor
-  case union_l ih1 ih2 =>
-    cases he with
-    | union he1 he2 => exact .union (ih1 he1) (ih2 he2)
-  case absurd_l => constructor
-  case excl_subclass_r ih => exact ih he
-  case excl_disjoint_r ih => exact ih he
-  case excl_irrelevant_r ih => exact ih he
-  case excl_r _ hsub _ ih =>
-    cases he with
-    | absurd ha => exact .union (ih (.absurd ha)) (.absurd (ha.trans_subclass hsub))
-  case subclass_l hsub =>
-    cases he with
-    | absurd ha => apply! IsEmpty.absurd $ .there _
-  case subclass_r => constructor
-  case irrelevant_r =>
-    cases he with
-    | absurd ha => exact .absurd ha
+  case union_l ha hb =>
+    cases he
+    apply! IsEmpty.union (ha _) (hb _)
   case empty_r => assumption
-  case union_r ih1 ih2 =>
-    cases he with
-    | absurd ha => exact ih2 (ih1 (.absurd ha))
+  case union_r ha hb =>
+    apply hb
+    apply! ha
+  case tree => constructor; exact .there he.is_absurd
+  case excl_absurd_r => assumption
+  case excl_irrelevant_r ih => apply! ih
+  case excl_subclass_r hs2 hs1 _ ih =>
+    constructor; apply! ih;
+    constructor; cases he
+    apply! ContainsSupOf.trans_subclass
+  case excl_subclass_l hs2 hs1 => assumption
+  case excl_irrelevant_l ih => apply! ih
+
+
+theorem Kind.Subtract.absurd_l (hs : Subtract (.node r1 ex1) K R) (hsc : ContainsSupOf ex1 r1) : IsEmpty R := by
+  apply hs.is_empty_l
+  constructor
+  assumption
+
+theorem Kind.Subtract.empty_implies_subclass
+  (hs : Subtract (.node r1 ex1) (.node r2 ex2) R)
+  (he : IsEmpty R)
+  : ContainsSupOf ex1 r1 ∨ r1.Subclass r2 := by
+  cases hs
+  case tree =>
+    cases he.is_absurd <;> aesop
+  case excl_absurd_r => left; apply he.is_absurd
+  case excl_irrelevant_r hs => apply hs.empty_implies_subclass he
+  case excl_subclass_r hs =>
+    cases he
+    apply! hs.empty_implies_subclass
+  case excl_subclass_l => left; apply he.is_absurd
+  case excl_irrelevant_l hs => apply! hs.empty_implies_subclass
 
 theorem Kind.Subtract.empty_r_inv (hs : Subtract K1 K2 R) (he : IsEmpty R) (hek2 : IsEmpty K2) : IsEmpty K1 := by
   induction hs
   case empty_l => constructor
-  case union_l ih1 ih2 =>
-    cases he with
-    | union he1 he2 => exact .union (ih1 he1 hek2) (ih2 he2 hek2)
-  case absurd_l ha => exact .absurd ha
-  case excl_subclass_r hss hc _ ih =>
-    cases hek2 with
-    | absurd ha =>
-      cases ha
-      case here hsub => exact (hss.antisymm hsub).elim
-      case there ha => exact ih he (.absurd ha)
-  case excl_disjoint_r hss _ _ ih =>
-    cases hek2 with
-    | absurd ha =>
-      cases ha
-      case here hsub => exact (hss.antisymm hsub).elim
-      case there ha => exact ih he (.absurd ha)
-  case excl_absurd_r hs => assumption
-  case excl_irrelevant_r hd _ ih =>
-    cases hek2 with
-    | absurd ha =>
-      cases ha
-      case here hsub => exact (hd.symm.not_subclass hsub).elim
-      case there ha => exact ih he (.absurd ha)
-  case excl_r hd hsub _ ih =>
-    cases he with
-    | union heR heA =>
-      cases hek2 with
-      | absurd ha =>
-        cases ha
-        case here hsub2 => exact (hd.symm.not_subclass hsub2).elim
-        case there ha => exact ih heR (.absurd ha)
-  case subclass_l =>
-    cases hek2 with
-    | absurd ha => cases ha
-  case subclass_r =>
-    cases hek2 with
-    | absurd ha => cases ha
-  case irrelevant_r =>
-    cases hek2 with
-    | absurd ha => cases ha
+  case union_l ha hb =>
+    cases he
+    constructor
+    apply! ha
+    apply! hb
   case empty_r => assumption
-  case union_r ih1 ih2 =>
-    cases hek2 with
-    | union he2a he2b => exact ih1 (ih2 he he2b) he2a
+  case union_r ha hb =>
+    cases hek2
+    simp_all
+  case tree => cases hek2.is_absurd
+  case excl_absurd_r hs => assumption
+  case excl_irrelevant_r hd hs ih =>
+    cases hek2.is_absurd
+    case here hsk => cases hd.not_subclass hsk
+    case there hek2 => apply! ih _ (.absurd hek2)
+  case excl_subclass_r hs2 hs1 hs ih =>
+    cases he
+    cases hek2.is_absurd
+    case here hsk =>
+      cases hs2.antisymm hsk
+      rename_i h _
+      cases hs.empty_implies_subclass h
+      case inl => constructor; assumption
+      case inr hsk2 => cases hsk2.antisymm hs1; assumption
+    case there hsk => apply! ih _ (.absurd _)
+  case excl_subclass_l => assumption
+  case excl_irrelevant_l hs2 hd1 hs ih =>
+    cases hek2.is_absurd
+    case here hsa =>
+      cases hs2.antisymm hsa
+      cases hs.empty_implies_subclass he
+      case inl h1 => exact .absurd h1
+      case inr h1 => cases hd1.not_subclass h1
+    case there hsc => apply ih he (.absurd hsc)
 
 theorem Kind.Subkind.empty_r_inv (hs : Subkind K1 K2) (he : IsEmpty K2) : IsEmpty K1 := by
   cases hs
@@ -623,57 +638,17 @@ theorem Kind.Disjoint.refine_subtract_l (hd : Disjoint K1 K) (hs : Subtract K1 K
   case union_l ih1 ih2 =>
     have ⟨hd1, hd2⟩ := hd.union_l_inv
     exact .union_l (ih1 hd1) (ih2 hd2)
-  case absurd_l => exact .empty_l
-  case excl_subclass_r ih => exact ih hd
-  case excl_disjoint_r ih => exact ih hd
-  case excl_absurd_r hs => assumption
-  case excl_irrelevant_r ih => exact ih hd
-  case excl_r _ hsub _ ih => exact .union_l (ih hd) (hd.refine_subroot_l hsub)
-  case subclass_l hsub => apply! append_excl_l (ex1:=[_])
-  case subclass_r => exact .empty_l
-  case irrelevant_r => exact hd
   case empty_r => assumption
   case union_r ih1 ih2 => exact ih2 (ih1 hd)
-
-theorem Kind.Subtract.empty_or_subroot (hs : Subtract (.node r1 ex1) (.node r2 ex2) R) (he : IsEmpty R) : ContainsSupOf ex1 r1 ∨ r1.Subclass r2 := by
-  cases hs
-  case absurd_l => left; assumption
-  case excl_subclass_r hss hsc hs =>
-    cases hs.empty_or_subroot he <;> aesop
-  case excl_disjoint_r hss hsc hs =>
-    cases hs.empty_or_subroot he <;> aesop
-  case excl_absurd_r hs => cases he; aesop
-  case excl_irrelevant_r hd hs =>
-    cases hs.empty_or_subroot he <;> aesop
-  case excl_r hs =>
-    cases he
-    rename_i he1 he2
-    cases hs.empty_or_subroot he1 <;> aesop
-  case subclass_l hs =>
-    cases he
-    rename_i he
-    cases he
-    case here he => cases hs.antisymm he; right; constructor
-    case there => aesop
-  case subclass_r => aesop
-  case irrelevant_r => cases he; aesop
-
--- theorem Kind.Disjoint.refine_subclass_l (hd : Disjoint (.node r2 ex2) K) (hs : Classifier.Subclass r1 r2) : ContainsSupOf ex2 r2 ∨ Disjoint (.node r1 ex1) K := by
---   cases hd
---   case empty_r => right; apply! empty_r
---   case union_r h1 h2 =>
---     cases h1.refine_subclass_l hs (ex1:=ex1); aesop
---     cases h2.refine_subclass_l hs (ex1:=ex1); aesop
---     right; apply! union_r
---   case absurd_l hsc => aesop
---   case absurd_r hsc => right; apply! absurd_r
---   case root hd => right; apply root $ hd.refines_subclass_l hs
---   case excl_l hsc => right; apply excl_l $ hsc.trans_subclass hs
---   case excl_r r2' ex2' hsc =>
---     induction hsc
---     case here a xs r2' hss =>
---       cases Classifier.subclass_or_disjoint a r1
---       case inl hs1 =>
+  case tree => apply! hd.append_excl_l (ex1 := [_])
+  case excl_absurd_r => assumption
+  case excl_irrelevant_r ih => apply! ih
+  case excl_subclass_r hs1 _ ih =>
+    apply Disjoint.union_l
+    apply! ih
+    apply! hd.refine_subroot_l
+  case excl_subclass_l => assumption
+  case excl_irrelevant_l ih => apply! ih
 
 theorem Kind.Disjoint.append_l_disj_inv (hd : Disjoint (.node r1 (a :: ex1)) (.node r2 ex2)) (hda : a.Disjoint r2) : Disjoint (.node r1 ex1) (.node r2 ex2) := by
   cases hd
@@ -703,24 +678,97 @@ theorem Kind.Disjoint.append_l_contained_inv (hd : Disjoint (.node r1 (a :: ex1)
     case here hs => apply! absurd_r $ hsc.trans_subclass _
     case there => apply! excl_r
 
+theorem Kind.Disjoint.refine_disjoint_subtract_l_disjoint_root
+  (hdr : Disjoint R K)
+  (hs : Subtract (.node r1 ex1) (.node r2 ex2) R)
+  (hd : r1.Disjoint r2)
+  : Disjoint (.node r1 ex1) K := by
+  cases hs
+  case tree =>
+    generalize h : node r1 (r2 :: ex1) = L at hdr
+    induction hdr <;> try cases h
+    case empty_r => apply! empty_r
+    case union_r ha hb => simp_all; apply! union_r
+    case absurd_l hsc =>
+      cases hsc
+      case here hs => cases hd.not_subclass hs
+      case there hsc => apply! absurd_l
+    case absurd_r => apply! absurd_r
+    case root hd2 => apply! root
+    case excl_l => apply! excl_l
+    case excl_r hsc =>
+      cases hsc
+      case here hs => apply! root $ hd.refines_subclass_r _
+      case there hsc => apply! excl_r
+  case excl_absurd_r => assumption
+  case excl_irrelevant_r hs => apply! hdr.refine_disjoint_subtract_l_disjoint_root
+  case excl_subclass_r hs =>
+    have ⟨hl, _⟩ := hdr.union_l_inv
+    apply! hl.refine_disjoint_subtract_l_disjoint_root _ hd
+  case excl_subclass_l => assumption
+  case excl_irrelevant_l hs => apply! hdr.refine_disjoint_subtract_l_disjoint_root
+
+
+
+
 theorem Kind.Disjoint.refine_disjoint_subtract_l (hd2 : Disjoint K2 K) (hs : Subtract K1 K2 R) (hdr : Disjoint R K) : Disjoint K1 K := by
   induction hs generalizing K
   case empty_l => apply empty_l
   case union_l ih1 ih2 =>
     have ⟨_, _⟩ := hdr.union_l_inv
     apply! union_l (ih1 _ _) (ih2 _ _)
-  case absurd_l => apply! absurd_l'
-  case excl_subclass_r ex1 a r1 r2 ex2 _  hss hsc hs ih =>
+  case empty_r => assumption
+  case union_r ha hb =>
+    have ⟨hl, hr⟩ := hd2.union_l_inv
+    apply ha hl _
+    apply hb hr hdr
+  case tree r1 ex1 r2 =>
+    generalize h : node r1 (r2 :: ex1) = L at hdr
+    induction hdr <;> try cases h
+    case empty_r => apply! empty_r
+    case union_r ha hb =>
+      have ⟨_, _⟩ := hd2.union_r_inv
+      simp_all
+      apply! union_r
+    case absurd_l hsc =>
+      cases hsc
+      case here hs =>
+        cases hd2
+        case absurd_l hsc => cases hsc
+        case absurd_r hsc => apply! absurd_r
+        case root hd =>  apply root; apply! hd.refines_subclass_l _
+        case excl_l hsc => apply excl_l; apply! hsc.trans_subclass
+        case excl_r hsc => cases hsc
+      case there hsc => apply! absurd_l
+    case absurd_r => apply! absurd_r
+    case root => apply! root
+    case excl_l => apply! excl_l
+    case excl_r hsc =>
+      cases hsc
+      case here hs =>
+        cases hd2
+        case absurd_r hsc => apply! absurd_r
+        case root hd => cases hd.symm.not_subclass hs
+        case excl_l hsc => apply absurd_r; apply! hsc.trans_subclass
+        case excl_r hsc => cases hsc
+        case absurd_l hsc => cases hsc
+      case there hsc => apply! excl_r
+  case excl_subclass_r r1 ex1 r2 ex2 _ a hss hsc hs ih =>
+    have ⟨hdr1, hdr2⟩ := hdr.union_l_inv
     generalize h : node r2 (a :: ex2) = L at hd2
     induction hd2 generalizing K2 <;> try cases h
     case empty_r => apply! empty_r
     case union_r ha hb =>
       simp_all
       have ⟨_, _⟩ := hdr.union_r_inv
-      apply! union_r (ha _) (hb _)
+      have ⟨_, _⟩ := hdr1.union_r_inv
+      have ⟨_, _⟩ := hdr2.union_r_inv
+      apply! union_r (ha _ _ _) (hb _ _ _)
     case absurd_l hsc =>
       cases hsc
-      case here hsc => cases hss.antisymm hsc
+      case here hsc1 =>
+        cases hss.antisymm hsc1
+
       case there hsc =>
         apply ih _ hdr
         apply! absurd_l
@@ -729,28 +777,7 @@ theorem Kind.Disjoint.refine_disjoint_subtract_l (hd2 : Disjoint K2 K) (hs : Sub
     case excl_l hsc => apply! ih (.excl_l _)
     case excl_r hsc =>
       cases hsc
-      case here hs => apply excl_r $ hsc.trans_subclass hs
-      case there hsc => apply! ih (excl_r _)
-  case excl_disjoint_r r1 ex1 r2 ex2 _ a hss hd hs ih =>
-    generalize h : node r2 (a :: ex2) = L at hd2
-    induction hd2 generalizing K2 <;> try cases h
-    case empty_r => apply! empty_r
-    case union_r ha hb =>
-      simp_all
-      have ⟨_, _⟩ := hdr.union_r_inv
-      apply! union_r (ha _) (hb _)
-    case absurd_l hsc =>
-      cases hsc
-      case here hsc => cases hss.antisymm hsc
-      case there hsc =>
-        apply ih _ hdr
-        apply! absurd_l
-    case absurd_r => apply! absurd_r
-    case root hd1 => apply ih (.root hd1) hdr
-    case excl_l hsc => apply! ih (.excl_l _)
-    case excl_r hsc =>
-      cases hsc
-      case here hs => apply! root $ hd.symm.refines_subclass_r _
+      case here hs => apply ih _ hdr; apply root; apply! hd.refines_subclass_r
       case there hsc => apply! ih (excl_r _)
   case excl_absurd_r hs => assumption
   case excl_irrelevant_r r1 ex1 r2 ex2 _ a hd hs ih =>
@@ -763,7 +790,7 @@ theorem Kind.Disjoint.refine_disjoint_subtract_l (hd2 : Disjoint K2 K) (hs : Sub
       apply! union_r (ha _) (hb _)
     case absurd_l hsc =>
       cases hsc
-      case here hsc => cases hd.symm.not_subclass hsc
+      case here hsc => cases hd.not_subclass hsc
       case there hsc =>
         apply ih _ hdr
         apply! absurd_l
@@ -772,70 +799,32 @@ theorem Kind.Disjoint.refine_disjoint_subtract_l (hd2 : Disjoint K2 K) (hs : Sub
     case excl_l hsc => apply! ih (.excl_l _)
     case excl_r hsc =>
       cases hsc
-      case here hs => apply ih _ hdr; apply root; apply! hd.symm.refines_subclass_r
+      case here hs => apply ih _ hdr; apply root; apply! hd.refines_subclass_r
       case there hsc => apply! ih (excl_r _)
-  case excl_r r1 ex1 r2 ex2 _ a hd hsc hs ih =>
-    have ⟨hdr', hd'⟩ := hdr.union_l_inv
+  case excl_subclass_l hs2 hs1 => assumption
+  case excl_irrelevant_l r1 ex1 r2 ex2 _ a hs2 hd1 hs ih =>
     generalize h : node r2 (a :: ex2) = L at hd2
     induction hd2 generalizing K2 <;> try cases h
     case empty_r => apply! empty_r
     case union_r ha hb =>
       simp_all
       have ⟨_, _⟩ := hdr.union_r_inv
-      have ⟨_, _⟩ := hdr'.union_r_inv
-      have ⟨hl, hr⟩ := hd'.union_r_inv
-      apply! union_r (ha _ _ _) (hb _ _ _)
+      apply! union_r (ha _) (hb _)
     case absurd_l hsc =>
       cases hsc
-      case here hsc => cases hd.symm.not_subclass hsc
+      case here hsc =>
+        cases hs2.antisymm hsc
+        apply! hdr.refine_disjoint_subtract_l_disjoint_root hs
       case there hsc =>
-        apply ih _ hdr'
+        apply ih _ hdr
         apply! absurd_l
     case absurd_r => apply! absurd_r
-    case root hd1 => apply ih (.root hd1) hdr'
+    case root hd1 => apply ih (.root hd1) hdr
     case excl_l hsc => apply! ih (.excl_l _)
     case excl_r hsc =>
       cases hsc
-      case here hs =>
-        cases hd'
-        case absurd_l hsc => apply! excl_r $ hsc.trans_subclass _
-        case absurd_r hsc => apply! absurd_r
-        case root hd => cases hd.symm.not_subclass hs
-        case excl_l hsc =>  apply! absurd_r $ hsc.trans_subclass _
-        case excl_r hsc => apply! excl_r
+      case here hs => apply root; apply! hd1.refines_subclass_r
       case there hsc => apply! ih (excl_r _)
-  case subclass_l r1 ex1 r2 hs =>
-    generalize h : node r2 [] = L at hd2
-    induction hd2 <;> try cases h
-    case empty_r => apply! empty_r
-    case union_r ha hb =>
-      have ⟨_, _⟩ := hdr.union_r_inv
-      simp_all
-      apply! union_r
-    case absurd_l hsc => cases hsc
-    case absurd_r => apply! absurd_r
-    case root hd => apply! hdr.append_l_disj_inv
-    case excl_l hsc => apply! hdr.append_l_contained_inv
-    case excl_r hsc => cases hsc
-  case subclass_r r1 ex1 r2 hs =>
-    generalize h : node r2 [] = L at hd2
-    induction hd2 <;> try cases h
-    case empty_r => apply! empty_r
-    case union_r ha hb =>
-      have ⟨_, _⟩ := hdr.union_r_inv
-      simp_all
-      apply! union_r
-    case absurd_l hsc => cases hsc
-    case absurd_r => apply! absurd_r
-    case root hd => apply! root $ hd.refines_subclass_l _
-    case excl_l hsc => apply! excl_l $ hsc.trans_subclass _
-    case excl_r hsc => cases hsc
-  case irrelevant_r r1 ex1 r2 hd => assumption
-  case empty_r => assumption
-  case union_r ha hb =>
-    have ⟨hl, hr⟩ := hd2.union_l_inv
-    apply ha hl _
-    apply hb hr hdr
 
 theorem Kind.Disjoint.is_empty_l (he : IsEmpty K) : Disjoint K L := by
   induction he
@@ -855,19 +844,24 @@ theorem Kind.Subkind.refine_disjoint_l (hs : Subkind K1 K2) (hd : Disjoint K2 K)
 
 theorem Kind.Subtract.exists' : ∃ R, Subtract (node r1 ex1) (node r2 ex2) R := by
   induction ex2
-  case nil =>
-    cases r1.subclass_or_disjoint r2
-    case inl hs => exists empty; apply subclass_r hs
+  case nil => exists node r1 (r2 :: ex1); apply tree
+  case cons head tail ih =>
+    cases r2.subclass_or_disjoint head
+    case inl hs =>
+      exists node r1 ex1
+      apply! excl_absurd_r
     case inr hs =>
       cases hs
-      case inl hs => exists (node r1 (r2 :: ex1)); apply subclass_l hs
-      case inr hd => exists (node r1 ex1); apply irrelevant_r hd
-  case cons head tail ih =>
-    cases head.subclass_or_disjoint r2
-    case inl hs =>
-      cases hs.might_strict
-      case inl he => cases he; exists node r1 ex1; apply excl_absurd_r hs
-      case inr hss =>
+      case inl hs =>
+        cases r1.subclass_or_disjoint head
+        case inl hs1 => exists node r1 ex1; apply! excl_subclass_l
+        case inr hs1 =>
+          cases hs1
+          case inl hs1 =>
+            have ⟨R1, h⟩ := ih
+            exists .union R1 (.node head ex1)
+            apply excl_subclass_r
+
 
 theorem Kind.Subtract.exists (a : Kind) (b: Kind) : ∃ R, Subtract a b R := by
   induction b generalizing a
