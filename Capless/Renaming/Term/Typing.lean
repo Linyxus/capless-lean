@@ -128,7 +128,7 @@ theorem Typed.rename
     apply ih2; trivial
   case boundary ih =>
     simp [Term.rename, EType.rename, CType.rename]
-    apply Typed.boundary
+    apply Typed.boundary; assumption
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.rename, FinFun.ext, CType.rename, SType.rename] at ih
     rw

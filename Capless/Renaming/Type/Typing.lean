@@ -120,7 +120,7 @@ theorem Typed.trename
     apply ih2; trivial
   case boundary ih =>
     simp [Term.trename, EType.trename, CType.trename]
-    apply boundary
+    apply boundary; assumption
     have ih := ih ((ρ.cext _).ext _)
     simp [FinFun.ext, CType.trename, SType.trename] at ih
     rw [ SType.cweaken_trename

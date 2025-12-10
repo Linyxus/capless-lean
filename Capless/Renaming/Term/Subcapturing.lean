@@ -17,59 +17,35 @@ theorem CaptureSet.Subset.rename {C1 C2 : CaptureSet n k}
   C1.rename f ⊆ C2.rename f := by
   induction h <;> try (solve | simp | constructor <;> try trivial)
   apply CaptureSet.Subset.union_rr; trivial
-  case proj_union =>
-    simp
-    apply proj_union
-  case union_proj =>
-    simp
-    apply union_proj
 
-mutual
 theorem CaptureKind.rename
   (h : Γ ⊢ C :k K)
-  (ρ : VarMap Γ f Δ) : Δ ⊢ (C.rename f) :k K :=
-  match h with
-  | .empty => .empty
-  | .label hl => .label (ρ.lmap _ _ hl)
-  | .cvar hb => .cvar (ρ.cmap _ _ hb)
-  | .csub hs hk => .csub (hs.rename ρ) (hk.rename ρ)
-  | .sub hs hk => .sub hs (hk.rename ρ)
-  | .proj_kind => by
-    simp
-    apply CaptureKind.proj_kind
-  | .proj hk => by
-    simp
-    apply CaptureKind.proj (hk.rename ρ)
+  (ρ : VarMap Γ f Δ) : Δ ⊢ (C.rename f) :k K := by
+  induction h
+  case var hb hk ih => apply! var (ρ.map _ _ hb) (ih _)
+  case label hb => apply! label (ρ.lmap _ _ _ hb)
+  case cvar hb => apply! cvar (ρ.cmap _ _ hb)
+  case cbound hb hk ih => apply! cbound (ρ.cmap _ _ hb) (ih _)
+  case cinstr hb hk ih => apply! cinstr (ρ.cmap _ _ hb) (ih _)
+  case sub hs hk ih => apply! sub hs (ih _)
+  case empty => apply empty
+  case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.rename
   (h : Subcapt Γ C1 C2)
   (ρ : VarMap Γ f Δ) :
-  Subcapt Δ (C1.rename f) (C2.rename f) :=
-  match h with
-  | .trans ha hb => .trans (ha.rename ρ) (hb.rename ρ)
-  | .subset hs => by
-    apply Subcapt.subset
-    apply CaptureSet.Subset.rename hs
-  | .union ha hb => .union (ha.rename ρ) (hb.rename ρ)
-  | .var hb => .var (ρ.map _ _ hb)
-  | .cinstl hb => .cinstl (ρ.cmap _ _ hb)
-  | .cinstr hb => .cinstr (ρ.cmap _ _ hb)
-  | .cbound hb => .cbound (ρ.cmap _ _ hb)
-  | .proj h1 => by
-    simp
-    apply Subcapt.proj (h1.rename ρ)
-  | .proj_sub hs => by
-    simp
-    apply Subcapt.proj_sub hs
-  | .proj_l => by
-    simp
-    apply Subcapt.proj_l
-  | .proj_r hk => by
-    simp
-    apply Subcapt.proj_r (hk.rename ρ)
-  | .proj_disj hd hk => by
-    simp
-    apply Subcapt.proj_disj hd (hk.rename ρ)
-end
+  Subcapt Δ (C1.rename f) (C2.rename f) :=by
+  induction h <;> try rw [CaptureSet.proj_rename]
+  case trans ha hb => apply! trans (ha _) (hb _)
+  case subset hs => apply! subset $ hs.rename
+  case union ha hb => apply! union (ha _) (hb _)
+  case var hb => apply! var (ρ.map _ _ hb)
+  case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
+  case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
+  case cbound hb => apply! cbound (ρ.cmap _ _ hb)
+  case subkind hs => apply! subkind
+  case proj_absurd => apply! proj_absurd
+  case proj_split => apply! proj_split
+  case proj_merge => apply! proj_merge
 
 end Capless

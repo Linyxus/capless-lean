@@ -11,39 +11,35 @@ remain valid when type variables are renamed consistently between contexts.
 -/
 namespace Capless
 
-mutual
-
-
 theorem CaptureKind.trename
   (h : CaptureKind Γ C K)
   (ρ : TVarMap Γ f Δ) :
-  CaptureKind Δ C K :=
-  match h with
-  | .label hl => .label (ρ.lmap _ _ hl)
-  | .cvar hb => .cvar (ρ.cmap _ _ hb)
-  | .csub hs hk => .csub (hs.trename ρ) (hk.trename ρ)
-  | .sub hs hk => .sub hs (hk.trename ρ)
-  | .empty => .empty
-  | .proj_kind => .proj_kind
-  | .proj hk => .proj (hk.trename ρ)
+  CaptureKind Δ C K := by
+  induction h
+  case var hb hk ih => apply! var (ρ.map _ _ hb) (ih _)
+  case label hb => apply! label (ρ.lmap _ _ _ hb)
+  case cvar hb => apply! cvar (ρ.cmap _ _ hb)
+  case cbound hb hk ih => apply! cbound (ρ.cmap _ _ hb) (ih _)
+  case cinstr hb hk ih => apply! cinstr (ρ.cmap _ _ hb) (ih _)
+  case sub hs hk ih => apply! sub hs (ih _)
+  case empty => apply empty
+  case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.trename
   (h : Subcapt Γ C1 C2)
   (ρ : TVarMap Γ f Δ) :
-  Subcapt Δ C1 C2 :=
-  match h with
-  | .trans ha hb => .trans (ha.trename ρ) (hb.trename ρ)
-  | .subset hs => .subset hs
-  | .union ha hb => .union (ha.trename ρ) (hb.trename ρ)
-  | .var hb => .var (ρ.map _ _ hb)
-  | .cinstl hb => .cinstl (ρ.cmap _ _ hb)
-  | .cinstr hb => .cinstr (ρ.cmap _ _ hb)
-  | .cbound hb => .cbound (ρ.cmap _ _ hb)
-  | .proj h1 => .proj (h1.trename ρ)
-  | .proj_sub hs => .proj_sub hs
-  | .proj_l => .proj_l
-  | .proj_r hk => .proj_r (hk.trename ρ)
-  | .proj_disj hd hk => .proj_disj hd (hk.trename ρ)
-end
+  Subcapt Δ C1 C2 := by
+  induction h
+  case trans ha hb => apply! trans (ha _) (hb _)
+  case subset hs => apply! subset
+  case union ha hb => apply! union (ha _) (hb _)
+  case var hb => apply! var (ρ.map _ _ hb)
+  case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
+  case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
+  case cbound hb => apply! cbound (ρ.cmap _ _ hb)
+  case subkind hs => apply! subkind
+  case proj_absurd => apply! proj_absurd
+  case proj_split => apply! proj_split
+  case proj_merge => apply! proj_merge
 
 end Capless

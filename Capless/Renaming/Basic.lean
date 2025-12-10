@@ -21,7 +21,7 @@ structure VarMap (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) wh
   map : ∀ x E, Γ.Bound x E -> Δ.Bound (f x) (E.rename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.rename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c (b.rename f)
-  lmap : ∀ x S, Γ.LBound x S -> Δ.LBound (f x) (S.rename f)
+  lmap : ∀ x c S, Γ.LBound x c S -> Δ.LBound (f x) c (S.rename f)
 
 def VarMap.cext {Γ : Context n m k} {Δ : Context n' m k}
   (ρ : VarMap Γ f Δ) (b : CBinding n k) :
@@ -46,7 +46,7 @@ def VarMap.cext {Γ : Context n m k} {Δ : Context n' m k}
       simp [CBinding.cweaken_rename_comm]
       constructor
       apply ρ.cmap; assumption
-  · intros x S hb
+  · intros x c S hb
     cases hb
     simp [SType.cweaken_rename_comm]
     constructor
@@ -78,7 +78,7 @@ def VarMap.ext {Γ : Context n m k} {Δ : Context n' m k}
       rw [<- CBinding.weaken_rename]
       constructor
       apply ρ.cmap; assumption
-  · intros x S hb
+  · intros x c S hb
     cases hb
     case there_var =>
       rw [<- SType.weaken_rename]
@@ -113,7 +113,7 @@ def VarMap.text {Γ : Context n m k} {Δ : Context n' m k}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intros x S hb
+    intros x c S hb
     cases hb
     case there_tvar =>
       rw [SType.tweaken_rename]
@@ -124,7 +124,7 @@ structure CVarMap (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') w
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.crename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound (f c) (b.crename f)
-  lmap : ∀ x S, Γ.LBound x S -> Δ.LBound x (S.crename f)
+  lmap : ∀ x c S, Γ.LBound x c S -> Δ.LBound x c (S.crename f)
 
 def CVarMap.cext {Γ : Context n m k} {Δ : Context n m k'}
   (ρ : CVarMap Γ f Δ) (b : CBinding n k) :
@@ -155,7 +155,7 @@ def CVarMap.cext {Γ : Context n m k} {Δ : Context n m k'}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_cvar hb0 =>
       rw [<- SType.cweaken_crename]
@@ -191,7 +191,7 @@ def CVarMap.ext {Γ : Context n m k} {Δ : Context n m k'}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_var =>
       rw [<- SType.weaken_crename]
@@ -226,7 +226,7 @@ def CVarMap.text {Γ : Context n m k} {Δ : Context n m k'}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_tvar hb0 =>
       rw [<- SType.tweaken_crename]
@@ -237,7 +237,7 @@ structure TVarMap (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) w
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.trename f)
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound (f X) (b.trename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
-  lmap : ∀ x S, Γ.LBound x S -> Δ.LBound x (S.trename f)
+  lmap : ∀ x c S, Γ.LBound x c S -> Δ.LBound x c (S.trename f)
 
 def TVarMap.ext {Γ : Context n m k} {Δ : Context n m' k}
   (ρ : TVarMap Γ f Δ) (E : CType n m k) :
@@ -267,7 +267,7 @@ def TVarMap.ext {Γ : Context n m k} {Δ : Context n m' k}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_var =>
       rw [<- SType.weaken_trename]
@@ -302,7 +302,7 @@ def TVarMap.text {Γ : Context n m k} {Δ : Context n m' k}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_tvar hb0 =>
       rw [<- SType.tweaken_trename]
@@ -336,7 +336,7 @@ def TVarMap.cext {Γ : Context n m k} {Δ : Context n m' k}
       constructor
       apply ρ.cmap; assumption
   case lmap =>
-    intro x S hb
+    intro x c S hb
     cases hb
     case there_cvar hb0 =>
       rw [<- SType.cweaken_trename]

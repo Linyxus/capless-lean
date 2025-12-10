@@ -317,3 +317,15 @@ theorem CaptureSet.Subset.proj (hsub : Subset C D) : Subset (C.proj K) (D.proj K
   case union_l ha hb => apply! union_l
   case union_rl ha => apply! union_rl
   case union_rr hb => apply! union_rr
+
+theorem CaptureSet.proj_rename {C : CaptureSet n k} : (C.proj K).rename f = (C.rename f).proj K := by
+  induction C
+  case empty => simp
+  case singleton => simp
+  case union ha hb => simp; aesop
+
+theorem CaptureSet.proj_crename {C : CaptureSet n k} : (C.proj K).crename f = (C.crename f).proj K := by
+  induction C
+  case empty => simp
+  case singleton => simp
+  case union ha hb => simp; aesop

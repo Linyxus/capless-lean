@@ -124,7 +124,7 @@ theorem Typed.crename
     apply ih2; assumption
   case boundary ih =>
     simp [Term.crename, EType.crename, CType.crename, SType.crename]
-    apply boundary
+    apply boundary; assumption
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.crename,
           TBinding.crename,

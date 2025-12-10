@@ -51,5 +51,6 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 | proj_merge : Subcapt Γ (.union (.singleton s K1) (.singleton s K2)) (.singleton s (.union K1 K2))
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
+notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K
 
 end Capless
