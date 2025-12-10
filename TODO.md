@@ -1,0 +1,3 @@
+- Prove `Subtract` properties
+  - [ ] `rfl`
+  - [ ] `implies_trans`
