@@ -12,15 +12,13 @@ namespace Capless
 
 
 inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
-  | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x} K
-  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x} (.singleton c [])
-  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c} K
-  | cbound : Context.CBound Γ c (.bound (.upper C)) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
-  | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ C K -> CaptureKind Γ {c=c} K
+  | var : Context.Bound Γ x (S^C) -> CaptureKind Γ C K -> CaptureKind Γ {x=x | L} (L.intersect K)
+  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x|K} (K.intersect (.node c []))
+  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c|L} (L.intersect K)
+  | cbound : Context.CBound Γ c (.bound (.upper C)) -> CaptureKind Γ C K -> CaptureKind Γ {c=c | L} (L.intersect K)
+  | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ C K -> CaptureKind Γ {c=c | L} (L.intersect K)
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
   | empty : CaptureKind Γ .empty K
-  | singleton_proj_kind : CaptureKind Γ (.singleton $ .proj s K) K
-  | singleton_proj : CaptureKind Γ (.singleton s) K -> CaptureKind Γ (.singleton $ s.proj K1) K
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
@@ -37,27 +35,21 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Subcapt Γ (C1 ∪ C2) C3
 | var :
   Context.Bound Γ x (CType.capt C S) ->
-  Subcapt Γ {x=x} C
+  Subcapt Γ {x=x|L} (C.proj L)
 | cinstl :
   Context.CBound Γ c (CBinding.inst C) ->
-  Subcapt Γ C {c=c}
+  Subcapt Γ (C.proj L) {c=c|L}
 | cinstr :
   Context.CBound Γ c (CBinding.inst C) ->
-  Subcapt Γ {c=c} C
+  Subcapt Γ {c=c|L} (C.proj L)
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
-  Subcapt Γ {c=c} C
-| singleton_proj_sub {s : Singleton n k} {K1 K2 : Kind}:
-  K1.Subkind K2 -> Subcapt Γ (.singleton $ s.proj K1) (.singleton $ s.proj K2)
-| singleton_proj_l : Subcapt Γ (.singleton $ .proj s K) (.singleton s)
-| singleton_proj : Subcapt Γ (.singleton s) C -> Subcapt Γ (.singleton $ s.proj K) (C.proj K)
-| singleton_proj_disj :
-  Kind.Disjoint K1 K2 ->
-  CaptureKind Γ (.singleton s) K1 ->
-  Subcapt Γ (.singleton $ s.proj K2) .empty
-
+  Subcapt Γ {c=c|L} (C.proj L)
+| subkind : K.Subkind L -> Subcapt Γ (.singleton s K) (.singleton s L)
+| proj_absurd : L.IsEmpty -> Subcapt Γ (.singleton s L) .empty
+| proj_split : Subcapt Γ (.singleton s (.union K1 K2)) (.union (.singleton s K1) (.singleton s K2))
+| proj_merge : Subcapt Γ (.union (.singleton s K1) (.singleton s K2)) (.singleton s (.union K1 K2))
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
-notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K
 
 end Capless

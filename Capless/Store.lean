@@ -113,37 +113,30 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   WellScoped Γ cont (.union C1 C2)
 | singleton :
   Context.Bound Γ x (S^C) ->
-  WidenVar x s C C1 ->
-  WellScoped Γ cont C1 ->
-  WellScoped Γ cont (.singleton s)
+  WellScoped Γ cont (C.proj L) ->
+  WellScoped Γ cont {x=x|L}
 | csingleton :
   Context.CBound Γ c (CBinding.inst C) ->
-  WidenCVar c s C C1 ->
-  WellScoped Γ cont C1 ->
-  WellScoped Γ cont (.singleton s)
+  WellScoped Γ cont (C.proj L) ->
+  WellScoped Γ cont {c=c|L}
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
-  WidenCVar c s C C1 ->
-  WellScoped Γ cont C1 ->
-  WellScoped Γ cont (.singleton s)
+  WellScoped Γ cont (C.proj L) ->
+  WellScoped Γ cont {c=c|L}
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
-  s.IsCVar c ->
-  WellScoped Γ cont (.singleton s)
+  WellScoped Γ cont {c=c|L}
 | label :
   Context.LBound Γ x c S ->
   Cont.HasLabel cont x tail ->
-  s.IsVar x ->
-  WellScoped Γ cont (.singleton s)
+  WellScoped Γ cont {x=x|L}
 | label_disj : -- label is within context but not reachable from stack
   Context.LBound Γ x c S ->
-  Kind.Disjoint K (.classifier c) ->
-  s.IsVarWith x K ->
-  WellScoped Γ cont (.singleton s)
-| label_absurd : -- label is projected to absurdity
-  Context.LBound Γ x c S ->
-  s.IsAbsurdVar x ->
-  WellScoped Γ cont (.singleton s)
+  Kind.Disjoint L (.classifier c) ->
+  WellScoped Γ cont {x=x|L}
+| absurd : -- a completely projected away reference cannot be used, so it is always well-scoped.
+  L.IsEmpty ->
+  WellScoped Γ cont (.singleton s L)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
 inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where

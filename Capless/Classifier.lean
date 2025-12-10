@@ -295,6 +295,13 @@ inductive Kind : Type where
   | node : Classifier -> List Classifier -> Kind -- .only[K].except[K1, ..., Kn]
   | union : Kind -> Kind -> Kind
 
+@[simp]
+def Kind.top := node .top []
+
+-- Shorthand notation for a subtree without exclusions
+@[simp]
+def Kind.classifier c := node c []
+
 def Kind.sup (a: Kind) (b: Kind) : Kind := a.union b
 
 def Kind.inf (a: Kind) (b: Kind) : Kind :=
@@ -348,7 +355,7 @@ inductive Kind.IsEmpty : Kind -> Prop where
 theorem Kind.IsEmpty.is_absurd (he : IsEmpty (.node r exs)) : ContainsSupOf exs r := by
   cases he; assumption
 
-inductive Intersect : Kind -> Kind -> Kind -> Prop where
+inductive Kind.Intersect : Kind -> Kind -> Kind -> Prop where
   | empty_l : Intersect .empty K .empty
   | empty_r : Intersect K .empty .empty
   | union_l : Intersect K1 K R1 -> Intersect K2 K R2 -> Intersect (K1.union K2) K (R1.union R2)
@@ -356,6 +363,70 @@ inductive Intersect : Kind -> Kind -> Kind -> Prop where
   | singleton_l : r1.Subclass r2 -> Intersect (.node r1 ex1) (.node r2 ex2) (.node r1 (ex1 ++ ex2))
   | singleton_r : r2.Subclass r1 -> Intersect (.node r1 ex1) (.node r2 ex2) (.node r2 (ex1 ++ ex2))
   | singleton_disj : r1.Disjoint r2 -> Intersect (.node r1 ex1) (.node r2 ex2) .empty
+
+@[simp]
+def Kind.intersect (k : Kind) (l : Kind) : Kind :=
+  match k with
+  | .empty => .empty
+  | .union k1 k2 => .union (k1.intersect l) (k2.intersect l)
+  | .node r1 ex1 =>
+    match l with
+    | .empty => .empty
+    | .union l1 l2 => .union ((node r1 ex1).intersect l1) ((node r1 ex1).intersect l2)
+    | .node r2 ex2 =>
+      if r1.subclass r2 then .node r1 (ex1 ++ ex2)
+      else if r2.subclass r1 then .node r2 (ex1 ++ ex2)
+      else .empty
+
+theorem Kind.Intersect.lawful : Intersect K L (K.intersect L) := by
+  induction K generalizing L
+  case empty => unfold intersect; apply empty_l
+  case union ha hb =>
+    unfold intersect
+    apply union_l ha hb
+  case node r1 ex1 =>
+    induction L
+    case empty => unfold intersect; simp; apply empty_r
+    case union ha hb => unfold intersect; simp; apply union_r ha hb
+    case node r2 ex2 =>
+      unfold intersect
+      simp
+      split
+      . rename_i h
+        rw [← Classifier.subclass_is_Subclass] at h
+        apply! singleton_l
+      . split
+        . rename_i h
+          rw [← Classifier.subclass_is_Subclass] at h
+          apply! singleton_r
+        . rename_i h1 h2
+          rw [← Classifier.subclass_is_Subclass] at h1 h2
+          cases Classifier.subclass_or_disjoint r1 r2 <;> try contradiction
+          rename_i h3; cases h3
+          case inl h3 => have h4 := h3.weaken; contradiction
+          case inr h3 => apply! singleton_disj
+
+theorem Kind.Intersect.top_r {K : Kind} : K.intersect .top = K := by
+  induction K
+  case empty => simp
+  case union ha hb => simp_all
+  case node r1 ex1 =>
+    have h := Classifier.Subclass.of_top (a:=r1)
+    rw [Classifier.subclass_is_Subclass] at h
+    aesop
+
+theorem Kind.Intersect.top_l {K : Kind} : Kind.top.intersect K = K := by
+  induction K
+  case empty => simp
+  case union ha hb => aesop
+  case node r1 ex1 =>
+    have h := Classifier.Subclass.of_top (a:=r1)
+    rw [Classifier.subclass_is_Subclass] at h
+    simp
+    split
+    . rename_i h1; unfold Classifier.subclass at h1; simp_all
+    . simp
+
 
 inductive Kind.Subtract : Kind -> Kind -> Kind -> Prop where
   | empty_l : Subtract .empty K .empty
@@ -1094,7 +1165,6 @@ theorem Kind.Subtract.empty_union_l
     cases he
     aesop
 
-
 theorem Kind.Subtract.empty_union_rl
   (hs : Subtract K K1 R)
   (he : R.IsEmpty)
@@ -1112,6 +1182,20 @@ theorem Kind.Subtract.empty_union_rl
   case union_r hsa hsb =>
     cases hs.unique hsa
     apply hsb.is_empty_l he
+
+theorem Kind.Subtract.top (hs : Subtract K .top R) : IsEmpty R := by
+  cases hs
+  case empty_l => constructor
+  case union_l ha hb =>
+    apply IsEmpty.union ha.top hb.top
+  case tree =>
+    constructor
+    apply ContainsSupOf.here
+    apply Classifier.Subclass.of_top
+
+theorem Kind.Subkind.of_top : Subkind K .top := by
+  have ⟨R, h⟩ := Subtract.exists K .top
+  apply subtract h h.top
 
 -- prove later
 theorem Kind.Subtract.rfl (hs : Subtract K K R) : IsEmpty R := by sorry
@@ -1136,3 +1220,80 @@ theorem Kind.Subkind.trans (hs1 : Subkind K1 K2) (hs2 : Subkind K2 K3) : Subkind
   have ⟨R, h⟩ := Subtract.exists K1 K3
   apply subtract h
   apply! h.implies_trans h1
+
+theorem Kind.Intersect.with_subkind
+  (hs : K1.Subkind K2)
+  : (intersect L K1).Subkind (intersect L K2) := by sorry
+
+theorem Kind.Subkind.of_empty
+  (hs : Subkind K L)
+  (he : L.IsEmpty)
+  : K.IsEmpty := by
+  cases hs
+  case subtract hs he1 => apply! hs.empty_r_inv
+
+theorem Kind.Intersect.subkind_l
+  : (intersect K L).Subkind K := by sorry
+theorem Kind.Intersect.subkind_r
+  : (intersect K L).Subkind L := by sorry
+
+theorem Kind.Intersect.is_empty_l
+  (he : IsEmpty K) : IsEmpty (K.intersect L) := by
+  apply Subkind.of_empty subkind_l he
+
+theorem Kind.Intersect.is_empty_r
+  (he : IsEmpty L) : IsEmpty (intersect K L) := by
+  apply Subkind.of_empty subkind_r he
+
+theorem Kind.Subkind.union_rl : Subkind K1 (.union K1 K2) := by sorry
+theorem Kind.Subkind.union_rr : Subkind K2 (.union K1 K2) := by sorry
+
+theorem Kind.Subkind.union_l
+  (hs1 : Subkind K1 L)
+  (hs2 : Subkind K2 L)
+  : Subkind (.union K1 K2) L := by
+  cases hs1
+  cases hs2
+  constructor
+  apply! Subtract.union_l
+  apply! IsEmpty.union
+
+theorem Kind.Subkind.join
+  (hs1 : Subkind K1 L1)
+  (hs2 : Subkind K2 L2)
+  : Subkind (.union K1 K2) (.union L1 L2) := by
+  apply union_l
+  apply trans hs1 .union_rl
+  apply trans hs2 .union_rr
+
+theorem Kind.Subkind.reorder_union_4 : Subkind (.union (.union A B) (.union C D)) (.union (.union A C) (.union B D)) := by
+  apply union_l
+  . apply union_l
+    . apply trans .union_rl .union_rl
+    . apply trans .union_rl .union_rr
+  . apply union_l
+    . apply trans .union_rr .union_rl
+    . apply trans .union_rr .union_rr
+
+theorem Kind.Intersect.union_r_subkind : Subkind (.intersect K (.union L1 L2)) (.union (K.intersect L1) (K.intersect L2)) := by
+  induction K
+  case empty => simp; apply Subkind.subtract; apply Subtract.empty_l; constructor
+  case node => simp; apply Subkind.rfl
+  case union ha hb =>
+    -- simp
+    have h := Subkind.join ha hb
+    simp at h
+    simp
+    apply Subkind.trans h .reorder_union_4
+
+theorem Kind.Subkind.is_empty_l
+  (he : IsEmpty K)
+  : Subkind K L := by
+  induction he
+  case empty =>
+    apply subtract .empty_l .empty
+  case absurd exs r hsc =>
+    have ⟨R, h⟩ := Subtract.exists (.node r exs) L
+    apply! subtract h $ h.absurd_l _
+  case union h1 h2 =>
+    apply! union_l

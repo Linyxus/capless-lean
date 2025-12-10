@@ -17,13 +17,13 @@ namespace Capless
 inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -> Prop where
 | var :
   Context.Bound Γ x (S^C) ->
-  Typed Γ (Term.var x) (S^{x=x}) {x=x}
+  Typed Γ (Term.var x) (S^{x=x|.top}) {x=x|.top}
 | label :
   Context.LBound Γ x c S ->
-  Typed Γ (Term.var x) (Label[S]^{x=x}) {x=x}
+  Typed Γ (Term.var x) (Label[S]^{x=x|.top}) {x=x|.top}
 | pack :
   CaptureBound Γ C B ->
-  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} ->
+  Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x|.top} ->
   Typed Γ (Term.pack C x) (∃[c<:B]T) {}
 | sub :
   Typed Γ t E1 C1 ->
@@ -31,7 +31,7 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   (Γ ⊢ E1 <:e E2) ->
   Typed Γ t E2 C2
 | abs {C : CaptureSet n k} :
-  Typed (Γ,x:T) t E (C.weaken ∪ {x=0}) ->
+  Typed (Γ,x:T) t E (C.weaken ∪ {x=0|.top}) ->
   Typed Γ (λ(x:T)t) ((∀(x:T)E)^C) {}
 | tabs {C : CaptureSet n k} :
   Typed (Γ,X<:S) t E C ->
@@ -40,19 +40,19 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed (Γ,c<:B) t E C.cweaken ->
   Typed Γ (λ[c<:B]t) ((∀[c<:B]E)^C) {}
 | app :
-  Typed Γ (Term.var x) (EType.type (∀(x:T)E)^C) {x=x} ->
-  Typed Γ (Term.var y) T {x=y} ->
-  Typed Γ (Term.app x y) (E.open y) ({x=x} ∪ {x=y})
+  Typed Γ (Term.var x) (EType.type (∀(x:T)E)^C) {x=x|.top} ->
+  Typed Γ (Term.var y) T {x=y|.top} ->
+  Typed Γ (Term.app x y) (E.open y) ({x=x|.top} ∪ {x=y|.top})
 | invoke :
-  Typed Γ (Term.var x) (EType.type (Label[S])^C) {x=x} ->
-  Typed Γ (Term.var y) (S^{}) {x=y} ->
-  Typed Γ (Term.invoke x y) E ({x=x} ∪ {x=y})
+  Typed Γ (Term.var x) (EType.type (Label[S])^C) {x=x|.top} ->
+  Typed Γ (Term.var y) (S^{}) {x=y|.top} ->
+  Typed Γ (Term.invoke x y) E ({x=x|.top} ∪ {x=y|.top})
 | tapp :
-  Typed Γ (Term.var x) (EType.type (∀[X<:SType.tvar X]E)^C) {x=x} ->
-  Typed Γ (Term.tapp x X) (E.topen X) {x=x}
+  Typed Γ (Term.var x) (EType.type (∀[X<:SType.tvar X]E)^C) {x=x|.top} ->
+  Typed Γ (Term.tapp x X) (E.topen X) {x=x|.top}
 | capp :
-  Typed Γ (Term.var x) (EType.type (∀[c<:CBound.upper {c=c}]E)^C) {x=x} ->
-  Typed Γ (Term.capp x c) (E.copen c) {x=x}
+  Typed Γ (Term.var x) (EType.type (∀[c<:CBound.upper {c=c|.top}]E)^C) {x=x|.top} ->
+  Typed Γ (Term.capp x c) (E.copen c) {x=x|.top}
 | letin :
   Typed Γ t (EType.type T) C ->
   Typed (Γ,x: T) u E.weaken C.weaken ->  -- which means that x ∉ C and x ∉ fv(E)
@@ -70,9 +70,9 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
 | boundary {Γ : Context n m k} {S : SType n m k} :
   c.Subclass .control ->
   Typed
-    ((Γ,c<:CBound.kind (.classifier c)),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:CBound.kind (.node c [])),x: Label[S.cweaken]^{c=0|.top})
     t
-    (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0} ∪ {x=0}) ->
+    (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0|.top} ∪ {x=0|.top}) ->
   Typed Γ (boundary[c]: S in t) (S^CaptureSet.empty) C
 
 notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C

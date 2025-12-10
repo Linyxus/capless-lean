@@ -29,18 +29,17 @@ theorem Subcapt.proj_sub {C : CaptureSet n k}
   : Subcapt Γ (C.proj K1) (C.proj K2) := by
   induction C
   case empty => simp; apply subset .rfl
-  case singleton s => apply singleton_proj_sub hsk
+  case singleton s L =>
+    apply subkind
+    apply! Kind.Intersect.with_subkind
   case union ha hb iha ihb =>
     simp
     apply join iha ihb
 
 theorem Subcapt.proj_l : Subcapt Γ (C.proj K) C := by
-  induction C
-  case empty => simp; apply rfl
-  case singleton => apply singleton_proj_l
-  case union ha hb iha ihb =>
-    simp
-    apply! join
+  have h := proj_sub (Γ:=Γ) (C:=C) (K1:=K) .of_top
+  rw [CaptureSet.proj_top] at h
+  assumption
 
 theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K :=
   match hk with
@@ -53,13 +52,11 @@ theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2)
     have ⟨_, _⟩ := hk.union_l_inv' heq
     apply And.intro <;> apply! CaptureKind.sub
   | .empty => by cases heq
-  | .singleton_proj_kind => by cases heq
-  | .singleton_proj hk => by cases heq
 termination_by structural hk
 
 
 theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := by
-  induction hs <;> (subst_vars; simp_all)
+  induction hs <;> (subst_vars; try simp_all)
   case trans ha hb iha ihb =>
     have ⟨_, _⟩ := ihb
     apply And.intro <;> apply! trans
@@ -67,57 +64,75 @@ theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Sub
     have ⟨_, _⟩ := hsub.union_l_inv
     apply And.intro <;> apply! subset
   case cinstl Γ _ hb =>
-    have h1 : Subcapt Γ C1 (C1 ∪ C2) := Subcapt.subset $ .union_rl .rfl
-    have h2 : Subcapt Γ C2 (C1 ∪ C2) := Subcapt.subset $ .union_rr .rfl
+    unfold CaptureSet.proj at heq; split at heq <;> simp at heq
+    have ⟨_, _⟩ := heq; subst_vars; simp_all
+    rename_i Γ c L _ C1 C2
+    have h1 : Subcapt Γ (C1.proj L) ((C1 ∪ C2).proj L) := by
+      simp
+      apply Subcapt.subset $ .union_rl .rfl
+    have h2 : Subcapt Γ (C2.proj L) ((C1 ∪ C2).proj L) := by
+      simp
+      apply Subcapt.subset $ .union_rr .rfl
     apply And.intro <;> apply! trans _ (.cinstl hb)
+  case union =>
+    injections; subst_vars; apply And.intro <;> assumption
+  case proj_merge =>
+    have ⟨_, _⟩ := heq; subst_vars; simp_all
+    apply And.intro <;> apply subkind
+    apply Kind.Subkind.union_rl
+    apply Kind.Subkind.union_rr
 
 theorem Subcapt.union_l_inv (hs : Subcapt Γ (C1 ∪ C2) D) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := hs.union_l_inv' $ .refl (a := C1 ∪ C2)
 theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := hk.union_l_inv' $ .refl (a := C1 ∪ C2)
 
-theorem Subcapt.proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj K) := by
-  induction C
-  case empty => simp; apply subset .empty
-  case union ha hb iha ihb =>
-    have ⟨_, _⟩ := hs.union_l_inv
-    simp
-    apply! union (iha _) (ihb _)
-  case singleton => apply! singleton_proj
+-- prove later, not sure if needed
+theorem Subcapt.proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj K) := by sorry
 
-theorem CaptureKind.proj_kind : CaptureKind Γ (.proj C K) K := by
-  induction C
-  case empty => apply empty
-  case union  => apply! union
-  case singleton => apply! singleton_proj_kind
-
-theorem CaptureKind.proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj K1) K := by
-  induction C
-  case empty => simp; apply empty
-  case union ha hb =>
-    have ⟨_, _⟩ := hk.union_l_inv
-    apply! union (ha _) (hb _)
-  case singleton => apply! singleton_proj
-
-theorem Subcapt.proj_disj
-  (hd : Kind.Disjoint K1 K2)
-  (hk : CaptureKind Γ C K1)
-  : Subcapt Γ (C.proj K2) .empty := by
+theorem Subcapt.proj_absurd_set {C : CaptureSet n k} (he : L.IsEmpty) : Subcapt Γ (C.proj L) .empty := by
   induction C
   case empty => simp; apply rfl
-  case union ha hb =>
+  case union ha hb => apply! union
+  case singleton =>
     simp
-    have ⟨_, _⟩ := hk.union_l_inv
-    apply! union (ha _) (hb _)
-  case singleton => apply! singleton_proj_disj
+    apply trans
+    apply subkind Kind.Intersect.subkind_r
+    apply! proj_absurd
 
-theorem CaptureKind.var_inv' (hk : CaptureKind Γ D K) (heq : D = {x=x}) (hb : Γ.Bound x S^C) : CaptureKind Γ C K := by
-  induction hk <;> (subst_vars; try simp_all)
-  case var hb1 hk ih =>
-    cases Context.bound_injective hb hb1
-    assumption
-  case label hb1 => cases Context.bound_lbound_absurd hb hb1
-  case sub hsk hk ih => apply! sub
+-- theorem CaptureKind.proj_kind : CaptureKind Γ (.proj C K) K := by
+--   induction C
+--   case empty => apply empty
+--   case union  => apply! union
+--   case singleton => apply! singleton_proj_kind
 
-theorem CaptureKind.var_inv (hk : CaptureKind Γ {x=x} K) (hb : Γ.Bound x S^C) : CaptureKind Γ C K := by apply! hk.var_inv' (.refl _)
+-- theorem CaptureKind.proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj K1) K := by
+--   induction C
+--   case empty => simp; apply empty
+--   case union ha hb =>
+--     have ⟨_, _⟩ := hk.union_l_inv
+--     apply! union (ha _) (hb _)
+--   case singleton => apply! singleton_proj
+
+-- theorem Subcapt.proj_disj
+--   (hd : Kind.Disjoint K1 K2)
+--   (hk : CaptureKind Γ C K1)
+--   : Subcapt Γ (C.proj K2) .empty := by
+--   induction C
+--   case empty => simp; apply rfl
+--   case union ha hb =>
+--     simp
+--     have ⟨_, _⟩ := hk.union_l_inv
+--     apply! union (ha _) (hb _)
+--   case singleton => apply! singleton_proj_disj
+
+-- theorem CaptureKind.var_inv' (hk : CaptureKind Γ D K) (heq : D = {x=x}) (hb : Γ.Bound x S^C) : CaptureKind Γ C K := by
+--   induction hk <;> (subst_vars; try simp_all)
+--   case var hb1 hk ih =>
+--     cases Context.bound_injective hb hb1
+--     assumption
+--   case label hb1 => cases Context.bound_lbound_absurd hb hb1
+--   case sub hsk hk ih => apply! sub
+
+-- theorem CaptureKind.var_inv (hk : CaptureKind Γ {x=x} K) (hb : Γ.Bound x S^C) : CaptureKind Γ C K := by apply! hk.var_inv' (.refl _)
 
 -- theorem CaptureKind.proj_inv' (hk : CaptureKind Γ D K) (heq : D = C.proj K1) : K1.Subkind K ∨ (∃ K2, K1.Disjoint K2 ∧ CaptureKind Γ C K2) ∨ CaptureKind Γ C K := by
 --   induction hk generalizing C K1
