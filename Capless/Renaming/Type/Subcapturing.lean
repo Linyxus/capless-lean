@@ -24,6 +24,7 @@ theorem CaptureKind.trename
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
   case union ha hb => apply! union (ha _) (hb _)
+  case absurd => apply! absurd
 
 theorem Subcapt.trename
   (h : Subcapt Γ C1 C2)
@@ -40,6 +41,5 @@ theorem Subcapt.trename
   case subkind hs => apply! subkind
   case proj_absurd => apply! proj_absurd
   case proj_split => apply! proj_split
-  case proj_merge => apply! proj_merge
 
 end Capless

@@ -24,8 +24,8 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   Reduce ⟨σ | cont | Term.capp x c⟩ ⟨σ | cont | t.copen c⟩
 | enter :
   Reduce
-    ⟨σ | cont | boundary:S in t⟩
-    ⟨(σ.label S).cval {x=0} | cont.weaken.cweaken.scope 0 | t⟩
+    ⟨σ | cont | boundary[c]:S in t⟩
+    ⟨(σ.label c S).cval {x=0|.top} | cont.weaken.cweaken.scope 0 | t⟩
 | leave_var :
   Reduce
     ⟨σ | cont.scope x | Term.var y⟩
@@ -36,7 +36,7 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
     ⟨σ | cont.scope x | v⟩
     ⟨σ | cont | v⟩
 | invoke {σ : Store n m k} {cont : Cont n m k} :
-  σ.LBound x S ->
+  σ.LBound x c S ->
   cont.HasLabel x tail ->
   Reduce
     ⟨σ | cont | Term.invoke x y⟩

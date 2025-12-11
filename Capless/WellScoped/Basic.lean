@@ -310,9 +310,5 @@ theorem WellScoped.subcapt (hsc : WellScoped Γ cont C2) (hsub : Subcapt Γ C1 C
   case proj_split =>
     cases hsc
     apply! proj_merge_singleton
-  case proj_merge =>
-    have h1 := hsc.subkind_singleton .union_rl
-    have h2 := hsc.subkind_singleton .union_rr
-    apply! union
 
 end Capless

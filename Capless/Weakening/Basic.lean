@@ -24,7 +24,7 @@ def VarMap.weaken {Γ : Context n m k} :
   constructor <;> (intros; constructor; trivial)
 
 def VarMap.lweaken {Γ : Context n m k} :
-  VarMap Γ FinFun.weaken (Γ.label S) := by
+  VarMap Γ FinFun.weaken (Γ.label c S) := by
   constructor <;> (intros; constructor; trivial)
 
 def VarMap.weaken_ext {Γ : Context n m k} :
@@ -39,7 +39,7 @@ def VarMap.lweaken_ext {Γ : Context n m k} :
   VarMap
     (Γ.var T)
     FinFun.weaken.ext
-    ((Γ.label P).var T.weaken) := by
+    ((Γ.label c P).var T.weaken) := by
   apply VarMap.ext
   apply VarMap.lweaken
 
@@ -56,7 +56,7 @@ def VarMap.lweaken_cext_ext {Γ : Context n m k} :
   VarMap
     ((Γ.cvar (CBinding.bound b)).var T)
     FinFun.weaken.ext
-    (((Γ.label P).cvar (CBinding.bound b.weaken)).var T.weaken) := by
+    (((Γ.label c P).cvar (CBinding.bound b.weaken)).var T.weaken) := by
   apply VarMap.ext
   apply VarMap.cext
   apply VarMap.lweaken

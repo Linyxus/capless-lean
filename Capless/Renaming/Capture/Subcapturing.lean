@@ -22,14 +22,21 @@ theorem CaptureKind.crename
   (ρ : CVarMap Γ f Δ) :
   CaptureKind Δ (C.crename f) K := by
   induction h
-  case var hb hk ih => apply! var (ρ.map _ _ hb) (ih _)
+  case var hb hk ih =>
+    rw [CaptureSet.proj_crename] at ih
+    apply! var (ρ.map _ _ hb) (ih _)
   case label hb => apply! label (ρ.lmap _ _ _ hb)
   case cvar hb => apply! cvar (ρ.cmap _ _ hb)
-  case cbound hb hk ih => apply! cbound (ρ.cmap _ _ hb) (ih _)
-  case cinstr hb hk ih => apply! cinstr (ρ.cmap _ _ hb) (ih _)
+  case cbound hb hk ih =>
+    rw [CaptureSet.proj_crename] at ih
+    apply! cbound (ρ.cmap _ _ hb) (ih _)
+  case cinstr hb hk ih =>
+    rw [CaptureSet.proj_crename] at ih
+    apply! cinstr (ρ.cmap _ _ hb) (ih _)
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
   case union ha hb => apply! union (ha _) (hb _)
+  case absurd he => apply! absurd
 
 theorem Subcapt.crename
   (h : Subcapt Γ C1 C2)
@@ -46,6 +53,5 @@ theorem Subcapt.crename
   case subkind hs => apply! subkind
   case proj_absurd => apply! proj_absurd
   case proj_split => apply! proj_split
-  case proj_merge => apply! proj_merge
 
 end Capless

@@ -1225,6 +1225,10 @@ theorem Kind.Intersect.with_subkind
   (hs : K1.Subkind K2)
   : (intersect L K1).Subkind (intersect L K2) := by sorry
 
+theorem Kind.Intersect.with_subkind_r
+  (hs : K1.Subkind K2)
+  : (intersect K1 L).Subkind (intersect K2 L) := by sorry
+
 theorem Kind.Subkind.of_empty
   (hs : Subkind K L)
   (he : L.IsEmpty)
@@ -1297,3 +1301,23 @@ theorem Kind.Subkind.is_empty_l
     apply! subtract h $ h.absurd_l _
   case union h1 h2 =>
     apply! union_l
+
+theorem Kind.Intersect.union_r_superkind : Subkind (.union (K.intersect L1) (K.intersect L2)) (.intersect K (.union L1 L2)) := by
+  induction K
+  case empty => simp; apply Subkind.is_empty_l; constructor; constructor; constructor;
+  case node => simp; apply Subkind.rfl
+  case union ha hb =>
+    have h := Subkind.join ha hb
+    simp
+    apply Subkind.trans .reorder_union_4 h
+
+-- theorem Kind.Subkind.intersect_l_inv
+--   (hs : Subkind (K1.intersect L) (K2.intersect L))
+--   : Subkind K1 K2 := by
+
+-- theorem Kind.Subkind.union_with_subkind_l
+--   (hs : Subkind K L)
+--   : Subkind (L.union K) L := by
+--   apply union_l .rfl hs
+
+theorem Kind.Intersect.union_l_subkind : Subkind (.intersect (.union K1 K2) L) (.union (K1.intersect L) (K2.intersect L)) := by sorry
