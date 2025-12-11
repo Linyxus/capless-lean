@@ -40,6 +40,7 @@ inductive SType : Nat -> Nat -> Nat -> Type where
 | cforall : CBound n k -> EType n m (k+1) -> SType n m k
 | box : CType n m k -> SType n m k
 | label : SType n m k -> SType n m k
+| maybe : SType n m k -> SType n m k
 
 end
 

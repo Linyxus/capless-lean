@@ -74,6 +74,15 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
     t
     (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0|.top} ∪ {x=0|.top}) ->
   Typed Γ (boundary[c]: S in t) (S^CaptureSet.empty) C
+| intercept {Γ : Context n m k} {S : SType n m k} :
+  Typed Γ t (S^{}) C ->
+  Typed Γ (intercept[K] in t) (EType.type (SType.maybe S)^(C.proj K)) C
+| unwrap {Γ : Context n m k} {S : SType n m k} :
+  Typed Γ (Term.var x) (EType.type (.maybe S)^C) {x=x|.top} ->
+  Typed Γ (.unwrap x) (S^{}) {x=x|.top}
+-- | unwrap_handle {Γ : Context n m k} :
+  -- Typed Γ (Term.var x) (EType.type (.maybe S)^C) {x=x|.top} ->
+  -- Typed (((Γ, X<:.top),x:)) h
 
 notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
 

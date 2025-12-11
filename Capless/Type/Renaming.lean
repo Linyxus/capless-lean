@@ -47,6 +47,7 @@ def SType.rename : SType n m k -> FinFun n n' -> SType n' m k
 | SType.cforall B E, f => SType.cforall (B.rename f) (E.rename f)
 | SType.box T, f => SType.box (T.rename f)
 | SType.label S, f => SType.label (S.rename f)
+| SType.maybe T, f => SType.maybe (T.rename f)
 
 end
 
@@ -67,6 +68,7 @@ def SType.trename : SType n m k -> FinFun m m' -> SType n m' k
 | SType.cforall B E, f => SType.cforall B (E.trename f)
 | SType.box T, f => SType.box (T.trename f)
 | SType.label S, f => SType.label (S.trename f)
+| SType.maybe T, f => SType.maybe (T.trename f)
 
 end
 
@@ -87,6 +89,7 @@ def SType.crename : SType n m k -> FinFun k k' -> SType n m k'
 | SType.cforall B E, f => SType.cforall (B.crename f) (E.crename f.ext)
 | SType.box T, f => SType.box (T.crename f)
 | SType.label S, f => SType.label (S.crename f)
+| SType.maybe T, f => SType.maybe (T.crename f)
 
 end
 
