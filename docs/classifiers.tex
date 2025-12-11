@@ -1,0 +1,282 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb}
+\usepackage{mathpartir}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Classifiers and Kinds: Definitions and Rules}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Classifier Structure}
+
+Classifiers form a tree structure rooted at $\top$:
+
+\begin{align*}
+c &::= \top \mid c.n & \text{(classifiers)}
+\end{align*}
+
+where $c.n$ denotes the $n$-th child of classifier $c$.
+
+\section{Kind Structure}
+
+Kinds represent sets of classifiers with possible exclusions:
+
+\begin{align*}
+K &::= \emptyset \mid K \cup K \mid c \setminus [c_1, \ldots, c_n] & \text{(kinds)}
+\end{align*}
+
+The notation $c \setminus [\overline{c}]$ represents all classifiers in the subtree rooted at $c$, excluding the subtrees rooted at each $c_i$.
+
+\paragraph{Abbreviations:}
+\begin{itemize}
+    \item $\mathsf{top} \triangleq \top \setminus []$ (all classifiers)
+    \item $\mathsf{classifier}(c) \triangleq c \setminus []$ (subtree rooted at $c$)
+\end{itemize}
+
+\section{Classifier Subclassing}
+
+The subclassing relation $c_1 \leq c_2$ holds when $c_1$ is in the subtree rooted at $c_2$:
+
+\begin{mathpar}
+\inferrule*[Right=SC-Refl]
+{ }
+{c \leq c}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=SC-Parent]
+{c_1 \leq c_2}
+{c_1.n \leq c_2}
+\end{mathpar}
+
+\section{Classifier Disjointness}
+
+Two classifiers are disjoint ($c_1 \bot c_2$) when they are in different subtrees:
+
+\begin{mathpar}
+\inferrule*[Right=CD-Base]
+{n \neq m}
+{p.n \bot p.m}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=CD-Left]
+{c_1 \bot c_2}
+{c_1.n \bot c_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=CD-Right]
+{c_1 \bot c_2}
+{c_1 \bot c_2.m}
+\end{mathpar}
+
+\section{Kind Disjointness}
+
+Two kinds are disjoint ($K_1 \bot K_2$) when they have no common classifiers:
+
+\begin{mathpar}
+\inferrule*[Right=KD-EmptyL]
+{ }
+{\emptyset \bot K}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-EmptyR]
+{ }
+{K \bot \emptyset}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-UnionL]
+{K_1 \bot K \\ K_2 \bot K}
+{K_1 \cup K_2 \bot K}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-UnionR]
+{K \bot K_1 \\ K \bot K_2}
+{K \bot K_1 \cup K_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-AbsurdL]
+{r_1 \in \overline{e_1}}
+{r_1 \setminus \overline{e_1} \bot r_2 \setminus \overline{e_2}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-AbsurdR]
+{r_2 \in \overline{e_2}}
+{r_1 \setminus \overline{e_1} \bot r_2 \setminus \overline{e_2}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-Root]
+{r_1 \bot r_2}
+{r_1 \setminus \overline{e_1} \bot r_2 \setminus \overline{e_2}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-ExclL]
+{r_1 \in \overline{e_2}}
+{r_1 \setminus \overline{e_1} \bot r_2 \setminus \overline{e_2}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=KD-ExclR]
+{r_2 \in \overline{e_1}}
+{r_1 \setminus \overline{e_1} \bot r_2 \setminus \overline{e_2}}
+\end{mathpar}
+
+Here, $r \in \overline{e}$ means $\exists e_i \in \overline{e}.\ r \leq e_i$ (containment via superclass).
+
+\section{Kind Intersection}
+
+The intersection relation $K_1 \cap K_2 = R$ computes the common classifiers:
+
+\begin{mathpar}
+\inferrule*[Right=Int-EmptyL]
+{ }
+{\emptyset \cap K = \emptyset}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-EmptyR]
+{ }
+{K \cap \emptyset = \emptyset}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-UnionL]
+{K_1 \cap K = R_1 \\ K_2 \cap K = R_2}
+{(K_1 \cup K_2) \cap K = R_1 \cup R_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-UnionR]
+{K \cap K_1 = R_1 \\ K \cap K_2 = R_2}
+{K \cap (K_1 \cup K_2) = R_1 \cup R_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-SubL]
+{r_1 \leq r_2}
+{(r_1 \setminus \overline{e_1}) \cap (r_2 \setminus \overline{e_2}) = r_1 \setminus (\overline{e_1} \mathbin{+\mkern-8mu+} \overline{e_2})}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-SubR]
+{r_2 \leq r_1}
+{(r_1 \setminus \overline{e_1}) \cap (r_2 \setminus \overline{e_2}) = r_2 \setminus (\overline{e_1} \mathbin{+\mkern-8mu+} \overline{e_2})}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Int-Disj]
+{r_1 \bot r_2}
+{(r_1 \setminus \overline{e_1}) \cap (r_2 \setminus \overline{e_2}) = \emptyset}
+\end{mathpar}
+
+\section{Kind Subtraction}
+
+The subtraction relation $K_1 - K_2 = R$ computes the classifiers in $K_1$ but not in $K_2$:
+
+\begin{mathpar}
+\inferrule*[Right=Sub-EmptyL]
+{ }
+{\emptyset - K = \emptyset}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-UnionL]
+{K_1 - K = R_1 \\ K_2 - K = R_2}
+{(K_1 \cup K_2) - K = R_1 \cup R_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-EmptyR]
+{ }
+{(r_1 \setminus \overline{e_1}) - \emptyset = r_1 \setminus \overline{e_1}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-UnionR]
+{(r_1 \setminus \overline{e_1}) - K_1 = R_1 \\ R_1 - K_2 = R_2}
+{(r_1 \setminus \overline{e_1}) - (K_1 \cup K_2) = R_2}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-Tree]
+{ }
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus []) = r_1 \setminus (r_2 :: \overline{e_1})}
+\end{mathpar}
+
+\paragraph{Exclusion handling:} For $(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2}))$, using the identity $A - (B - C) = (A - B) \cup (A \cap B \cap C)$:
+
+\begin{mathpar}
+\inferrule*[Right=Sub-ExclAbsurd]
+{a < r_2}
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2})) = r_1 \setminus \overline{e_1}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-ExclIrrelR]
+{a \bot r_2 \\ (r_1 \setminus \overline{e_1}) - (r_2 \setminus \overline{e_2}) = R}
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2})) = R}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-ExclSubR]
+{a \leq r_2 \\ a \leq r_1 \\ (r_1 \setminus \overline{e_1}) - (r_2 \setminus \overline{e_2}) = R}
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2})) = R \cup (a \setminus \overline{e_1})}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-ExclSubL]
+{a \leq r_2 \\ r_1 < a}
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2})) = r_1 \setminus \overline{e_1}}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=Sub-ExclIrrelL]
+{a \leq r_2 \\ r_1 \bot a \\ (r_1 \setminus \overline{e_1}) - (r_2 \setminus \overline{e_2}) = R}
+{(r_1 \setminus \overline{e_1}) - (r_2 \setminus (a :: \overline{e_2})) = R}
+\end{mathpar}
+
+Here, $a < r$ denotes strict subclassing ($a \leq r$ and $a \neq r$).
+
+\section{Subkinding}
+
+The subkinding relation $K_1 \subset K_2$ holds when every classifier in $K_1$ is also in $K_2$:
+
+\begin{mathpar}
+\inferrule*[Right=SK-Sub]
+{K_1 - K_2 = R \\ \mathsf{isEmpty}(R)}
+{K_1 \subset K_2}
+\end{mathpar}
+
+where $\mathsf{isEmpty}(K)$ is defined inductively:
+
+\begin{mathpar}
+\inferrule*[Right=IsEmpty-Empty]
+{ }
+{\mathsf{isEmpty}(\emptyset)}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=IsEmpty-Absurd]
+{r \in \overline{e}}
+{\mathsf{isEmpty}(r \setminus \overline{e})}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[Right=IsEmpty-Union]
+{\mathsf{isEmpty}(K_1) \\ \mathsf{isEmpty}(K_2)}
+{\mathsf{isEmpty}(K_1 \cup K_2)}
+\end{mathpar}
+
+\end{document}
