@@ -76,30 +76,6 @@ theorem WellScoped.subkind_singleton
   rw [Kind.Intersect.top_l] at h1
   assumption
 
--- theorem WellScoped.proj (hsc : WellScoped Γ cont C) : WellScoped Γ cont (C.proj K) := by
---   induction hsc generalizing K
---   case empty => apply empty
---   case union ih1 ih2 => apply union ih1 ih2
---   case singleton hb hsc ih =>
---     simp only [CaptureSet.proj]
---     apply singleton hb ih
---   case csingleton hb hsc ih =>
---     simp only [CaptureSet.proj]
---     apply csingleton hb ih
---   case cbound hb hsc ih =>
---     simp only [CaptureSet.proj]
---     apply cbound hb ih
---   case ckind hb =>
---     simp only [CaptureSet.proj]
---     apply ckind hb
---   case label hb hl =>
---     simp only [CaptureSet.proj]
---     apply label hb hl
---   case label_disj hb hd =>
---     simp only [CaptureSet.proj]
---     apply label_disj hb (hd.intersect_disjoint Kind.Intersect.lawful)
-
-
 theorem WellScoped.subset {C1 C2 : CaptureSet n k}
   (hsc : WellScoped Γ cont C2)
   (hs : C1.Subset C2) : WellScoped Γ cont C1 := by
@@ -310,5 +286,35 @@ theorem WellScoped.subcapt (hsc : WellScoped Γ cont C2) (hsub : Subcapt Γ C1 C
   case proj_split =>
     cases hsc
     apply! proj_merge_singleton
+
+theorem WellScoped.var_inv
+  (hsc : WellScoped Γ cont {x=x|.top})
+  (hbx : Γ.Bound x (S^C)) :
+  WellScoped Γ cont C := by
+  cases hsc
+  case singleton hbx' _ =>
+    have h := Context.bound_injective hbx hbx'
+    cases h
+    rw [CaptureSet.proj_top] at *
+    trivial
+  case label =>
+    exfalso
+    apply Context.bound_lbound_absurd <;> easy
+  case label_disj =>
+    exfalso
+    apply Context.bound_lbound_absurd <;> easy
+  case absurd he => cases he.is_absurd
+
+theorem WellScoped.label_inv
+  (hsc : WellScoped Γ cont {x=x|.top})
+  (hbl : Γ.LBound x c S) :
+  ∃ tail, cont.HasLabel x tail := by
+  cases hsc
+  case singleton =>
+    exfalso
+    apply Context.bound_lbound_absurd <;> easy
+  case label => aesop
+  case label_disj hd => cases hd.top_l.is_absurd
+  case absurd he => cases he.is_absurd
 
 end Capless

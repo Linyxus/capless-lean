@@ -7,73 +7,49 @@ Substitution theorems for capture variable substitution in subcapturing judgment
 
 namespace Capless
 
-mutual
 theorem CaptureKind.csubst
   (h : CaptureKind Γ C K)
   (σ : CVarSubst Γ f Δ) :
-  CaptureKind Δ (C.crename f) K :=
-  match h with
-  | .label hl =>
-    have hl1 := σ.lmap _ _ hl
-    .label hl1
-  | .cvar hb => by
+  CaptureKind Δ (C.crename f) K := by
+  induction h
+  case var hb hk ih =>
+    rewrite [CaptureSet.proj_crename] at ih
+    apply! var (σ.map _ _ hb) (ih _)
+  case label hb => apply label (σ.lmap _ _ _ hb)
+  case cvar hb =>
     cases σ.cmap_bound _ _ hb
-    assumption
-  | .csub hsub hk =>
-    have hsub1 := hsub.csubst σ
-    .csub hsub1 (hk.csubst σ)
-  | .sub hs hk => .sub hs (hk.csubst σ)
-  | .empty => .empty
-  | .proj_kind => by
-    simp
-    apply CaptureKind.proj_kind
-  | .proj hk => by
-    simp
-    apply CaptureKind.proj $ hk.csubst σ
-
+    apply! apply_proj_singleton
+  case cbound hb hk ih =>
+    rewrite [CaptureSet.proj_crename] at ih
+    cases σ.cmap_bound _ _ hb
+    rename_i hb
+    apply subcapt _ hb.apply_proj_singleton
+    apply! ih
+  case cinstr hb hk ih =>
+    rewrite [CaptureSet.proj_crename] at ih
+    apply! cinstr (σ.cmap _ _ hb) (ih _)
+  case sub hs hk ih =>
+    apply! sub hs (ih _)
+  case empty => apply empty
+  case absurd he => apply! absurd
+  case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.csubst
   (h : Subcapt Γ C1 C2)
   (σ : CVarSubst Γ f Δ) :
-  Subcapt Δ (C1.crename f) (C2.crename f) :=
-  match h with
-  | .trans ha hb => .trans (ha.csubst σ) (hb.csubst σ)
-  | .subset hsub => by
-    apply Subcapt.subset
-    apply (CaptureSet.crename_monotone hsub)
-  | .union h1 h2 => by
-    have ih1 := h1.csubst σ
-    have ih2 := h2.csubst σ
-    rw [CaptureSet.crename_union]
-    apply Subcapt.union <;> trivial
-  | .var hb =>
-    have ht := σ.map _ _ hb
-    Subcapt.var ht
-  | .cinstl hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cinstl hb1
-  | .cinstr hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cinstr hb1
-  | .cbound hb => by
-    have hb1 := σ.cmap_bound _ _ hb
-    cases hb1
-    easy
-  | .proj h1 => by
-    simp
-    apply Subcapt.proj (h1.csubst σ)
-  | .proj_sub hs => by
-    simp
-    apply Subcapt.proj_sub hs
-  | .proj_l => by
-    simp
-    apply Subcapt.proj_l
-  | .proj_r hk => by
-    simp
-    apply Subcapt.proj_r (hk.csubst σ)
-  | .proj_disj hd hk => by
-    simp
-    apply Subcapt.proj_disj hd (hk.csubst σ)
-end
+  Subcapt Δ (C1.crename f) (C2.crename f) := by
+  induction h <;> try rw [CaptureSet.proj_crename]
+  case trans ha hb => apply! trans (ha _) (hb _)
+  case subset hs => apply subset (CaptureSet.Subset.crename hs)
+  case union ha hb => apply! union (ha _) (hb _)
+  case var hb => apply var (σ.map _ _ hb)
+  case cinstl hb => apply cinstl (σ.cmap _ _ hb)
+  case cinstr hb => apply cinstr (σ.cmap _ _ hb)
+  case cbound hb =>
+    cases σ.cmap_bound _ _ hb
+    apply! apply_proj_singleton
+  case subkind hs => apply! subkind
+  case proj_absurd => apply! proj_absurd
+  case proj_split => apply! proj_split
 
 end Capless

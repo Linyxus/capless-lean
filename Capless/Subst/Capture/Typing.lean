@@ -122,7 +122,7 @@ theorem Typed.csubst
     case boundary ih =>
       simp [Term.crename]
       simp [EType.crename, CType.crename]
-      apply boundary
+      apply boundary; assumption
       have ih := ih (σ.cext.ext _)
       simp [CBinding.crename, EType.crename, CType.crename, SType.crename, FinFun.ext] at ih
       rw [ <- SType.cweaken_crename
@@ -133,7 +133,7 @@ theorem Typed.csubst
       aesop
 
 theorem Typed.copen
-  (h : Typed (Γ,c<:CBound.upper {c=c}) t E Ct) :
+  (h : Typed (Γ,c<:CBound.upper {c=c|.top}) t E Ct) :
   Typed Γ (t.copen c) (E.copen c) (Ct.copen c) := by
   simp [Term.copen, EType.copen]
   apply? Typed.csubst

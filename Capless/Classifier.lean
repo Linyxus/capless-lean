@@ -658,6 +658,16 @@ theorem Kind.Disjoint.from_empty_intersect (hi : Intersect K1 K2 R) (he : IsEmpt
       | inr ha => exact .absurd_r ha
   | singleton_disj hd => exact .root hd
 
+theorem Kind.Disjoint.top_l (hd: Disjoint .top K) : IsEmpty K := by
+  cases hd
+  case empty_r => constructor
+  case union_r ha hb => apply IsEmpty.union ha.top_l hb.top_l
+  case absurd_l hsc => cases hsc
+  case absurd_r hsc => constructor; assumption
+  case root hd => cases hd.symm.not_subclass .of_top
+  case excl_l hsc => constructor; apply hsc.trans_subclass .of_top
+  case excl_r hsc => cases hsc
+
 theorem Kind.Disjoint.symm (hd : K1.Disjoint K2) : Disjoint K2 K1 := by
   induction hd with
   | empty_l => exact .empty_r
@@ -1321,3 +1331,23 @@ theorem Kind.Intersect.union_r_superkind : Subkind (.union (K.intersect L1) (K.i
 --   apply union_l .rfl hs
 
 theorem Kind.Intersect.union_l_subkind : Subkind (.intersect (.union K1 K2) L) (.union (K1.intersect L) (K2.intersect L)) := by sorry
+
+theorem Kind.Intersect.assoc_subkind : Subkind (.intersect (.intersect K1 K2) K3) (.intersect K1 (.intersect K2 K3)) := by
+  induction K1 <;> try simp_all
+  case empty => apply Subkind.rfl
+  case union ha hb => apply Subkind.join ha hb
+  case node =>
+    induction K2
+    case empty => simp; apply Subkind.rfl
+    case union ha hb => simp; apply Subkind.join ha hb
+    case node => sorry
+
+theorem Kind.Intersect.assoc_superkind : Subkind (.intersect K1 (.intersect K2 K3)) (.intersect (.intersect K1 K2) K3) := by
+  induction K1 <;> try simp_all
+  case empty => apply Subkind.rfl
+  case union ha hb => apply Subkind.join ha hb
+  case node =>
+    induction K2
+    case empty => simp; apply Subkind.rfl
+    case union ha hb => simp; apply Subkind.join ha hb
+    case node => sorry

@@ -28,8 +28,8 @@ namespace Capless
 theorem Typed.app_inv'
   (he : t0 = Term.app x y)
   (h : Typed Γ t0 E Ct0) :
-  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x}
-    ∧ Typed Γ (Term.var y) (EType.type T) {x=y}
+  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x|.top}
+    ∧ Typed Γ (Term.var y) (EType.type T) {x=y|.top}
     ∧ E0 = F.open y
     ∧ ESubtyp Γ E0 E := by
     induction h <;> try (solve | cases he)
@@ -48,8 +48,8 @@ theorem Typed.app_inv'
 
 theorem Typed.app_inv
   (h : Typed Γ (Term.app x y) E Ct) :
-  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x}
-    ∧ Typed Γ (Term.var y) (EType.type T) {x=y}
+  ∃ T Cf F E0, Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.forall T F))) {x=x|.top}
+    ∧ Typed Γ (Term.var y) (EType.type T) {x=y|.top}
     ∧ E0 = F.open y
     ∧ ESubtyp Γ E0 E :=
   Typed.app_inv' rfl h
@@ -58,7 +58,7 @@ theorem Typed.tapp_inv'
   (he : t0 = Term.tapp x X)
   (h : Typed Γ t0 E Ct) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x}
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x|.top}
     ∧ E0 = F.topen X
     ∧ ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
@@ -79,7 +79,7 @@ theorem Typed.tapp_inv'
 theorem Typed.tapp_inv
   (h : Typed Γ (Term.tapp x X) E Ct) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x}
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.tforall (SType.tvar X) F))) {x=x|.top}
     ∧ E0 = F.topen X
     ∧ ESubtyp Γ E0 E :=
   Typed.tapp_inv' rfl h
@@ -88,7 +88,7 @@ theorem Typed.var_inv'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type T)
   (h : Typed Γ t0 E0 Ct0) (hb : Γ.Bound x T0) :
-  ∃ C0 S0, Γ.Bound x (S0^C0) ∧ (Γ ⊢ (S0^{x=x}) <: T) := by
+  ∃ C0 S0, Γ.Bound x (S0^C0) ∧ (Γ ⊢ (S0^{x=x|.top}) <: T) := by
   induction h <;> try (solve | cases he1 | cases he2)
   case var C0 S0 hb =>
     cases he1; cases he2
@@ -114,7 +114,7 @@ theorem Typed.var_inv'
 
 theorem Typed.var_inv
   (h : Typed Γ (Term.var x) (EType.type T) Ct) (hb : Γ.Bound x T0) :
-  ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x=x} S0) T := by
+  ∃ C0 S0, Γ.Bound x (CType.capt C0 S0) ∧ CSubtyp Γ (CType.capt {x=x|.top} S0) T := by
   apply Typed.var_inv' rfl rfl h hb
 
 theorem Typed.canonical_form_lam'
@@ -123,7 +123,7 @@ theorem Typed.canonical_form_lam'
   (he2 : E0 = EType.type (CType.capt Cf S0))
   (h : Typed Γ t0 E0 Ct0) :
   CSubtyp Γ T' T ∧
-  Typed (Γ.var T') t E (Cf.weaken ∪ {x=0}) := by
+  Typed (Γ.var T') t E (Cf.weaken ∪ {x=0|.top}) := by
   induction h <;> try (solve | cases he1 | cases he2)
   case abs =>
     cases he1; cases he2
@@ -149,13 +149,13 @@ theorem Typed.canonical_form_lam'
       assumption
       apply Subcapt.join
       { apply hsc.weaken }
-      { apply Subcapt.refl } }
+      { apply Subcapt.rfl } }
 
 theorem Typed.canonical_form_lam
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.lam T t) (EType.type ((∀(x:T')E)^Cf)) Ct) :
   CSubtyp Γ T' T ∧
-  Typed (Γ.var T') t E (Cf.weaken ∪ {x=0}) := by
+  Typed (Γ.var T') t E (Cf.weaken ∪ {x=0|.top}) := by
   apply Typed.canonical_form_lam' <;> try trivial
   constructor
 
@@ -189,7 +189,7 @@ theorem Typed.canonical_form_tlam'
     { apply! SSubtyp.trans }
     { constructor
       apply? Typed.sub
-      apply ht1.tnarrow; assumption; apply Subcapt.refl
+      apply ht1.tnarrow; assumption; apply Subcapt.rfl
       apply hsc.tweaken
       apply ESubtyp.refl }
 
@@ -205,7 +205,7 @@ theorem Typed.capp_inv'
   (he : t0 = Term.capp x c)
   (h : Typed Γ t0 E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c}) F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c|.top}) F))) {x=x|.top} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E := by
   induction h <;> try (solve | cases he)
@@ -226,7 +226,7 @@ theorem Typed.capp_inv'
 theorem Typed.capp_inv
   (h : Typed Γ (Term.capp x c) E Ct0) :
   ∃ Cf F E0,
-    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c}) F))) {x=x} ∧
+    Typed Γ (Term.var x) (EType.type (CType.capt Cf (SType.cforall (CBound.upper {c=c|.top}) F))) {x=x|.top} ∧
     E0 = F.copen c ∧
     ESubtyp Γ E0 E :=
   Typed.capp_inv' rfl h
@@ -411,7 +411,7 @@ theorem Typed.canonical_form_pack'
   (he2 : E0 = EType.ex B T)
   (h : Typed Γ t0 E0 Ct) :
   CaptureBound Γ C B ∧
-    Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} := by
+    Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x|.top} := by
   induction h <;> try (solve | cases he1 | cases he2)
   case pack =>
     cases he1; cases he2
@@ -425,14 +425,14 @@ theorem Typed.canonical_form_pack'
     assumption
     apply Typed.sub
     exact ih
-    apply Subcapt.refl
+    apply Subcapt.rfl
     constructor
     apply hs.cinstantiate ihb
 
 theorem Typed.canonical_form_pack
   (ht : Γ.IsTight)
   (h : Typed Γ (Term.pack C x) (EType.ex B T) Ct) :
-  CaptureBound Γ C B ∧ Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x} :=
+  CaptureBound Γ C B ∧ Typed (Γ.cvar (CBinding.inst C)) (Term.var x) (EType.type T) {x=x|.top} :=
   Typed.canonical_form_pack' ht rfl rfl h
 
 theorem Typed.forall_inv' {v : Term n m k}
@@ -513,72 +513,72 @@ theorem Typed.cforall_inv {v : Term n m k}
 theorem Typed.var_inv_capt'
   (he : t0 = Term.var x)
   (hx : Typed Γ t0 E Cx) :
-  Γ ⊢ ({x=x}) <:c Cx := by
+  Γ ⊢ ({x=x|.top}) <:c Cx := by
   induction hx <;> try (solve | cases he)
-  case var => cases he; apply Subcapt.refl
-  case label => cases he; apply Subcapt.refl
+  case var => cases he; apply Subcapt.rfl
+  case label => cases he; apply Subcapt.rfl
   case sub ih =>
     have ih := ih he
     apply Subcapt.trans <;> easy
 
 theorem Typed.var_inv_capt
   (hx : Typed Γ (Term.var x) E Cx) :
-  Γ ⊢ ({x=x}) <:c Cx :=
+  Γ ⊢ ({x=x|.top}) <:c Cx :=
   Typed.var_inv_capt' rfl hx
 
 theorem Typed.app_inv_capt'
   (he : t0 = Term.app x y)
   (ht : Typed Γ t0 E Ct) :
-  Γ ⊢ ({x=x}∪{x=y}) <:c Ct := by
+  Γ ⊢ ({x=x|.top}∪{x=y|.top}) <:c Ct := by
   induction ht <;> try (solve | cases he)
-  case app => cases he; apply Subcapt.refl
+  case app => cases he; apply Subcapt.rfl
   case sub ih =>
     have ih := ih he
     apply! Subcapt.trans
 
 theorem Typed.app_inv_capt
   (ht : Typed Γ (Term.app x y) E Ct) :
-  Γ ⊢ ({x=x}∪{x=y}) <:c Ct :=
+  Γ ⊢ ({x=x|.top}∪{x=y|.top}) <:c Ct :=
   Typed.app_inv_capt' rfl ht
 
 theorem Typed.tapp_inv_capt'
   (he : t0 = Term.tapp x X)
   (ht : Typed Γ t0 E Ct) :
-  Γ ⊢ ({x=x}) <:c Ct := by
+  Γ ⊢ ({x=x|.top}) <:c Ct := by
   induction ht <;> try (solve | cases he)
-  case tapp => cases he; apply Subcapt.refl
+  case tapp => cases he; apply Subcapt.rfl
   case sub ih =>
     have ih := ih he
     apply! Subcapt.trans
 
 theorem Typed.tapp_inv_capt
   (ht : Typed Γ (Term.tapp x X) E Ct) :
-  Γ ⊢ ({x=x}) <:c Ct :=
+  Γ ⊢ ({x=x|.top}) <:c Ct :=
   Typed.tapp_inv_capt' rfl ht
 
 theorem Typed.capp_inv_capt'
   (he : t0 = Term.capp x c)
   (ht : Typed Γ t0 E Ct) :
-  Γ ⊢ ({x=x}) <:c Ct := by
+  Γ ⊢ ({x=x|.top}) <:c Ct := by
   induction ht <;> try (solve | cases he)
-  case capp => cases he; apply Subcapt.refl
+  case capp => cases he; apply Subcapt.rfl
   case sub ih =>
     have ih := ih he
     apply! Subcapt.trans
 
 theorem Typed.capp_inv_capt
   (ht : Typed Γ (Term.capp x c) E Ct) :
-  Γ ⊢ ({x=x}) <:c Ct :=
+  Γ ⊢ ({x=x|.top}) <:c Ct :=
   Typed.capp_inv_capt' rfl ht
 
 theorem Typed.var_inv_cs'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type (S^C))
   (hx : Typed Γ t0 E0 Cx) :
-  Γ ⊢ ({x=x}) <:c C := by
+  Γ ⊢ ({x=x|.top}) <:c C := by
   induction hx <;> try (solve | cases he1 | cases he2)
-  case var => cases he1; cases he2; apply Subcapt.refl
-  case label => cases he1; cases he2; apply Subcapt.refl
+  case var => cases he1; cases he2; apply Subcapt.rfl
+  case label => cases he1; cases he2; apply Subcapt.rfl
   case sub ih =>
     subst_vars
     rename_i hsub
@@ -590,7 +590,7 @@ theorem Typed.var_inv_cs'
 
 theorem Typed.var_inv_cs
   (hx : Typed Γ (Term.var x) (EType.type (S^C)) Cx) :
-  Γ ⊢ ({x=x}) <:c C :=
+  Γ ⊢ ({x=x|.top}) <:c C :=
   Typed.var_inv_cs' rfl rfl hx
 
 theorem Typed.val_precise_cv'
@@ -614,7 +614,7 @@ theorem Typed.val_precise_cv'
     have ih := ih rfl hv
     apply Typed.sub
     { easy }
-    { apply Subcapt.refl }
+    { apply Subcapt.rfl }
     { constructor; easy }
 
 theorem Typed.val_precise_cv
@@ -627,8 +627,8 @@ theorem Typed.invoke_inv' {Γ : Context n m k}
   (he : t0 = Term.invoke x y)
   (ht : Typed Γ t0 E Ct) :
   ∃ S0 C0,
-    Typed Γ (Term.var x) (Label[S0]^C0) {x=x} ∧
-    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y} := by
+    Typed Γ (Term.var x) (Label[S0]^C0) {x=x|.top} ∧
+    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y|.top} := by
   induction ht <;> try (solve | cases he)
   case invoke =>
     cases he
@@ -638,15 +638,15 @@ theorem Typed.invoke_inv' {Γ : Context n m k}
 theorem Typed.invoke_inv {Γ : Context n m k}
   (ht : Typed Γ (Term.invoke x y) E Ct) :
   ∃ S0 C0,
-    Typed Γ (Term.var x) (Label[S0]^C0) {x=x} ∧
-    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y} :=
+    Typed Γ (Term.var x) (Label[S0]^C0) {x=x|.top} ∧
+    Typed Γ (Term.var y) (EType.type (S0^{})) {x=y|.top} :=
   Typed.invoke_inv' rfl ht
 
 theorem Typed.label_inv'
   (he1 : t0 = Term.var x)
   (he2 : E0 = EType.type T)
-  (ht : Typed Γ t0 E0 Ct) (hb : Γ.LBound x S1) :
-  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ (Label[S0]^{x=x}) <: T) := by
+  (ht : Typed Γ t0 E0 Ct) (hb : Γ.LBound x c S1) :
+  ∃ c0 S0, Γ.LBound x c0 S0 ∧ (Γ ⊢ (Label[S0]^{x=x|.top}) <: T) := by
   induction ht <;> try (solve | cases he1 | cases he2)
   case var hb0 =>
     cases he1; cases he2
@@ -654,40 +654,40 @@ theorem Typed.label_inv'
     apply! Context.bound_lbound_absurd
   case label hb0 =>
     cases he1; cases he2
-    apply Exists.intro; apply And.intro
+    apply Exists.intro; apply Exists.intro; apply And.intro
     { exact hb0 }
     { apply CSubtyp.refl }
   case sub hsub ih =>
     cases he1; cases he2
     cases hsub
-    have ⟨S0, hb0, hs0⟩ := ih rfl rfl hb
-    apply Exists.intro
+    have ⟨c0, S0, hb0, hs0⟩ := ih rfl rfl hb
+    apply Exists.intro; apply Exists.intro;
     apply And.intro
     { easy }
     { apply CSubtyp.trans <;> easy }
 
 theorem Typed.label_inv
-  (ht : Typed Γ (Term.var x) (EType.type T) Ct) (hb : Γ.LBound x S1) :
-  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ (Label[S0]^{x=x}) <: T) :=
+  (ht : Typed Γ (Term.var x) (EType.type T) Ct) (hb : Γ.LBound x c S1) :
+  ∃ c0 S0, Γ.LBound x c0 S0 ∧ (Γ ⊢ (Label[S0]^{x=x|.top}) <: T) :=
   Typed.label_inv' rfl rfl ht hb
 
 theorem Typed.label_inv_sub
-  (ht : Typed Γ (Term.var x) (Label[S]^C) Ct) (hb : Γ.LBound x S1)
+  (ht : Typed Γ (Term.var x) (Label[S]^C) Ct) (hb : Γ.LBound x c S1)
   (hg : Γ.IsTight) :
-  ∃ S0, Γ.LBound x S0 ∧ (Γ ⊢ S <:s S0) := by
-  have ⟨S0, hl, hs⟩ := Typed.label_inv ht hb
+  ∃ c0 S0, Γ.LBound x c0 S0 ∧ (Γ ⊢ S <:s S0) := by
+  have ⟨c0, S0, hl, hs⟩ := Typed.label_inv ht hb
   cases hs; rename_i hs
   have h1 := SSubtyp.sub_dealias_label_inv hg (by constructor) (by constructor) hs
   aesop
 
 theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
-  (he : t0 = (boundary:S in t))
+  (he : t0 = (boundary[c]:S in t))
   (ht : Typed Γ t0 E Ct) :
   Typed
-    ((Γ,c<:(.kind Kind.control)),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:(.kind $ .classifier c)),x: Label[S.cweaken]^{c=0|.top})
     t
     (S.cweaken.weaken^{})
-    (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
+    (Ct.cweaken.weaken ∪ {c=0|.top} ∪ {x=0|.top}) ∧
     (Γ ⊢ (S^{}) <:e E) := by
   induction ht <;> try (solve | cases he)
   case boundary =>
@@ -701,18 +701,18 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
     { apply Typed.sub
       { exact ih }
       { apply Subcapt.join; apply Subcapt.join
-        all_goals try apply Subcapt.refl
+        all_goals try apply Subcapt.rfl
         apply hsc.cweaken.weaken }
       apply ESubtyp.refl }
     { apply ESubtyp.trans <;> easy }
 
 theorem Typed.boundary_inv {Γ : Context n m k} {S : SType n m k}
-  (ht : Typed Γ (boundary:S in t) E Ct) :
+  (ht : Typed Γ (boundary[c]:S in t) E Ct) :
   Typed
-    ((Γ,c<:(.kind Kind.control)),x: Label[S.cweaken]^{c=0})
+    ((Γ,c<:(.kind $ .classifier c)),x: Label[S.cweaken]^{c=0|.top})
     t
     (S.cweaken.weaken^{})
-    (Ct.cweaken.weaken ∪ {c=0} ∪ {x=0}) ∧
+    (Ct.cweaken.weaken ∪ {c=0|.top} ∪ {x=0|.top}) ∧
     (Γ ⊢ (S^{}) <:e E) :=
   Typed.boundary_inv' rfl ht
 

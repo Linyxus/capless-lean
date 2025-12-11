@@ -7,54 +7,38 @@ Substitution theorems for type variable substitution in subcapturing judgments.
 
 namespace Capless
 
-mutual
 
 theorem CaptureKind.tsubst
   (h : CaptureKind Γ C K)
   (σ : TVarSubst Γ f Δ) :
-  CaptureKind Δ C K :=
-  match h with
-  | .label hl =>
-    have hl1 := σ.lmap _ _ hl
-    .label hl1
-  | .cvar hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cvar hb1
-  | .csub hsub hk =>
-    have hsub1 := hsub.tsubst σ
-    .csub hsub1 (hk.tsubst σ)
-  | .sub hs hk =>
-    .sub hs (hk.tsubst σ)
-  | .empty => .empty
-  | .proj hk => .proj $ hk.tsubst σ
-  | .proj_kind => .proj_kind
+  CaptureKind Δ C K := by
+  induction h
+  case var hb hk ih =>
+    apply! var (σ.map _ _ hb) (ih _)
+  case label hb => apply label (σ.lmap _ _ _ hb)
+  case cvar hb => apply cvar (σ.cmap _ _ hb)
+  case cbound hb hk ih => apply! cbound (σ.cmap _ _ hb) (ih _)
+  case cinstr hb hk ih => apply! cinstr (σ.cmap _ _ hb) (ih _)
+  case sub hs hk ih => apply! sub hs (ih _)
+  case empty => apply empty
+  case absurd he => apply! absurd
+  case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.tsubst
   (h : Subcapt Γ C1 C2)
   (σ : TVarSubst Γ f Δ) :
-  Subcapt Δ C1 C2 :=
-  match h with
-  | .trans ha hb => .trans (ha.tsubst σ) (hb.tsubst σ)
-  | .subset hsub => .subset hsub
-  | .union h1 h2 => .union (h1.tsubst σ) (h2.tsubst σ)
-  | .var hb => by
-    have ht := σ.map _ _ hb
-    apply Subcapt.var <;> aesop
-  | .cinstl hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cinstl hb1
-  | .cinstr hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cinstr hb1
-  | .cbound hb =>
-    have hb1 := σ.cmap _ _ hb
-    .cbound hb1
-  | .proj hk => .proj $ hk.tsubst σ
-  | .proj_sub hs => .proj_sub hs
-  | .proj_l => .proj_l
-  | .proj_r hs => .proj_r $ hs.tsubst σ
-  | .proj_disj hd hk => .proj_disj hd $ hk.tsubst σ
+  Subcapt Δ C1 C2 := by
+  induction h
+  case trans ha hb => apply! trans (ha _) (hb _)
+  case subset hs => apply subset hs
+  case union ha hb => apply! union (ha _) (hb _)
+  case var hb => apply var (σ.map _ _ hb)
+  case cinstl hb => apply cinstl (σ.cmap _ _ hb)
+  case cinstr hb => apply cinstr (σ.cmap _ _ hb)
+  case cbound hb => apply cbound (σ.cmap _ _ hb)
+  case subkind hs => apply! subkind
+  case proj_absurd => apply! proj_absurd
+  case proj_split => apply! proj_split
 
-end
 
 end Capless

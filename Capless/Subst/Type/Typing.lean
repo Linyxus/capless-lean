@@ -104,7 +104,7 @@ theorem Typed.tsubst
       trivial
     case label hb =>
       simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      have hb1 := σ.lmap _ _ hb
+      have hb1 := σ.lmap _ _ _ hb
       apply label; assumption
     case invoke ih1 ih2 =>
       simp [Term.trename]
@@ -115,7 +115,7 @@ theorem Typed.tsubst
     case boundary ih =>
       simp [Term.trename]
       simp [EType.trename, CType.trename, SType.trename]
-      apply boundary
+      apply boundary; assumption
       have ih := ih (σ.cext.ext _)
       simp [EType.trename, CType.trename, SType.trename] at ih
       rw [ <- SType.cweaken_trename

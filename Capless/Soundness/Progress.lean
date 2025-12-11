@@ -15,7 +15,7 @@ This module proves that a well-typed term is either an answer (in which case the
 namespace Capless
 
 theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
-  (∃ v, Store.Bound σ x v ∧ v.IsValue) ∨ (∃ S, Store.LBound σ x S) := by
+  (∃ v, Store.Bound σ x v ∧ v.IsValue) ∨ (∃ c S, Store.LBound σ x c S) := by
   induction σ
   case empty => exact Fin.elim0 x
   case val =>
@@ -37,7 +37,8 @@ theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
         { apply Term.IsValue.weaken; trivial }
       case inr ih =>
         apply Or.inr
-        have ⟨S, ih⟩ := ih
+        have ⟨c, S, ih⟩ := ih
+        constructor
         constructor
         constructor; easy
   case tval ih =>
@@ -51,7 +52,8 @@ theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
       { apply Term.IsValue.tweaken; trivial }
     case inr ih =>
       apply Or.inr
-      have ⟨S, ih⟩ := ih
+      have ⟨c, S, ih⟩ := ih
+      constructor
       constructor
       constructor; easy
   case cval ih =>
@@ -65,13 +67,15 @@ theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
       { apply Term.IsValue.cweaken; trivial }
     case inr ih =>
       apply Or.inr
-      have ⟨S, ih⟩ := ih
+      have ⟨c, S, ih⟩ := ih
+      constructor
       constructor
       constructor; easy
   case label ih =>
     cases x using Fin.cases
     case zero =>
       apply Or.inr
+      constructor
       constructor
       constructor
     case succ x0 =>
@@ -85,7 +89,8 @@ theorem Store.lookup_exists {σ : Store n m k} {x : Fin n} :
         { apply Term.IsValue.weaken; trivial }
       case inr ih =>
         apply Or.inr
-        have ⟨S, ih⟩ := ih
+        have ⟨c, S, ih⟩ := ih
+        constructor
         constructor
         constructor; easy
 
@@ -98,10 +103,10 @@ theorem Store.val_lookup_exists {σ : Store n m k} {x : Fin n}
   cases h
   case inl h => easy
   case inr h =>
-    have ⟨S, hl⟩ := h
+    have ⟨c, S, hl⟩ := h
     have hb := Store.bound_label hl hs
-    have ⟨S0, hb0, hsub⟩ := Typed.label_inv hx hb
-    have h := Context.lbound_inj hb hb0
+    have ⟨c0, S0, hb0, hsub⟩ := Typed.label_inv hx hb
+    have ⟨_, _⟩ := Context.lbound_inj hb hb0
     subst_vars
     cases hvt
     case capt hvt =>
@@ -144,7 +149,7 @@ theorem Store.value_typing_label_absurd
 theorem Store.label_lookup_exists {σ : Store n m k} {x : Fin n}
   (hs : TypedStore σ Γ)
   (hx : Typed Γ (Term.var x) (EType.type (Label[S]^C)) Cx) :
-  ∃ S0, Store.LBound σ x S0 := by
+  ∃ c0 S0, Store.LBound σ x c0 S0 := by
   have hg := TypedStore.is_tight hs
   have h := Store.lookup_exists (σ := σ) (x := x)
   cases h
@@ -214,7 +219,7 @@ theorem progress
     case invoke hx hy _ _ σ cont Ct =>
       cases hsc; rename_i hsc _
       have hg := TypedStore.is_tight hs
-      have ⟨S0, hl⟩ := Store.label_lookup_exists hs hx
+      have ⟨c0, S0, hl⟩ := Store.label_lookup_exists hs hx
       have hl := Store.bound_label hl hs
       have ⟨_, hsl⟩ := WellScoped.label_inv hsc hl
       aesop

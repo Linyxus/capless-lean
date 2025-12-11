@@ -113,7 +113,7 @@ theorem Typed.subst
     rw [<- CaptureSet.cweaken_rename_comm]
     exact ih
   case label hb =>
-    have hb1 := σ.lmap _ _ hb
+    have hb1 := σ.lmap _ _ _ hb
     simp [Term.rename, EType.rename, CType.rename, SType.rename]
     apply label
     aesop
@@ -126,7 +126,7 @@ theorem Typed.subst
   case boundary ih =>
     simp [Term.rename]
     simp [EType.rename, CType.rename] at *
-    apply boundary
+    apply boundary; assumption
     have ih := ih (σ.cext.ext _)
     simp
       [ CBinding.rename

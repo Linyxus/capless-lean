@@ -13,8 +13,8 @@ namespace Capless
 
 inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | var : Context.Bound Γ x (S^C) -> CaptureKind Γ (C.proj L) K -> CaptureKind Γ {x=x | L} K
-  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x|K} (K.intersect (.node c []))
-  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c|L} (L.intersect K)
+  | label : Context.LBound Γ x c S -> CaptureKind Γ {x=x|K} (.intersect (.node c []) K)
+  | cvar : Context.CBound Γ c (.bound (.kind K)) -> CaptureKind Γ {c=c|L} (K.intersect L)
   | cbound : Context.CBound Γ c (.bound (.upper C)) -> CaptureKind Γ (C.proj L) K -> CaptureKind Γ {c=c | L} K
   | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ (C.proj L) K -> CaptureKind Γ {c=c | L} K
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
