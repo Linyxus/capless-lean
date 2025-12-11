@@ -329,3 +329,6 @@ theorem CaptureSet.proj_crename {C : CaptureSet n k} : (C.proj K).crename f = (C
   case empty => simp
   case singleton => simp
   case union ha hb => simp; aesop
+
+theorem CaptureSet.proj_weaken {C : CaptureSet n k} : (C.proj K).weaken = (C.weaken).proj K := C.proj_rename
+theorem CaptureSet.proj_cweaken {C : CaptureSet n k} : (C.proj K).cweaken = (C.cweaken).proj K := C.proj_crename

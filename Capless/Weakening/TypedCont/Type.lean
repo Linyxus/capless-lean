@@ -79,12 +79,15 @@ theorem WellScoped.tweaken
       simp [CType.tweaken, CType.trename] at hb1
       exact hb1 }
     { exact ih }
+  case ckind hb => apply ckind hb.there_tvar
   case label hb hs =>
     apply label
     { have hb1 := Context.LBound.there_tvar (b := b) hb
       simp [CType.tweaken, CType.trename] at hb1
       exact hb1 }
     { apply hs.tweaken }
+  case label_disj hb hd => apply! label_disj hb.there_tvar
+  case absurd => apply! absurd
 
 theorem TypedCont.tweaken
   (h : TypedCont Γ E t E' C0) :

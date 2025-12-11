@@ -683,6 +683,7 @@ theorem Typed.label_inv_sub
 theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
   (he : t0 = (boundary[c]:S in t))
   (ht : Typed Γ t0 E Ct) :
+  (c.Subclass .control) ∧
   Typed
     ((Γ,c<:(.kind $ .classifier c)),x: Label[S.cweaken]^{c=0|.top})
     t
@@ -692,11 +693,13 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
   induction ht <;> try (solve | cases he)
   case boundary =>
     cases he
+    apply And.intro; assumption
     split_and
     { easy }
     { apply ESubtyp.refl }
   case sub hsc hsub ih =>
-    have ⟨ih, hsub0⟩ := ih he
+    have ⟨hs, ih, hsub0⟩ := ih he
+    apply And.intro; assumption
     split_and
     { apply Typed.sub
       { exact ih }
@@ -708,6 +711,7 @@ theorem Typed.boundary_inv' {Γ : Context n m k} {S : SType n m k}
 
 theorem Typed.boundary_inv {Γ : Context n m k} {S : SType n m k}
   (ht : Typed Γ (boundary[c]:S in t) E Ct) :
+  (c.Subclass .control) ∧
   Typed
     ((Γ,c<:(.kind $ .classifier c)),x: Label[S.cweaken]^{c=0|.top})
     t

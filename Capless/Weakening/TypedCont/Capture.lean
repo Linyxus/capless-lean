@@ -80,25 +80,28 @@ theorem WellScoped.cweaken
     { have hb1 := Context.Bound.there_cvar (b := b) hb
       simp [CType.cweaken, CType.crename] at hb1
       exact hb1 }
-    { exact ih }
+    { rw [← CaptureSet.proj_crename]; exact ih }
   case csingleton hb _ ih =>
     apply csingleton
     { have hb1 := Context.CBound.there_cvar (b' := b) hb
       simp [CType.cweaken, CType.crename] at hb1
       exact hb1 }
-    { exact ih }
+    { rw [← CaptureSet.proj_cweaken]; exact ih }
   case cbound hb _ ih =>
     apply cbound
     { have hb1 := Context.CBound.there_cvar (b' := b) hb
       simp [CType.cweaken, CType.crename] at hb1
       exact hb1 }
-    { exact ih }
+    { rw [← CaptureSet.proj_crename]; exact ih }
+  case ckind hb => apply ckind hb.there_cvar
   case label hb hs =>
     apply label
     { have hb1 := Context.LBound.there_cvar (b := b) hb
       simp [CType.cweaken, CType.crename] at hb1
       exact hb1 }
     { apply hs.cweaken }
+  case label_disj hb hd => apply! label_disj hb.there_cvar
+  case absurd => apply! absurd
 
 theorem TypedCont.cweaken
   (h : TypedCont Γ E t E' Ct) :
