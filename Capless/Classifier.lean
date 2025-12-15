@@ -34,6 +34,13 @@ theorem Classifier.StrictSub.weaken (hs : StrictSub a b) : Subclass a b := by
 
 theorem Classifier.StrictSub.size (hs : StrictSub a b) : sizeOf a > sizeOf b := by induction hs <;> (simp; try omega)
 
+theorem Classifier.StrictSub.neq (hs : StrictSub a b) : a ≠ b := by
+  apply Ne.intro
+  intro h
+  have hs := hs.size
+  rw [h] at hs
+  omega
+
 inductive Classifier.Disjoint : Classifier -> Classifier -> Prop where
   | base : n != m -> Disjoint (child n p) (child m p)
   | left : Disjoint a b -> Disjoint (child n a) b
@@ -1351,3 +1358,294 @@ theorem Kind.Intersect.assoc_superkind : Subkind (.intersect K1 (.intersect K2 K
     case empty => simp; apply Subkind.rfl
     case union ha hb => simp; apply Subkind.join ha hb
     case node => sorry
+
+@[simp]
+def Kind.contains_sup_of (exs : List Classifier) (c : Classifier) :=
+  match exs with
+  | .nil => false
+  | .cons head tail => c.subclass head || contains_sup_of tail c
+
+theorem Kind.ContainsSupOf.lawful : ContainsSupOf exs r ↔ contains_sup_of exs r := by
+  apply Iff.intro
+  . intro hsc
+    induction hsc
+    case here hs => simp; simp_all [Classifier.subclass_is_Subclass]
+    case there ih => simp_all
+  . intro hsc
+    unfold contains_sup_of at hsc
+    split at hsc
+    . aesop
+    . simp at hsc
+      cases hsc <;> rename_i hsc
+      . apply ContainsSupOf.here; simp_all [Classifier.subclass_is_Subclass]
+      . apply ContainsSupOf.there; rw [← lawful] at hsc; simp_all
+
+@[simp]
+def Kind.disjoint (K1 : Kind) (K2 : Kind) :=
+  match K1 with
+  | .empty => true
+  | .union a b => a.disjoint K2 && b.disjoint K2
+  | .node r1 ex1 =>
+    match K2 with
+    | .empty => true
+    | .union a b => (Kind.node r1 ex1).disjoint a && (Kind.node r1 ex1).disjoint b
+    | .node r2 ex2 =>
+      r1.disjoint r2
+        || contains_sup_of ex1 r1 || contains_sup_of ex2 r2
+        || contains_sup_of ex1 r2 || contains_sup_of ex2 r1
+
+theorem Kind.Disjoint.lawful : Disjoint K1 K2 ↔ K1.disjoint K2 := by
+  apply Iff.intro
+  . intro hd
+    induction hd
+    case empty_l => simp
+    case empty_r K =>
+      induction K <;> simp_all
+    case union_l => simp_all
+    case union_r K K1 K2 _ _ ha hb =>
+      induction K <;> simp_all
+      rename_i iha ihb hha hhb
+      have ⟨_, _⟩ := hha.union_l_inv
+      have ⟨_, _⟩ := hhb.union_l_inv
+      apply And.intro
+      apply! iha
+      apply! ihb
+    case absurd_l hsc => simp_all [ContainsSupOf.lawful]
+    case absurd_r hsc => simp_all [ContainsSupOf.lawful]
+    case root hd => simp_all [Classifier.disjoint_is_Disjoint]
+    case excl_l => simp_all [ContainsSupOf.lawful]
+    case excl_r => simp_all [ContainsSupOf.lawful]
+  . intro hd
+    induction K1
+    case empty => apply empty_l
+    case union ha hb =>
+      apply union_l <;> simp_all
+    case node r1 ex1 =>
+      induction K2
+      case empty => apply empty_r
+      case union ha hb =>
+        apply union_r <;> simp_all
+      case node r2 ex2 =>
+        simp at hd; rw [← Classifier.disjoint_is_Disjoint] at hd; repeat rw [← ContainsSupOf.lawful] at hd
+        cases hd <;> rename_i hd
+        . cases hd <;> rename_i hd
+          . cases hd <;> rename_i hd
+            . cases hd <;> rename_i hd
+              . apply! root
+              . apply! absurd_l
+            . apply! absurd_r
+          . apply! excl_r
+        . apply! excl_l
+
+
+-- inductive Kind.Contains : Kind -> Classifier -> Prop where
+--   | union_l : Contains K1 c -> Contains (.union K1 K2) c
+--   | union_r : Contains K2 c -> Contains (.union K1 K2) c
+--   | subclass : Classifier.Subclass c r -> Contains (.node r []) c
+--   | excl_sub :
+--     Classifier.StrictSub a c ->
+--     Contains (.node r exs) c ->
+--     Contains (.node r (a :: exs)) c
+--   | excl_irrelevant :
+--     Classifier.Disjoint a c ->
+--     Contains (.node r exs) c ->
+--     Contains (.node r (a :: exs)) c
+
+-- theorem Kind.Contains.is_subclass
+--   (hc : Contains (.node r exs) c)
+--   : c.Subclass r := by
+--   cases hc
+--   case subclass => assumption
+--   case excl_sub hc => apply hc.is_subclass
+--   case excl_irrelevant hc => apply hc.is_subclass
+
+-- theorem Kind.Contains.not_empty
+--   (hc : Contains K c)
+--   (he : IsEmpty K)
+--   : False := by
+--   induction he
+--   case empty => cases hc
+--   case absurd exs r hsc =>
+--     induction hsc
+--     case here hs =>
+--       cases hc
+--       case excl_sub hss hc =>
+--         apply hss.antisymm
+--         apply hc.is_subclass.trans hs
+--       case excl_irrelevant hd hc =>
+--         apply hd.symm.not_subclass
+--         apply hc.is_subclass.trans hs
+--     case there hsc ih =>
+--       cases hc <;> apply! ih
+--   case union ha hb =>
+--     cases hc
+--     apply! ha
+--     apply! hb
+
+-- theorem Kind.Contains.excl_irrelevant_l
+--   (hd : Classifier.Disjoint r a)
+--   (hc : Contains (.node r exs) c)
+--   : Contains (.node r (a :: exs)) c := by
+--   cases c.subclass_or_disjoint a <;> rename_i hs
+--   . cases (hd.refines_subclass_l hc.is_subclass).not_subclass hs
+--   . cases hs <;> rename_i hs
+--     . apply! excl_sub
+--     . apply! excl_irrelevant hs.symm
+
+-- theorem Kind.Contains.change_root
+--   (hc : Contains (.node r exs) c)
+--   (hs1 : c.Subclass a)
+--   : Contains (.node a exs) c := by
+--   cases hc
+--   case subclass => apply! subclass
+--   case excl_sub hss hc => apply excl_sub hss; apply! hc.change_root
+--   case excl_irrelevant hd hc => apply excl_irrelevant hd; apply! hc.change_root
+
+-- theorem Kind.Contains.excl_append
+--   (hc1 : Contains (.node r ex1) c)
+--   (hc2 : Contains (.node r ex2) c)
+--   : Contains (.node r (ex1 ++ ex2)) c := by
+--   induction ex1
+--   case nil => exact hc2
+--   case cons head tail ih =>
+--     cases hc1
+--     case excl_sub => apply! excl_sub _ (ih _)
+--     case excl_irrelevant => apply! excl_irrelevant _ (ih _)
+
+-- theorem Kind.Contains.subtract
+--   (hc : Contains K c)
+--   (hs : Subtract K L R)
+--   : Contains L c ∨ Contains R c := by
+--   induction hs
+--   case empty_l => cases hc.not_empty .empty
+--   case union_l ha hb =>
+--     cases hc <;> rename_i hc
+--     . cases ha hc
+--       . aesop
+--       . right; apply union_l; assumption
+--     . cases hb hc
+--       . aesop
+--       . right; apply union_r; assumption
+--   case empty_r => aesop
+--   case union_r ha hb =>
+--     cases ha hc <;> rename_i ha
+--     . left; apply union_l; assumption
+--     . cases hb ha <;> rename_i hb
+--       . left; apply union_r; assumption
+--       . aesop
+--   case tree r1 _ r2 =>
+--     cases c.subclass_or_disjoint r2 <;> rename_i hs
+--     . left; constructor; assumption
+--     . cases hs <;> rename_i hs
+--       . right; apply! excl_sub
+--       . right; apply excl_irrelevant hs.symm hc
+--   case excl_absurd_r hss => aesop
+--   case excl_irrelevant_r hd _ ih =>
+--     cases ih hc
+--     case inl hc => left; apply! excl_irrelevant_l
+--     case inr => aesop
+--   case excl_subclass_r a hs2 hs1 _ ih =>
+--     cases ih hc <;> rename_i ih
+--     . cases c.subclass_or_disjoint a <;> rename_i hs
+--       . right; apply union_r; apply! change_root
+--       . cases hs <;> rename_i hs
+--         . left; apply! excl_sub
+--         . left; apply! excl_irrelevant (.symm _)
+--     . right; apply! union_l
+--   case excl_subclass_l hs2 hss => aesop
+--   case excl_irrelevant_l hs2 hd1 _ ih =>
+--     cases ih hc <;> rename_i ih
+--     . left; apply excl_irrelevant _ ih; apply hd1.symm.refines_subclass_r hc.is_subclass
+--     . aesop
+
+-- theorem Kind.Contains.refine_subkind
+--   (hc : Contains K c)
+--   (hs : Subkind K L)
+--   : Contains L c := by
+--   cases hs
+--   rename_i hs he
+--   cases hc.subtract hs
+--   . assumption
+--   . rename_i hc; cases hc.not_empty he
+
+-- theorem Kind.Contains.intersect'
+--   (hc1 : Contains K1 c)
+--   (hc2: Contains K2 c)
+--   (hi : Intersect K1 K2 R)
+--   : Contains R c := by
+--   induction hi
+--   case empty_l => cases hc1.not_empty .empty
+--   case empty_r => cases hc2.not_empty .empty
+--   case union_l ha hb =>
+--     simp_all
+--     cases hc1
+--     . apply! union_l (ha _)
+--     . apply! union_r (hb _)
+--   case union_r ha hb =>
+--     simp_all
+--     cases hc2
+--     . apply! union_l (ha _)
+--     . apply! union_r (hb _)
+--   case singleton_l =>
+--     apply excl_append hc1 (hc2.change_root hc1.is_subclass)
+--   case singleton_r =>
+--     apply excl_append (hc1.change_root hc2.is_subclass) hc2
+--   case singleton_disj hd =>
+--     cases (hd.refines_subclass_l hc1.is_subclass).not_subclass hc2.is_subclass
+
+-- theorem Kind.Contains.intersect
+--   (hc1 : Contains K1 c)
+--   (hc2 : Contains K2 c)
+--   : Contains (K1.intersect K2) c := intersect' hc1 hc2 (Intersect.lawful)
+
+-- @[simp]
+-- def Kind.contains (K : Kind) (c : Classifier) : Bool :=
+--   match K with
+--   | .empty => false
+--   | .union K1 K2 => K1.contains c || K2.contains c
+--   | .node r exs =>
+--     match exs with
+--     | .nil => c.subclass r
+--     | .cons a xs =>
+--       if a.subclass c && a != c then (Kind.node r xs).contains c
+--       else if a.disjoint c then (Kind.node r xs).contains c
+--       else false
+
+-- theorem Kind.Contains.lawful : Contains K c ↔ K.contains c := by
+--   apply Iff.intro
+--   . intro hc
+--     induction hc <;> try simp_all
+--     case subclass hs => rw [← Classifier.subclass_is_Subclass]; assumption
+--     case excl_sub hss _ _ => left; apply And.intro; rw [← Classifier.subclass_is_Subclass]; apply hss.weaken; apply hss.neq
+--     case excl_irrelevant hd _ _ => right; rw [← Classifier.disjoint_is_Disjoint]; assumption
+--   . intro hc
+--     unfold contains at hc
+--     split at hc
+--     . aesop
+--     . simp at hc; cases hc
+--       . apply union_l; rw [lawful]; assumption
+--       . apply union_r; rw [lawful]; assumption
+--     . split at hc
+--       . constructor; rw [Classifier.subclass_is_Subclass]; assumption
+--       . simp at hc
+--         split at hc
+--         . rename_i h
+--           have ⟨h1, h2⟩ := h
+--           apply excl_sub
+--           rw [← Classifier.subclass_is_Subclass] at h1
+--           cases h1.might_strict <;> aesop
+--           rw [← lawful] at hc; aesop
+--         . have ⟨h1, h2⟩ := hc
+--           rw [← lawful] at h2
+--           rw [← Classifier.disjoint_is_Disjoint] at h1
+--           apply! excl_irrelevant
+
+  -- : Contains (K1.intersect K2) c := by
+  -- induction K1 generalizing K2
+  -- case empty => cases hc1.not_empty .empty
+  -- case union ha hb =>
+  --   simp
+  --   cases hc1
+  --   apply! union_l (ha _ hc2)
+  --   apply! union_r (hb _ hc2)
+  -- case node r1 ex1 =>

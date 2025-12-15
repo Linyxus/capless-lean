@@ -79,10 +79,17 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
   Typed Γ (intercept[K] in t) (EType.type (SType.maybe S)^(C.proj K)) C
 | unwrap {Γ : Context n m k} {S : SType n m k} :
   Typed Γ (Term.var x) (EType.type (.maybe S)^C) {x=x|.top} ->
-  Typed Γ (.unwrap x) (S^{}) {x=x|.top}
--- | unwrap_handle {Γ : Context n m k} :
-  -- Typed Γ (Term.var x) (EType.type (.maybe S)^C) {x=x|.top} ->
-  -- Typed (((Γ, X<:.top),x:)) h
+  Typed
+    (((Γ,X<:.top),x:(Label[.tvar 0]^{x=x|.top})),x:(SType.tvar 0)^{})
+    t
+    (S.tweaken.weaken.weaken^{}) (C.weaken.weaken ∪ {x=0|.top} ∪ {x=1|.top}) ->
+  Typed Γ (.unwrap x t) (S^CaptureSet.empty) C
+| ok {Γ : Context n m k} {S : SType n m k} :
+  Typed Γ (Term.var x) (S^CaptureSet.empty) {x=x|.top} -> Typed Γ (Term.ok x) ((SType.maybe S)^CaptureSet.empty) {x=x|.top}
+| invoked {Γ : Context n m k} {S : SType n m k} :
+  Typed Γ (Term.var l) (Label[S]^C) {x=l|.top} ->
+  Typed Γ (Term.var v) (S^CaptureSet.empty) {x=v|.top} ->
+  Typed Γ (Term.invoked l v) ((SType.maybe S)^C) ({x=l|.top} ∪ {x=v|.top})
 
 notation:40 Γ " ⊢ " t:80 " : " E " @ " C => Typed Γ t E C
 

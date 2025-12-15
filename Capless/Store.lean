@@ -56,6 +56,10 @@ inductive Cont : Nat -> Nat -> Nat -> Type where
   (l : Fin n) ->
   Cont n m k ->
   Cont n m k
+| intercept : -- intercept frame
+  Kind ->
+  Cont n m k ->
+  Cont n m k
 
 /-- Evaluation state. -/
 structure State (n : Nat) (m : Nat) (k : Nat) where
@@ -100,6 +104,19 @@ inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
 | there_label :
   Cont.HasLabel cont l tail ->
   Cont.HasLabel (Cont.scope l' cont) l tail
+| there_intercept :
+  Cont.HasLabel cont l tail ->
+  Cont.HasLabel (Cont.intercept K cont) l tail
+
+/-- Checks whether a label can be handled in a scope of a continuation stack. This can either be a label frame itself, or the intercept frame. -/
+inductive Cont.HasIntercept : Cont n m k -> Fin n -> Classifier -> Cont n m k -> Prop where
+| here_label :
+  Cont.HasIntercept (Cont.scope l tail) l tail
+| here_intercept :
+  Cont.HasLabel tail l tail' -> -- the tail must actually contain the label frame
+
+  Cont.HasIntercept ()
+
 
 /-- Checks whether a capture set is well-scoped under a context and a continuation stack.
  -- A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`).
