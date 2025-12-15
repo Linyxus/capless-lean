@@ -355,6 +355,9 @@ inductive Kind.IsEmpty : Kind -> Prop where
 theorem Kind.IsEmpty.is_absurd (he : IsEmpty (.node r exs)) : ContainsSupOf exs r := by
   cases he; assumption
 
+theorem Kind.IsEmpty.union_l_inv (he : IsEmpty (.union K1 K2)) : IsEmpty K1 ∧ IsEmpty K2 := by
+  cases he; constructor <;> assumption
+
 inductive Kind.Intersect : Kind -> Kind -> Kind -> Prop where
   | empty_l : Intersect .empty K .empty
   | empty_r : Intersect K .empty .empty
@@ -1207,21 +1210,395 @@ theorem Kind.Subkind.of_top : Subkind K .top := by
   have ⟨R, h⟩ := Subtract.exists K .top
   apply subtract h h.top
 
--- prove later
-theorem Kind.Subtract.rfl (hs : Subtract K K R) : IsEmpty R := by sorry
+-- Key lemma: if the first node's exclusion list extends the second's,
+-- then the subtraction is empty.
+-- Semantically: (r \ ex1) ⊆ (r \ ex2) when ex2 is a suffix of ex1,
+-- so (r \ ex1) \ (r \ ex2) = ∅
+theorem Kind.Subtract.suffix_empty
+  (hs : Subtract (.node r ex1) (.node r ex2) R)
+  (hsuf : ∃ pre, ex1 = pre ++ ex2)
+  : IsEmpty R := by
+  obtain ⟨pre, heq⟩ := hsuf
+  induction ex2 generalizing ex1 R pre
+  case nil =>
+    subst heq
+    simp at hs
+    cases hs
+    -- tree: R = node r (r :: pre)
+    constructor
+    apply ContainsSupOf.here
+    exact Classifier.Subclass.rfl
+  case cons a tail ih =>
+    subst heq
+    cases hs
+    case excl_absurd_r hsub =>
+      -- r.StrictSub a
+      constructor
+      apply ContainsSupOf.append_r
+      apply ContainsSupOf.here
+      exact hsub.weaken
+    case excl_irrelevant_r hd hs' =>
+      -- r.Disjoint a
+      -- hs' : Subtract (node r (pre ++ a :: tail)) (node r tail) R
+      -- new prefix is pre ++ [a]
+      -- Need: (pre ++ a :: tail) = (pre ++ [a]) ++ tail
+      have heq : pre ++ a :: tail = (pre ++ [a]) ++ tail := by simp
+      exact ih hs' (pre ++ [a]) heq
+    case excl_subclass_r hsub1 hsub2 hs' =>
+      -- a.Subclass r
+      -- hs' : Subtract (node r (pre ++ a :: tail)) (node r tail) R'
+      -- Result is union R' (node a (pre ++ a :: tail))
+      have heq : pre ++ a :: tail = (pre ++ [a]) ++ tail := by simp
+      constructor
+      · exact ih hs' (pre ++ [a]) heq
+      · -- Need: (node a (pre ++ a :: tail)).IsEmpty
+        -- This needs ContainsSupOf (pre ++ a :: tail) a
+        constructor
+        apply ContainsSupOf.append_r
+        apply ContainsSupOf.here
+        exact Classifier.Subclass.rfl
+    case excl_subclass_l hsub1 hsub2 =>
+      -- hsub1 : r.StrictSub a (but names may be swapped depending on unification)
+      -- hsub2 : a.Subclass r
+      -- After antisymm and subst, we get r.StrictSub r
+      -- The cases on StrictSub produces child and parent_l cases
+      -- In the parent_l case, r = child n a✝ and we have a✝.StrictSub r
+      -- But we can still prove the goal since r is in its own exclusion list
+      have h := hsub1.weaken
+      have heq' := h.antisymm hsub2
+      subst heq'
+      -- Goal: (node r (pre ++ r :: tail)).IsEmpty
+      -- r is in the exclusion list, so it's empty
+      constructor
+      apply ContainsSupOf.append_r
+      apply ContainsSupOf.here
+      exact Classifier.Subclass.rfl
+    case excl_irrelevant_l hsub hd hs' =>
+      -- hsub : r.Disjoint a, hd : a.Subclass r - contradiction
+      exact absurd hd hsub.symm.not_subclass
 
-theorem Kind.Subkind.rfl : Subkind K K := by
-  have ⟨R, h⟩ := Subtract.exists K K
-  apply subtract h h.rfl
+theorem Kind.Subtract.rfl_node (hs : Subtract (.node r ex) (.node r ex) R) : IsEmpty R :=
+  suffix_empty hs (Exists.intro [] (by simp))
 
--- prove later
+-- Helper lemma: if a.StrictSub r, then (node a ex) \ (node r ex) is empty
+-- IMPORTANT: Both nodes must have the SAME exclusion list for this to hold
+-- This is because (node a ex) is "strictly inside" (node r ex) when they share exclusions
+theorem Kind.Subtract.strictsub_empty_same_ex
+  (hs : Subtract (.node a ex) (.node r ex) R)
+  (hss : a.StrictSub r)
+  : R.IsEmpty := by
+  -- The semantics: (node a ex) represents subtree a minus exclusions ex
+  -- (node r ex) represents subtree r minus exclusions ex
+  -- Since a.StrictSub r, subtree a ⊆ subtree r
+  -- Both have the same exclusions, so (node a ex) ⊆ (node r ex)
+  -- Hence (node a ex) \ (node r ex) = empty
+  -- Proof by induction on the Subtract derivation structure (via the exclusion list)
+  induction ex generalizing R with
+  | nil =>
+    cases hs
+    case tree =>
+      constructor
+      apply ContainsSupOf.here
+      apply hss.weaken
+  | cons head tail ih =>
+    cases hs
+    case excl_absurd_r hsub =>
+      constructor -- IsEmpty.absurd
+      apply ContainsSupOf.here
+      apply Classifier.Subclass.trans
+      apply hss.weaken
+      apply hsub.weaken
+    case excl_irrelevant_r hd hs' =>
+      have ⟨R_IH, hs_IH⟩ := Subtract.exists (.node a tail) (.node r tail)
+      have he_IH := ih hs_IH
+      apply is_empty_append_l hs_IH he_IH hs'
+    case excl_subclass_r hsub1 hsub2 hs' =>
+      constructor
+      . have ⟨R_IH, hs_IH⟩ := Subtract.exists (.node a tail) (.node r tail)
+        have he_IH := ih hs_IH
+        apply is_empty_append_l hs_IH he_IH hs'
+      . constructor
+        apply ContainsSupOf.here
+        exact .rfl
+    case excl_subclass_l hsub1 hsub2 =>
+      constructor
+      apply ContainsSupOf.here
+      apply hsub1.weaken
+    case excl_irrelevant_l hsub1 hd hs' =>
+      have ⟨R_IH, hs_IH⟩ := Subtract.exists (.node a tail) (.node r tail)
+      have he_IH := ih hs_IH
+      apply is_empty_append_l hs_IH he_IH hs'
+
+-- Key lemma: if r.Subclass r' and (node r' ex') is not absurd,
+-- then (node r ex) ⊆ (node r' ex')
+-- The non-absurdity condition is necessary because if (node r' ex') is absurd,
+-- the subtraction can return (node r ex) unchanged (via excl_absurd_r)
+theorem Kind.Subtract.empty_implies_exclusions_covered
+  (hs : Subtract (.node r ex) (.node r' ex') R)
+  (he : IsEmpty R)
+  : ∀ a ∈ ex', (a.Subclass r → ContainsSupOf ex a) ∧ (r.StrictSub a → ContainsSupOf ex r) := by
+  induction ex' generalizing R
+  case nil => simp
+  case cons a tail ih =>
+    intro k hk
+    simp at hk
+    cases hs
+    case excl_absurd_r hsub' =>
+      cases he
+      rename_i hc
+      exact ⟨fun h => hc.trans_subclass h, fun _ => hc⟩
+    case excl_irrelevant_r hd hs' =>
+      cases hk
+      case inl heq =>
+        subst heq
+        constructor
+        . intro hsub
+          cases hs'.empty_implies_subclass he
+          case inl habs => exact habs.trans_subclass hsub
+          case inr hsub_r_r' => exact absurd (hsub.trans hsub_r_r') hd.symm.not_subclass
+        . intro hsub
+          cases hs'.empty_implies_subclass he
+          case inl habs => assumption
+          case inr hsub_r_r' =>
+             exact absurd hsub_r_r' (hd.to_subclass hsub.weaken).symm.not_subclass
+      case inr hin =>
+        apply ih hs' he k hin
+    case excl_subclass_r h1 h2 hs' =>
+      have ⟨he1, he2⟩ := he.union_l_inv
+      cases hk
+      case inl heq =>
+        subst heq
+        constructor
+        . intro; exact he2.is_absurd
+        . intro h; cases h.antisymm h1
+      case inr hin =>
+        apply ih hs' he1 k hin
+    case excl_subclass_l hs1 hs2 =>
+      cases he
+      rename_i hc
+      exact ⟨fun h => hc.trans_subclass h, fun _ => hc⟩
+    case excl_irrelevant_l hs1 hd hs' =>
+      cases hk
+      case inl heq =>
+        subst heq
+        constructor
+        . intro hsub; exact absurd hsub hs1.symm.not_subclass
+        . intro hsub; exact absurd hsub.weaken hs1.not_subclass
+      case inr hin =>
+        apply ih hs' he k hin
+
+theorem Kind.Subtract.subclass_node_empty
+  (hsub : r.Subclass r')
+  (hna : ¬ContainsSupOf ex' r')  -- (node r' ex') is not absurd
+  (hcov : ∀ k ∈ ex', (k.Subclass r → ContainsSupOf ex k) ∧ (r.StrictSub k → ContainsSupOf ex r))
+  (hs : Subtract (.node r ex) (.node r' ex') R)
+  : IsEmpty R := by
+  induction ex' generalizing R with
+  | nil =>
+    cases hs
+    case tree =>
+      exact .absurd (.here hsub)
+  | cons a ex' ih =>
+    cases hs with
+    | excl_absurd_r hss =>
+      have hc : ContainsSupOf (a :: ex') r' := .here hss.weaken
+      exact absurd hc hna
+    | excl_irrelevant_r hd hs' =>
+      have hna' : ¬ContainsSupOf ex' r' := fun hc => hna (.there hc)
+      apply ih hna'
+      · intro k hk; apply hcov k (.tail _ hk)
+      · exact hs'
+    | excl_subclass_r h1 h2 hs' =>
+      constructor
+      · have hna' : ¬ContainsSupOf ex' r' := fun hc => hna (.there hc)
+        apply ih hna'
+        · intro k hk; apply hcov k (.tail _ hk)
+        · exact hs'
+      · exact .absurd ((hcov a (.head _)).1 h2)
+    | excl_subclass_l hs1 hss =>
+      exact .absurd ((hcov a (.head _)).2 hss)
+    | excl_irrelevant_l hs1 hd hs' =>
+      have hna' : ¬ContainsSupOf ex' r' := fun hc => hna (.there hc)
+      apply ih hna'
+      · intro k hk; apply hcov k (.tail _ hk)
+      · exact hs'
+
+-- Transitivity: if K1 ⊆ K2 and K2 ⊆ K3, then K1 ⊆ K3
+-- This is the core transitivity property for subset
+-- IMPORTANT: This must be defined before empty_union_rr which uses it
 theorem Kind.Subtract.implies_trans
   (hs3 : Subtract K1 K3 R3)
   (hs1 : Subtract K1 K2 R1)
   (he1 : R1.IsEmpty)
   (hs2 : Subtract K2 K3 R2)
   (he2 : R2.IsEmpty)
-  : R3.IsEmpty := by sorry
+  : R3.IsEmpty := by
+  induction K1 generalizing K2 K3 R1 R2 R3 with
+  | empty =>
+    cases hs3; constructor
+  | union K1a K1b ih1a ih1b =>
+    cases hs1 with
+    | union_l hs1a hs1b =>
+      have ⟨he1a, he1b⟩ := he1.union_l_inv
+      cases hs3 with
+      | union_l hs3a hs3b =>
+        constructor
+        · exact ih1a hs3a hs1a he1a hs2 he2
+        · exact ih1b hs3b hs1b he1b hs2 he2
+  | node r ex =>
+    -- K1 = (node r ex), need to show K1 ⊆ K3 given K1 ⊆ K2 ⊆ K3
+    -- Strategy: nested induction on K2
+    induction K2 generalizing K3 R1 R2 R3 with
+    | empty =>
+      -- K1 \ empty = K1, for K1.IsEmpty, K1 is absurd
+      cases hs1
+      case empty_r => exact hs3.is_empty_l he1
+    | union K2a K2b ih2a ih2b =>
+      -- K1 \ (K2a ∪ K2b) via union_r
+      cases hs1 with
+      | union_r hs1a hs1b =>
+        -- hs1a : K1 \ K2a = R1a
+        -- hs1b : R1a \ K2b = R1, he1 : R1.IsEmpty
+        cases hs2 with
+        | union_l hs2a hs2b =>
+          have ⟨he2a, he2b⟩ := he2.union_l_inv
+          -- hs2a : K2a \ K3, he2a : K2a ⊆ K3
+          -- hs2b : K2b \ K3, he2b : K2b ⊆ K3
+          -- By IH on K2a:
+          -- If K1 ⊆ K2a (i.e., R1a.IsEmpty), then K1 ⊆ K3
+          -- Otherwise, R1a \ K2b = R1 is empty, so R1a ⊆ K2b
+          -- And K2b ⊆ K3, so by IH on K2b: R1a ⊆ K3
+          -- But we need K1 ⊆ K3...
+          -- This case is complex because K1 may partially overlap both K2a and K2b
+          sorry
+    | node r2 ex2 =>
+      -- K2 is a node, use empty_implies_subclass
+      cases hs1.empty_implies_subclass he1 with
+      | inl habs =>
+        -- K1 = (node r ex) is absurd
+        exact hs3.is_empty_l (IsEmpty.absurd habs)
+      | inr hsub =>
+        -- r.Subclass r2
+        -- K2 = (node r2 ex2) ⊆ K3
+        -- Need to show K1 ⊆ K3
+        induction K3 generalizing R2 R3 with
+        | empty =>
+          cases hs2
+          case empty_r =>
+            -- K2 \ empty = K2, so R2 = K2 and he2 : K2.IsEmpty
+            -- K1 ⊆ K2 (from hs1, he1) and K2.IsEmpty implies K1.IsEmpty
+            -- By empty_r_inv: if K1 \ K2 = R1 is empty and K2 is empty, then K1 is empty
+            exact hs3.is_empty_l (hs1.empty_r_inv he1 he2)
+        | union K3a K3b ih3a ih3b =>
+          cases hs2 with
+          | union_r hs2a hs2b =>
+            -- K2 \ K3a = R2a, R2a \ K3b = R2 with R2.IsEmpty
+            -- Complex case
+            sorry
+        | node r3 ex3 =>
+          cases hs2.empty_implies_subclass he2 with
+          | inl habs2 =>
+            -- K2 = (node r2 ex2) is absurd (ContainsSupOf ex2 r2)
+            -- K1 ⊆ K2 (from hs1, he1), so K1 is also empty
+            have hk2e : (node r2 ex2).IsEmpty := .absurd habs2
+            have hk1e : (node r ex).IsEmpty := hs1.empty_r_inv he1 hk2e
+            exact hs3.is_empty_l hk1e
+          | inr hsub2 =>
+            -- r2.Subclass r3
+            -- By transitivity: r.Subclass r3
+            have hsub3 := hsub.trans hsub2
+            -- K3 = (node r3 ex3) is not absurd because K2 ⊆ K3 and K2 is not absurd
+            -- We derive this from the fact that hsub2 was produced by empty_implies_subclass
+            -- which means the inl case (K2 absurd) was not taken
+            -- Therefore K3 can't be absurd (otherwise K2 ⊆ K3 would force K2 absurd)
+            -- This argument is complex to formalize, so we leave a sorry for now
+            -- Use the subclass_node_empty lemma with the non-absurdity hypothesis
+            have hna3 : ¬ContainsSupOf ex3 r3 := by
+              -- If K3 were absurd, then K2 ⊆ K3 with K2 not absurd is impossible
+              -- because Subkind.of_empty would make K2 absurd
+              sorry
+            have hcov : ∀ k ∈ ex3, (k.Subclass r → ContainsSupOf ex k) ∧ (r.StrictSub k → ContainsSupOf ex r) := by
+                sorry
+            exact subclass_node_empty hsub3 hna3 hcov hs3
+
+-- Key lemma: the remainder of a node subtraction is a subset of the original node
+-- If Subtract (node r ex) K R, then R ⊆ (node r ex)
+-- This is a fundamental property: A \ B ⊆ A
+-- Equivalently: Subtract (node r ex) K R → Subtract R (node r ex) T → T.IsEmpty
+-- This is expressed via the Subkind relation
+theorem Kind.Subtract.node_remainder_subkind
+  (hs : Subtract (.node r ex) K R)
+  : Subkind R (.node r ex) := by
+  sorry
+
+-- Corollary: the remainder property using explicit subtraction witness
+theorem Kind.Subtract.node_remainder_subset
+  (hs : Subtract (.node r ex) K R)
+  (hs' : Subtract R (.node r ex) T)
+  : T.IsEmpty := by
+  have hsub := node_remainder_subkind hs
+  cases hsub with
+  | subtract hs'' he =>
+    -- hs' : R \ (node r ex) = T
+    -- hs'' : R \ (node r ex) = T' with T'.IsEmpty
+    -- By uniqueness, T = T'
+    cases hs'.unique hs''
+    exact he
+
+-- Symmetric version of empty_union_rl for when the subkind is on the right
+theorem Kind.Subtract.empty_union_rr
+  (hs : Subtract K K2 R)
+  (he : R.IsEmpty)
+  (hs1 : Subtract K (.union K1 K2) R1)
+  : R1.IsEmpty := by
+  cases hs1
+  case empty_l => constructor
+  case union_l C1 R1 C2 R2 ha hb =>
+    -- K = C1 ∪ C2, ha : C1 \ (K1 ∪ K2) = R1, hb : C2 \ (K1 ∪ K2) = R2
+    -- hs : (C1 ∪ C2) \ K2 = R with R.IsEmpty
+    have ⟨T1, h1⟩ := Subtract.exists C1 K2
+    have ⟨T2, h2⟩ := Subtract.exists C2 K2
+    have ⟨_, _⟩ := hs.empty_union_l he h1 h2
+    constructor
+    apply! h1.empty_union_rr
+    apply! h2.empty_union_rr
+  case union_r hsa hsb =>
+    -- K = node r ex, hsa : K \ K1 = R1', hsb : R1' \ K2 = R1
+    -- hs : K \ K2 = R with R.IsEmpty
+    -- By node_remainder_subkind on hsa: R1' ⊆ K
+    -- Combined with K ⊆ K2 (from hs, he), by transitivity R1' ⊆ K2
+    -- So hsb : R1' \ K2 = R1 means R1.IsEmpty
+    cases node_remainder_subkind hsa with
+    | subtract hs_sub he_sub =>
+      -- hs_sub : R1' \ K = T, he_sub : T.IsEmpty (R1' ⊆ K)
+      -- hs : K \ K2 = R, he : R.IsEmpty (K ⊆ K2)
+      -- hsb : R1' \ K2 = R1
+      -- Need: R1.IsEmpty (by transitivity: R1' ⊆ K ⊆ K2)
+      exact hsb.implies_trans hs_sub he_sub hs he
+
+theorem Kind.Subtract.rfl (hs : Subtract K K R) : IsEmpty R := by
+  induction K generalizing R
+  case empty =>
+    cases hs
+    constructor
+  case union K1 K2 ih1 ih2 =>
+    cases hs
+    case union_l ha hb =>
+      -- ha : Subtract K1 (K1 ∪ K2) R1
+      -- hb : Subtract K2 (K1 ∪ K2) R2
+      have ⟨T1, h1⟩ := Subtract.exists K1 K1
+      have he1 : T1.IsEmpty := ih1 h1
+      have ⟨T2, h2⟩ := Subtract.exists K2 K2
+      have he2 : T2.IsEmpty := ih2 h2
+      constructor
+      · exact h1.empty_union_rl he1 ha
+      · exact h2.empty_union_rr he2 hb
+  case node r ex =>
+    exact rfl_node hs
+
+theorem Kind.Subkind.rfl : Subkind K K := by
+  have ⟨R, h⟩ := Subtract.exists K K
+  apply subtract h h.rfl
 
 theorem Kind.Subkind.trans (hs1 : Subkind K1 K2) (hs2 : Subkind K2 K3) : Subkind K1 K3 := by
   cases hs1
