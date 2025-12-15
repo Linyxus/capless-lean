@@ -44,8 +44,10 @@ def CaptureSet.proj (c : CaptureSet n k) (K : Kind) :=
   | singleton s p => singleton s (p.intersect K)
 
 theorem CaptureSet.proj_top {C : CaptureSet n k} : C.proj .top = C := by
-  induction C <;> try aesop
-  apply Kind.Intersect.top_r
+  induction C
+  case empty => rfl
+  case union ih1 ih2 => simp only [proj, union.injEq]; exact ⟨ih1, ih2⟩
+  case singleton => simp only [proj]; rw [Kind.Intersect.top_r]
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
