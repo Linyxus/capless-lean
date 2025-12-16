@@ -108,14 +108,53 @@ inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
   Cont.HasLabel cont l tail ->
   Cont.HasLabel (Cont.intercept K cont) l tail
 
-/-- Checks whether a label can be handled in a scope of a continuation stack. This can either be a label frame itself, or the intercept frame. -/
-inductive Cont.HasIntercept : Cont n m k -> Fin n -> Classifier -> Cont n m k -> Prop where
+/-- Checks whether a label can be handled in a scope of a continuation stack. This can either be a label frame itself, or the intercept frame.
+ -  We need to actually check the classifier here to see if they match. -/
+inductive Cont.HasIntercept : Cont n m k -> Fin n -> Kind -> Cont n m k -> Prop where
 | here_label :
-  Cont.HasIntercept (Cont.scope l tail) l tail
+  Cont.HasIntercept (Cont.scope l tail) l L tail
 | here_intercept :
   Cont.HasLabel tail l tail' -> -- the tail must actually contain the label frame
+  L.disjoint K = false ->
+  Cont.HasIntercept (Cont.intercept K tail) l L tail
+| there_intercept :
+  Cont.HasIntercept tail l L tail' ->
+  L.disjoint K = true ->
+  Cont.HasIntercept (Cont.intercept K tail) l L tail'
+| there_val :
+  Cont.HasIntercept cont l L tail ->
+  Cont.HasIntercept (Cont.cons t cont) l L tail
+| there_tval :
+  Cont.HasIntercept cont l L tail ->
+  Cont.HasIntercept (Cont.conse t cont) l L tail
+| there_cval :
+  Cont.HasIntercept cont l L tail ->
+  Cont.HasIntercept (Cont.scope l' cont) l L tail
+| there_label :
+  Cont.HasIntercept cont l L tail ->
+  Cont.HasIntercept (Cont.scope l' cont) l L tail
 
-  Cont.HasIntercept ()
+theorem Cont.HasIntercept.HasLabel (hi : HasIntercept cont l L tail) : ∃ tail', HasLabel cont l tail' := by
+  induction hi
+  case here_label l tail L => exists tail; apply HasLabel.here
+  case here_intercept _ _ tail' _ _ hl _ => exists tail'; apply HasLabel.there_intercept hl
+  case there_intercept ih =>
+    have ⟨t, h⟩ := ih
+    exists t; apply HasLabel.there_intercept h
+  case there_val ih =>
+    have ⟨t, h⟩ := ih
+    exists t; apply HasLabel.there_val h
+  case there_tval ih =>
+    have ⟨t, h⟩ := ih
+    exists t; apply HasLabel.there_tval h
+  case there_cval ih =>
+    have ⟨t, h⟩ := ih
+    exists t; apply HasLabel.there_cval h
+  case there_label ih =>
+    have ⟨t, h⟩ := ih
+    exists t; apply HasLabel.there_label h
+
+
 
 
 /-- Checks whether a capture set is well-scoped under a context and a continuation stack.
@@ -266,18 +305,21 @@ def Cont.weaken : Cont n m k -> Cont (n+1) m k
 | Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
 | Cont.conse t cont => Cont.conse t.weaken1 cont.weaken
 | Cont.scope x cont => Cont.scope x.succ cont.weaken
+| Cont.intercept K cont => Cont.intercept K cont.weaken
 
 def Cont.tweaken : Cont n m k -> Cont n (m+1) k
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.tweaken cont.tweaken
 | Cont.conse t cont => Cont.conse t.tweaken cont.tweaken
 | Cont.scope x cont => Cont.scope x cont.tweaken
+| Cont.intercept K cont => Cont.intercept K cont.tweaken
 
 def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.cweaken cont.cweaken
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 | Cont.scope x cont => Cont.scope x cont.cweaken
+| Cont.intercept K cont => Cont.intercept K cont.cweaken
 
 /-!
 ## Tightness
