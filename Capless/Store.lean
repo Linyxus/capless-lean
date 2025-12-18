@@ -58,6 +58,7 @@ inductive Cont : Nat -> Nat -> Nat -> Type where
   Cont n m k
 | intercept : -- intercept frame
   Kind ->
+  Term (n + 2) (m + 1) k ->
   Cont n m k ->
   Cont n m k
 
@@ -106,38 +107,38 @@ inductive Cont.HasLabel : Cont n m k -> Fin n -> Cont n m k -> Prop where
   Cont.HasLabel (Cont.scope l' cont) l tail
 | there_intercept :
   Cont.HasLabel cont l tail ->
-  Cont.HasLabel (Cont.intercept K cont) l tail
+  Cont.HasLabel (Cont.intercept K h cont) l tail
 
-/-- Checks whether a label can be handled in a scope of a continuation stack. This can either be a label frame itself, or the intercept frame.
+/-- Checks whether a label can be handled in an intercept scope of a continuation stack.
  -  We need to actually check the classifier here to see if they match. -/
-inductive Cont.HasIntercept : Cont n m k -> Fin n -> Kind -> Cont n m k -> Prop where
+inductive Cont.HasIntercept : Cont n m k -> Fin n -> Kind -> Option (Term (n + 2) (m + 1) k) -> Cont n m k -> Prop where
 | here_label :
-  Cont.HasIntercept (Cont.scope l tail) l L tail
+  Cont.HasIntercept (Cont.scope l tail) l L .none tail
 | here_intercept :
   Cont.HasLabel tail l tail' -> -- the tail must actually contain the label frame
   L.disjoint K = false ->
-  Cont.HasIntercept (Cont.intercept K tail) l L tail
+  Cont.HasIntercept (Cont.intercept K h tail) l L (.some h) tail
 | there_intercept :
-  Cont.HasIntercept tail l L tail' ->
+  Cont.HasIntercept tail l L h' tail' ->
   L.disjoint K = true ->
-  Cont.HasIntercept (Cont.intercept K tail) l L tail'
+  Cont.HasIntercept (Cont.intercept K h tail) l L h' tail'
 | there_val :
-  Cont.HasIntercept cont l L tail ->
-  Cont.HasIntercept (Cont.cons t cont) l L tail
+  Cont.HasIntercept cont l L h tail ->
+  Cont.HasIntercept (Cont.cons t cont) l L h tail
 | there_tval :
-  Cont.HasIntercept cont l L tail ->
-  Cont.HasIntercept (Cont.conse t cont) l L tail
+  Cont.HasIntercept cont l L h tail ->
+  Cont.HasIntercept (Cont.conse t cont) l L h tail
 | there_cval :
-  Cont.HasIntercept cont l L tail ->
-  Cont.HasIntercept (Cont.scope l' cont) l L tail
+  Cont.HasIntercept cont l L h tail ->
+  Cont.HasIntercept (Cont.scope l' cont) l L h tail
 | there_label :
-  Cont.HasIntercept cont l L tail ->
-  Cont.HasIntercept (Cont.scope l' cont) l L tail
+  Cont.HasIntercept cont l L h tail ->
+  Cont.HasIntercept (Cont.scope l' cont) l L h tail
 
-theorem Cont.HasIntercept.HasLabel (hi : HasIntercept cont l L tail) : ∃ tail', HasLabel cont l tail' := by
+theorem Cont.HasIntercept.has_label (hi : HasIntercept cont l L h tail) : ∃ tail', HasLabel cont l tail' := by
   induction hi
   case here_label l tail L => exists tail; apply HasLabel.here
-  case here_intercept _ _ tail' _ _ hl _ => exists tail'; apply HasLabel.there_intercept hl
+  case here_intercept _ _ tail' _ _ _ hl _ => exists tail'; apply HasLabel.there_intercept hl
   case there_intercept ih =>
     have ⟨t, h⟩ := ih
     exists t; apply HasLabel.there_intercept h
@@ -154,8 +155,19 @@ theorem Cont.HasIntercept.HasLabel (hi : HasIntercept cont l L tail) : ∃ tail'
     have ⟨t, h⟩ := ih
     exists t; apply HasLabel.there_label h
 
-
-
+theorem Cont.HasLabel.has_intercept (hl : HasLabel cont l tail) : ∃ h tail', HasIntercept cont l L h tail' := by
+  induction hl
+  case here l tail => exists .none, tail; apply! HasIntercept.here_label
+  case there_val ih => have ⟨h, tail, ih⟩ := ih; exists h, tail; apply! HasIntercept.there_val
+  case there_tval ih => have ⟨h, tail, ih⟩ := ih; exists h, tail; apply! HasIntercept.there_tval
+  case there_cval ih => have ⟨h, tail, ih⟩ := ih; exists h, tail; apply! HasIntercept.there_cval
+  case there_label ih => have ⟨h, tail, ih⟩ := ih; exists h, tail; apply! HasIntercept.there_label
+  case there_intercept cont _ _ K h0 hl ih =>
+    have ⟨h, tail, ih⟩ := ih
+    generalize hd : L.disjoint K = b0
+    cases b0
+    . exists .some h0, cont; apply HasIntercept.here_intercept hl hd;
+    . exists h, tail; apply! HasIntercept.there_intercept
 
 /-- Checks whether a capture set is well-scoped under a context and a continuation stack.
  -- A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`).
@@ -194,26 +206,35 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   L.IsEmpty ->
   WellScoped Γ cont (.singleton s L)
 
-/-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` through the continuation stack results in an output of type `Eout`, and the captured variables of the entire stack is `C`. -/
-inductive TypedCont : Context n m k -> EType n m k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
+/-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` with ambiant captures `Cin`
+    through the continuation stack results in an output of type `Eout`,
+    and the captured variables of the entire stack is `C`. -/
+inductive TypedCont : Context n m k -> EType n m k -> CaptureSet n k -> Cont n m k -> EType n m k -> CaptureSet n k -> Prop where
 | none :
   ESubtyp Γ E E' ->
-  TypedCont Γ E Cont.none E' {}
+  TypedCont Γ E Cin Cont.none E' {}
 | cons {Ct : CaptureSet n k} :
   Typed (Γ,x: T) t (EType.weaken E) Ct.weaken ->
   WellScoped Γ cont Ct ->
-  TypedCont Γ E cont E' C ->
-  TypedCont Γ (EType.type T) (Cont.cons t cont) E' (C ∪ Ct)
+  TypedCont Γ E (Cin ∪ Ct) cont E' C ->
+  TypedCont Γ (EType.type T) Cin (Cont.cons t cont) E' (C ∪ Ct)
 | conse {Ct : CaptureSet n k} :
   Typed ((Γ.cvar (CBinding.bound B)).var T) t (EType.weaken (EType.cweaken E)) Ct.cweaken.weaken ->
   WellScoped Γ cont Ct ->
-  TypedCont Γ E cont E' C ->
-  TypedCont Γ (EType.ex B T) (Cont.conse t cont) E' (C ∪ Ct)
+  TypedCont Γ E (Cin ∪ Ct) cont E' C ->
+  TypedCont Γ (EType.ex B T) Cin (Cont.conse t cont) E' (C ∪ Ct)
 | scope :
   Context.LBound Γ x c S ->
-  TypedCont Γ (S^{}) cont E' C ->
+  TypedCont Γ (S^{}) Cin cont E' C ->
   (Γ ⊢ T0 <: S^{}) ->
-  TypedCont Γ (EType.type T0) (Cont.scope x cont) E' C
+  TypedCont Γ (EType.type T0) Cin (Cont.scope x cont) E' C
+| intercept {S : SType n m k} {Cin Ct: CaptureSet n k}:
+  Typed (((Γ,X<:⊤),x:(Label[.tvar 0]^(Cin.proj K))),x:(SType.tvar 0)^{}) h (S.tweaken.weaken.weaken^CaptureSet.empty) (Ct.weaken.weaken ∪ {x=0|.top} ∪ {x=1|.top}) ->
+  WellScoped Γ cont Ct ->
+  TypedCont Γ (S^CaptureSet.empty) (Cin ∪ Ct) cont E' C ->
+  (Γ ⊢ T0 <: (CType.capt .empty S)) ->
+  TypedCont Γ (EType.type T0) Cin (Cont.intercept K h cont) E' (C ∪ Ct)
+
 
 /-- Typecheck an evaluation state. -/
 inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
@@ -221,7 +242,7 @@ inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
   TypedStore σ Γ ->
   Typed Γ t E Ct ->
   WellScoped Γ cont Ct ->
-  TypedCont Γ E cont E' C ->
+  TypedCont Γ E Ct cont E' C ->
   TypedState (State.mk σ cont t) Γ E'
 
 /-!
@@ -305,21 +326,21 @@ def Cont.weaken : Cont n m k -> Cont (n+1) m k
 | Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
 | Cont.conse t cont => Cont.conse t.weaken1 cont.weaken
 | Cont.scope x cont => Cont.scope x.succ cont.weaken
-| Cont.intercept K cont => Cont.intercept K cont.weaken
+| Cont.intercept K h cont => Cont.intercept K h.weaken cont.weaken
 
 def Cont.tweaken : Cont n m k -> Cont n (m+1) k
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.tweaken cont.tweaken
 | Cont.conse t cont => Cont.conse t.tweaken cont.tweaken
 | Cont.scope x cont => Cont.scope x cont.tweaken
-| Cont.intercept K cont => Cont.intercept K cont.tweaken
+| Cont.intercept K h cont => Cont.intercept K h.tweaken cont.tweaken
 
 def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.cweaken cont.cweaken
 | Cont.conse t cont => Cont.conse t.cweaken1 cont.cweaken
 | Cont.scope x cont => Cont.scope x cont.cweaken
-| Cont.intercept K cont => Cont.intercept K cont.cweaken
+| Cont.intercept K h cont => Cont.intercept K h.cweaken cont.cweaken
 
 /-!
 ## Tightness

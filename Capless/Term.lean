@@ -63,14 +63,8 @@ inductive Term : Nat -> Nat -> Nat -> Type where
 | bindc : CaptureSet n k -> Term n m (k+1) -> Term n m k
 /-- Boundary form `boundary[c] as <c,x> in t`. -/
 | boundary : Classifier -> SType n m k -> Term (n+1) m (k+1) -> Term n m k
-/-- Intercept: `intercept[K] in t` --/
-| intercept : Kind -> Term n m k -> Term n m k
-/-- Unwraps a maybe --/
-| unwrap: Fin n -> Term (n+2) (m+1) k -> Term n m k
-/-- value form of maybe: a returned value -/
-| ok : Fin n -> Term n m k
-/-- value form of maybe: a invocation label, and its associated value. -/
-| invoked : Fin n -> Fin n -> Term n m k
+/-- Intercept: `intercept[K] with h in t` --/
+| intercept : Kind -> Term (n + 2) (m + 1) k -> Term n m k -> Term n m k
 
 /-!
 ## Notations
@@ -84,8 +78,7 @@ notation:40 "let" "(c,x)=" t " in " u => Term.letex t u
 notation:40 "let" "X=" S " in " t => Term.bindt S t
 notation:40 "let" "c=" C " in " t => Term.bindc C t
 notation:40 "boundary[" c "]:" S " in " t => Term.boundary c S t
-notation:40 "intercept[" K "]"" in " t => Term.intercept K t
-notation:40 "handle " n " with " t => Term.unwrap n t
+notation:40 "intercept[" K "]" " with " h " in " t => Term.intercept K h t
 
 /-- Whether this term is a value? -/
 @[aesop safe constructors]
@@ -94,8 +87,6 @@ inductive Term.IsValue : Term n m k -> Prop where
 | tlam : Term.IsValue (tlam S t)
 | clam : Term.IsValue (clam B t)
 | pack : Term.IsValue (pack c x)
-| ok : Term.IsValue (ok v)
-| invoked : Term.IsValue (invoked l v)
 
 /-!
 ## Renaming Operations on `Term`
@@ -118,11 +109,7 @@ def Term.rename (t : Term n m k) (f : FinFun n n') : Term n' m k :=
   | Term.bindt S t => Term.bindt (S.rename f) (t.rename f)
   | Term.bindc c t => Term.bindc (c.rename f) (t.rename f)
   | Term.boundary c S t => Term.boundary c (S.rename f) (t.rename f.ext)
-  | Term.intercept K t => Term.intercept K (t.rename f)
-  | Term.unwrap x t => Term.unwrap (f x) (t.rename f.ext.ext)
-  | Term.ok v => Term.ok $ f v
-  | Term.invoked l v => Term.invoked (f l) (f v)
-
+  | Term.intercept K h t => Term.intercept K (h.rename f.ext.ext) (t.rename f)
 
 def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   match t with
@@ -140,10 +127,7 @@ def Term.trename (t : Term n m k) (f : FinFun m m') : Term n m' k :=
   | Term.bindt S t => Term.bindt (S.trename f) (t.trename f.ext)
   | Term.bindc c t => Term.bindc c (t.trename f)
   | Term.boundary c S t => Term.boundary c (S.trename f) (t.trename f)
-  | Term.intercept K t => Term.intercept K (t.trename f)
-  | Term.unwrap x t => Term.unwrap x (t.trename f.ext)
-  | Term.ok v => Term.ok v
-  | Term.invoked l v => Term.invoked l v
+  | Term.intercept K h t => Term.intercept K (h.trename f.ext) (t.trename f)
 
 def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   match t with
@@ -161,10 +145,7 @@ def Term.crename (t : Term n m k) (f : FinFun k k') : Term n m k' :=
   | Term.bindt S t => Term.bindt (S.crename f) (t.crename f)
   | Term.bindc c t => Term.bindc (c.crename f) (t.crename f.ext)
   | Term.boundary c S t => Term.boundary c (S.crename f) (t.crename f.ext)
-  | Term.intercept K t => Term.intercept K (t.crename f)
-  | Term.unwrap x t => Term.unwrap x (t.crename f)
-  | Term.ok v => Term.ok v
-  | Term.invoked l v => Term.invoked l v
+  | Term.intercept K h t => Term.intercept K (h.crename f) (t.crename f)
 
 def Term.weaken (t : Term n m k) : Term (n+1) m k := t.rename FinFun.weaken
 
@@ -273,14 +254,8 @@ theorem Term.rename_id {t : Term n m k} :
     simp [Term.rename, CaptureSet.rename_id, ih]
   case boundary ih =>
     simp [Term.rename, SType.rename_id, ih, FinFun.id_ext]
-  case intercept ih =>
-    simp [Term.rename, ih]
-  case unwrap ih =>
-    simp [Term.rename, FinFun.id_ext, ih, FinFun.id]
-  case ok =>
-    simp [Term.rename, FinFun.id]
-  case invoked =>
-    simp [Term.rename, FinFun.id]
+  case intercept ih ih2 =>
+    simp [Term.rename, SType.rename_id, FinFun.id_ext, ih, ih2]
 
 theorem Term.trename_id {t : Term n m k} :
   t.trename FinFun.id = t := by
@@ -318,12 +293,8 @@ theorem Term.trename_id {t : Term n m k} :
     exact ih
   case boundary ih =>
     simp [Term.trename, SType.trename_id, ih, FinFun.id_ext]
-  case intercept ih =>
-    simp [Term.trename, ih]
-  case unwrap ih =>
-    simp [Term.trename, FinFun.id_ext, ih]
-  case ok => simp [Term.trename]
-  case invoked => simp [Term.trename]
+  case intercept ih ih2 =>
+    simp [Term.trename, ih, ih2, FinFun.id_ext]
 
 theorem Term.crename_id {t : Term n m k} :
   t.crename FinFun.id = t := by
@@ -361,12 +332,8 @@ theorem Term.crename_id {t : Term n m k} :
   case boundary ih =>
     simp [Term.crename]
     simp [ih, SType.crename_id, FinFun.id_ext]
-  case intercept ih =>
-    simp [Term.crename, ih]
-  case unwrap ih =>
-    simp [Term.crename, ih]
-  case ok => simp [Term.crename]
-  case invoked => simp [Term.crename]
+  case intercept ih ih2 =>
+    simp [Term.crename, ih, ih2]
 
 theorem Term.rename_rename {t : Term n m k} {f : FinFun n n'} {g : FinFun n' n''} :
   (t.rename f).rename g = t.rename (g.comp f) := by
@@ -406,13 +373,8 @@ theorem Term.rename_rename {t : Term n m k} {f : FinFun n n'} {g : FinFun n' n''
   case boundary ih =>
     simp [rename, SType.rename_rename]
     simp [<- FinFun.ext_comp_ext, ih]
-  case intercept ih =>
-    simp [rename, ih]
-  case unwrap ih =>
-    simp [rename]
-    simp [<- FinFun.ext_comp_ext, ih]
-  case ok => simp [rename]
-  case invoked => simp [rename]
+  case intercept ih ih2 =>
+    simp [rename, ih, ih2, ← FinFun.ext_comp_ext]
 
 theorem Term.crename_crename {t : Term n m k} {f : FinFun k k'} {g : FinFun k' k''} :
   (t.crename f).crename g = t.crename (g.comp f) := by
@@ -452,12 +414,8 @@ theorem Term.crename_crename {t : Term n m k} {f : FinFun k k'} {g : FinFun k' k
   case boundary ih =>
     simp [crename, SType.crename_crename]
     simp [<- FinFun.ext_comp_ext, ih]
-  case intercept ih =>
-    simp [crename, ih]
-  case unwrap ih =>
-    simp [crename, ih]
-  case ok => simp [crename]
-  case invoked => simp [crename]
+  case intercept ih ih2 =>
+    simp [crename, ih, ih2]
 
 theorem Term.trename_trename {t : Term n m k} {f : FinFun m m'} {g : FinFun m' m''} :
   (t.trename f).trename g = t.trename (g.comp f) := by
@@ -497,12 +455,7 @@ theorem Term.trename_trename {t : Term n m k} {f : FinFun m m'} {g : FinFun m' m
   case boundary ih =>
     simp [trename, SType.trename_trename]
     simp [<- FinFun.ext_comp_ext, ih]
-  case intercept ih =>
-    simp [trename, ih]
-  case unwrap ih =>
-    simp [trename]
-    simp [<- FinFun.ext_comp_ext, ih]
-  case ok => simp [trename]
-  case invoked => simp [trename]
+  case intercept ih ih2 =>
+    simp [trename, ih, ih2, ← FinFun.ext_comp_ext]
 
 end Capless

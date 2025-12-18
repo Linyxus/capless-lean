@@ -137,5 +137,12 @@ theorem Typed.crename
         <- CaptureSet.weaken_crename,
         <- CaptureSet.cweaken_crename] at ih
     exact ih
+  case intercept ih ih2 =>
+    apply intercept
+    have ih := ih $ ((ρ.text _).ext _).ext _
+    simp [TBinding.crename, EType.crename, CType.crename, SType.crename] at ih ih2
+    simp [← SType.weaken_crename, ← SType.tweaken_crename, ← CaptureSet.weaken_crename, CaptureSet.proj_crename] at ih ih2
+    apply ih
+    apply ih2 ρ
 
 end Capless

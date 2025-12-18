@@ -127,5 +127,11 @@ theorem Typed.trename
        , SType.weaken_trename ]
     simp [EType.trename, CType.trename] at ih
     exact ih
-
+  case intercept ih ih2 =>
+    apply intercept
+    have ih := ih $ ((ρ.text _).ext _).ext _
+    simp [TBinding.trename, EType.trename, CType.trename, SType.trename, FinFun.ext_zero] at ih ih2
+    simp [← SType.weaken_trename, ← SType.tweaken_trename] at ih ih2
+    apply ih
+    apply ih2 ρ
 end Capless

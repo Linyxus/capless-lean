@@ -189,7 +189,7 @@ theorem progress
     case sub hsub ih _ _ _ =>
       apply ih <;> try easy
       apply WellScoped.subcapt; easy; easy
-      apply! TypedCont.narrow
+      apply! TypedCont.narrow (TypedCont.cin_narrow hc _) _
     case abs => cases hc <;> aesop
     case tabs => cases hc <;> aesop
     case cabs => cases hc <;> aesop
@@ -222,7 +222,9 @@ theorem progress
       have ⟨c0, S0, hl⟩ := Store.label_lookup_exists hs hx
       have hl := Store.bound_label hl hs
       have ⟨_, hsl⟩ := WellScoped.label_inv hsc hl
-      aesop
+      have ⟨handler, tail, hsi⟩ := hsl.has_intercept (L:=.classifier c0)
+      cases handler <;> aesop
     case boundary => aesop
+    case intercept => aesop
 
 end Capless

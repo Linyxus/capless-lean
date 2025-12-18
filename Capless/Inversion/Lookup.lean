@@ -136,15 +136,27 @@ theorem Store.bound_label
   case label ih => constructor
 
 theorem Cont.has_label_tail_inv
-  (htc : TypedCont Γ E1 cont E2 Ct)
+  (htc : TypedCont Γ E1 Cin cont E2 Ct)
   (hb : Γ.LBound x c S0)
   (hh : cont.HasLabel x tail) :
-  ∃ Ct1, TypedCont Γ (S0^{}) tail E2 Ct1 := by
+  ∃ Ct1, TypedCont Γ (S0^{}) Cin tail E2 Ct1 := by
   induction hh generalizing E1 E2 Ct <;> try (solve | cases htc; aesop)
   case here =>
     cases htc; rename_i hb0 htc0
     have he := Context.lbound_inj hb hb0
     cases he
     aesop
+  case there_val ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
+  case there_tval ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
+  case there_intercept ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
 
 end Capless

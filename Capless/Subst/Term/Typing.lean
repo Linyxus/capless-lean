@@ -138,6 +138,14 @@ theorem Typed.subst
       , CaptureSet.cweaken_rename_comm
       , FinFun.ext ] at ih
     exact ih
+  case intercept ih ih2 =>
+    simp [Term.rename]
+    apply intercept
+    have ih := ih $ (σ.text.ext _).ext _
+    simp [TBinding.rename, EType.rename, CType.rename, SType.rename] at ih ih2
+    simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ih ih2
+    apply ih
+    apply! ih2
 
 theorem Typed.open
   (h : Typed (Γ,x: P) t E Ct)

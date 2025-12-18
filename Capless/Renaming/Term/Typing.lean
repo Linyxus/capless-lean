@@ -138,5 +138,12 @@ theorem Typed.rename
       , CaptureSet.weaken_rename ]
     simp [CBound.rename, EType.rename, CType.rename] at ih
     exact ih
+  case intercept ih ih2 =>
+    apply intercept
+    have ih := ih $ ((ρ.text _).ext _).ext _
+    simp [TBinding.rename, EType.rename, CType.rename, SType.rename] at ih ih2
+    simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ih ih2
+    apply ih
+    apply ih2 ρ
 
 end Capless

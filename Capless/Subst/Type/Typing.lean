@@ -122,6 +122,14 @@ theorem Typed.tsubst
          , <- SType.weaken_trename
          , <- SType.cweaken_trename ] at ih
       aesop
+    case intercept ih ih2 =>
+      simp [Term.trename]
+      apply intercept
+      have ih := ih $ ((σ.text _).ext _).ext _
+      simp [TBinding.trename, EType.trename, CType.trename, SType.trename] at ih ih2
+      simp [← SType.weaken_trename, ← SType.tweaken_trename] at ih ih2
+      apply ih
+      apply! ih2
 
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :

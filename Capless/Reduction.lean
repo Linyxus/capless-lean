@@ -26,6 +26,10 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   Reduce
     ⟨σ | cont | boundary[c]:S in t⟩
     ⟨(σ.label c S).cval {x=0|.top} | cont.weaken.cweaken.scope 0 | t⟩
+| intercept :
+  Reduce
+    ⟨σ | cont | intercept[K] with h in t⟩
+    ⟨σ | cont.intercept K h | t⟩
 | leave_var :
   Reduce
     ⟨σ | cont.scope x | Term.var y⟩
@@ -35,9 +39,24 @@ inductive Reduce : State n m k -> State n' m' k' -> Prop where
   Reduce
     ⟨σ | cont.scope x | v⟩
     ⟨σ | cont | v⟩
+| leave_intercept_var :
+  Reduce
+    ⟨σ | cont.intercept K h | Term.var x⟩
+    ⟨σ | cont | Term.var x⟩
+| leave_intercept_val {v : Term n m k} :
+  v.IsValue ->
+  Reduce
+    ⟨σ | cont.intercept K h | v⟩
+    ⟨σ | cont | v⟩
+| invoke_handler {σ : Store n m k} {cont : Cont n m k} :
+  σ.LBound x c S ->
+  cont.HasIntercept x (.classifier c) (.some h) tail ->
+  Reduce
+    ⟨σ | cont | Term.invoke x y⟩
+    ⟨σ | tail | Term.bindt S ((h.open x.castSucc).open y)⟩
 | invoke {σ : Store n m k} {cont : Cont n m k} :
   σ.LBound x c S ->
-  cont.HasLabel x tail ->
+  cont.HasIntercept x (.classifier c) .none tail ->
   Reduce
     ⟨σ | cont | Term.invoke x y⟩
     ⟨σ | tail | Term.var y⟩
