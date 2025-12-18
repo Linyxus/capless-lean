@@ -68,6 +68,7 @@ theorem Cont.HasLabel.cweaken
   case there_tval => simp [Cont.cweaken]; apply there_tval; aesop
   case there_cval => simp [Cont.cweaken]; apply there_cval; aesop
   case there_label => simp [Cont.cweaken]; apply there_label; aesop
+  case there_intercept => simp [Cont.cweaken]; apply there_intercept; aesop
 
 theorem WellScoped.cweaken
   (h : WellScoped Γ E Ct) :
@@ -104,8 +105,8 @@ theorem WellScoped.cweaken
   case absurd => apply! absurd
 
 theorem TypedCont.cweaken
-  (h : TypedCont Γ E t E' Ct) :
-  TypedCont (Γ.cvar b) E.cweaken t.cweaken E'.cweaken Ct.cweaken := by
+  (h : TypedCont Γ Cin E t E' Ct) :
+  TypedCont (Γ.cvar b) Cin.cweaken E.cweaken t.cweaken E'.cweaken Ct.cweaken := by
   induction h
   case none =>
     simp [Cont.cweaken]
@@ -140,5 +141,18 @@ theorem TypedCont.cweaken
     apply ih
     have h := hs.cweaken (b:=b)
     aesop
+  case intercept ht hsc hs h ih =>
+    simp [Cont.cweaken]
+    apply intercept
+    { have ht1 := ht.cweaken_text_ext_ext (cb := b)
+      simp [TBinding.cweaken, TBinding.crename, CType.cweaken, CType.crename,
+            ← CaptureSet.proj_cweaken, CaptureSet.proj_crename,
+            SType.weaken, SType.crename_rename_comm, SType.tweaken, ← SType.crename_trename_comm, SType.crename,
+            CaptureSet.cweaken, ← CaptureSet.weaken_crename] at ht1
+      simp [CaptureSet.cweaken, SType.tweaken, SType.weaken]
+      exact ht1 }
+    apply hsc.cweaken
+    apply ih
+    apply h.cweaken
 
 end Capless

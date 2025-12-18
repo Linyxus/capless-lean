@@ -326,14 +326,14 @@ def Cont.weaken : Cont n m k -> Cont (n+1) m k
 | Cont.cons t cont => Cont.cons t.weaken1 cont.weaken
 | Cont.conse t cont => Cont.conse t.weaken1 cont.weaken
 | Cont.scope x cont => Cont.scope x.succ cont.weaken
-| Cont.intercept K h cont => Cont.intercept K h.weaken cont.weaken
+| Cont.intercept K h cont => Cont.intercept K (h.rename FinFun.weaken.ext.ext) cont.weaken
 
 def Cont.tweaken : Cont n m k -> Cont n (m+1) k
 | Cont.none => Cont.none
 | Cont.cons t cont => Cont.cons t.tweaken cont.tweaken
 | Cont.conse t cont => Cont.conse t.tweaken cont.tweaken
 | Cont.scope x cont => Cont.scope x cont.tweaken
-| Cont.intercept K h cont => Cont.intercept K h.tweaken cont.tweaken
+| Cont.intercept K h cont => Cont.intercept K (h.trename FinFun.weaken.ext) cont.tweaken
 
 def Cont.cweaken : Cont n m k -> Cont n m (k+1)
 | Cont.none => Cont.none

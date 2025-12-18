@@ -19,7 +19,7 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ (C.proj L) K -> CaptureKind Γ {c=c | L} K
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
   | empty : CaptureKind Γ .empty K
-  | absurd : L.IsEmpty -> CaptureKind Γ (.singleton s L) K
+  | absurd : CaptureKind Γ C K -> K.IsEmpty -> CaptureKind Γ C L
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
@@ -47,7 +47,7 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
 | subkind : K.Subkind L -> Subcapt Γ (.singleton s K) (.singleton s L)
-| proj_absurd : L.IsEmpty -> Subcapt Γ (.singleton s L) .empty
+| absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
 | proj_split : Subcapt Γ (.singleton s (.union K1 K2)) (.union (.singleton s K1) (.singleton s K2))
 
 theorem Subcapt.proj_merge : Subcapt Γ (.union (.singleton s K1) (.singleton s K2)) (.singleton s (.union K1 K2)) := by

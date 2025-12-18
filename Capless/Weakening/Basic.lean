@@ -87,6 +87,36 @@ def CVarMap.weaken_cext_ext {Γ : Context n m k} :
   apply CVarMap.cext
   apply CVarMap.weaken
 
+def VarMap.weaken_text_ext_ext {Γ : Context n m k} :
+  VarMap
+    (((Γ.tvar b).var T1).var T2)
+    FinFun.weaken.ext.ext
+    ((((Γ.var P).tvar (b.rename FinFun.weaken)).var (T1.rename FinFun.weaken)).var (T2.rename FinFun.weaken.ext)) := by
+  apply VarMap.ext
+  apply VarMap.ext
+  apply VarMap.text
+  apply VarMap.weaken
+
+def CVarMap.weaken_text_ext_ext {Γ : Context n m k} :
+  CVarMap
+    (((Γ.tvar b).var T1).var T2)
+    FinFun.weaken
+    ((((Γ.cvar cb).tvar (b.crename FinFun.weaken)).var T1.cweaken).var T2.cweaken) := by
+  apply CVarMap.ext
+  apply CVarMap.ext
+  apply CVarMap.text
+  apply CVarMap.weaken
+
+def VarMap.lweaken_text_ext_ext {Γ : Context n m k} :
+  VarMap
+    (((Γ.tvar b).var T1).var T2)
+    FinFun.weaken.ext.ext
+    ((((Γ.label c P).tvar (b.rename FinFun.weaken)).var (T1.rename FinFun.weaken)).var (T2.rename FinFun.weaken.ext)) := by
+  apply VarMap.ext
+  apply VarMap.ext
+  apply VarMap.text
+  apply VarMap.lweaken
+
 def TVarMap.weaken {Γ : Context n m k} :
   TVarMap Γ FinFun.weaken (Γ.tvar b) := by
   constructor <;> (intros; constructor; trivial)
@@ -106,6 +136,16 @@ def TVarMap.weaken_cext_ext {Γ : Context n m k} :
     (((Γ.tvar b).cvar (CBinding.bound B)).var T.tweaken) := by
   apply TVarMap.ext
   apply TVarMap.cext
+  apply TVarMap.weaken
+
+def TVarMap.weaken_text_ext_ext {Γ : Context n m k} :
+  TVarMap
+    (((Γ.tvar b1).var T1).var T2)
+    FinFun.weaken.ext
+    ((((Γ.tvar b2).tvar (b1.trename FinFun.weaken)).var (T1.trename FinFun.weaken.ext)).var (T2.trename FinFun.weaken.ext)) := by
+  apply TVarMap.ext
+  apply TVarMap.ext
+  apply TVarMap.text
   apply TVarMap.weaken
 
 end Capless

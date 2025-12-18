@@ -52,8 +52,12 @@ theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2)
     have ⟨_, _⟩ := hk.union_l_inv' heq
     apply And.intro <;> apply! CaptureKind.sub
   | .empty => by cases heq
+  | .absurd hk he => by
+    have ⟨_, _⟩ := hk.union_l_inv' heq
+    apply And.intro <;> apply! absurd
 termination_by structural hk
 
+theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := hk.union_l_inv' $ .refl (a := C1 ∪ C2)
 
 theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := by
   induction hs <;> (subst_vars; try simp_all)
@@ -76,20 +80,11 @@ theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Sub
     apply And.intro <;> apply! trans _ (.cinstl hb)
   case union =>
     injections; subst_vars; apply And.intro <;> assumption
+  case absurd he hk =>
+    have ⟨_, _⟩ := hk.union_l_inv
+    apply And.intro <;> apply! absurd
 
 theorem Subcapt.union_l_inv (hs : Subcapt Γ (C1 ∪ C2) D) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := hs.union_l_inv' $ .refl (a := C1 ∪ C2)
-theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := hk.union_l_inv' $ .refl (a := C1 ∪ C2)
-
-
-theorem Subcapt.proj_absurd_set {C : CaptureSet n k} (he : L.IsEmpty) : Subcapt Γ (C.proj L) .empty := by
-  induction C
-  case empty => simp; apply rfl
-  case union ha hb => apply! union
-  case singleton =>
-    simp
-    apply trans
-    apply subkind Kind.Intersect.subkind_r
-    apply! proj_absurd
 
 theorem CaptureKind.subset
   (hk : CaptureKind Γ C2 K)
@@ -149,11 +144,10 @@ theorem CaptureKind.subkind_proj
   case empty =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     apply empty
-  case absurd he =>
-    unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
+  case absurd hk he ih =>
     apply absurd
-    apply Kind.Subkind.of_empty (Kind.Intersect.with_subkind hs) he
+    apply ih hs h
+    assumption
   case union ha hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -169,29 +163,22 @@ theorem CaptureKind.subkind_singleton
   rw [← CaptureSet.proj]
   apply! subkind_proj
 
-theorem CaptureKind.absurd_set {C : CaptureSet n k}
-  (he : L.IsEmpty)
-  : CaptureKind Γ (C.proj L) K := by
-  induction C
-  case empty => apply empty
-  case union ha hb => apply! union
-  case singleton => simp; apply absurd; apply Kind.Intersect.is_empty_r he
-
 theorem CaptureKind.var_lookup_inv
   (hk : CaptureKind Γ {x=x|L} K)
   (hb : Γ.Bound x S^C)
-  : L.IsEmpty ∨ CaptureKind Γ (C.proj L) K := by
+  : CaptureKind Γ (C.proj L) K := by
   generalize h : {x=x|L} = D at hk
   induction hk <;> cases h
   case var K hb2 hk ih =>
     cases Context.bound_injective hb hb2
-    right; assumption
+    assumption
   case label hb2 => cases Context.bound_lbound_absurd hb hb2
   case sub hs hk ih =>
-    cases ih hb (.refl _)
-    case inl => left; assumption
-    case inr h => right; apply! sub
-  case absurd => aesop
+    apply sub hs
+    apply ih hb (.refl _)
+  case absurd ih =>
+    simp_all
+    apply! absurd
 
 theorem CaptureKind.label_lookup_inv
   (hs : CaptureKind Γ {x=x|K1} K)
@@ -392,7 +379,8 @@ theorem CaptureKind.subcapt
     rw [← CaptureSet.proj] at hk
     rw [← CaptureSet.proj]
     apply subkind_proj hk hs
-  case proj_absurd he => apply! absurd
+  case absurd he =>
+    apply absurd_set
   case proj_split =>
     have ⟨_, _⟩ := hk.union_l_inv
     apply! proj_merge_singleton

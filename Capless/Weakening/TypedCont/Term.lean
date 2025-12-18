@@ -70,6 +70,8 @@ theorem Cont.HasLabel.weaken
   case there_label ih =>
     simp [Cont.weaken]
     apply there_label; trivial
+  case there_intercept ih =>
+    apply there_intercept; trivial
 
 theorem WellScoped.weaken
   (h : WellScoped Γ cont Ct) :
@@ -107,8 +109,8 @@ theorem WellScoped.weaken
 
 
 theorem TypedCont.weaken
-  (h : TypedCont Γ E t E' C0) :
-  TypedCont (Γ.var T) E.weaken t.weaken E'.weaken C0.weaken := by
+  (h : TypedCont Γ E Cin t E' C0) :
+  TypedCont (Γ.var T) E.weaken Cin.weaken t.weaken E'.weaken C0.weaken := by
   induction h
   case none =>
     simp [Cont.weaken]
@@ -147,6 +149,22 @@ theorem TypedCont.weaken
     { aesop }
     { have h1 := hs.weaken (T:=T)
       aesop }
+  case intercept ht hsc hs h ih =>
+    apply intercept
+    { have ht1 := ht.weaken_text_ext_ext (P:=T)
+      simp [CType.rename, TBinding.rename,
+            EType.weaken, EType.rename] at ht1
+      simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ht1
+      simp [FinFun.ext_zero, FinFun.ext_ext_one] at ht1
+      simp [CaptureSet.weaken, SType.rename] at ht1
+      simp [CaptureSet.weaken, Term.weaken]
+
+            -- SType.rename, SType.weaken, SType.tweaken,
+            -- CaptureSet.proj_rename] at ht1
+      exact ht1 }
+    apply hsc.weaken
+    apply ih
+    apply h.weaken
 
 theorem Cont.HasLabel.lweaken
   (h : Cont.HasLabel cont x tail) :
@@ -167,6 +185,7 @@ theorem Cont.HasLabel.lweaken
   case there_label ih =>
     simp [Cont.weaken]
     apply there_label; trivial
+  case there_intercept => apply! there_intercept
 
 theorem WellScoped.lweaken
   (h : WellScoped Γ cont Ct) :
@@ -203,8 +222,8 @@ theorem WellScoped.lweaken
   case absurd => apply! absurd
 
 theorem TypedCont.lweaken
-  (h : TypedCont Γ E cont E' Ct) :
-  TypedCont (Γ.label c S) E.weaken cont.weaken E'.weaken Ct.weaken := by
+  (h : TypedCont Γ Cin E cont E' Ct) :
+  TypedCont (Γ.label c S) Cin.weaken E.weaken cont.weaken E'.weaken Ct.weaken := by
   induction h
   case none =>
     simp [Cont.weaken]
@@ -243,5 +262,21 @@ theorem TypedCont.lweaken
     { aesop }
     { have h1 := hs.lweaken (c:=c) (S:=S)
       aesop }
+  case intercept ht hsc hs h ih =>
+    apply intercept
+    { have ht1 := ht.lweaken_text_ext_ext (c := c) (P:=S)
+      simp [CType.rename, TBinding.rename,
+            EType.weaken, EType.rename] at ht1
+      simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ht1
+      simp [FinFun.ext_zero, FinFun.ext_ext_one] at ht1
+      simp [CaptureSet.weaken, SType.rename] at ht1
+      simp [CaptureSet.weaken, Term.weaken]
+
+            -- SType.rename, SType.weaken, SType.tweaken,
+            -- CaptureSet.proj_rename] at ht1
+      exact ht1 }
+    apply hsc.lweaken
+    apply ih
+    apply h.lweaken
 
 end Capless

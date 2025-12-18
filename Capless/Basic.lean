@@ -98,4 +98,7 @@ theorem FinFun.comp_succ {f : FinFun n n'}: Fin.succ ∘ f = (FinFun.ext f) ∘ 
 theorem FinFun.ext_zero {f : FinFun n n'} : f.ext 0 = 0 := by
   simp [FinFun.ext]
 
+theorem FinFun.ext_ext_one {f : FinFun n n'} : f.ext.ext 1 = 1 := by
+  rfl
+
 end Capless
