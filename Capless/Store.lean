@@ -169,6 +169,32 @@ theorem Cont.HasLabel.has_intercept (hl : HasLabel cont l tail) : ∃ h tail', H
     . exists .some h0, cont; apply HasIntercept.here_intercept hl hd;
     . exists h, tail; apply! HasIntercept.there_intercept
 
+/-- Computes the reach set of a capture set. The reach set should only consist of capture variables and -/
+inductive ReachSet : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
+| empty : ReachSet Γ .empty .empty
+| union :
+  ReachSet Γ C1 R1 ->
+  ReachSet Γ C2 R2 ->
+  ReachSet Γ (C1 ∪ C2) (R1 ∪ R2)
+| var :
+  Context.Bound Γ x (S^C) ->
+  ReachSet Γ (C.proj L) R ->
+  ReachSet Γ {x=x|L} R
+| cinstr :
+  Context.CBound Γ c (CBinding.inst C) ->
+  ReachSet Γ (C.proj L) R ->
+  ReachSet Γ {c=c|L} R
+| cbound :
+  Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
+  ReachSet Γ (C.proj L) R ->
+  ReachSet Γ {c=c|L} R
+| ckind :
+  Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
+  ReachSet Γ {c=c|L} {c=c|L}
+| label :
+  Context.LBound Γ x c S ->
+  ReachSet Γ {x=x|L} {x=x|L}
+
 /-- Checks whether a capture set is well-scoped under a context and a continuation stack.
  -- A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`).
  -- This is an invariant to be maintained thoroughout evaluation. -/
@@ -179,18 +205,6 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   WellScoped Γ cont C1 ->
   WellScoped Γ cont C2 ->
   WellScoped Γ cont (.union C1 C2)
-| singleton :
-  Context.Bound Γ x (S^C) ->
-  WellScoped Γ cont (C.proj L) ->
-  WellScoped Γ cont {x=x|L}
-| csingleton :
-  Context.CBound Γ c (CBinding.inst C) ->
-  WellScoped Γ cont (C.proj L) ->
-  WellScoped Γ cont {c=c|L}
-| cbound :
-  Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
-  WellScoped Γ cont (C.proj L) ->
-  WellScoped Γ cont {c=c|L}
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
   WellScoped Γ cont {c=c|L}
@@ -234,13 +248,14 @@ inductive TypedCont : Context n m k -> EType n m k -> CaptureSet n k -> Cont n m
 
 
 /-- Typecheck an evaluation state. -/
-inductive TypedState : State n m k -> Context n m k -> EType n m k -> Prop where
+inductive TypedState : State n m k -> Context n m k -> EType n m k -> CaptureSet n k -> Prop where
 | mk :
   TypedStore σ Γ ->
   Typed Γ t E Ct ->
-  WellScoped Γ cont Ct ->
+  ReachSet Γ Ct Rt ->
+  WellScoped Γ cont Rt ->
   TypedCont Γ E Ct cont E' C ->
-  TypedState (State.mk σ cont t) Γ E'
+  TypedState (State.mk σ cont t) Γ E' Rt
 
 /-!
 ## Store Lookup
