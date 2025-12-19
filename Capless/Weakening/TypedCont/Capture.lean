@@ -102,7 +102,6 @@ theorem WellScoped.cweaken
       exact hb1 }
     { apply hs.cweaken }
   case label_disj hb hd => apply! label_disj hb.there_cvar
-  case absurd => apply! absurd
 
 theorem TypedCont.cweaken
   (h : TypedCont Γ Cin E t E' Ct) :

@@ -31,7 +31,7 @@ theorem CaptureKind.csubst
   case sub hs hk ih =>
     apply! sub hs (ih _)
   case empty => apply empty
-  case absurd he => apply! absurd
+  case absurd ih => apply! absurd (ih _)
   case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.csubst
@@ -49,7 +49,7 @@ theorem Subcapt.csubst
     cases σ.cmap_bound _ _ hb
     apply! apply_proj_singleton
   case subkind hs => apply! subkind
-  case proj_absurd => apply! proj_absurd
+  case absurd hk he => apply! absurd (hk.csubst _)
   case proj_split => apply! proj_split
 
 end Capless

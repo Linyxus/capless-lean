@@ -105,8 +105,6 @@ theorem WellScoped.weaken
       exact hb1 }
     { apply hs.weaken }
   case label_disj hb hd => apply label_disj hb.there_var hd
-  case absurd => apply! absurd
-
 
 theorem TypedCont.weaken
   (h : TypedCont Γ E Cin t E' C0) :
@@ -219,7 +217,6 @@ theorem WellScoped.lweaken
       exact hb1 }
     { apply hs.lweaken }
   case label_disj hb hd => apply! label_disj hb.there_label
-  case absurd => apply! absurd
 
 theorem TypedCont.lweaken
   (h : TypedCont Γ Cin E cont E' Ct) :

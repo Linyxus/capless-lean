@@ -94,7 +94,8 @@ theorem preservation
         { apply WellScoped.var_inv
           exact h2; easy }
         { easy } }
-      { rw [CaptureSet.open, CaptureSet.rename]
+      { simp [CaptureSet.open, CaptureSet.rename, FinFun.open]
+        simp [CaptureSet.weaken, CaptureSet.rename_rename, FinFun.open_comp_weaken, CaptureSet.rename_id]
         easy }
   case tapply hl =>
     cases ht

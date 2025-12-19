@@ -202,9 +202,6 @@ inductive WellScoped : Context n m k -> Cont n m k -> CaptureSet n k -> Prop whe
   Context.LBound Γ x c S ->
   Kind.Disjoint L (.classifier c) ->
   WellScoped Γ cont {x=x|L}
-| absurd : -- a completely projected away reference cannot be used, so it is always well-scoped.
-  L.IsEmpty ->
-  WellScoped Γ cont (.singleton s L)
 
 /-- Typecheck a continuation stack. `TypedCont Γ Ein cont Eout C` means that threading a input of type `Ein` with ambiant captures `Cin`
     through the continuation stack results in an output of type `Eout`,

@@ -21,7 +21,7 @@ theorem CaptureKind.tsubst
   case cinstr hb hk ih => apply! cinstr (σ.cmap _ _ hb) (ih _)
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
-  case absurd he => apply! absurd
+  case absurd ih => apply! absurd (ih _)
   case union ha hb => apply! union (ha _) (hb _)
 
 theorem Subcapt.tsubst
@@ -37,7 +37,7 @@ theorem Subcapt.tsubst
   case cinstr hb => apply cinstr (σ.cmap _ _ hb)
   case cbound hb => apply cbound (σ.cmap _ _ hb)
   case subkind hs => apply! subkind
-  case proj_absurd => apply! proj_absurd
+  case absurd hk he => apply! absurd (hk.tsubst _)
   case proj_split => apply! proj_split
 
 

@@ -58,11 +58,6 @@ theorem WellScoped.subkind
     have ⟨_, _⟩ := h; subst_vars; simp_all
     apply label_disj hb
     apply hd.refine_subkind_l $ Kind.Intersect.with_subkind hs
-  case absurd he =>
-    unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    apply absurd
-    apply (Kind.Intersect.with_subkind hs).of_empty he
 
 theorem WellScoped.subkind_singleton
   (hsc : WellScoped Γ cont (.singleton s L))
@@ -106,7 +101,6 @@ theorem WellScoped.cons
     constructor; assumption
   case label_disj hb hd =>
     apply! label_disj
-  case absurd => apply! absurd
 
 theorem WellScoped.conse
   (hsc : WellScoped Γ cont C) :
@@ -122,7 +116,6 @@ theorem WellScoped.conse
     apply label hb
     constructor; assumption
   case label_disj => apply! label_disj
-  case absurd => apply! absurd
 
 theorem WellScoped.scope
   (hsc : WellScoped Γ cont C) :
@@ -138,18 +131,7 @@ theorem WellScoped.scope
     apply label hb
     constructor; assumption
   case label_disj => apply! label_disj
-  case absurd => apply! absurd
 
-theorem WellScoped.absurd_set
-  (he : Kind.IsEmpty L)
-  : WellScoped Γ cont (.proj C L) := by
-  induction C
-  case empty => simp; constructor
-  case union ha hb => simp; apply! union
-  case singleton =>
-    simp
-    apply absurd
-    apply! Kind.Subkind.of_empty Kind.Intersect.subkind_r
 
 theorem WellScoped.proj_merge
   (hsc1 : WellScoped Γ cont (.proj C K1))
@@ -176,13 +158,6 @@ theorem WellScoped.proj_merge
       apply! ih _ (.refl _)
     case label hb2 _ => cases Context.bound_lbound_absurd hb hb2
     case label_disj hb2 _ => cases Context.bound_lbound_absurd hb hb2
-    case absurd p he =>
-      have h : (p.intersect (K1.union K2)).Subkind (p.intersect K1) := by
-        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
-        apply Kind.Subkind.union_l .rfl
-        apply! Kind.Subkind.is_empty_l
-      apply subkind_singleton _ h
-      apply! singleton
   case csingleton hb hsc ih =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -194,13 +169,6 @@ theorem WellScoped.proj_merge
       apply! ih _ (.refl _)
     case cbound hb2 _ => cases Context.cbound_injective hb hb2
     case ckind hb2 => cases Context.cbound_injective hb hb2
-    case absurd p he =>
-      have h : (p.intersect (K1.union K2)).Subkind (p.intersect K1) := by
-        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
-        apply Kind.Subkind.union_l .rfl
-        apply! Kind.Subkind.is_empty_l
-      apply subkind_singleton _ h
-      apply! csingleton
   case cbound hb hsc ih =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -212,13 +180,6 @@ theorem WellScoped.proj_merge
       apply subkind _ Kind.Intersect.union_r_subkind
       apply! ih _ (.refl _)
     case ckind hb2 => cases Context.cbound_injective hb hb2
-    case absurd p he =>
-      have h : (p.intersect (K1.union K2)).Subkind (p.intersect K1) := by
-        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
-        apply Kind.Subkind.union_l .rfl
-        apply! Kind.Subkind.is_empty_l
-      apply subkind_singleton _ h
-      apply! cbound
   case ckind hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -238,18 +199,6 @@ theorem WellScoped.proj_merge
       subst_vars
       have h := Kind.Disjoint.union_l hd hd2
       apply subkind_singleton (label_disj hb h) Kind.Intersect.union_r_subkind
-    case absurd he =>
-      have h := Kind.Disjoint.union_l hd (.is_empty_l he)
-      apply subkind_singleton (label_disj hb h) Kind.Intersect.union_r_subkind
-  case absurd he =>
-    unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    rename_i p
-    have h : (p.intersect (K1.union K2)).Subkind (p.intersect K2) := by
-      apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
-      apply Kind.Subkind.union_l _ .rfl
-      apply Kind.Subkind.is_empty_l he
-    apply! subkind_singleton _ h
 
 theorem WellScoped.proj_merge_singleton
   (hs1 : WellScoped Γ cont (.singleton s K1))
@@ -260,6 +209,24 @@ theorem WellScoped.proj_merge_singleton
   rw [← CaptureSet.proj] at hs1 hs2
   rw [← Kind.Intersect.top_l (K:=K1.union K2), ← CaptureSet.proj]
   apply! proj_merge
+
+theorem WellScoped.absurd
+  (hk : CaptureKind Γ C K)
+  (he : K.IsEmpty)
+  : WellScoped Γ cont C := by
+  induction hk
+  case var hb hk ih => apply! singleton hb (ih _)
+  case label hl =>
+    apply label_disj hl
+    apply Kind.Disjoint.symm
+    apply Kind.Disjoint.from_empty_intersect Kind.Intersect.lawful he
+  case cvar hb => apply ckind hb
+  case cbound hb hk ih => apply! cbound hb (ih _)
+  case cinstr hb hk ih => apply! csingleton hb (ih _)
+  case sub hs hk ih => apply ih; apply hs.empty_r_inv he
+  case empty => constructor
+  case absurd hk he1 ih => apply! ih
+  case union ha hb => simp_all; apply! union
 
 
 theorem WellScoped.subcapt (hsc : WellScoped Γ cont C2) (hsub : Subcapt Γ C1 C2) : WellScoped Γ cont C1 := by
@@ -278,11 +245,10 @@ theorem WellScoped.subcapt (hsc : WellScoped Γ cont C2) (hsub : Subcapt Γ C1 C
       cases Context.cbound_injective hb1 hb
     case ckind hb1 =>
       cases Context.cbound_injective hb1 hb
-    case absurd he => apply! absurd_set
   case cinstr hb => apply! csingleton
   case cbound hb => apply! cbound
   case subkind => apply! hsc.subkind_singleton
-  case proj_absurd he => apply! absurd
+  case absurd hk he => apply! absurd
   case proj_split =>
     cases hsc
     apply! proj_merge_singleton
@@ -303,7 +269,6 @@ theorem WellScoped.var_inv
   case label_disj =>
     exfalso
     apply Context.bound_lbound_absurd <;> easy
-  case absurd he => cases he.is_absurd
 
 theorem WellScoped.label_inv
   (hsc : WellScoped Γ cont {x=x|.top})
@@ -315,6 +280,5 @@ theorem WellScoped.label_inv
     apply Context.bound_lbound_absurd <;> easy
   case label => aesop
   case label_disj hd => cases hd.top_l.is_absurd
-  case absurd he => cases he.is_absurd
 
 end Capless

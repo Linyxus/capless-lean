@@ -36,7 +36,7 @@ theorem CaptureKind.rename
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
   case union ha hb => apply! union (ha _) (hb _)
-  case absurd => apply! absurd
+  case absurd hk he ih => apply! absurd (ih _)
 
 theorem Subcapt.rename
   (h : Subcapt Γ C1 C2)
@@ -51,7 +51,7 @@ theorem Subcapt.rename
   case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
   case cbound hb => apply! cbound (ρ.cmap _ _ hb)
   case subkind hs => apply! subkind
-  case proj_absurd => apply! proj_absurd
+  case absurd hk he => apply! absurd (hk.rename _)
   case proj_split => apply! proj_split
 
 end Capless
