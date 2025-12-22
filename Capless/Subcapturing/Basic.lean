@@ -148,8 +148,8 @@ theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.pro
   case sub hs hk ih =>
     apply sub (Kind.Intersect.with_subkind_r hs) ih
   case empty => apply empty
-  case absurd he hk ih =>
-    apply absurd ih
+  case singleton_absurd he hk =>
+    apply singleton_absurd
     apply Kind.Intersect.is_empty_l hk
   case union ha hb => apply union ha hb
 

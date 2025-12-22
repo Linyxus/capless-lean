@@ -4,24 +4,13 @@ import Capless.Inversion.Context
 namespace Capless
 
 
-theorem CaptureKind.union_l_inv' (hk : CaptureKind Γ C K) (heq : C = C1 ∪ C2) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K :=
-  match hk with
-  | .cvar _ => by cases heq
-  | .union ha hb => by
-    injections
-    subst_vars
-    apply! And.intro
-  | .sub hsk hk => by
-    have ⟨_, _⟩ := hk.union_l_inv' heq
-    apply And.intro <;> apply! CaptureKind.sub
-  | .empty => by cases heq
-  | .absurd hk he => by
-    have ⟨_, _⟩ := hk.union_l_inv' heq
-    apply And.intro <;> apply! absurd
-termination_by structural hk
-
-theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := hk.union_l_inv' $ .refl (a := C1 ∪ C2)
-
+theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := by
+  generalize h : C1 ∪ C2 = D at hk
+  induction hk generalizing C1 C2 <;> cases h
+  case sub hs hk ih =>
+    have ⟨_, _⟩ := ih (.refl _)
+    apply And.intro <;> apply! sub hs
+  case union => apply! And.intro
 
 theorem CaptureKind.subkind_proj
   (hk : CaptureKind Γ (.proj C K2) K)
@@ -66,10 +55,12 @@ theorem CaptureKind.subkind_proj
   case empty =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     apply empty
-  case absurd hk he ih =>
-    apply absurd
-    apply ih hs h
-    assumption
+  case singleton_absurd he =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply singleton_absurd
+    apply Kind.Subkind.empty_r_inv _ he
+    apply Kind.Intersect.with_subkind hs
   case union ha hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -85,98 +76,93 @@ theorem CaptureKind.subkind_singleton
   rw [← CaptureSet.proj]
   apply! subkind_proj
 
-
-
-
 theorem CaptureKind.var_lookup_inv
   (hk : CaptureKind Γ {x=x|L} K)
   (hb : Γ.Bound x S^C)
-  : CaptureKind Γ (C.proj L) K := by
+  : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {x=x|L} = D at hk
   induction hk <;> cases h
   case var K hb2 hk ih =>
     cases Context.bound_injective hb hb2
-    assumption
+    left; assumption
   case label hb2 => cases Context.bound_lbound_absurd hb hb2
   case sub hs hk ih =>
-    apply sub hs
-    apply ih hb (.refl _)
-  case absurd ih =>
-    simp_all
-    apply! absurd
+    cases ih hb (.refl _)
+    case inl h => left; apply sub hs h
+    case inr h => right; assumption
+  case singleton_absurd he =>
+    right; assumption
 
 theorem CaptureKind.label_lookup_inv
   (hs : CaptureKind Γ {x=x|K1} K)
   (hb : Γ.LBound x c S)
-  : (Kind.intersect (.classifier c) K1).Subkind K := by
+  : (Kind.intersect (.classifier c) K1).Subkind K ∨ K1.IsEmpty := by
   generalize h : {x=x|K1} = D at hs
   induction hs <;> cases h
   case var hb1 hk ih => cases Context.bound_lbound_absurd hb1 hb
   case label hb1 =>
     cases Context.lbound_inj hb hb1; subst_vars
-    exact .rfl
+    left; exact .rfl
   case sub hs1 _ ih =>
-    apply Kind.Subkind.trans _ hs1
-    apply ih hb (.refl _)
-  case absurd he hk ih =>
-    apply Kind.Subkind.is_empty_l
-    apply Kind.Subkind.empty_r_inv _ he
-    apply ih hb (.refl _)
+    cases ih hb (.refl _)
+    case inl h => left; apply Kind.Subkind.trans h hs1
+    case inr h => right; assumption
+  case singleton_absurd he =>
+    right; assumption
 
 theorem CaptureKind.cbound_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.bound (.upper C)))
-  : CaptureKind Γ (C.proj L) K := by
+  : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
   induction hs <;> cases h
   case cvar hb2 => cases Context.cbound_injective hb hb2
   case cbound hb2 hk ih =>
     cases Context.cbound_injective hb hb2
-    assumption
+    left; assumption
   case cinstr hb2 hk ih => cases Context.cbound_injective hb hb2
   case sub hs hk ih =>
-    apply sub hs
-    apply ih hb (.refl _)
-  case absurd he hk ih =>
-    apply absurd _ he
-    apply ih hb (.refl _)
+    cases ih hb (.refl _)
+    case inl h => left; apply sub hs h
+    case inr h => right; assumption
+  case singleton_absurd he =>
+    right; assumption
 
 theorem CaptureKind.ckind_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.bound (.kind K1)))
-  : (K1.intersect L).Subkind K := by
+  : (K1.intersect L).Subkind K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
   induction hs <;> cases h
   case cvar hb2 =>
     cases Context.cbound_injective hb hb2
-    exact .rfl
+    left; exact .rfl
   case cbound hb2 hk ih => cases Context.cbound_injective hb hb2
   case cinstr hb2 hk ih => cases Context.cbound_injective hb hb2
   case sub hs1 _ ih =>
-    apply Kind.Subkind.trans _ hs1
-    apply ih hb (.refl _)
-  case absurd he hk ih =>
-    apply Kind.Subkind.is_empty_l
-    apply Kind.Subkind.empty_r_inv _ he
-    apply ih hb (.refl _)
+    cases ih hb (.refl _)
+    case inl h => left; apply Kind.Subkind.trans h hs1
+    case inr h => right; assumption
+  case singleton_absurd he =>
+    right; assumption
 
 theorem CaptureKind.cinst_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.inst C))
-  : CaptureKind Γ (C.proj L) K := by
+  : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
   induction hs <;> cases h
   case cvar hb2 => cases Context.cbound_injective hb hb2
   case cbound hb2 hk ih => cases Context.cbound_injective hb hb2
   case cinstr hb2 hk ih =>
     cases Context.cbound_injective hb hb2
-    assumption
+    left; assumption
   case sub hs hk ih =>
-    apply sub hs
-    apply ih hb (.refl _)
-  case absurd he hk ih =>
-    apply absurd _ he
-    apply ih hb (.refl _)
+    cases ih hb (.refl _)
+    case inl h => left; apply sub hs h
+    case inr h => right; assumption
+  case singleton_absurd he =>
+    right; assumption
 
 theorem CaptureKind.proj_merge
   (hk1 : CaptureKind Γ (.proj C K1) L1)
@@ -188,43 +174,85 @@ theorem CaptureKind.proj_merge
   induction hk1 generalizing C K1 K2
   case var x _ _ _ K hb hk1 ih =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    apply var hb
-    apply subkind_proj _ Kind.Intersect.union_r_subkind
-    apply ih _ (.refl _)
-    apply hk2.var_lookup_inv hb
+    obtain ⟨rfl, rfl⟩ := h
+    rename_i p
+    cases hk2.var_lookup_inv hb
+    case inl h =>
+      apply var hb
+      apply subkind_proj _ Kind.Intersect.union_r_subkind
+      exact ih h hs1 rfl
+    case inr he =>
+      apply sub hs1
+      apply var hb
+      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
+        apply Kind.Subkind.union_l .rfl
+        apply Kind.Subkind.is_empty_l he
+      apply subkind_proj hk1 hsub
   case label hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    have h := hk2.label_lookup_inv hb
-    apply sub
-    exact .union_l hs1 (.trans h hs2)
-    apply sub Kind.Intersect.union_r_subkind
-    apply sub $ Kind.Intersect.with_subkind Kind.Intersect.union_r_subkind
-    apply label hb
+    obtain ⟨rfl, rfl⟩ := h
+    rename_i p
+    cases hk2.label_lookup_inv hb
+    case inl h =>
+      apply sub
+      exact .union_l hs1 (.trans h hs2)
+      apply sub Kind.Intersect.union_r_subkind
+      apply sub $ Kind.Intersect.with_subkind Kind.Intersect.union_r_subkind
+      apply label hb
+    case inr he =>
+      apply sub hs1
+      apply sub (Kind.Intersect.with_subkind (.trans Kind.Intersect.union_r_subkind (.union_l .rfl (.is_empty_l he))))
+      apply label hb
   case cvar hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    have h := hk2.ckind_lookup_inv hb
-    apply sub
-    exact .union_l hs1 (.trans h hs2)
-    apply sub Kind.Intersect.union_r_subkind
-    apply sub $ Kind.Intersect.with_subkind Kind.Intersect.union_r_subkind
-    apply cvar hb
+    obtain ⟨rfl, rfl⟩ := h
+    rename_i p
+    cases hk2.ckind_lookup_inv hb
+    case inl h =>
+      apply sub
+      exact .union_l hs1 (.trans h hs2)
+      apply sub Kind.Intersect.union_r_subkind
+      apply sub $ Kind.Intersect.with_subkind Kind.Intersect.union_r_subkind
+      apply cvar hb
+    case inr he =>
+      apply sub hs1
+      apply sub (Kind.Intersect.with_subkind (.trans Kind.Intersect.union_r_subkind (.union_l .rfl (.is_empty_l he))))
+      apply cvar hb
   case cbound hb hk1 ih =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    apply cbound hb
-    apply subkind_proj _ Kind.Intersect.union_r_subkind
-    have h := hk2.cbound_lookup_inv hb
-    apply ih h (.refl _)
+    obtain ⟨rfl, rfl⟩ := h
+    rename_i p
+    cases hk2.cbound_lookup_inv hb
+    case inl h =>
+      apply cbound hb
+      apply subkind_proj _ Kind.Intersect.union_r_subkind
+      apply ih h hs1 (.refl _)
+    case inr he =>
+      apply sub hs1
+      apply cbound hb
+      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
+        apply Kind.Subkind.union_l .rfl
+        apply Kind.Subkind.is_empty_l he
+      apply subkind_proj hk1 hsub
   case cinstr hb hk1 ih =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
-    apply cinstr hb
-    apply subkind_proj _ Kind.Intersect.union_r_subkind
-    have h := hk2.cinst_lookup_inv hb
-    apply ih h (.refl _)
+    obtain ⟨rfl, rfl⟩ := h
+    rename_i p
+    cases hk2.cinst_lookup_inv hb
+    case inl h =>
+      apply cinstr hb
+      apply subkind_proj _ Kind.Intersect.union_r_subkind
+      apply ih h hs1 (.refl _)
+    case inr he =>
+      apply sub hs1
+      apply cinstr hb
+      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
+        apply Kind.Subkind.union_l .rfl
+        apply Kind.Subkind.is_empty_l he
+      apply subkind_proj hk1 hsub
   case sub hs hk1 ih =>
     subst_vars
     apply ih hk2
@@ -233,15 +261,20 @@ theorem CaptureKind.proj_merge
   case empty =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     apply empty
-  case absurd hk1 he ih =>
-    subst_vars
-    apply ih hk2 _ (.refl _)
-    apply Kind.Subkind.is_empty_l he
+  case singleton_absurd he =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    obtain ⟨rfl, rfl⟩ := h
+    -- K1 side is empty, so use K2 side
+    apply sub hs2
+    apply subkind_singleton hk2
+    -- p ∩ (K1 ∪ K2) <: (p ∩ K1) ∪ (p ∩ K2) <: p ∩ K2  (since p ∩ K1 is empty)
+    apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
+    apply Kind.Subkind.union_l (.is_empty_l he) .rfl
   case union ha hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
+    obtain ⟨rfl, rfl⟩ := h
     have ⟨_, _⟩ := hk2.union_l_inv
-    apply! union (ha _ $ .refl _) (hb _ $ .refl _)
+    apply! union (ha _ _ $ .refl _) (hb _ _ $ .refl _)
 
 theorem CaptureKind.proj_merge_singleton
   (hs1 : CaptureKind Γ (.singleton s K1) K)
@@ -270,9 +303,18 @@ theorem CaptureKind.subset
   case trans ha hb => aesop
   case singleton_subkind hs =>
     apply! subkind_singleton
+  case singleton_absurd L he => apply! singleton_absurd
   case proj_merge =>
     have ⟨_, _⟩ := hk.union_l_inv
     apply! proj_merge_singleton
+
+theorem CaptureKind.absurd {C : CaptureSet n k}
+  (he : K.IsEmpty)
+  : CaptureKind Γ (C.proj K) L := by
+  induction C
+  case empty => apply empty
+  case union ha hb => apply! union
+  case singleton => apply singleton_absurd $ Kind.Intersect.is_empty_r he
 
 theorem CaptureKind.subcapt
   (hk : CaptureKind Γ C2 K)
@@ -290,10 +332,7 @@ theorem CaptureKind.subcapt
     case cbound hb1 hk ih => cases Context.cbound_injective hb hb1
     case cinstr hb1 hk ih => cases Context.cbound_injective hb hb1; assumption
     case sub hs hk ih => apply sub hs; apply ih hb; rfl
-    case absurd he hk ih =>
-      apply absurd _ he
-      apply ih hb (.refl _)
+    case singleton_absurd he => apply! absurd
   case cinstr => apply! cinstr
   case cbound => apply! cbound
-  case absurd hk1 he =>
-    apply! absurd
+  case absurd hk1 he => apply sub _ hk1; apply Kind.Subkind.is_empty_l he

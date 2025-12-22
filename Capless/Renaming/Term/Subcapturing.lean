@@ -16,7 +16,8 @@ theorem CaptureSet.Subset.rename {C1 C2 : CaptureSet n k}
   (h : C1 ⊆ C2) :
   C1.rename f ⊆ C2.rename f := by
   induction h <;> try (solve | simp | constructor <;> try trivial)
-  apply CaptureSet.Subset.union_rr; trivial
+  apply! union_rr
+  apply! proj_merge
 
 theorem CaptureKind.rename
   (h : Γ ⊢ C :k K)
@@ -36,7 +37,7 @@ theorem CaptureKind.rename
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
   case union ha hb => apply! union (ha _) (hb _)
-  case absurd hk he ih => apply! absurd (ih _)
+  case singleton_absurd => apply! singleton_absurd
 
 theorem Subcapt.rename
   (h : Subcapt Γ C1 C2)
@@ -50,8 +51,6 @@ theorem Subcapt.rename
   case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
   case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
   case cbound hb => apply! cbound (ρ.cmap _ _ hb)
-  case subkind hs => apply! subkind
   case absurd hk he => apply! absurd (hk.rename _)
-  case proj_split => apply! proj_split
 
 end Capless

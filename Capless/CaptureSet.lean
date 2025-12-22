@@ -77,6 +77,9 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | singleton_subkind :
   K.Subkind L ->
   Subset (.singleton s K) (.singleton s L)
+| singleton_absurd :
+  K.IsEmpty ->
+  Subset (.singleton s K) .empty
 | proj_merge:
   Subset (.singleton s (.union L1 L2)) (.union (.singleton s L1) (.singleton s L2))
 | trans : Subset A B -> Subset B C -> Subset A C
@@ -144,6 +147,14 @@ theorem CaptureSet.Subset.subkind {C : CaptureSet n k}
   case empty => simp; constructor
   case union ha hb => apply! union_monotone
   case singleton => simp; apply singleton_subkind (Kind.Intersect.with_subkind hk)
+
+theorem CaptureSet.Subset.absurd {C : CaptureSet n k} (he : K.IsEmpty) : Subset (C.proj K) .empty := by
+  induction C
+  case empty => simp; constructor
+  case union ha hb =>
+    apply trans (.union_monotone ha hb)
+    apply union_l .rfl .rfl
+  case singleton => simp; apply singleton_absurd; apply Kind.Intersect.is_empty_r he
 
 /-!
 ## Renaming operations
@@ -321,6 +332,8 @@ theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
     apply! Subset.union_rr
   case singleton_subkind s K L hk =>
     cases s <;> (simp; apply! Subset.singleton_subkind)
+  case singleton_absurd s K he =>
+    cases s <;> (simp; apply! Subset.singleton_absurd)
   case proj_merge s L1 L2 =>
     cases s <;> (simp; apply! Subset.proj_merge)
   case trans ha hb => apply! Subset.trans
@@ -339,6 +352,8 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
     apply! Subset.union_rr
   case singleton_subkind s K L hk =>
     cases s <;> (apply! Subset.singleton_subkind)
+  case singleton_absurd s K he =>
+    cases s <;> (apply! Subset.singleton_absurd)
   case proj_merge s L1 L2 =>
     cases s <;> (apply! Subset.proj_merge)
   case trans ha hb => apply! Subset.trans
@@ -360,6 +375,9 @@ theorem CaptureSet.Subset.proj (hsub : Subset C D) : Subset (C.proj K) (D.proj K
   case union_rr hb => apply! union_rr
   case singleton_subkind hs =>
     apply singleton_subkind $ Kind.Intersect.with_subkind_r hs
+  case singleton_absurd he =>
+    apply trans (.singleton_subkind _) (.singleton_absurd he)
+    apply Kind.Intersect.subkind_l
   case proj_merge => apply proj_merge
   case trans ha hb => apply! trans
 
@@ -383,3 +401,19 @@ theorem CaptureSet.Subset.proj_l : Subset (C.proj K) C := by
   case empty => constructor
   case union ha hb => simp; apply! union_monotone
   case singleton => apply singleton_subkind; apply Kind.Intersect.subkind_l
+
+theorem CaptureSet.Subset.proj_proj_intersect {C : CaptureSet n k}: Subset ((C.proj K).proj L) (C.proj (K.intersect L)) := by
+  induction C
+  case empty => simp; constructor
+  case union ha hb => simp; apply! union_monotone
+  case singleton =>
+    apply singleton_subkind
+    apply Kind.Intersect.assoc_subkind
+
+theorem CaptureSet.Subset.proj_intersect_proj {C : CaptureSet n k}: Subset (C.proj (K.intersect L)) ((C.proj K).proj L) := by
+  induction C
+  case empty => simp; constructor
+  case union ha hb => simp; apply! union_monotone
+  case singleton =>
+    apply singleton_subkind
+    apply Kind.Intersect.assoc_superkind

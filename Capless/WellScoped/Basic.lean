@@ -11,36 +11,304 @@ This file contains basic properties of the well-scopedness relation.
 
 namespace Capless
 
+theorem ReachSet.proj_empty {C : CaptureSet n k}
+  (hr : ReachSet Γ (C.proj K) R)
+  (he : K.IsEmpty)
+  : R ⊆ .empty := by
+  generalize h : C.proj K = D at hr
+  induction hr generalizing C K
+  case empty => constructor
+  case union ha hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply CaptureSet.Subset.union_l (ha he (.refl _)) (hb he (.refl _))
+  case var hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply ih _ (.refl _)
+    apply Kind.Intersect.is_empty_r he
+  case cinstr hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply ih _ (.refl _)
+    apply Kind.Intersect.is_empty_r he
+  case cbound hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply ih _ (.refl _)
+    apply Kind.Intersect.is_empty_r he
+  case ckind =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply CaptureSet.Subset.singleton_absurd
+    apply Kind.Intersect.is_empty_r $ Kind.Intersect.is_empty_r he
+  case label =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply CaptureSet.Subset.singleton_absurd
+    apply Kind.Intersect.is_empty_r $ Kind.Intersect.is_empty_r he
+  case absurd =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    constructor
+
+theorem ReachSet.proj_absurd {C : CaptureSet n k}
+  (he : K.IsEmpty)
+  : ∃ R, R ⊆ .empty ∧ ReachSet Γ (C.proj K) R := by
+  induction C
+  case empty => exists .empty; apply And.intro .empty .empty
+  case union ha hb =>
+    have ⟨Ra, hsa, ha⟩ := ha
+    have ⟨Rb, hbs, hb⟩ := hb
+    exists Ra ∪ Rb
+    apply And.intro
+    apply! CaptureSet.Subset.union_l
+    apply! union
+  case singleton =>
+    exists .empty
+    apply And.intro .empty
+    apply absurd
+    apply Kind.Intersect.is_empty_r he
+
 theorem ReachSet.inj
   (hr1 : ReachSet Γ C R1)
   (hr2 : ReachSet Γ C R2)
-  : R1 = R2 := by
+  : R1 ⊆ R2 := by
   induction hr1 generalizing R2
-  case empty => cases hr2; simp
-  case union ha hb => cases hr2; simp; apply! And.intro (ha _) (hb _)
+  case empty => apply CaptureSet.Subset.empty
+  case union ha hb => cases hr2; apply! CaptureSet.Subset.union_monotone (ha _) (hb _)
   case var hb1 hr1 ih =>
     cases hr2
     case var hb2 hr2 => cases Context.bound_injective hb1 hb2; apply! ih
     case label hb2 => cases Context.bound_lbound_absurd hb1 hb2
+    case absurd he => apply! hr1.proj_empty
   case cinstr hb1 hr1 ih =>
     cases hr2
     case cinstr hb2 hr2 => cases Context.cbound_injective hb1 hb2; apply! ih
     case cbound hb2 hr2 => cases Context.cbound_injective hb1 hb2
     case ckind hb2 => cases Context.cbound_injective hb1 hb2
+    case absurd he => apply! hr1.proj_empty
   case cbound hb1 hr1 ih =>
     cases hr2
     case cinstr hb2 hr2 => cases Context.cbound_injective hb1 hb2
     case cbound hb2 hr2 => cases Context.cbound_injective hb1 hb2; apply! ih
     case ckind hb2 => cases Context.cbound_injective hb1 hb2
+    case absurd he => apply! hr1.proj_empty
   case ckind hb1 =>
     cases hr2
     case cinstr hb2 hr2 => cases Context.cbound_injective hb1 hb2
     case cbound hb2 hr2 => cases Context.cbound_injective hb1 hb2
-    case ckind hb2 => cases Context.cbound_injective hb1 hb2; simp
+    case ckind hb2 => cases Context.cbound_injective hb1 hb2; constructor
+    case absurd he => apply! CaptureSet.Subset.singleton_absurd (Kind.Intersect.is_empty_r _)
   case label hb1 =>
     cases hr2
     case var hb2 hr2 =>  cases Context.bound_lbound_absurd hb2 hb1
-    case label hb2 => cases Context.lbound_inj hb1 hb2; simp
+    case label hb2 => cases Context.lbound_inj hb1 hb2; subst_vars; constructor
+    case absurd he => apply! CaptureSet.Subset.singleton_absurd (Kind.Intersect.is_empty_r _)
+  case absurd => constructor
+
+
+theorem ReachSet.subkind {C : CaptureSet n k}
+  (hk : K.Subkind L)
+  (hr : ReachSet Γ (C.proj L) R2)
+  : ∃ R1, R1 ⊆ R2 ∧ ReachSet Γ (C.proj K) R1 := by
+  generalize h : C.proj L = D at hr
+  induction hr generalizing C L K
+  case empty =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    exists .empty; apply And.intro .empty .empty
+  case union ha hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    have ⟨Ra, hsa, ha⟩ := ha hk (.refl _)
+    have ⟨Rb, hsb, hb⟩ := hb hk (.refl _)
+    exists Ra ∪ Rb
+    apply And.intro (.union_monotone hsa hsb)
+    apply! union
+  case var hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    have ⟨R, hs, h⟩ := ih (Kind.Intersect.with_subkind hk) (.refl _)
+    exists R; apply And.intro hs (.var hb h)
+  case cinstr hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    have ⟨R, hs, h⟩ := ih (Kind.Intersect.with_subkind hk) (.refl _)
+    exists R; apply And.intro hs (.cinstr hb h)
+  case cbound hb hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    have ⟨R, hs, h⟩ := ih (Kind.Intersect.with_subkind hk) (.refl _)
+    exists R; apply And.intro hs (.cbound hb h)
+  case ckind hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply Exists.intro
+    apply And.intro _ (ckind hb)
+    apply CaptureSet.Subset.singleton_subkind $ Kind.Intersect.with_subkind $ Kind.Intersect.with_subkind hk
+  case label hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply Exists.intro
+    apply And.intro _ (label hb)
+    apply CaptureSet.Subset.singleton_subkind $ Kind.Intersect.with_subkind $ Kind.Intersect.with_subkind hk
+  case absurd he =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    exists .empty; apply And.intro .empty
+    apply absurd $ Kind.Subkind.empty_r_inv _ he
+    apply Kind.Intersect.with_subkind hk
+
+
+theorem ReachSet.singleton_subkind
+  (hk : K.Subkind L)
+  (hr : ReachSet Γ (.singleton s L) R2)
+  : ∃ R1, R1 ⊆ R2 ∧ ReachSet Γ (.singleton s K) R1 := by
+  rw [← Kind.Intersect.top_l (K:=L), ← CaptureSet.proj] at hr
+  rw [← Kind.Intersect.top_l (K:=K), ← CaptureSet.proj]
+  apply! subkind
+
+theorem ReachSet.proj_merge' {C : CaptureSet n k}
+  (hr1 : ReachSet Γ (C.proj L1) R1)
+  (hr2 : ReachSet Γ (C.proj L2) R2)
+  : ∃ R, R ⊆ (R1 ∪ R2) ∧ ReachSet Γ (C.proj (L1.union L2)) R := by
+  generalize h : C.proj L1 = D at hr1
+  induction hr1 generalizing C L1 L2 R2
+  case empty =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    exists .empty; apply And.intro .empty .empty
+  case union ha hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    rename_i hr2a hr2b
+    have ⟨Ra, hsa, ha⟩ := ha hr2a (.refl _)
+    have ⟨Rb, hsb, hb⟩ := hb hr2b (.refl _)
+    exists Ra ∪ Rb
+    apply And.intro
+    . apply CaptureSet.Subset.trans $ CaptureSet.Subset.union_monotone hsa hsb
+      apply CaptureSet.Subset.union_l
+      . apply CaptureSet.Subset.union_l (.union_rl $ .union_rl .rfl) (.union_rr $ .union_rl .rfl)
+      . apply CaptureSet.Subset.union_l (.union_rl $ .union_rr .rfl) (.union_rr $ .union_rr .rfl)
+    . apply! union
+  case var C _ _ _ hb hr1 ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    case var hb2 hr2 =>
+      cases Context.bound_injective hb hb2
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs hs') (.var hb h)
+    case label hb2 => cases Context.bound_lbound_absurd hb hb2
+    case absurd he =>
+      have ⟨R2, hs2, hr2⟩ := proj_absurd (Γ:=Γ) (C:=C) he
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs (.trans hs' (.union_monotone .rfl hs2))) (.var hb h)
+  case cinstr C _ _ hb hr1 ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    case cinstr hb2 hr2 =>
+      cases Context.cbound_injective hb hb2
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs hs') (.cinstr hb h)
+    case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
+    case ckind hb2 => cases Context.cbound_injective hb hb2
+    case absurd he =>
+      have ⟨R2, hs2, hr2⟩ := proj_absurd (Γ:=Γ) (C:=C) he
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs (.trans hs' (.union_monotone .rfl hs2))) (.cinstr hb h)
+  case cbound C _ _ hb hr1 ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2
+    case cbound hb2 hr2 =>
+      cases Context.cbound_injective hb hb2
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs hs') (.cbound hb h)
+    case ckind hb2 => cases Context.cbound_injective hb hb2
+    case absurd he =>
+      have ⟨R2, hs2, hr2⟩ := proj_absurd (Γ:=Γ) (C:=C) he
+      have ⟨R', hs', h'⟩ := ih hr2 (.refl _)
+      have ⟨R, hs, h⟩ := h'.subkind Kind.Intersect.union_r_subkind
+      exists R
+      apply And.intro (.trans hs (.trans hs' (.union_monotone .rfl hs2))) (.cbound hb h)
+  case ckind c K _ hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2
+    case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
+    case ckind p _ hb2 =>
+      cases Context.cbound_injective hb hb2
+      exists {c=c| K.intersect (p.intersect (.union L1 L2))}
+      apply And.intro
+      . apply CaptureSet.Subset.trans (.singleton_subkind _) .proj_merge
+        apply Kind.Subkind.trans (Kind.Intersect.with_subkind _) Kind.Intersect.union_r_subkind
+        apply Kind.Intersect.union_r_subkind
+      . apply! ckind
+    case absurd he =>
+      rename_i p
+      exists {c=c| K.intersect (p.intersect (.union L1 L2))}
+      apply And.intro
+      . apply CaptureSet.Subset.union_rl (.singleton_subkind _)
+        apply Kind.Intersect.with_subkind
+        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind (.union_l .rfl (.is_empty_l he))
+      . apply! ckind
+
+  case label x _ _ _ hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    cases hr2
+    case var hb2 hr2 => cases Context.bound_lbound_absurd hb2 hb
+    case label p c _ hb2 =>
+      cases Context.lbound_inj hb hb2
+      subst_vars
+      exists {x=x| (Kind.classifier c).intersect (p.intersect (.union L1 L2))}
+      apply And.intro
+      . apply CaptureSet.Subset.trans (.singleton_subkind _) .proj_merge
+        apply Kind.Subkind.trans (Kind.Intersect.with_subkind _) Kind.Intersect.union_r_subkind
+        apply Kind.Intersect.union_r_subkind
+      . apply! label
+    case absurd he =>
+      rename_i c _ _ p
+      exists {x=x| (Kind.classifier c).intersect (p.intersect (.union L1 L2))}
+      apply And.intro
+      . apply CaptureSet.Subset.union_rl (.singleton_subkind _)
+        apply Kind.Intersect.with_subkind
+        apply Kind.Subkind.trans Kind.Intersect.union_r_subkind (.union_l .rfl (.is_empty_l he))
+      . apply! label
+  case absurd he =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    rename_i p
+    have h0 : (p.intersect (L1.union L2)).Subkind (p.intersect L2) := by
+      apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
+      apply Kind.Subkind.union_l (.is_empty_l he) .rfl
+    have ⟨R, hs, h⟩ := hr2.singleton_subkind h0
+    exists R
+    apply And.intro (.union_rr hs)
+    apply h
+
+theorem ReachSet.proj_merge
+  (hr1 : ReachSet Γ (.singleton s L1) R1)
+  (hr2 : ReachSet Γ (.singleton s L2) R2)
+  : ∃ R, R ⊆ (R1 ∪ R2) ∧ ReachSet Γ (.singleton s (L1.union L2)) R := by
+  rw [← Kind.Intersect.top_l (K:=L1), ← CaptureSet.proj] at hr1
+  rw [← Kind.Intersect.top_l (K:=L2), ← CaptureSet.proj] at hr2
+  rw [← Kind.Intersect.top_l (K:=(L1.union L2)), ← CaptureSet.proj]
+  apply! proj_merge'
 
 theorem ReachSet.subset
   (hs : C1 ⊆ C2)
@@ -67,7 +335,50 @@ theorem ReachSet.subset
     rename_i R1 R2 h1 h2
     have ⟨R, hs, h⟩ := ih h2
     exists R; apply And.intro (.union_rr hs) h
+  case trans ha hb =>
+    have ⟨Rb, hsb, hb⟩ := hb hr1
+    have ⟨Ra, hsa, ha⟩ := ha hb
+    exists Ra; apply! And.intro (.trans hsa hsb)
+  case singleton_subkind hs => apply! singleton_subkind
+  case singleton_absurd he => exists .empty; apply And.intro .empty (.absurd he)
+  case proj_merge =>
+    cases hr1
+    apply! proj_merge
 
+
+theorem ReachSet.capture_kind_absurd {Γ: Context n m k}
+  (hk : CaptureKind Γ C K)
+  (he : K.IsEmpty)
+  : ∃ R, R ⊆ .empty ∧ ReachSet Γ C R := by
+  induction hk
+  case var hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs (var hb h)
+  case label x c _ K hb =>
+    exists {x=x|(Kind.classifier c).intersect K}
+    apply And.intro (.singleton_absurd he)
+    apply! label
+  case cvar c K L hb =>
+    exists {c=c|K.intersect L}
+    apply And.intro (.singleton_absurd he)
+    apply! ckind
+  case cbound hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs
+    apply! cbound
+  case cinstr hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs
+    apply! cinstr
+  case sub hsk hk ih => apply ih (hsk.empty_r_inv he)
+  case empty => exists .empty; apply And.intro .empty .empty
+  case singleton_absurd he2 => exists .empty; apply! And.intro .empty (.absurd he2)
+  case union ha hb =>
+    have ⟨Ra, hsa, ha⟩ := ha he
+    have ⟨Rb, hsb, hb⟩ := hb he
+    exists Ra ∪ Rb
+    apply And.intro (.union_l hsa hsb)
+    apply! union
 
 theorem ReachSet.subcapt
   (hr2 : ReachSet Γ C2 R2)
@@ -78,25 +389,25 @@ theorem ReachSet.subcapt
     have ⟨R2, hs2, hr⟩ := hb hr2
     have ⟨R1, hs1, hr⟩ := ha hr
     exists R1
-    apply! And.intro (.trans _ _)
+    apply! And.intro (.trans hs1 hs2)
   case subset => apply! subset
   case union ha hb =>
     have ⟨Ra, hsa, hra⟩ := ha hr2
     have ⟨Rb, hsb, hrb⟩ := hb hr2
     exists Ra ∪ Rb
-    apply! And.intro (.union_l _ _) (.union _ _)
+    apply And.intro (.union_l hsa hsb) (.union hra hrb)
   case var hb => exists R2; apply And.intro .rfl; apply! var
   case cinstl hb =>
     cases hr2
     case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2; exists R2; apply! And.intro .rfl
     case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
     case ckind hb2 => cases Context.cbound_injective hb hb2
+    case absurd _ he => apply! proj_absurd
   case cinstr hb => exists R2; apply And.intro .rfl; apply! cinstr
   case cbound hb => exists R2; apply And.intro .rfl; apply! cbound
-  case subkind hs =>
-    -- time to push subkinding to subsetting
-
-
+  case absurd hk he =>
+    cases hr2
+    apply capture_kind_absurd hk he
 
 -- theorem WellScoped.subkind
 --   (hsc : WellScoped Γ cont (.proj C K2))

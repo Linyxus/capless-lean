@@ -190,10 +190,11 @@ inductive ReachSet : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop w
   ReachSet Γ {c=c|L} R
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
-  ReachSet Γ {c=c|L} {c=c|L}
+  ReachSet Γ {c=c|L} {c=c|K.intersect L}
 | label :
   Context.LBound Γ x c S ->
-  ReachSet Γ {x=x|L} {x=x|L}
+  ReachSet Γ {x=x|L} {x=x|(Kind.classifier c).intersect L}
+| absurd : K.IsEmpty -> ReachSet Γ (.singleton s K) {}
 
 /-- Checks whether a capture set is well-scoped under a context and a continuation stack.
  -- A capture set is well-scoped if any label transitively reachable from it is in the scope of the continuation stack (via `Cont.HasLabel`).

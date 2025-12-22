@@ -24,7 +24,7 @@ theorem CaptureKind.trename
   case sub hs hk ih => apply! sub hs (ih _)
   case empty => apply empty
   case union ha hb => apply! union (ha _) (hb _)
-  case absurd ih => apply! absurd (ih _)
+  case singleton_absurd => apply! singleton_absurd
 
 theorem Subcapt.trename
   (h : Subcapt Γ C1 C2)
@@ -38,8 +38,6 @@ theorem Subcapt.trename
   case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
   case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
   case cbound hb => apply! cbound (ρ.cmap _ _ hb)
-  case subkind hs => apply! subkind
   case absurd hk he => apply! absurd (hk.trename _)
-  case proj_split => apply! proj_split
 
 end Capless

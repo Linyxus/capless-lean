@@ -484,4 +484,51 @@ theorem Context.cvar_bound_cbound_inv_inst
     ∧ C = C0.cweaken := by
   apply Context.cvar_bound_cbound_inv_inst' rfl hb
 
+theorem Context.bound_exists {Γ : Context n m k} :
+  (∃ C0, Context.Bound Γ x C0) ∨ (∃ c0 S0, Context.LBound Γ x c0 S0) := by
+    induction Γ
+    case empty => exact x.elim0
+    case var C0 ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; left; exists C0.weaken; apply Context.Bound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        cases ih (x:=j) <;> rename_i ih
+        . have ⟨C0, ih⟩ := ih; left; exists C0.weaken; apply Context.Bound.there_var ih
+        . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.weaken; apply Context.LBound.there_var ih
+    case tvar ih =>
+      cases ih (x:=x) <;> rename_i ih
+      . have ⟨C0, ih⟩ := ih; left; exists C0.tweaken; apply Context.Bound.there_tvar ih
+      . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.tweaken; apply Context.LBound.there_tvar ih
+    case cvar ih =>
+      cases ih (x:=x) <;> rename_i ih
+      . have ⟨C0, ih⟩ := ih; left; exists C0.cweaken; apply Context.Bound.there_cvar ih
+      . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.cweaken; apply Context.LBound.there_cvar ih
+    case label c S ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; right; exists c, S.weaken; apply Context.LBound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        cases ih (x:=j) <;> rename_i ih
+        . have ⟨C0, ih⟩ := ih; left; exists C0.weaken; apply Context.Bound.there_label ih
+        . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.weaken; apply Context.LBound.there_label ih
+
+theorem Context.cbound_exists {Γ : Context n m k} :
+  ∃ B0, Context.CBound Γ x B0 := by
+    induction Γ
+    case empty => exact x.elim0
+    case var ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0.weaken; apply Context.CBound.there_var ih
+    case tvar ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0; apply Context.CBound.there_tvar ih
+    case cvar B ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; exists B.cweaken; apply Context.CBound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        have ⟨B0, ih⟩ := ih (x:=j)
+        exists B0.cweaken; apply Context.CBound.there_cvar ih
+    case label ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0.weaken; apply Context.CBound.there_label ih
+
 end Capless

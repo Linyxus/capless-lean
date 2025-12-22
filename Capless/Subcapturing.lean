@@ -19,7 +19,7 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | cinstr : Context.CBound Γ c (.inst C) -> CaptureKind Γ (C.proj L) K -> CaptureKind Γ {c=c | L} K
   | sub : Kind.Subkind K L -> CaptureKind Γ C K -> CaptureKind Γ C L
   | empty : CaptureKind Γ .empty K
-  | absurd : CaptureKind Γ C K -> K.IsEmpty -> CaptureKind Γ C L
+  | singleton_absurd : K.IsEmpty -> CaptureKind Γ (.singleton s K) L
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
@@ -46,6 +46,8 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
+-- | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
+-- ^^^ would be interesting to prove, but seems really hard to crack
 | absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2

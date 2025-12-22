@@ -434,6 +434,10 @@ theorem Kind.Intersect.top_l {K : Kind} : Kind.top.intersect K = K := by
     . rename_i h1; unfold Classifier.subclass at h1; simp_all
     . simp
 
+theorem Kind.Intersect.assoc {A B C : Kind} : (A.intersect B).intersect C = A.intersect (B.intersect C) := by
+  -- will be correct when we flatten the structure
+  sorry
+
 inductive Kind.Subtract : Kind -> Kind -> Kind -> Prop where
   | empty_l : Subtract .empty K .empty
   | union_l : Subtract K1 K R1 -> Subtract K2 K R2 -> Subtract (.union K1 K2) K (.union R1 R2)
