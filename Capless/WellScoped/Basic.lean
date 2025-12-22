@@ -409,6 +409,19 @@ theorem ReachSet.subcapt
     cases hr2
     apply capture_kind_absurd hk he
 
+theorem ReachSet.is_subcapt
+  (hr : ReachSet Γ C R)
+  : Subcapt Γ C R := by
+  induction hr
+  case empty => apply Subcapt.subset .empty
+  case union ha hb => apply! Subcapt.join
+  case var hb hr ih => apply Subcapt.trans (.var hb) ih
+  case cinstr hb hr ih => apply Subcapt.trans (.cinstr hb) ih
+  case cbound hb hr ih => apply Subcapt.trans (.cbound hb) ih
+  case ckind =>
+    -- apply Subcapt.
+
+
 -- theorem WellScoped.subkind
 --   (hsc : WellScoped Γ cont (.proj C K2))
 --   (hs : K1.Subkind K2)

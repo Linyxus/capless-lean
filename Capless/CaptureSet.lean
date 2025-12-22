@@ -417,3 +417,10 @@ theorem CaptureSet.Subset.proj_intersect_proj {C : CaptureSet n k}: Subset (C.pr
   case singleton =>
     apply singleton_subkind
     apply Kind.Intersect.assoc_superkind
+
+theorem CaptureSet.Subset.proj_intersect {C : CaptureSet n k}: C.proj (K.intersect L) = (C.proj K).proj L := by
+  induction C
+  case empty => simp
+  case union ha hb => simp_all
+  case singleton =>
+    simp [Kind.Intersect.assoc]
