@@ -46,14 +46,7 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
 | cbound :
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
-| subkind : K.Subkind L -> Subcapt Γ (.singleton s K) (.singleton s L)
 | absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
-| proj_split : Subcapt Γ (.singleton s (.union K1 K2)) (.union (.singleton s K1) (.singleton s K2))
-
-theorem Subcapt.proj_merge : Subcapt Γ (.union (.singleton s K1) (.singleton s K2)) (.singleton s (.union K1 K2)) := by
-  apply union
-  . apply subkind $ .union_rl (K2:=K2)
-  . apply subkind .union_rr
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K
