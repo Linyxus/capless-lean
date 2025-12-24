@@ -45,10 +45,10 @@ theorem Subtree.Intersect.lawful : Intersect s t (s.intersect t) := by
 def Kind.intersect (k : Kind) (l : Kind) : Kind :=
   List.flatMap (fun x => List.flatMap (fun y => x.intersect y) l) k
 
-def Kind.intersect.cons_l : intersect (x :: xs) K = intersect [x] K ++ intersect xs K := by simp
-def Kind.intersect.append_l : intersect (xs1 ++ xs2) K = intersect xs1 K ++ intersect xs2 K := by simp
-def Kind.intersect.cons_r : intersect [x] (y :: ys) = intersect [x] [y] ++ intersect [x] ys := by simp
-def Kind.intersect.append_r : intersect [x] (ys1 ++ ys2) = intersect [x] ys1 ++ intersect [x] ys2 := by simp
+theorem Kind.intersect.cons_l : intersect (x :: xs) K = intersect [x] K ++ intersect xs K := by simp
+theorem Kind.intersect.append_l : intersect (xs1 ++ xs2) K = intersect xs1 K ++ intersect xs2 K := by simp
+theorem Kind.intersect.cons_r : intersect [x] (y :: ys) = intersect [x] [y] ++ intersect [x] ys := by simp
+theorem Kind.intersect.append_r : intersect [x] (ys1 ++ ys2) = intersect [x] ys1 ++ intersect [x] ys2 := by simp
 
 theorem Kind.Intersect.lawful' : Intersect [x] L (.intersect [x] L) := by
   induction L
@@ -59,11 +59,11 @@ theorem Kind.Intersect.lawful' : Intersect [x] L (.intersect [x] L) := by
     . apply singleton .lawful
     . simp at ih; apply ih
 
-theorem Kind.Intersect.lawful : Intersect K L (K.intersect L) := by
+theorem Kind.Intersect.lawful (K L : Kind) : Intersect K L (K.intersect L) := by
   induction K generalizing L
   case nil => simp; apply empty_l
   case cons x xs ih =>
-    apply append_l _ ih
+    apply append_l _ (ih _)
     have h := lawful' (x:=x) (L:=L)
     simp_all
 
