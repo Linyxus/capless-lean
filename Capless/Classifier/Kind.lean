@@ -40,6 +40,21 @@ inductive ContainsSupOf : List Classifier -> Classifier -> Prop where
   | here : b.Subclass a -> ContainsSupOf (a :: xs) b
   | there : ContainsSupOf xs b -> ContainsSupOf (a :: xs) b
 
+instance ContainsSupOf.decidable : Decidable (ContainsSupOf xs a) := by
+  cases xs
+  case nil => apply Decidable.isFalse; intro h; cases h
+  case cons x xs =>
+    cases decidable (xs:=xs) (a:=a)
+    case isTrue h => exact .isTrue (.there h)
+    case isFalse h =>
+      cases Classifier.Subclass.decidable a x
+      case isTrue h2 => exact .isTrue (.here h2)
+      case isFalse h2 =>
+        apply Decidable.isFalse
+        intro hx
+        cases hx <;> contradiction
+
+
 theorem ContainsSupOf.append_l (h : ContainsSupOf xs b) : ContainsSupOf (xs ++ ys) b := by
   induction h with
   | here hs => exact .here hs

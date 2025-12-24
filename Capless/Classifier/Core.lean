@@ -236,6 +236,11 @@ theorem Classifier.subclass_is_Subclass : Subclass a b ↔ a.subclass b := by
         rw [subclass_is_Subclass (a:=p)]
         assumption
 
+instance Classifier.Subclass.decidable (a b : Classifier) : Decidable (a.Subclass b) := by
+  cases h : a.subclass b
+  . apply Decidable.isFalse; rw [Classifier.subclass_is_Subclass]; simp_all
+  . apply Decidable.isTrue; simp [Classifier.subclass_is_Subclass, h]
+
 /-- The disjoint relation as a deterministic boolean function. -/
 def Classifier.disjoint (a : Classifier) (b : Classifier) :=
   match a with
