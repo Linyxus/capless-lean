@@ -50,6 +50,14 @@ theorem ContainsSupOf.append_r (h : ContainsSupOf ys b) : ContainsSupOf (xs ++ y
   | nil => exact h
   | cons _ _ ih => exact .there ih
 
+theorem ContainsSupOf.insert (h : ContainsSupOf (xs ++ ys) b) : ContainsSupOf (xs ++ zs ++ ys) b := by
+  induction xs generalizing ys with
+  | nil => apply! append_r
+  | cons x xs ih =>
+    cases h
+    case here => apply! here
+    case there => apply there; apply! ih
+
 theorem ContainsSupOf.trans_subclass (h : ContainsSupOf xs a) (hs : b.Subclass a) : ContainsSupOf xs b := by
   induction h with
   | here hs' => exact .here (hs.trans hs')
