@@ -28,8 +28,7 @@ theorem Kind.disjoint.lawful : Disjoint K L ↔ disjoint K L := by
   rw [disjoint, decide_eq_true_iff]
   exact Disjoint.empty_intersect.symm
 
-theorem Kind.disjoint.symm (hs : disjoint K L) : disjoint L K := by
-  rw [← lawful] at *
+theorem Kind.Disjoint.symm (hs : Disjoint K L) : Disjoint L K := by
   cases hs
   rename_i h1 h2
   have h := Intersect.lawful L K
@@ -39,5 +38,36 @@ theorem Kind.disjoint.symm (hs : disjoint K L) : disjoint L K := by
   apply h2 c
   have ⟨_, _⟩ := h.contains_inv hc
   apply! h1.contains
+
+theorem Kind.disjoint.symm (hs : disjoint K L) : disjoint L K := by
+  rw [← lawful] at *
+  apply! Disjoint.symm
+
+theorem Kind.Disjoint.union_l (hd1 : Disjoint K1 L) (hd2 : Disjoint K2 L) : Disjoint (K1 ++ K2) L := by
+  rw [← empty_intersect, ← SEmpty.is_empty] at *
+  intro c hc
+  have h1 := Intersect.lawful K1 L
+  have h2 := Intersect.lawful K2 L
+  have h12 := Intersect.lawful (K1 ++ K2) L
+  have ⟨hc12, _⟩ := h12.contains_inv hc
+  cases hc12.append_inv
+  . apply hd1 c; apply! h1.contains
+  . apply hd2 c; apply! h2.contains
+
+theorem Kind.Disjoint.is_empty_l (he : IsEmpty K) : Disjoint K L := by
+  rw [← empty_intersect, ← SEmpty.is_empty] at *
+  intro c hc
+  apply he c
+  have h := Intersect.lawful K L
+  have ⟨_, _⟩ := h.contains_inv hc
+  assumption
+
+theorem Kind.Disjoint.is_empty_r (he : IsEmpty L) : Disjoint K L := by
+  rw [← empty_intersect, ← SEmpty.is_empty] at *
+  intro c hc
+  apply he c
+  have h := Intersect.lawful K L
+  have ⟨_, _⟩ := h.contains_inv hc
+  assumption
 
 end Capless

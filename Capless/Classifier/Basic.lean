@@ -88,4 +88,41 @@ theorem Kind.Intersect.subkind_symm : Subkind (.intersect A B) (.intersect B A) 
   have ⟨_, _⟩ := ha.contains_inv hc
   apply! hb.contains
 
+-- Disjointness and Subkinding
+
+theorem Kind.Disjoint.refine_subkind_l
+  (hd : Disjoint K2 L)
+  (hs : K1.Subkind K2)
+  : Disjoint K1 L := by
+  rw [← Disjoint.empty_intersect, ← SEmpty.is_empty, Subkind.semantics] at *
+  intro c hc
+  apply hd c
+  have h2 := Intersect.lawful K2 L
+  have h1 := Intersect.lawful K1 L
+  have ⟨hc1, _⟩ := h1.contains_inv hc
+  have hc2 := hs c hc1
+  apply! h2.contains
+
+theorem Kind.disjoint.refine_subkind_l (hd : disjoint K2 L) (hs : K1.Subkind K2) : disjoint K1 L := by
+  rw [← disjoint.lawful] at *; apply! Disjoint.refine_subkind_l
+
+theorem Kind.Disjoint.refine_subkind_r
+  (hd : Disjoint L K2)
+  (hs : K1.Subkind K2)
+  : Disjoint L K1 := by
+  apply symm; apply! hd.symm.refine_subkind_l
+
+theorem Kind.disjoint.refine_subkind_r (hd : disjoint L K2) (hs : K1.Subkind K2) : disjoint L K1 := by
+  rw [← disjoint.lawful] at *; apply! Disjoint.refine_subkind_r
+
+theorem Kind.Disjoint.and_subkind (hd : Disjoint K L) (hs : K.Subkind L) : K.IsEmpty := by
+  rw [← Disjoint.empty_intersect, Subkind.semantics, ← SEmpty.is_empty] at *
+  intro c hc
+  apply hd c
+  have hi := Intersect.lawful K L
+  apply hi.contains hc (hs c hc)
+
+theorem Kind.Disjoint.with_self (hd : Disjoint K K) : K.IsEmpty := by
+  apply hd.and_subkind .rfl
+
 end Capless
