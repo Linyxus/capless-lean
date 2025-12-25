@@ -51,6 +51,6 @@ theorem Subcapt.crename
   case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
   case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
   case cbound hb => apply! cbound (ρ.cmap _ _ hb)
-  case absurd hk he => apply! absurd (hk.crename _)
+  case proj_r hk => apply! proj_r (hk.crename _)
 
 end Capless

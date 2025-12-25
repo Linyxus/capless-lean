@@ -47,8 +47,10 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
 | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
--- ^^^ would be interesting to prove, but seems really hard to crack
-| absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
+
+-- We don't need absurd here because...
+theorem Subcapt.absurd (hk : CaptureKind Γ C K) (he : K.IsEmpty) : Subcapt Γ C .empty := by
+  apply trans (.proj_r hk) (.subset $ .absurd he)
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K

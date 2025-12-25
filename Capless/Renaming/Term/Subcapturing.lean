@@ -51,6 +51,6 @@ theorem Subcapt.rename
   case cinstl hb => apply! cinstl (ρ.cmap _ _ hb)
   case cinstr hb => apply! cinstr (ρ.cmap _ _ hb)
   case cbound hb => apply! cbound (ρ.cmap _ _ hb)
-  case absurd hk he => apply! absurd (hk.rename _)
+  case proj_r hk => apply! proj_r (hk.rename _)
 
 end Capless

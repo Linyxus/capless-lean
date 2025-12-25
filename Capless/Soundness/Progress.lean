@@ -175,10 +175,10 @@ inductive Progress : State n m k -> Prop where
 set_option maxHeartbeats 314159265358
 
 theorem progress
-  (ht : TypedState state Γ E) :
+  (ht : TypedState state Γ E Rt) :
   Progress state := by
   cases ht
-  case mk hs ht hsc hc =>
+  case mk hs ht hc hr hsc =>
     induction ht
     case var =>
       cases hc <;> aesop
@@ -186,10 +186,13 @@ theorem progress
       cases hc <;> aesop
     case pack =>
       cases hc <;> aesop
-    case sub hsub ih _ _ _ =>
-      apply ih <;> try easy
-      apply WellScoped.subcapt; easy; easy
-      apply! TypedCont.narrow (TypedCont.cin_narrow hc _) _
+    case sub hsubcapt hsub ih _ _ _ =>
+      have ⟨R', _, h⟩ := hr.subcapt hsubcapt
+      apply ih
+      . easy
+      . apply! TypedCont.narrow (TypedCont.cin_narrow hc _) _
+      . apply h
+      . apply! WellScoped.subset
     case abs => cases hc <;> aesop
     case tabs => cases hc <;> aesop
     case cabs => cases hc <;> aesop
@@ -217,11 +220,12 @@ theorem progress
     case bindt => aesop
     case bindc => aesop
     case invoke hx hy _ _ σ cont Ct =>
+      cases hr; rename_i hr _
       cases hsc; rename_i hsc _
       have hg := TypedStore.is_tight hs
       have ⟨c0, S0, hl⟩ := Store.label_lookup_exists hs hx
       have hl := Store.bound_label hl hs
-      have ⟨_, hsl⟩ := WellScoped.label_inv hsc hl
+      have ⟨_, hsl⟩ := hr.label_inv hsc hl
       have ⟨handler, tail, hsi⟩ := hsl.has_intercept (L:=.classifier c0)
       cases handler <;> aesop
     case boundary => aesop

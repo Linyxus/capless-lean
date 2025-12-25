@@ -2,6 +2,7 @@ import Capless.Store
 import Capless.Subcapturing
 import Capless.Subcapturing.Basic
 import Capless.Inversion.Context
+import Capless.WellScoped.ReachSet
 
 /-!
 # Basic Properties of Well-Scopedness

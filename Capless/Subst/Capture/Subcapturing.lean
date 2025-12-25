@@ -48,6 +48,6 @@ theorem Subcapt.csubst
   case cbound hb =>
     cases σ.cmap_bound _ _ hb
     apply! apply_proj_singleton
-  case absurd hk he => apply! absurd (hk.csubst _)
+  case proj_r hk => apply! proj_r (hk.csubst _)
 
 end Capless

@@ -62,9 +62,6 @@ theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Sub
     apply And.intro
     . apply! trans (.proj_r _) (.subset $ .union_rl .rfl)
     . apply! trans (.proj_r _) (.subset $ .union_rr .rfl)
-  case absurd he hk =>
-    have ⟨_, _⟩ := hk.union_l_inv
-    apply And.intro <;> apply! absurd
 
 theorem Subcapt.union_l_inv (hs : Subcapt Γ (C1 ∪ C2) D) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := hs.union_l_inv' $ .refl (a := C1 ∪ C2)
 
@@ -135,13 +132,11 @@ theorem Subcapt.apply_proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj
     . simp only [CaptureSet.proj_proj]
       apply subset (.subkind _)
       apply Kind.Intersect.subkind_symm
-  case absurd hk he =>
-    simp
-    apply absurd _ he
-    apply CaptureKind.sub _ hk.apply_proj
-    apply Kind.Intersect.subkind_l
 
 theorem Subcapt.apply_proj_singleton (hs : Subcapt Γ (.singleton s .top) C) : Subcapt Γ (.singleton s K) (C.proj K) := by
   rw [← Kind.intersect.top_l (K:=K)]
   rw [← CaptureSet.proj, Kind.intersect.top_l]
   apply! apply_proj
+
+theorem Subcapt.apply_proj_r (hs : Subcapt Γ C D) (hk : CaptureKind Γ C K) : Subcapt Γ C (D.proj K) := by
+  apply trans (.proj_r hk) hs.apply_proj

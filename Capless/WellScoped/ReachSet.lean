@@ -484,9 +484,6 @@ theorem ReachSet.subcapt
   case cinstr hb => exists R2; apply And.intro .rfl; apply! cinstr
   case cbound hb => exists R2; apply And.intro .rfl; apply! cbound
   case proj_r hk => apply! proj_r
-  case absurd hk he =>
-    cases hr2
-    apply capture_kind_absurd hk he
 
 theorem ReachSet.is_subcapt
   (hr : ReachSet Γ C R)

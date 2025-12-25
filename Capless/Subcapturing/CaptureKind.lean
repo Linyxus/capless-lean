@@ -383,7 +383,6 @@ theorem CaptureKind.subcapt
   case cinstr => apply! cinstr
   case cbound => apply! cbound
   case proj_r hk1 => apply! proj_r
-  case absurd hk1 he => apply sub _ hk1; apply Kind.Subkind.is_empty_l he
 
 theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj L) (K.intersect L) := by
   induction hk generalizing L

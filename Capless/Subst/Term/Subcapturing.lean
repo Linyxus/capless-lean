@@ -47,6 +47,6 @@ theorem Subcapt.subst
   case cinstl hb => apply cinstl (σ.cmap _ _ hb)
   case cinstr hb => apply cinstr (σ.cmap _ _ hb)
   case cbound hb => apply cbound (σ.cmap _ _ hb)
-  case absurd hk he => apply! absurd (hk.subst _)
+  case proj_r hk => apply! proj_r (hk.subst _)
 
 end Capless
