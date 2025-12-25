@@ -313,6 +313,10 @@ theorem Classifier.disjoint_is_Disjoint {a b : Classifier} : Disjoint a b ↔ a.
             assumption
 termination_by sizeOf a + sizeOf b
 
+instance Classifier.Disjoint.decidable : Decidable (Disjoint a b) := by
+  cases h : a.disjoint b
+  case true => apply isTrue; rw [disjoint_is_Disjoint]; exact h
+  case false => apply isFalse; rw[disjoint_is_Disjoint]; simp [h]
 
 /-- Same as `subclass_or_disjoint`, but with the functions. -/
 theorem Classifier.subclass_or_disjoint' (a b : Classifier) : a.subclass b ∨ b.subclass a ∨ a.disjoint b := by

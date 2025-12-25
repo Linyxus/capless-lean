@@ -1,6 +1,7 @@
 import Capless.Classifier.Semantics
 import Capless.Classifier.Subkind
 import Capless.Classifier.Intersection
+import Capless.Classifier.Disjoint
 
 namespace Capless
 
@@ -63,5 +64,28 @@ theorem Kind.Intersect.union_r_superkind : Subkind ((K.intersect L1) ++ (K.inter
     apply contains hi hc1 (.append_r hc2)
   . have ⟨hc1, hc2⟩ := hi2.contains_inv hc
     apply contains hi hc1 (.append_l hc2)
+
+theorem Kind.Intersect.subkind_self : Subkind A (.intersect A A) := by
+  rw [Subkind.semantics]
+  intro c hc
+  have hi := Intersect.lawful A A
+  apply! hi.contains
+
+theorem Kind.Intersect.is_empty_repeat (he : IsEmpty (.intersect A (.intersect B A))) : IsEmpty (.intersect B A) := by
+  rw [← SEmpty.is_empty] at *
+  intro c hc
+  apply he c
+  have hi := Intersect.lawful B A
+  have hi' := Intersect.lawful A (.intersect B A)
+  have ⟨_, _⟩ := hi.contains_inv hc
+  apply! hi'.contains
+
+theorem Kind.Intersect.subkind_symm : Subkind (.intersect A B) (.intersect B A) := by
+  rw [Subkind.semantics]
+  intro c hc
+  have ha := Intersect.lawful A B
+  have hb := Intersect.lawful B A
+  have ⟨_, _⟩ := ha.contains_inv hc
+  apply! hb.contains
 
 end Capless

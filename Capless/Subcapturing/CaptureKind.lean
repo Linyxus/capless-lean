@@ -26,7 +26,7 @@ theorem CaptureKind.subkind_proj
     apply Kind.Intersect.with_subkind hs
   case label hb =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
-    have ⟨_, _⟩ := h; subst_vars; simp_all
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
     apply sub
     apply (Kind.Intersect.with_subkind (Kind.Intersect.with_subkind hs))
     apply! label
@@ -70,8 +70,8 @@ theorem CaptureKind.subkind_singleton
   (hs : CaptureKind Γ (.singleton s K2) K)
   (hsub : K1.Subkind K2)
   : CaptureKind Γ (.singleton s K1) K := by
-  rw [← Kind.Intersect.top_l (K:=K2)] at hs
-  rw [← Kind.Intersect.top_l (K:=K1)]
+  rw [← Kind.intersect.top_l (K:=K2)] at hs
+  rw [← Kind.intersect.top_l (K:=K1)]
   rw [← CaptureSet.proj] at hs
   rw [← CaptureSet.proj]
   apply! subkind_proj
@@ -169,11 +169,11 @@ theorem CaptureKind.proj_merge
   (hk2 : CaptureKind Γ (.proj C K2) L2)
   (hs1 : L1.Subkind L)
   (hs2 : L2.Subkind L)
-  : CaptureKind Γ (.proj C (K1.union K2)) L := by
+  : CaptureKind Γ (.proj C (K1 ++ K2)) L := by
   generalize h : C.proj K1 = D at hk1
   induction hk1 generalizing C K1 K2
   case var x _ _ _ K hb hk1 ih =>
-    unfold CaptureSet.proj at h; split at h <;> simp at h
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
     obtain ⟨rfl, rfl⟩ := h
     rename_i p
     cases hk2.var_lookup_inv hb
@@ -184,7 +184,7 @@ theorem CaptureKind.proj_merge
     case inr he =>
       apply sub hs1
       apply var hb
-      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+      have hsub : Kind.Subkind (p.intersect (K1 ++ K2)) (p.intersect K1) := by
         apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
         apply Kind.Subkind.union_l .rfl
         apply Kind.Subkind.is_empty_l he
@@ -231,7 +231,7 @@ theorem CaptureKind.proj_merge
     case inr he =>
       apply sub hs1
       apply cbound hb
-      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+      have hsub : Kind.Subkind (p.intersect (K1 ++ K2)) (p.intersect K1) := by
         apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
         apply Kind.Subkind.union_l .rfl
         apply Kind.Subkind.is_empty_l he
@@ -248,7 +248,7 @@ theorem CaptureKind.proj_merge
     case inr he =>
       apply sub hs1
       apply cinstr hb
-      have hsub : Kind.Subkind (p.intersect (K1.union K2)) (p.intersect K1) := by
+      have hsub : Kind.Subkind (p.intersect (K1 ++ K2)) (p.intersect K1) := by
         apply Kind.Subkind.trans Kind.Intersect.union_r_subkind
         apply Kind.Subkind.union_l .rfl
         apply Kind.Subkind.is_empty_l he
@@ -279,11 +279,11 @@ theorem CaptureKind.proj_merge
 theorem CaptureKind.proj_merge_singleton
   (hs1 : CaptureKind Γ (.singleton s K1) K)
   (hs2 : CaptureKind Γ (.singleton s K2) K)
-  : CaptureKind Γ (.singleton s (K1.union K2)) K := by
-  rw [← Kind.Intersect.top_l (K:=K1)] at hs1
-  rw [← Kind.Intersect.top_l (K:=K2)] at hs2
+  : CaptureKind Γ (.singleton s (K1 ++ K2)) K := by
+  rw [← Kind.intersect.top_l (K:=K1)] at hs1
+  rw [← Kind.intersect.top_l (K:=K2)] at hs2
   rw [← CaptureSet.proj] at hs1 hs2
-  rw [← Kind.Intersect.top_l (K:=K1.union K2), ← CaptureSet.proj]
+  rw [← Kind.intersect.top_l (K:=K1 ++ K2), ← CaptureSet.proj]
   exact proj_merge hs1 hs2 .rfl .rfl
 
 theorem CaptureKind.subset
@@ -314,7 +314,54 @@ theorem CaptureKind.absurd {C : CaptureSet n k}
   induction C
   case empty => apply empty
   case union ha hb => apply! union
-  case singleton => apply singleton_absurd $ Kind.Intersect.is_empty_r he
+  case singleton => apply singleton_absurd $ Kind.intersect.is_empty_r he
+
+theorem CaptureKind.proj_r
+  (hk1 : CaptureKind Γ C K)
+  (hk2 : CaptureKind Γ (C.proj K) L)
+  : CaptureKind Γ C L := by
+  induction hk1 generalizing L
+  case var hb hk1 ih =>
+    apply var hb
+    rw [CaptureSet.proj_proj] at ih
+    cases hk2.var_lookup_inv hb <;> rename_i hk2
+    . apply ih hk2
+    . apply ih $ .absurd hk2
+  case label hb =>
+    apply sub _ (.label hb)
+    cases hk2.label_lookup_inv hb <;> rename_i hk2
+    . rw [← Kind.intersect.assoc] at hk2
+      apply Kind.Subkind.trans _ hk2
+      apply Kind.Intersect.subkind_self
+    . have hk2 := Kind.Intersect.is_empty_repeat hk2
+      apply Kind.Subkind.is_empty_l hk2
+  case cvar hb =>
+    apply sub _ (.cvar hb)
+    cases hk2.ckind_lookup_inv hb <;> rename_i hk2
+    . rw [← Kind.intersect.assoc] at hk2
+      apply Kind.Subkind.trans _ hk2
+      apply Kind.Intersect.subkind_self
+    . have hk2 := Kind.Intersect.is_empty_repeat hk2
+      apply Kind.Subkind.is_empty_l hk2
+  case cbound hb hk ih =>
+    apply cbound hb
+    rw [CaptureSet.proj_proj] at ih
+    cases hk2.cbound_lookup_inv hb <;> rename_i hk2
+    . apply ih hk2
+    . apply ih $ .absurd hk2
+  case cinstr hb hk ih =>
+    apply cinstr hb
+    rw [CaptureSet.proj_proj] at ih
+    cases hk2.cinst_lookup_inv hb <;> rename_i hk2
+    . apply ih hk2
+    . apply ih $ .absurd hk2
+  case sub hsk hk ih =>
+    apply ih $ hk2.subkind_proj hsk
+  case empty => apply empty
+  case singleton_absurd he => apply! singleton_absurd
+  case union ha hb iha ihb =>
+    have ⟨_, _⟩ := hk2.union_l_inv
+    apply! union (iha _) (ihb _)
 
 theorem CaptureKind.subcapt
   (hk : CaptureKind Γ C2 K)
@@ -335,4 +382,101 @@ theorem CaptureKind.subcapt
     case singleton_absurd he => apply! absurd
   case cinstr => apply! cinstr
   case cbound => apply! cbound
+  case proj_r hk1 => apply! proj_r
   case absurd hk1 he => apply sub _ hk1; apply Kind.Subkind.is_empty_l he
+
+theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj L) (K.intersect L) := by
+  induction hk generalizing L
+  case var hb hk ih =>
+    simp [-Kind.intersect, CaptureSet.proj_proj] at ih
+    apply var hb ih
+  case label hb =>
+    rw [Kind.intersect.assoc]
+    apply label hb
+  case cvar hb =>
+    rw [Kind.intersect.assoc]
+    apply! cvar
+  case cbound hb hk ih =>
+    simp [-Kind.intersect, CaptureSet.proj_proj] at ih
+    apply! cbound hb ih
+  case cinstr hb hk ih =>
+    simp [-Kind.intersect, CaptureSet.proj_proj] at ih
+    apply! cinstr hb ih
+  case sub hs hk ih =>
+    apply sub (Kind.Intersect.with_subkind_r hs) ih
+  case empty => apply empty
+  case singleton_absurd he hk =>
+    apply singleton_absurd
+    apply Kind.intersect.is_empty_l hk
+  case union ha hb => apply union ha hb
+
+theorem CaptureKind.apply_proj_singleton (hk : CaptureKind Γ (.singleton s .top) K) : CaptureKind Γ (.singleton s L) (K.intersect L) := by
+  rw [← Kind.intersect.top_l (K:=L)]
+  rw [← CaptureSet.proj, Kind.intersect.top_l]
+  apply hk.apply_proj
+
+private theorem Kind.elim_middle_intersect : Subkind (.intersect A (.intersect B C)) (.intersect A C) := by
+  rw [Subkind.semantics]
+  intro c hc
+  have h1 := Intersect.lawful A (B.intersect C)
+  have h2 := Intersect.lawful A C
+  have h3 := Intersect.lawful B C
+  have ⟨_, hr⟩ := h1.contains_inv hc
+  have ⟨_, _⟩ := h3.contains_inv hr
+  apply! h2.contains
+
+private theorem Kind.elim_last_repeat : Subkind (.intersect A B) (.intersect (.intersect A B) B) := by
+  rw [Subkind.semantics]
+  intro c hc
+  have h1 := Intersect.lawful A B
+  have h2 := Intersect.lawful (.intersect A B) B
+  have ⟨_, _⟩ := h1.contains_inv hc
+  apply! h2.contains
+
+theorem CaptureKind.intersect_with_proj' {C : CaptureSet n k} (hk : CaptureKind Γ (C.proj K) L) : CaptureKind Γ (C.proj K) (L.intersect K) := by
+  generalize h : C.proj K = D at hk
+  induction hk generalizing C K
+  case var hb hk ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply var hb
+    apply sub Kind.elim_middle_intersect $ ih (.refl _)
+  case label hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply sub _ $ label hb
+    simp only [← Kind.intersect.assoc]
+    apply Kind.elim_last_repeat
+  case cvar hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply sub _ $ cvar hb
+    simp only [← Kind.intersect.assoc]
+    apply Kind.elim_last_repeat
+  case cbound hb hk ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply cbound hb
+    apply sub Kind.elim_middle_intersect $ ih (.refl _)
+  case cinstr hb hk ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply cinstr hb
+    apply sub Kind.elim_middle_intersect $ ih (.refl _)
+  case sub hsk hk ih =>
+    subst_vars
+    apply sub _ (ih $ .refl _)
+    apply Kind.Intersect.with_subkind_r hsk
+  case empty => apply empty
+  case singleton_absurd he =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply! singleton_absurd
+  case union ha hb iha ihb =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    apply union (iha $ .refl _) (ihb $ .refl _)
+
+theorem CaptureKind.intersect_with_proj {C : CaptureSet n k} (hk : CaptureKind Γ (C.proj K) L) : CaptureKind Γ (C.proj K) (K.intersect L) := by
+  apply sub _ (intersect_with_proj' hk)
+  apply Kind.Intersect.subkind_symm

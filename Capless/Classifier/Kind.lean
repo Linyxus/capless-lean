@@ -11,6 +11,7 @@ namespace Capless
 structure Subtree : Type where
   root  : Classifier
   excls : List Classifier
+deriving DecidableEq
 
 /-- A classifier filter : a list of filtered subtree. -/
 def Kind : Type := List Subtree
@@ -93,6 +94,17 @@ theorem ContainsSupOf.of_append (h : ContainsSupOf (xs ++ ys) b) : ContainsSupOf
 inductive Kind.IsEmpty : Kind -> Prop where
   | empty : IsEmpty []
   | absurd : ContainsSupOf exs r -> IsEmpty xs -> IsEmpty (Subtree.mk r exs :: xs)
+
+instance Kind.IsEmpty.decidable : Decidable (IsEmpty K) := by
+  cases K
+  case nil => apply isTrue .empty
+  case cons x xs =>
+    cases ContainsSupOf.decidable (xs:=x.excls) (a:=x.root)
+    case isFalse => apply isFalse; intro h; cases h; simp_all
+    cases decidable (K:=xs)
+    case isFalse => apply isFalse; intro h; cases h; simp_all
+    rename_i h1 h2
+    apply isTrue (.absurd h1 h2)
 
 theorem Kind.IsEmpty.node (hsc : ContainsSupOf exs r) : IsEmpty [.mk r exs] := absurd hsc .empty
 

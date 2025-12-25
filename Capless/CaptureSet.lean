@@ -3,6 +3,7 @@ import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.PImage
 import Capless.Basic
 import Capless.Classifier
+import Capless.Classifier.Intersection
 import Capless.Tactics
 namespace Capless
 
@@ -47,7 +48,7 @@ theorem CaptureSet.proj_top {C : CaptureSet n k} : C.proj .top = C := by
   induction C
   case empty => aesop
   case union ha hb => aesop
-  case singleton => simp; apply Kind.Intersect.top_r
+  case singleton => unfold proj; simp only [Kind.intersect.top_r]
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
@@ -81,7 +82,7 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
   K.IsEmpty ->
   Subset (.singleton s K) .empty
 | proj_merge:
-  Subset (.singleton s (.union L1 L2)) (.union (.singleton s L1) (.singleton s L2))
+  Subset (.singleton s (L1 ++ L2)) (.union (.singleton s L1) (.singleton s L2))
 | trans : Subset A B -> Subset B C -> Subset A C
 
 @[simp]
@@ -154,7 +155,7 @@ theorem CaptureSet.Subset.absurd {C : CaptureSet n k} (he : K.IsEmpty) : Subset 
   case union ha hb =>
     apply trans (.union_monotone ha hb)
     apply union_l .rfl .rfl
-  case singleton => simp; apply singleton_absurd; apply Kind.Intersect.is_empty_r he
+  case singleton => unfold proj; apply singleton_absurd; apply Kind.intersect.is_empty_r he
 
 /-!
 ## Renaming operations
@@ -402,25 +403,10 @@ theorem CaptureSet.Subset.proj_l : Subset (C.proj K) C := by
   case union ha hb => simp; apply! union_monotone
   case singleton => apply singleton_subkind; apply Kind.Intersect.subkind_l
 
-theorem CaptureSet.Subset.proj_proj_intersect {C : CaptureSet n k}: Subset ((C.proj K).proj L) (C.proj (K.intersect L)) := by
-  induction C
-  case empty => simp; constructor
-  case union ha hb => simp; apply! union_monotone
-  case singleton =>
-    apply singleton_subkind
-    apply Kind.Intersect.assoc_subkind
-
-theorem CaptureSet.Subset.proj_intersect_proj {C : CaptureSet n k}: Subset (C.proj (K.intersect L)) ((C.proj K).proj L) := by
-  induction C
-  case empty => simp; constructor
-  case union ha hb => simp; apply! union_monotone
-  case singleton =>
-    apply singleton_subkind
-    apply Kind.Intersect.assoc_superkind
-
-theorem CaptureSet.Subset.proj_intersect {C : CaptureSet n k}: C.proj (K.intersect L) = (C.proj K).proj L := by
+theorem CaptureSet.proj_proj {C : CaptureSet n k}: ((C.proj K).proj L) = (C.proj (K.intersect L)) := by
   induction C
   case empty => simp
-  case union ha hb => simp_all
-  case singleton =>
-    simp [Kind.Intersect.assoc]
+  case union ha hb iha ihb =>
+    simp only [CaptureSet.proj]
+    rw [iha, ihb]
+  case singleton => simp only [CaptureSet.proj]; rw [Kind.intersect.assoc]

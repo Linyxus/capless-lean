@@ -48,7 +48,7 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Subcapt Γ {c=c|L} (C.proj L)
 | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
 -- ^^^ would be interesting to prove, but seems really hard to crack
--- | absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
+| absurd : CaptureKind Γ C K -> K.IsEmpty -> Subcapt Γ C .empty
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K

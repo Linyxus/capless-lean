@@ -57,6 +57,11 @@ theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Sub
     apply And.intro <;> apply! trans _ (.cinstl hb)
   case union =>
     injections; subst_vars; apply And.intro <;> assumption
+  case proj_r hk =>
+    have ⟨_, _⟩ := hk.union_l_inv
+    apply And.intro
+    . apply! trans (.proj_r _) (.subset $ .union_rl .rfl)
+    . apply! trans (.proj_r _) (.subset $ .union_rr .rfl)
   case absurd he hk =>
     have ⟨_, _⟩ := hk.union_l_inv
     apply And.intro <;> apply! absurd
@@ -70,11 +75,11 @@ theorem CaptureKind.var_top (hb : Γ.Bound x S^C) (hs : CaptureKind Γ C K) : Ca
   apply! var
 
 theorem CaptureKind.label_top (hb : Γ.LBound x c S) : CaptureKind Γ {x=x|.top} (.node c []) := by
-  rw [← Kind.Intersect.top_r (K:=.node c [])]
+  rw [← Kind.intersect.top_r (K:=.node c [])]
   apply label hb
 
 theorem CaptureKind.cvar_top (hb : Γ.CBound c (.bound (.kind K))) : CaptureKind Γ {c=c|.top} K := by
-  rw [← Kind.Intersect.top_r (K:=K)]
+  rw [← Kind.intersect.top_r (K:=K)]
   apply cvar hb
 
 theorem CaptureKind.cbound_top (hb : Γ.CBound c (.bound (.upper C))) (hs : CaptureKind Γ C K) : CaptureKind Γ {c=c|.top} K := by
@@ -105,58 +110,7 @@ theorem Subcapt.cbound_top (hb : Γ.CBound c (.bound (.upper C))) : Subcapt Γ {
   rw [CaptureSet.proj_top] at h
   exact h
 
-theorem Subcapt.proj_proj_intersect : Subcapt Γ (.proj (.proj C K1) K2) (C.proj (K1.intersect K2)) := by
-  induction C
-  case empty => simp; apply rfl
-  case union ih1 ih2 =>
-    simp
-    apply! join
-  case singleton =>
-    simp
-    apply singleton_subkind Kind.Intersect.assoc_subkind
-
-theorem Subcapt.proj_intersect_proj : Subcapt Γ (C.proj (K1.intersect K2)) (.proj (.proj C K1) K2) := by
-  induction C
-  case empty => simp; apply rfl
-  case union ih1 ih2 =>
-    simp
-    apply! join
-  case singleton =>
-    simp
-    apply singleton_subkind Kind.Intersect.assoc_superkind
-
 -- Connections between subkinding and subcapturing
-
-
-theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj L) (K.intersect L) := by
-  induction hk generalizing L
-  case var hb hk ih =>
-    apply var hb
-    apply subcapt ih .proj_intersect_proj
-  case label hb =>
-    simp
-    apply sub Kind.Intersect.assoc_superkind (label hb)
-  case cvar hb =>
-    simp
-    apply sub Kind.Intersect.assoc_superkind $ cvar hb
-  case cbound hb hk ih =>
-    apply cbound hb
-    apply subcapt ih .proj_intersect_proj
-  case cinstr hb hk ih =>
-    apply cinstr hb
-    apply subcapt ih .proj_intersect_proj
-  case sub hs hk ih =>
-    apply sub (Kind.Intersect.with_subkind_r hs) ih
-  case empty => apply empty
-  case singleton_absurd he hk =>
-    apply singleton_absurd
-    apply Kind.Intersect.is_empty_l hk
-  case union ha hb => apply union ha hb
-
-theorem CaptureKind.apply_proj_singleton (hk : CaptureKind Γ (.singleton s .top) K) : CaptureKind Γ (.singleton s L) (K.intersect L) := by
-  rw [← Kind.Intersect.top_l (K:=L)]
-  rw [← CaptureSet.proj, Kind.Intersect.top_l]
-  apply hk.apply_proj
 
 theorem Subcapt.apply_proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj K) := by
   induction hs generalizing K
@@ -164,15 +118,23 @@ theorem Subcapt.apply_proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj
   case subset => apply! subset $ .proj _
   case union ha hb => apply union ha hb
   case var hb =>
-    simp
-    apply trans (var hb) .proj_intersect_proj
+    simp [-Kind.intersect, CaptureSet.proj_proj]
+    apply! var
   case cinstl hb =>
-    apply trans .proj_proj_intersect
-    apply cinstl hb
+    rw [CaptureSet.proj_proj, CaptureSet.proj]
+    apply! cinstl
   case cinstr hb =>
-    apply trans (cinstr hb) .proj_intersect_proj
+    simp [-Kind.intersect, CaptureSet.proj_proj]
+    apply! cinstr
   case cbound hb =>
-    apply trans (cbound hb) .proj_intersect_proj
+    simp [-Kind.intersect, CaptureSet.proj_proj]
+    apply! cbound
+  case proj_r hk =>
+    apply trans
+    . apply proj_r (.sub Kind.Intersect.subkind_l hk.apply_proj)
+    . simp only [CaptureSet.proj_proj]
+      apply subset (.subkind _)
+      apply Kind.Intersect.subkind_symm
   case absurd hk he =>
     simp
     apply absurd _ he
@@ -180,6 +142,6 @@ theorem Subcapt.apply_proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj
     apply Kind.Intersect.subkind_l
 
 theorem Subcapt.apply_proj_singleton (hs : Subcapt Γ (.singleton s .top) C) : Subcapt Γ (.singleton s K) (C.proj K) := by
-  rw [← Kind.Intersect.top_l (K:=K)]
-  rw [← CaptureSet.proj, Kind.Intersect.top_l]
+  rw [← Kind.intersect.top_l (K:=K)]
+  rw [← CaptureSet.proj, Kind.intersect.top_l]
   apply! apply_proj

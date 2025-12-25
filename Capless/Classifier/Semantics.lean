@@ -448,4 +448,22 @@ theorem Kind.Intersect.with_ssubkind_r
   have ⟨h1, h2⟩ := hi1.contains_inv hc
   apply hi2.contains (hs c h1) h2
 
+theorem Kind.intersect.is_empty_r
+  (he : IsEmpty L)
+  : IsEmpty (.intersect K L) := by
+  rw [← SEmpty.is_empty] at *
+  have h := Intersect.lawful K L
+  intro c hc
+  have ⟨h1, h2⟩ := h.contains_inv hc
+  apply he c h2
+
+theorem Kind.intersect.is_empty_l
+  (he : IsEmpty K)
+  : IsEmpty (.intersect K L) := by
+  rw [← SEmpty.is_empty] at *
+  have h := Intersect.lawful K L
+  intro c hc
+  have ⟨h1, h2⟩ := h.contains_inv hc
+  apply he c h1
+
 end Capless
