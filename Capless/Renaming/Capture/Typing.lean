@@ -2,6 +2,7 @@ import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subtyping
 import Capless.Renaming.Capture.CaptureBound
+import Capless.Renaming.Capture.Subcapturing
 
 /-!
 # Capture Variable Renaming for Typing
@@ -12,6 +13,38 @@ capture variables with a valid renaming map, we have `Δ ⊢ t.crename f : E.cre
 -/
 
 namespace Capless
+
+theorem ReachSet.crename
+  {Γ : Context n m k} {Δ : Context n m k'}
+  (h : ReachSet Γ C R)
+  (ρ : CVarMap Γ f Δ) :
+  ReachSet Δ (C.crename f) (R.crename f) := by
+  induction h generalizing k'
+  case empty => constructor
+  case union ih1 ih2 => apply union (ih1 ρ) (ih2 ρ)
+  case var hb hr ih =>
+    have hb1 := ρ.map _ _ hb
+    simp [CType.crename] at hb1
+    apply var hb1
+    rw [← CaptureSet.proj_crename]; exact ih ρ
+  case cinstr hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.crename] at hb1
+    apply cinstr hb1
+    rw [← CaptureSet.proj_crename]; exact ih ρ
+  case cbound hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.crename] at hb1
+    apply cbound hb1
+    rw [← CaptureSet.proj_crename]; exact ih ρ
+  case ckind hb =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.crename] at hb1
+    apply ckind hb1
+  case label hb =>
+    have hb1 := ρ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem Typed.crename
   {Γ : Context n m k} {Δ : Context n m k'}
@@ -144,5 +177,7 @@ theorem Typed.crename
     simp [← SType.weaken_crename, ← SType.tweaken_crename, ← CaptureSet.weaken_crename, CaptureSet.proj_crename] at ih ih2
     apply ih
     apply ih2 ρ
+    apply! ReachSet.crename
+    apply! CaptureSet.Subset.crename
 
 end Capless

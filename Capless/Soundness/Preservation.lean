@@ -26,22 +26,27 @@ This module proves that the reduction of a well-typed term preserves its type. T
 
 namespace Capless
 
-inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
+inductive Preserve : Context n m k -> EType n m k -> CaptureSet n k -> State n' m' k' -> Prop where
 | mk :
-  TypedState state Γ E ->
-  Preserve Γ E state
+  TypedState state Γ E R' ->
+  R' ⊆ R ->
+  Preserve Γ E R state
 | mk_weaken :
-  TypedState state (Γ.var P) E.weaken ->
-  Preserve Γ E state
+  TypedState state (Γ.var P) E.weaken R' ->
+  R' ⊆ (R.weaken ∪ {x=0|.top}) ->
+  Preserve Γ E R state
 | mk_tweaken :
-  TypedState state (Γ.tvar b) E.tweaken ->
-  Preserve Γ E state
+  TypedState state (Γ.tvar b) E.tweaken R' ->
+  R' ⊆ R ->
+  Preserve Γ E R state
 | mk_cweaken :
-  TypedState state (Γ.cvar b) E.cweaken ->
-  Preserve Γ E state
+  TypedState state (Γ.cvar b) E.cweaken R' ->
+  R' ⊆ (R.cweaken ∪ {c=0|.top}) ->
+  Preserve Γ E R state
 | mk_enter :
-  TypedState state ((Γ.label c S).cvar b) E.weaken.cweaken ->
-  Preserve Γ E state
+  TypedState state ((Γ.label c S).cvar b) E.weaken.cweaken R' ->
+  R' ⊆ (R.weaken.cweaken ∪ {x=0|.top} ∪ {c=0|.top}) ->
+  Preserve Γ E R state
 
 theorem value_typing_widen
   (hv : Typed Γ v (EType.type (S^C)) Cv)
@@ -64,17 +69,31 @@ theorem EType.weaken_cweaken_helper {S : SType n m k} :
 
 theorem preservation
   (hr : Reduce state state')
-  (ht : TypedState state Γ E) :
-  Preserve Γ E state' := by
+  (ht : TypedState state Γ E R) :
+  Preserve Γ E R state' := by
   cases hr
-  case apply hl =>
+  case apply y _ hl =>
     cases ht
-    case mk hs hsc ht hc =>
+    case mk hs ht hc hr hsc =>
       have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
       have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
       have hv' := value_typing_widen hv hvs
       have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv'
+      have ⟨R', hsub', hr'⟩ : ∃ R' ⊆ R, ReachSet Γ ((Cv.weaken ∪ {x=0|.top}).open y) R' := by {
+        have ht1 := Typed.app_inv_capt ht
+        have ⟨R1, hss1, h1⟩ := hr.subcapt ht1
+        simp [CaptureSet.open]
+        simp [FinFun.open, CaptureSet.weaken, CaptureSet.rename_rename]
+        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
+        cases h1; rename_i R2 R3 h2 h3
+        have ⟨hss1l, hss1r⟩ := CaptureSet.Subset.union_l_inv hss1
+        have ⟨RCv, hscv, hcv⟩ := h2.var_inv hbx
+        exists RCv ∪ R3
+        apply And.intro
+        . apply CaptureSet.Subset.union_l (.trans hscv hss1l) hss1r
+        . apply hcv.union h3
+      }
       constructor
       constructor
       { easy }
@@ -84,16 +103,8 @@ theorem preservation
         { apply Subcapt.rfl }
         { subst he1
           easy } }
-      { have h1 := Typed.app_inv_capt ht
-        have h2 := WellScoped.subcapt hsc h1
-        simp [CaptureSet.open]
-        simp [FinFun.open, CaptureSet.weaken, CaptureSet.rename_rename]
-        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
-        cases h2; rename_i h2 h3
-        apply WellScoped.union
-        { apply WellScoped.var_inv
-          exact h2; easy }
-        { easy } }
+      { exact hr' }
+      { apply! hsc.subset }
       { simp [CaptureSet.open, CaptureSet.rename, FinFun.open]
         simp [CaptureSet.weaken, CaptureSet.rename_rename, FinFun.open_comp_weaken, CaptureSet.rename_id]
         easy }

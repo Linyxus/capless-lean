@@ -2,12 +2,68 @@ import Capless.Subst.Basic
 import Capless.Subst.Capture.Subtyping
 import Capless.Subst.Capture.CaptureBound
 import Capless.Typing
+import Capless.WellScoped.Basic
 
 /-
 Substitution theorems for capture variable substitution in typing judgments.
 -/
 
 namespace Capless
+
+theorem ReachSet.csubst
+  {Γ : Context n m k} {Δ : Context n m k'}
+  (h : ReachSet Γ C R)
+  (σ : CVarSubst Γ f Δ) :
+  ∃ R' ⊆ R.crename f, ReachSet Δ (C.crename f) R' := by
+  induction h generalizing k'
+  case empty => exists .empty; apply And.intro .empty .empty
+  case union ih1 ih2 =>
+    have ⟨R1, hs1, h1⟩ := ih1 σ
+    have ⟨R2, hs2, h2⟩ := ih2 σ
+    exists R1 ∪ R2
+    simp
+    apply And.intro $ CaptureSet.Subset.union_monotone hs1 hs2
+    apply! union
+  case var hb hr ih =>
+    have hb1 := σ.map _ _ hb
+    simp [CType.crename] at hb1
+    have ⟨R, hs, h⟩ := ih σ
+    exists R
+    apply And.intro hs
+    apply var hb1
+    rw [← CaptureSet.proj_crename]; exact h
+  case cinstr hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.crename] at hb1
+    have ⟨R, hs, h⟩ := ih σ
+    exists R
+    apply And.intro hs
+    apply cinstr hb1
+    rw [← CaptureSet.proj_crename]; exact h
+  case cbound L _ hb hr ih =>
+    have hb1 := σ.cmap_bound _ _ hb
+    cases hb1; rename_i hb1
+    have ⟨R1, hs1, h1⟩ := ih σ
+    have hb1' := hb1.apply_proj (K:=L)
+    rw [CaptureSet.proj, Kind.intersect.top_l, ← CaptureSet.proj_crename] at hb1'
+    have ⟨R2, hs2, h2⟩ := h1.subcapt hb1'
+    exists R2
+    apply And.intro $ hs2.trans hs1
+    exact h2
+  case ckind c K L hb =>
+    have hb1 := σ.cmap_bound _ _ hb
+    cases hb1; rename_i hb1
+    have hb1' := hb1.apply_proj (K:=K) (L:=L)
+    rw [CaptureSet.proj, Kind.intersect.top_l] at hb1'
+    exists {c=f c|(K.intersect L).intersect L}
+    apply And.intro
+    . apply CaptureSet.Subset.singleton_subkind Kind.Intersect.subkind_l
+    . apply! ckind hb1'
+
+  case label hb =>
+    have hb1 := σ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem Typed.csubst
   {Γ : Context n m k} {Δ : Context n m k'}

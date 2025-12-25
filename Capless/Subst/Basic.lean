@@ -91,7 +91,7 @@ structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k')
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f c) (CBinding.inst (C.crename f))
   cmap_bound : ∀ c B, Γ.CBound c (CBinding.bound B) ->
-    Subbound Δ (CBound.upper {c=f c|.top}) (B.crename f)
+    TightSubbound Δ (f c) (B.crename f)
   lmap : ∀ l c S, Γ.LBound l c S -> Δ.LBound l c (S.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
@@ -476,9 +476,7 @@ def CVarSubst.ext {Γ : Context n m k}
     cases b0 <;> cases he0
     have h := σ.cmap_bound _ _ hb'
     rw [<- CBound.crename_rename_comm]
-    rw [<- CaptureSet.weaken_csingleton]
-    rw [<- CBound.weaken_upper]
-    apply Subbound.weaken; easy
+    apply TightSubbound.weaken; easy
 
 def CVarSubst.text {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ) :
@@ -515,7 +513,7 @@ def CVarSubst.text {Γ : Context n m k}
       cases hb
       rename_i hb0
       have h0 := σ.cmap_bound _ _ hb0
-      apply Subbound.tweaken; easy
+      apply TightSubbound.tweaken; easy
     case lmap =>
       intros l c S hb
       cases hb
@@ -596,8 +594,7 @@ def CVarSubst.cext {Γ : Context n m k}
       cases cb
       case kind k =>
         simp only [CBinding.crename, CBound.crename]
-        apply Subbound.set_kind
-        apply CaptureKind.cvar_top .here
+        apply TightSubbound.kind .here .rfl
       case upper D0 =>
         constructor
         apply Subcapt.cbound_top
@@ -723,17 +720,31 @@ def CVarSubst.narrow
     have h := Context.cvar_cbound_inv hb
     cases h
     case inl h =>
-      have ⟨he1, he2⟩ := h
-      cases he1; cases he2
+      have ⟨he1, he2⟩ := h; simp_all
       simp [CBound.crename_id]
       simp [FinFun.id]
-      apply Subbound.trans (B2:=B'.cweaken)
-      { cases B' <;> constructor
-        apply Subcapt.cbound_top
-        constructor
-        apply CaptureKind.cvar_top
-        constructor }
-      { apply Subbound.cweaken; easy }
+      cases hs
+      case set hs =>
+        cases he2
+        apply TightSubbound.upper (.trans (.cbound .here) _)
+        rw [← CaptureSet.proj_crename, CaptureSet.proj_top]
+        apply hs.cweaken
+      case kind hsk =>
+        cases he2
+        apply TightSubbound.kind .here hsk
+      case set_kind hk =>
+        cases he2
+
+
+
+
+      -- apply Subbound.trans (B2:=B'.cweaken)
+      -- { cases B' <;> constructor
+      --   apply Subcapt.cbound_top
+      --   constructor
+      --   apply CaptureKind.cvar_top
+      --   constructor }
+      -- { apply Subbound.cweaken; easy }
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases b1 <;> cases he1

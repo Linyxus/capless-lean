@@ -2,6 +2,7 @@ import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Type.Subtyping
 import Capless.Renaming.Type.CaptureBound
+import Capless.Renaming.Type.Subcapturing
 
 /-!
 # Type Variable Renaming for Typing
@@ -11,6 +12,34 @@ The main theorem `Typed.trename` shows that if `Γ ⊢ t : E @ Ct`, then after r
 type variables with a valid renaming map, we have `Δ ⊢ t.trename f : E.trename f @ Ct`.
 -/
 namespace Capless
+
+theorem ReachSet.trename
+  {Γ : Context n m k} {Δ : Context n m' k}
+  (h : ReachSet Γ C R)
+  (ρ : TVarMap Γ f Δ) :
+  ReachSet Δ C R := by
+  induction h generalizing m'
+  case empty => constructor
+  case union ih1 ih2 => apply union (ih1 ρ) (ih2 ρ)
+  case var hb hr ih =>
+    have hb1 := ρ.map _ _ hb
+    apply var hb1
+    exact ih ρ
+  case cinstr hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    apply cinstr hb1
+    exact ih ρ
+  case cbound hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    apply cbound hb1
+    exact ih ρ
+  case ckind hb =>
+    have hb1 := ρ.cmap _ _ hb
+    apply ckind hb1
+  case label hb =>
+    have hb1 := ρ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem Typed.trename
   {Γ : Context n m k} {Δ : Context n m' k}
@@ -134,4 +163,7 @@ theorem Typed.trename
     simp [← SType.weaken_trename, ← SType.tweaken_trename] at ih ih2
     apply ih
     apply ih2 ρ
+    apply! ReachSet.trename
+    assumption
+
 end Capless

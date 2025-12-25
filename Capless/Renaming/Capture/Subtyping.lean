@@ -32,6 +32,14 @@ theorem Subbound.crename
     apply CaptureKind.crename _ ρ
     trivial
 
+theorem TightSubbound.crename
+  (h : TightSubbound Γ c B)
+  (ρ : CVarMap Γ f Δ)
+  : TightSubbound Δ (f c) (B.crename f) := by
+  cases h
+  case upper hs =>  apply upper; apply! hs.crename
+  case kind hb hk => apply! kind (ρ.cmap _ _ hb)
+
 def SSubtyp.crename_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)

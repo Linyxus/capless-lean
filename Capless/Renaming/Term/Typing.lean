@@ -2,6 +2,7 @@ import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Term.Subtyping
 import Capless.Renaming.Term.CaptureBound
+import Capless.Renaming.Term.Subcapturing
 
 /-!
 # Term Variable Renaming for Typing
@@ -11,6 +12,38 @@ The main theorem `Typed.rename` shows that if `Γ ⊢ t : E @ Ct`, then after re
 term variables with a valid renaming map, we have `Δ ⊢ t.rename f : E.rename f @ Ct.rename f`.
 -/
 namespace Capless
+
+theorem ReachSet.rename
+  {Γ : Context n m k} {Δ : Context n' m k}
+  (h : ReachSet Γ C R)
+  (ρ : VarMap Γ f Δ) :
+  ReachSet Δ (C.rename f) (R.rename f) := by
+  induction h generalizing n'
+  case empty => constructor
+  case union ih1 ih2 => apply union (ih1 ρ) (ih2 ρ)
+  case var hb hr ih =>
+    have hb1 := ρ.map _ _ hb
+    simp [CType.rename] at hb1
+    apply var hb1
+    rw [← CaptureSet.proj_rename]; exact ih ρ
+  case cinstr hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    apply cinstr hb1
+    rw [← CaptureSet.proj_rename]; exact ih ρ
+  case cbound hb hr ih =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    apply cbound hb1
+    rw [← CaptureSet.proj_rename]; exact ih ρ
+  case ckind hb =>
+    have hb1 := ρ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    apply ckind hb1
+  case label hb =>
+    have hb1 := ρ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem Typed.rename
   {Γ : Context n m k} {Δ : Context n' m k}
@@ -145,5 +178,7 @@ theorem Typed.rename
     simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ih ih2
     apply ih
     apply ih2 ρ
+    apply! ReachSet.rename
+    apply! CaptureSet.Subset.rename
 
 end Capless

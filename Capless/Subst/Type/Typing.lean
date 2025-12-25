@@ -9,6 +9,35 @@ Substitution theorems for type variable substitution in typing judgments.
 
 namespace Capless
 
+
+theorem ReachSet.tsubst
+  {Γ : Context n m k} {Δ : Context n m' k}
+  (h : ReachSet Γ C R)
+  (σ : TVarSubst Γ f Δ) :
+  ReachSet Δ C R := by
+  induction h generalizing m'
+  case empty => constructor
+  case union ih1 ih2 => apply union (ih1 σ) (ih2 σ)
+  case var hb hr ih =>
+    have hb1 := σ.map _ _ hb
+    apply var hb1
+    exact ih σ
+  case cinstr hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    apply cinstr hb1
+    exact ih σ
+  case cbound hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    apply cbound hb1
+    exact ih σ
+  case ckind hb =>
+    have hb1 := σ.cmap _ _ hb
+    apply ckind hb1
+  case label hb =>
+    have hb1 := σ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
+
 theorem Typed.tsubst
   {Γ : Context n m k} {Δ : Context n m' k}
   (h : Typed Γ t E Ct)
@@ -130,6 +159,7 @@ theorem Typed.tsubst
       simp [← SType.weaken_trename, ← SType.tweaken_trename] at ih ih2
       apply ih
       apply! ih2
+      apply! ReachSet.tsubst
 
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :
