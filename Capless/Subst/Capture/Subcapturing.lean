@@ -18,7 +18,8 @@ theorem CaptureKind.csubst
   case label hb => apply label (σ.lmap _ _ _ hb)
   case cvar hb =>
     cases σ.cmap_bound _ _ hb
-    apply! apply_proj_singleton
+    rename_i hb1 hs1
+    apply sub (Kind.Intersect.with_subkind_r hs1) (cvar hb1)
   case cbound hb hk ih =>
     rewrite [CaptureSet.proj_crename] at ih
     cases σ.cmap_bound _ _ hb

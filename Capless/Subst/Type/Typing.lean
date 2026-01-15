@@ -151,7 +151,7 @@ theorem Typed.tsubst
          , <- SType.weaken_trename
          , <- SType.cweaken_trename ] at ih
       aesop
-    case intercept ih ih2 =>
+    case intercept hr hs ih ih2 =>
       simp [Term.trename]
       apply intercept
       have ih := ih $ ((σ.text _).ext _).ext _
@@ -160,6 +160,7 @@ theorem Typed.tsubst
       apply ih
       apply! ih2
       apply! ReachSet.tsubst
+      apply hs
 
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :

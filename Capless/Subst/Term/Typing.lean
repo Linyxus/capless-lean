@@ -3,12 +3,68 @@ import Capless.Subst.Basic
 import Capless.Subst.Term.Subtyping
 import Capless.Renaming.Term.Typing
 import Capless.Renaming.Term.CaptureBound
+import Capless.WellScoped.ReachSet
 
 /-
 Substitution theorems for term variable substitution in typing judgments.
 -/
 
 namespace Capless
+
+theorem ReachSet.subst
+  {Γ : Context n m k} {Δ : Context n' m k}
+  (h : ReachSet Γ C R)
+  (σ : VarSubst Γ f Δ) :
+  ∃ R' ⊆ R.rename f, ReachSet Δ (C.rename f) R' := by
+  induction h generalizing n'
+  case empty => exists .empty; apply And.intro .empty .empty
+  case union ih1 ih2 =>
+    have ⟨R1, hs1, h1⟩ := ih1 σ
+    have ⟨R2, hs2, h2⟩ := ih2 σ
+    exists R1 ∪ R2
+    simp
+    apply And.intro $ CaptureSet.Subset.union_monotone hs1 hs2
+    apply! union
+  case var L _ hb hr ih =>
+    have hb1 := σ.map _ _ hb
+    have hs1 := Typing.inv_subcapt hb1
+    have hs2 := hs1.apply_proj (K:=L)
+    rw [CaptureSet.proj, Kind.intersect.top_l, ← CaptureSet.proj_rename] at hs2
+    have ⟨R, hs, h⟩ := ih σ
+    have ⟨R', hs', hr'⟩ := h.subcapt hs2
+    exists R'
+    apply And.intro (hs'.trans hs) hr'
+  case cinstr hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    have ⟨R, hs, h⟩ := ih σ
+    exists R
+    apply And.intro hs
+    apply cinstr hb1
+    rw [← CaptureSet.proj_rename]; exact h
+  case cbound hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    have ⟨R, hs, h⟩ := ih σ
+    exists R
+    apply And.intro hs
+    apply cbound hb1
+    rw [← CaptureSet.proj_rename]; exact h
+  case ckind hb =>
+    have hb1 := σ.cmap _ _ hb
+    simp [CBinding.rename] at hb1
+    apply Exists.intro
+    apply And.intro .rfl
+    simp only [CaptureSet.rename]
+    apply! ReachSet.ckind
+  case label hb =>
+    have hb1 := σ.lmap _ _ _ hb
+    apply Exists.intro
+    apply And.intro
+    . apply CaptureSet.Subset.rfl
+    . apply label hb1
+  case absurd he =>
+    exists ∅; apply And.intro; apply CaptureSet.Subset.empty; apply! absurd
 
 theorem Typed.subst
   {Γ : Context n m k} {Δ : Context n' m k}
@@ -138,9 +194,10 @@ theorem Typed.subst
       , CaptureSet.cweaken_rename_comm
       , FinFun.ext ] at ih
     exact ih
-  case intercept ih ih2 =>
+  case intercept hr hs ih ih2 =>
     simp [Term.rename]
-    apply intercept
+    have ⟨R1, hs1, hr1⟩ := hr.subst σ
+    apply intercept _ _ hr1 (hs1.trans hs.rename)
     have ih := ih $ (σ.text.ext _).ext _
     simp [TBinding.rename, EType.rename, CType.rename, SType.rename] at ih ih2
     simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ih ih2

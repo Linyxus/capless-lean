@@ -52,18 +52,20 @@ theorem ReachSet.csubst
     exact h2
   case ckind c K L hb =>
     have hb1 := σ.cmap_bound _ _ hb
-    cases hb1; rename_i hb1
-    have hb1' := hb1.apply_proj (K:=K) (L:=L)
-    rw [CaptureSet.proj, Kind.intersect.top_l] at hb1'
-    exists {c=f c|(K.intersect L).intersect L}
+    cases hb1; rename_i K' hb1 hs1
+    exists {c=f c|(K'.intersect L)}
     apply And.intro
-    . apply CaptureSet.Subset.singleton_subkind Kind.Intersect.subkind_l
-    . apply! ckind hb1'
-
-  case label hb =>
+    . simp only [CaptureSet.crename]; apply CaptureSet.Subset.singleton_subkind; apply Kind.Intersect.with_subkind_r hs1
+    . apply! ckind
+  case label c S L hb =>
     have hb1 := σ.lmap _ _ _ hb
-    apply label hb1
-  case absurd he => apply! absurd
+    rename_i x
+    exists {x=x|((Kind.classifier c).intersect L)}
+    apply And.intro
+    . apply CaptureSet.Subset.rfl
+    . apply label hb1
+  case absurd he =>
+    exists ∅; apply And.intro; apply CaptureSet.Subset.empty; apply! absurd
 
 theorem Typed.csubst
   {Γ : Context n m k} {Δ : Context n m k'}
@@ -187,15 +189,15 @@ theorem Typed.csubst
          , <- CaptureSet.weaken_crename
          , <- CaptureSet.cweaken_crename ] at ih
       aesop
-    case intercept ih ih2 =>
+    case intercept hr hs ih ih2 =>
       simp [Term.crename]
-      apply intercept
+      have ⟨R1, hrs1, hr1⟩ := hr.csubst σ
+      apply intercept _ _ hr1 (CaptureSet.Subset.trans hrs1 hs.crename)
       have ih := ih $ (σ.text.ext _).ext _
       simp [TBinding.crename, EType.crename, CType.crename, SType.crename] at ih ih2
       simp [← SType.weaken_crename, ← SType.tweaken_crename, ← CaptureSet.weaken_crename, CaptureSet.proj_crename] at ih ih2
       apply ih
       apply! ih2
-
 
 
 theorem Typed.copen

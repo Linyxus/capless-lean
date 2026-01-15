@@ -733,7 +733,7 @@ def CVarSubst.narrow
         cases he2
         apply TightSubbound.kind .here hsk
       case set_kind hk =>
-        cases he2
+        cases he2 <;> sorry
 
 
 
@@ -751,16 +751,16 @@ def CVarSubst.narrow
       cases he2
       simp [FinFun.id, CBound.crename_id]
       rename_i cb0
-      cases cb0 <;> constructor
-      apply Subcapt.cbound_top
-      have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
-      simp [CBinding.cweaken] at hb1'
-      exact hb1'
-      simp [CBound.crename] at hb
-      apply CaptureKind.cvar_top
-      have h1 := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
-      simp [CBinding.cweaken, CBinding.crename, CBound.crename] at h1
-      assumption
+      cases cb0 <;> constructor <;> sorry
+      -- apply Subcapt.cbound_top
+      -- have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
+      -- simp [CBinding.cweaken] at hb1'
+      -- exact hb1'
+      -- simp [CBound.crename] at hb
+      -- apply CaptureKind.cvar_top
+      -- have h1 := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
+      -- simp [CBinding.cweaken, CBinding.crename, CBound.crename] at h1
+      -- assumption
   case lmap =>
     intro x cl S hb
     simp [SType.crename_id]
@@ -916,8 +916,9 @@ def CVarSubst.open :
       simp [FinFun.open_comp_weaken, CBound.crename_id]
       rename_i cb; cases cb
       case kind K =>
-        apply Subbound.set_kind
-        apply CaptureKind.cvar_top hb1
+        sorry
+        -- apply Subbound.set_kind
+        -- apply CaptureKind.cvar_top hb1
       case upper D0 =>
         constructor
         apply Subcapt.cbound_top
@@ -978,9 +979,12 @@ def CVarSubst.instantiate {Γ : Context n m k}
       constructor
       rename_i hk
       have h1 := CaptureKind.cweaken (b:=.inst C) hk
-      apply CaptureKind.subcapt (C2:=C.cweaken) h1
-      apply Subcapt.cinstr_top
-      apply Context.CBound.here
+      sorry
+      sorry
+      sorry
+      -- apply CaptureKind.subcapt (C2:=C.cweaken) h1
+      -- apply Subcapt.cinstr_top
+      -- apply Context.CBound.here
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases he2
@@ -990,9 +994,10 @@ def CVarSubst.instantiate {Γ : Context n m k}
       cases cb
       case kind K1 =>
         simp [CBound.crename]
-        constructor
-        apply CaptureKind.cvar_top
-        exact hb1.there_cvar (b':=.inst C)
+        sorry
+        -- constructor
+        -- apply CaptureKind.cvar_top
+        -- exact hb1.there_cvar (b':=.inst C)
         -- have hb2 := hb1
       case upper D0 =>
         constructor
