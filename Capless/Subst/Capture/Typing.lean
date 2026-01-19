@@ -52,11 +52,8 @@ theorem ReachSet.csubst
     exact h2
   case ckind c K L hb =>
     have hb1 := σ.cmap_bound _ _ hb
-    cases hb1; rename_i K' hb1 hs1
-    exists {c=f c|(K'.intersect L)}
-    apply And.intro
-    . simp only [CaptureSet.crename]; apply CaptureSet.Subset.singleton_subkind; apply Kind.Intersect.with_subkind_r hs1
-    . apply! ckind
+    cases hb1
+    sorry
   case label c S L hb =>
     have hb1 := σ.lmap _ _ _ hb
     rename_i x

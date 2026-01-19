@@ -21,18 +21,6 @@ inductive Subbound : Context n m k -> CBound n k -> CBound n k -> Prop where
 | set_kind :
   CaptureKind Γ C K -> Subbound Γ (CBound.upper C) (CBound.kind K)
 
-/-- Stronger version of subbounds: it keeps track of the binding in the case of a kind-bounded csv. -/
-inductive TightSubbound : Context n m k -> Fin k -> CBound n k -> Prop where
-  | upper : Subcapt Γ {c=c|.top} C -> TightSubbound Γ c (.upper C)
-  | kind :
-    Γ.CBound c (CBinding.bound (.kind K)) ->
-    K.Subkind L ->
-    TightSubbound Γ c (.kind L)
-  -- | set_kind :
-  --   Γ.CBound c (CBinding.bound (.upper C)) ->
-  --   CaptureKind Γ C K ->
-  --   TightSubbound Γ c (CBound.kind K)
-
 mutual
 
 inductive ESubtyp : Context n m k -> EType n m k -> EType n m k -> Prop where

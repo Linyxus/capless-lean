@@ -26,14 +26,6 @@ theorem Subbound.trename
     constructor
     apply CaptureKind.trename <;> easy
 
-theorem TightSubbound.trename
-  (h : TightSubbound Γ c B)
-  (ρ : TVarMap Γ f Δ)
-  : TightSubbound Δ c B := by
-  cases h
-  case upper hs =>  apply upper; apply! hs.trename
-  case kind hb hk => apply! kind (ρ.cmap _ _ hb)
-
 def SSubtyp.trename_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)

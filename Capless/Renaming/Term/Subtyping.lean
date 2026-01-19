@@ -27,14 +27,6 @@ theorem Subbound.rename
     constructor
     apply CaptureKind.rename <;> easy
 
-theorem TightSubbound.rename
-  (h : TightSubbound Γ c B)
-  (ρ : VarMap Γ f Δ)
-  : TightSubbound Δ c (B.rename f) := by
-  cases h
-  case upper hs =>  apply upper; apply! hs.rename
-  case kind hb hk => apply! kind (ρ.cmap _ _ hb)
-
 def SSubtyp.rename_motive1
   (Γ : Context n m k)
   (E1 : EType n m k)
