@@ -6,11 +6,15 @@ namespace Capless
 
 theorem CaptureKind.union_l_inv (hk : CaptureKind Γ (C1 ∪ C2) K) : CaptureKind Γ C1 K ∧ CaptureKind Γ C2 K := by
   generalize h : C1 ∪ C2 = D at hk
-  induction hk generalizing C1 C2 <;> cases h
+  induction hk generalizing C1 C2 <;> try cases h
   case sub hs hk ih =>
     have ⟨_, _⟩ := ih (.refl _)
     apply And.intro <;> apply! sub hs
   case union => apply! And.intro
+  case reach ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all
+    have ⟨_, _⟩ := ih
+    apply And.intro <;> apply! reach
 
 theorem CaptureKind.subkind_proj
   (hk : CaptureKind Γ (.proj C K2) K)
@@ -65,6 +69,12 @@ theorem CaptureKind.subkind_proj
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
     apply union (ha hs (.refl _)) (hb hs (.refl _))
+  case reach ih =>
+    have ⟨C0, ha, hb⟩ := CaptureSet.proj_reach_inv h
+    have ih := ih hs ha
+    rw [hb, CaptureSet.reach_proj]
+    apply! reach
+
 
 theorem CaptureKind.subkind_singleton
   (hs : CaptureKind Γ (.singleton s K2) K)
@@ -81,7 +91,7 @@ theorem CaptureKind.var_lookup_inv
   (hb : Γ.Bound x S^C)
   : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {x=x|L} = D at hk
-  induction hk <;> cases h
+  induction hk <;> try cases h
   case var K hb2 hk ih =>
     cases Context.bound_injective hb hb2
     left; assumption
@@ -92,13 +102,15 @@ theorem CaptureKind.var_lookup_inv
     case inr h => right; assumption
   case singleton_absurd he =>
     right; assumption
+  case reach =>
+    unfold CaptureSet.with_reach at h; aesop
 
 theorem CaptureKind.label_lookup_inv
   (hs : CaptureKind Γ {x=x|K1} K)
   (hb : Γ.LBound x c S)
   : (Kind.intersect (.classifier c) K1).Subkind K ∨ K1.IsEmpty := by
   generalize h : {x=x|K1} = D at hs
-  induction hs <;> cases h
+  induction hs <;> try cases h
   case var hb1 hk ih => cases Context.bound_lbound_absurd hb1 hb
   case label hb1 =>
     cases Context.lbound_inj hb hb1; subst_vars
@@ -109,13 +121,15 @@ theorem CaptureKind.label_lookup_inv
     case inr h => right; assumption
   case singleton_absurd he =>
     right; assumption
+  case reach =>
+    unfold CaptureSet.with_reach at h; aesop
 
 theorem CaptureKind.cbound_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.bound (.upper C)))
   : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
-  induction hs <;> cases h
+  induction hs <;> try cases h
   case cvar hb2 => cases Context.cbound_injective hb hb2
   case cbound hb2 hk ih =>
     cases Context.cbound_injective hb hb2
@@ -127,13 +141,15 @@ theorem CaptureKind.cbound_lookup_inv
     case inr h => right; assumption
   case singleton_absurd he =>
     right; assumption
+  case reach =>
+    unfold CaptureSet.with_reach at h; aesop
 
 theorem CaptureKind.ckind_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.bound (.kind K1)))
   : (K1.intersect L).Subkind K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
-  induction hs <;> cases h
+  induction hs <;> try cases h
   case cvar hb2 =>
     cases Context.cbound_injective hb hb2
     left; exact .rfl
@@ -145,13 +161,15 @@ theorem CaptureKind.ckind_lookup_inv
     case inr h => right; assumption
   case singleton_absurd he =>
     right; assumption
+  case reach =>
+    unfold CaptureSet.with_reach at h; aesop
 
 theorem CaptureKind.cinst_lookup_inv
   (hs : CaptureKind Γ {c=c|L} K)
   (hb : Γ.CBound c (.inst C))
   : CaptureKind Γ (C.proj L) K ∨ L.IsEmpty := by
   generalize h : {c=c|L} = D at hs
-  induction hs <;> cases h
+  induction hs <;> try cases h
   case cvar hb2 => cases Context.cbound_injective hb hb2
   case cbound hb2 hk ih => cases Context.cbound_injective hb hb2
   case cinstr hb2 hk ih =>
@@ -163,6 +181,63 @@ theorem CaptureKind.cinst_lookup_inv
     case inr h => right; assumption
   case singleton_absurd he =>
     right; assumption
+  case reach =>
+    unfold CaptureSet.with_reach at h; aesop
+
+@[simp]
+private def CaptureSet.drop_reach (s : CaptureSet n k) :=
+  match s with
+  | empty => empty
+  | union a b => union a.drop_reach b.drop_reach
+  | singleton s K =>
+    let s' : Singleton n k :=
+      match s with
+      | .var n => .var n
+      | .cvar k => .cvar k
+      | .reach n => .var n
+      | .creach k => .cvar k
+    singleton s' K
+
+@[simp]
+private theorem CaptureSet.reach_drop_reach {C : CaptureSet n k} : C.with_reach.drop_reach = C.drop_reach := by
+  induction C <;> aesop
+
+private theorem CaptureKind.drop_reach
+  (hk : CaptureKind Γ C K)
+  : CaptureKind Γ C.drop_reach K := by
+  induction hk
+  case var => apply! var
+  case label => apply! label
+  case cvar => apply! cvar
+  case cbound => apply! cbound
+  case cinstr => apply! cinstr
+  case sub => apply! sub
+  case empty => apply empty
+  case singleton_absurd => apply! singleton_absurd
+  case union => apply! union
+  case reach => aesop
+
+private theorem CaptureKind.drop_reach_inv
+  (hk : CaptureKind Γ C.drop_reach K)
+  : CaptureKind Γ C K := by
+  induction C
+  case empty => apply empty
+  case union ha hb =>
+    have ⟨_, _⟩ := hk.union_l_inv
+    apply union <;> aesop
+  case singleton s K =>
+    simp at hk
+    cases s <;> (simp at hk; try assumption)
+    . apply reach hk
+    . apply reach hk
+
+
+theorem CaptureKind.with_reach_inv
+  (hk : CaptureKind Γ C.with_reach K)
+  : CaptureKind Γ C K := by
+  have hk1 := hk.drop_reach
+  rw [CaptureSet.reach_drop_reach] at hk1
+  apply hk1.drop_reach_inv
 
 theorem CaptureKind.proj_merge
   (hk1 : CaptureKind Γ (.proj C K1) L1)
@@ -275,6 +350,13 @@ theorem CaptureKind.proj_merge
     obtain ⟨rfl, rfl⟩ := h
     have ⟨_, _⟩ := hk2.union_l_inv
     apply! union (ha _ _ $ .refl _) (hb _ _ $ .refl _)
+  case reach hsk ih =>
+    have ⟨C0, ha, hb⟩ := CaptureSet.proj_reach_inv h
+    subst_vars
+    rw [CaptureSet.reach_proj]; apply reach
+    apply ih _ hs1 (.refl _)
+    rw [CaptureSet.reach_proj] at hk2
+    apply hk2.with_reach_inv
 
 theorem CaptureKind.proj_merge_singleton
   (hs1 : CaptureKind Γ (.singleton s K1) K)
@@ -362,6 +444,48 @@ theorem CaptureKind.proj_r
   case union ha hb iha ihb =>
     have ⟨_, _⟩ := hk2.union_l_inv
     apply! union (iha _) (ihb _)
+  case reach ih =>
+    rw [CaptureSet.reach_proj] at hk2
+    apply reach
+    apply ih hk2.with_reach_inv
+
+theorem CaptureKind.reachset
+  (hk : CaptureKind Γ C K)
+  (hr : ReachSet Γ C R)
+  : CaptureKind Γ R K := by
+  induction hr
+  case empty => apply empty
+  case union ha hb =>
+    have ⟨_, _⟩ := hk.union_l_inv
+    apply! union (ha _) (hb _)
+  case var hb hr ih =>
+    apply ih
+    cases hk.var_lookup_inv hb
+    . aesop
+    . apply! absurd
+  case cinstr hb hr ih =>
+    apply ih
+    cases hk.cinst_lookup_inv hb
+    . aesop
+    . apply! absurd
+  case cbound hb hr ih =>
+    apply ih
+    cases hk.cbound_lookup_inv hb
+    . aesop
+    . apply! absurd
+  case ckind hb =>
+    cases hk.ckind_lookup_inv hb
+    . apply sub _ (reach (cvar hb))
+      apply! Kind.Subkind.trans Kind.Intersect.subkind_r
+    . apply singleton_absurd
+      apply! Kind.intersect.is_empty_r
+  case label hb =>
+    cases hk.label_lookup_inv hb
+    . apply sub _ (label hb)
+      apply! Kind.Subkind.trans Kind.Intersect.subkind_r
+    . apply singleton_absurd
+      apply! Kind.intersect.is_empty_r
+  case absurd he => apply empty
 
 theorem CaptureKind.subcapt
   (hk : CaptureKind Γ C2 K)
@@ -380,9 +504,12 @@ theorem CaptureKind.subcapt
     case cinstr hb1 hk ih => cases Context.cbound_injective hb hb1; assumption
     case sub hs hk ih => apply sub hs; apply ih hb; rfl
     case singleton_absurd he => apply! absurd
+    case reach => unfold CaptureSet.with_reach at h; aesop
   case cinstr => apply! cinstr
   case cbound => apply! cbound
   case proj_r hk1 => apply! proj_r
+  case reach => apply! with_reach_inv
+  case reachset hr => apply hk.with_reach_inv.reachset hr
 
 theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj L) (K.intersect L) := by
   induction hk generalizing L
@@ -408,6 +535,9 @@ theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.pro
     apply singleton_absurd
     apply Kind.intersect.is_empty_l hk
   case union ha hb => apply union ha hb
+  case reach ih =>
+    rw [CaptureSet.reach_proj]
+    apply reach ih
 
 theorem CaptureKind.apply_proj_singleton (hk : CaptureKind Γ (.singleton s .top) K) : CaptureKind Γ (.singleton s L) (K.intersect L) := by
   rw [← Kind.intersect.top_l (K:=L)]
@@ -475,6 +605,11 @@ theorem CaptureKind.intersect_with_proj' {C : CaptureSet n k} (hk : CaptureKind 
     unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
     have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
     apply union (iha $ .refl _) (ihb $ .refl _)
+  case reach ih =>
+    have ⟨C0, ha, hb⟩ := CaptureSet.proj_reach_inv h
+    have ih := ih ha
+    apply! reach
+
 
 theorem CaptureKind.intersect_with_proj {C : CaptureSet n k} (hk : CaptureKind Γ (C.proj K) L) : CaptureKind Γ (C.proj K) (K.intersect L) := by
   apply sub _ (intersect_with_proj' hk)

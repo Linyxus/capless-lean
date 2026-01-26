@@ -16,6 +16,8 @@ This file contains the definition of capture sets.
 inductive Singleton : Nat -> Nat -> Type where
 | var : Fin n -> Singleton n k
 | cvar : Fin k -> Singleton n k
+| reach : Fin n -> Singleton n k
+| creach : Fin k -> Singleton n k
 
 /-- Capture sets in System Capless.
 
@@ -49,6 +51,21 @@ theorem CaptureSet.proj_top {C : CaptureSet n k} : C.proj .top = C := by
   case empty => aesop
   case union ha hb => aesop
   case singleton => unfold proj; simp only [Kind.intersect.top_r]
+
+@[simp]
+def Singleton.with_reach (s: Singleton n k) :=
+  match s with
+  | var n => reach n
+  | cvar k => creach k
+  | reach n => reach n
+  | creach k => creach k
+
+@[simp]
+def CaptureSet.with_reach (c: CaptureSet n k) :=
+  match c with
+  | empty => empty
+  | union a b => union a.with_reach b.with_reach
+  | singleton s k => singleton s.with_reach k
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
@@ -166,12 +183,16 @@ def Singleton.rename (s : Singleton n k) (f : FinFun n n') : Singleton n' k :=
   match s with
   | var n => var $ f n
   | cvar k => cvar k
+  | reach n => reach $ f n
+  | creach k => creach $ k
 
 @[simp]
 def Singleton.crename (s : Singleton n k) (f : FinFun k k') : Singleton n k' :=
   match s with
   | var n => var n
   | cvar k => cvar $ f k
+  | reach n => reach n
+  | creach k => creach $ f k
 
 @[simp]
 theorem Singleton.rename_id {s : Singleton n k} :
@@ -410,3 +431,29 @@ theorem CaptureSet.proj_proj {C : CaptureSet n k}: ((C.proj K).proj L) = (C.proj
     simp only [CaptureSet.proj]
     rw [iha, ihb]
   case singleton => simp only [CaptureSet.proj]; rw [Kind.intersect.assoc]
+
+-- Reach
+
+theorem CaptureSet.reach_reach {C : CaptureSet n k}: C.with_reach.with_reach = C.with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.reach_proj {C : CaptureSet n k} : C.with_reach.proj K = (C.proj K).with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.proj_reach_inv {C D : CaptureSet n k} (h1 : C.proj K = D.with_reach)
+  : ∃ C' : CaptureSet n k, C'.proj K = D ∧ C = C'.with_reach := by
+  induction C generalizing D
+  case empty =>
+    exists empty
+    simp at h1; unfold with_reach at h1; split at h1 <;> simp_all
+  case union ha hb =>
+    simp at h1; unfold with_reach at h1; split at h1 <;> try simp_all
+    have ⟨Ra, ha1, ha2⟩ := ha (.refl _)
+    have ⟨Rb, hb1, hb2⟩ := hb (.refl _)
+    exists (Ra ∪ Rb)
+    apply And.intro <;> simp_all
+  case singleton s L =>
+    unfold with_reach at h1; split at h1 <;> simp [-Kind.intersect, -Singleton.with_reach] at h1
+    have ⟨_, _⟩ := h1; subst_vars
+    rename_i s
+    exists .singleton s L

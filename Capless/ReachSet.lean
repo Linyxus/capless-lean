@@ -24,10 +24,35 @@ inductive ReachSet : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop w
   ReachSet Γ {c=c|L} R
 | ckind :
   Context.CBound Γ c (CBinding.bound (CBound.kind K)) ->
-  ReachSet Γ {c=c|L} {c=c|K.intersect L}
+  ReachSet Γ {c=c|L} (.singleton (.creach c) (K.intersect L))
 | label :
   Context.LBound Γ x c S ->
   ReachSet Γ {x=x|L} {x=x|(Kind.classifier c).intersect L}
 | absurd : K.IsEmpty -> ReachSet Γ (.singleton s K) {}
+
+theorem ReachSet.apply_proj (hr : ReachSet Γ C R) : ReachSet Γ (C.proj K) (R.proj K) := by
+  induction hr
+  case empty => apply empty
+  case union ha hb => apply! union
+  case var ih =>
+    rw [CaptureSet.proj_proj] at ih
+    apply! var
+  case cinstr ih =>
+    rw [CaptureSet.proj_proj] at ih
+    apply! cinstr
+  case cbound ih =>
+    rw [CaptureSet.proj_proj] at ih
+    apply! cbound
+  case ckind hb =>
+    simp only [CaptureSet.proj]
+    rw [Kind.intersect.assoc]
+    apply ckind hb
+  case label hb =>
+    simp only [CaptureSet.proj]
+    rw [Kind.intersect.assoc]
+    apply label hb
+  case absurd =>
+    apply absurd
+    apply! Kind.intersect.is_empty_l
 
 end Capless

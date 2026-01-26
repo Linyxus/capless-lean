@@ -1,5 +1,6 @@
 import Capless.Context
 import Capless.CaptureSet
+import Capless.ReachSet
 
 /-!
 
@@ -21,6 +22,7 @@ inductive CaptureKind : Context n m k -> CaptureSet n k -> Kind -> Prop where
   | empty : CaptureKind Γ .empty K
   | singleton_absurd : K.IsEmpty -> CaptureKind Γ (.singleton s K) L
   | union : CaptureKind Γ C1 K -> CaptureKind Γ C2 K -> CaptureKind Γ (C1 ∪ C2) K
+  | reach : CaptureKind Γ C K -> CaptureKind Γ C.with_reach K
 
 inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop where
 | trans :
@@ -47,6 +49,9 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
 | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
+| reach : Subcapt Γ C C.with_reach
+| reachset :
+  ReachSet Γ C R -> Subcapt Γ R C.with_reach
 
 -- We don't need absurd here because...
 theorem Subcapt.absurd (hk : CaptureKind Γ C K) (he : K.IsEmpty) : Subcapt Γ C .empty := by
