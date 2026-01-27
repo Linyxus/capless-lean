@@ -1,5 +1,6 @@
 import Capless.Subcapturing
 import Capless.Inversion.Context
+import Capless.WellScoped.ReachSet
 
 namespace Capless
 
@@ -580,7 +581,11 @@ theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.pro
 theorem CaptureKind.apply_proj_singleton (hk : CaptureKind Γ (.singleton s .top) K) : CaptureKind Γ (.singleton s L) (K.intersect L) := by
   rw [← Kind.intersect.top_l (K:=L)]
   rw [← CaptureSet.proj, Kind.intersect.top_l]
-  apply hk.apply_proj
+  apply! apply_proj
+
+theorem CaptureKind.apply_proj_singleton' (hk : CaptureKind Γ (.singleton s .top) K) : CaptureKind Γ (.singleton s L) (L.intersect K) := by
+  apply sub _ hk.apply_proj_singleton
+  apply Kind.Intersect.subkind_symm
 
 private theorem Kind.elim_middle_intersect : Subkind (.intersect A (.intersect B C)) (.intersect A C) := by
   rw [Subkind.semantics]

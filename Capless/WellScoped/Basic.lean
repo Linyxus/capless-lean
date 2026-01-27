@@ -12,6 +12,177 @@ This file contains basic properties of the well-scopedness relation.
 
 namespace Capless
 
+theorem ReachSet.capture_kind_absurd {Γ: Context n m k}
+  (hk : CaptureKind Γ C K)
+  (he : K.IsEmpty)
+  : ∃ R, R ⊆ .empty ∧ ReachSet Γ C R := by
+  induction hk
+  case var hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs (var hb h)
+  case label x c _ K hb =>
+    exists {x=x|(Kind.classifier c).intersect K}
+    apply And.intro (.singleton_absurd he)
+    apply! label
+  case cvar c K L hb =>
+    exists .singleton (.creach c) (K.intersect L)
+    apply And.intro (.singleton_absurd he)
+    apply! ckind
+  case cbound hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs
+    apply! cbound
+  case cinstr hb hk ih =>
+    have ⟨R, hs, h⟩ := ih he
+    exists R; apply And.intro hs
+    apply! cinstr
+  case sub hsk hk ih => apply ih (hsk.empty_r_inv he)
+  case empty => exists .empty; apply And.intro .empty .empty
+  case singleton_absurd he2 => exists .empty; apply! And.intro .empty (.absurd he2)
+  case union ha hb =>
+    have ⟨Ra, hsa, ha⟩ := ha he
+    have ⟨Rb, hsb, hb⟩ := hb he
+    exists Ra ∪ Rb
+    apply And.intro (.union_l hsa hsb)
+    apply! union
+  case reach hk ih =>
+    have ⟨R0, hs0, hr0⟩ := ih he
+    exists R0
+    apply And.intro hs0 hr0.with_reach
+
+theorem ReachSet.proj_r
+  (hk : CaptureKind Γ C K)
+  (hr2 : ReachSet Γ (C.proj K) R2)
+  : ∃ R ⊆ R2, ReachSet Γ C R := by
+  induction hk generalizing R2
+  case var hb hk ih =>
+    rw [CaptureSet.proj_proj] at ih
+    cases hr2
+    case var hb2 hr2 =>
+      cases Context.bound_injective hb hb2
+      have ⟨R, h1, h2⟩ := ih hr2
+      exists R; apply And.intro h1
+      apply! var
+    case label hb2 => cases Context.bound_lbound_absurd hb hb2
+    case absurd K he =>
+      have ⟨R, h1, h2⟩ := capture_kind_absurd hk.intersect_with_proj he
+      exists R; apply And.intro h1
+      apply! var
+  case label x c _ K hb =>
+    exists {x=x|(Kind.classifier c).intersect K}
+    apply And.intro _ (.label hb)
+    cases hr2
+    case var hb2 hr2 => cases Context.bound_lbound_absurd hb2 hb
+    case label hb2 =>
+      cases Context.lbound_inj hb hb2; subst_vars
+      rw [← Kind.intersect.assoc]
+      exact .singleton_subkind Kind.Intersect.subkind_self
+    case absurd he =>
+      exact .singleton_absurd $ Kind.Intersect.is_empty_repeat he
+  case cvar c C K hb =>
+    exists .singleton (.creach c) (C.intersect K)
+    apply And.intro _ (.ckind hb)
+    cases hr2
+    case ckind hb2 =>
+      cases Context.cbound_injective hb hb2
+      rw [← Kind.intersect.assoc]
+      exact .singleton_subkind Kind.Intersect.subkind_self
+    case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2
+    case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
+    case absurd x c _ K he =>
+      exact .singleton_absurd $ Kind.Intersect.is_empty_repeat he
+  case cbound hb hk ih =>
+    rw [CaptureSet.proj_proj] at ih
+    cases hr2
+    case ckind hb2 => cases Context.cbound_injective hb hb2
+    case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2
+    case cbound hb2 hr2 =>
+      cases Context.cbound_injective hb hb2
+      have ⟨R, h1, h2⟩ := ih hr2
+      exists R; apply And.intro h1
+      apply! cbound
+    case absurd K he =>
+      have ⟨R, h1, h2⟩ := capture_kind_absurd hk.intersect_with_proj he
+      exists R; apply And.intro h1
+      apply! cbound
+  case cinstr hb hk ih =>
+    rw [CaptureSet.proj_proj] at ih
+    cases hr2
+    case ckind hb2 => cases Context.cbound_injective hb hb2
+    case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
+    case cinstr hb2 hr2 =>
+      cases Context.cbound_injective hb hb2
+      have ⟨R, h1, h2⟩ := ih hr2
+      exists R; apply And.intro h1
+      apply! cinstr
+    case absurd K he =>
+      have ⟨R, h1, h2⟩ := capture_kind_absurd hk.intersect_with_proj he
+      exists R; apply And.intro h1
+      apply! cinstr
+  case sub hsk hk ih =>
+    have ⟨R3, h3, hr3⟩ := hr2.subkind hsk
+    have ⟨R, h, ih⟩ := ih hr3
+    exists R
+    apply And.intro (.trans h h3) ih
+  case empty => cases hr2; exists .empty; apply And.intro .empty .empty
+  case singleton_absurd he =>
+    exists .empty; apply And.intro .empty (.absurd he)
+  case union ha hb iha ihb =>
+    cases hr2
+    rename_i ha2 hb2
+    have ⟨R1, h1, ih1⟩ := iha ha2
+    have ⟨R2, h2, ih2⟩ := ihb hb2
+    exists R1 ∪ R2
+    apply And.intro (.union_monotone h1 h2) (.union ih1 ih2)
+  case reach hr ih =>
+    rw [CaptureSet.reach_proj] at hr2
+    have ⟨R, h, ih⟩ := ih hr2.with_reach_inv
+    exists R
+    apply And.intro h ih.with_reach
+
+theorem ReachSet.subcapt
+  (hr2 : ReachSet Γ C2 R2)
+  (hs : Subcapt Γ C1 C2)
+  : ∃ R1, R1 ⊆ R2 ∧ ReachSet Γ C1 R1 := by
+  induction hs generalizing R2
+  case trans ha hb =>
+    have ⟨R2, hs2, hr⟩ := hb hr2
+    have ⟨R1, hs1, hr⟩ := ha hr
+    exists R1
+    apply! And.intro (.trans hs1 hs2)
+  case subset => apply! subset
+  case union ha hb =>
+    have ⟨Ra, hsa, hra⟩ := ha hr2
+    have ⟨Rb, hsb, hrb⟩ := hb hr2
+    exists Ra ∪ Rb
+    apply And.intro (.union_l hsa hsb) (.union hra hrb)
+  case var hb => exists R2; apply And.intro .rfl; apply! var
+  case cinstl hb =>
+    cases hr2
+    case cinstr hb2 hr2 => cases Context.cbound_injective hb hb2; exists R2; apply! And.intro .rfl
+    case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
+    case ckind hb2 => cases Context.cbound_injective hb hb2
+    case absurd _ he => apply! proj_absurd
+  case cinstr hb => exists R2; apply And.intro .rfl; apply! cinstr
+  case cbound hb => exists R2; apply And.intro .rfl; apply! cbound
+  case proj_r hk => apply! proj_r
+  case reachsetl hr =>
+    have ⟨R1, h1, _, hr1⟩ := hr.idempotent
+    exists R1
+    apply And.intro (.trans h1 (hr.inj hr2.with_reach_inv)) hr1
+  case reachsetr hr =>
+    have ⟨R1, _, h1, hr1⟩ := hr.idempotent
+    have h2 := hr1.inj hr2
+    apply Exists.intro
+    apply And.intro (h1.trans h2) hr.with_reach
+
+
+theorem ReachSet.is_subcapt
+  (hr : ReachSet Γ C R)
+  : Subcapt Γ C R := by
+    apply Subcapt.trans .reach (.reachsetr hr)
+
+
 theorem WellScoped.subkind {C : CaptureSet n k}
   (hsc : WellScoped Γ cont (C.proj L))
   (hsk : K.Subkind L)

@@ -33,6 +33,15 @@ theorem Kind.Intersect.subkind_r
   have h := Intersect.lawful K L
   apply h.is_ssubkind_r
 
+theorem Kind.Subkind.of_intersect
+  (hs1 : Subkind A B1)
+  (hs2 : Subkind A B2)
+  : Subkind A (B1.intersect B2) := by
+  rw [semantics] at *
+  intro c ha
+  have h := Intersect.lawful B1 B2
+  apply h.contains (hs1 c ha) (hs2 c ha)
+
 theorem Kind.Subkind.reorder_union_4 : Subkind ((A ++ B) ++ (C ++ D)) ((A ++ C) ++ (B ++ D)) := by
   apply union_l
   . apply union_l
