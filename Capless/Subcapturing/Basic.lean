@@ -62,14 +62,19 @@ theorem Subcapt.union_l_inv' (hs : Subcapt Γ C D) (heq : C = (C1 ∪ C2)) : Sub
     apply And.intro
     . apply! trans (.proj_r _) (.subset $ .union_rl .rfl)
     . apply! trans (.proj_r _) (.subset $ .union_rr .rfl)
-  case reach =>
-    apply And.intro
-    . apply trans reach (.subset $ .union_rl .rfl)
-    . apply trans reach (.subset $ .union_rr .rfl)
-  case reachset hr =>
-    apply And.intro <;> apply trans (.subset _) (reachset hr)
+  case reachsetl hr =>
+    apply And.intro <;> apply trans (.subset _) (reachsetl hr)
     . exact .union_rl .rfl
     . exact .union_rr .rfl
+  case reachsetr hr =>
+    unfold CaptureSet.with_reach at heq; split at heq <;> simp_all
+    have ⟨h1, h2⟩ := heq; subst_vars
+    cases hr
+    apply And.intro
+    . apply trans _ (.subset $ .union_rl .rfl)
+      apply! reachsetr
+    . apply trans _ (.subset $ .union_rr .rfl)
+      apply! reachsetr
 
 theorem Subcapt.union_l_inv (hs : Subcapt Γ (C1 ∪ C2) D) : Subcapt Γ C1 D ∧ Subcapt Γ C2 D := hs.union_l_inv' $ .refl (a := C1 ∪ C2)
 
@@ -140,12 +145,12 @@ theorem Subcapt.apply_proj (hs : Subcapt Γ C D) : Subcapt Γ (C.proj K) (D.proj
     . simp only [CaptureSet.proj_proj]
       apply subset (.subkind _)
       apply Kind.Intersect.subkind_symm
-  case reach =>
+  case reachsetl hr =>
     rw [CaptureSet.reach_proj]
-    apply! reach
-  case reachset hr =>
+    apply reachsetl hr.apply_proj
+  case reachsetr hr =>
     rw [CaptureSet.reach_proj]
-    apply reachset hr.apply_proj
+    apply reachsetr hr.apply_proj
 
 theorem Subcapt.apply_proj_singleton (hs : Subcapt Γ (.singleton s .top) C) : Subcapt Γ (.singleton s K) (C.proj K) := by
   rw [← Kind.intersect.top_l (K:=K)]

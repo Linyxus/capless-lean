@@ -28,6 +28,12 @@ inductive ReachSet : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop w
 | label :
   Context.LBound Γ x c S ->
   ReachSet Γ {x=x|L} {x=x|(Kind.classifier c).intersect L}
+| var_reach :
+  ReachSet Γ {x=x|K} R ->
+  ReachSet Γ {x^=x|K} R
+| cvar_creach :
+  ReachSet Γ {c=c|K} R ->
+  ReachSet Γ {c^=c|K} R
 | absurd : K.IsEmpty -> ReachSet Γ (.singleton s K) {}
 
 theorem ReachSet.apply_proj (hr : ReachSet Γ C R) : ReachSet Γ (C.proj K) (R.proj K) := by
@@ -51,6 +57,12 @@ theorem ReachSet.apply_proj (hr : ReachSet Γ C R) : ReachSet Γ (C.proj K) (R.p
     simp only [CaptureSet.proj]
     rw [Kind.intersect.assoc]
     apply label hb
+  case var_reach ih =>
+    simp only [CaptureSet.proj]
+    apply var_reach ih
+  case cvar_creach ih =>
+    simp only [CaptureSet.proj]
+    apply cvar_creach ih
   case absurd =>
     apply absurd
     apply! Kind.intersect.is_empty_l

@@ -41,10 +41,32 @@ theorem ReachSet.proj_empty {C : CaptureSet n k}
     have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
     apply CaptureSet.Subset.singleton_absurd
     apply Kind.intersect.is_empty_r $ Kind.intersect.is_empty_r he
+  case var_reach hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    case h_3 =>
+      have ⟨h1, h2⟩ := h
+      cases h1; subst h2
+      rename_i x _ _ p
+      apply ih (C := {x=x|p}) (K := K) he (.refl _)
+  case cvar_creach hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    case h_3 =>
+      have ⟨h1, h2⟩ := h
+      cases h1; subst h2
+      rename_i c _ _ p
+      apply ih (C := {c=c|p}) (K := K) he (.refl _)
   case absurd =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
     constructor
+
+theorem ReachSet.singleton_proj_empty
+  (hr : ReachSet Γ (.singleton s K) R)
+  (he : K.IsEmpty)
+  : R ⊆ ∅ := by
+  rw [← Kind.intersect.top_l (K:=K), ← CaptureSet.proj] at hr
+  apply proj_empty hr he
+
 
 theorem ReachSet.proj_absurd {C : CaptureSet n k}
   (he : K.IsEmpty)
@@ -70,7 +92,9 @@ theorem ReachSet.inj
   : R1 ⊆ R2 := by
   induction hr1 generalizing R2
   case empty => apply CaptureSet.Subset.empty
-  case union ha hb => cases hr2; apply! CaptureSet.Subset.union_monotone (ha _) (hb _)
+  case union ha hb =>
+    cases hr2
+    case union => apply! CaptureSet.Subset.union_monotone (ha _) (hb _)
   case var hb1 hr1 ih =>
     cases hr2
     case var hb2 hr2 => cases Context.bound_injective hb1 hb2; apply! ih
@@ -99,12 +123,42 @@ theorem ReachSet.inj
     case var hb2 hr2 =>  cases Context.bound_lbound_absurd hb2 hb1
     case label hb2 => cases Context.lbound_inj hb1 hb2; subst_vars; constructor
     case absurd he => apply! CaptureSet.Subset.singleton_absurd (Kind.intersect.is_empty_r _)
+  case var_reach hr1 ih =>
+    cases hr2
+    case var_reach => apply! ih
+    case absurd he => apply! hr1.singleton_proj_empty
+  case cvar_creach ih =>
+    cases hr2
+    case cvar_creach => apply! ih
+    case absurd he => apply! singleton_proj_empty
   case absurd => constructor
 
+private theorem drop_repeat_intersect_left : Kind.Subkind (K.intersect L) (Kind.intersect K (K.intersect L)) := by
+  rw [← Kind.intersect.assoc]
+  apply Kind.Intersect.with_subkind_r
+  apply Kind.Intersect.subkind_self
+
+theorem ReachSet.idempotent
+  (hr : ReachSet Γ C R) :
+  ∃ R', R' ⊆ R ∧ R ⊆ R' ∧ ReachSet Γ R R' := by
+  induction hr <;> try assumption
+  case empty => apply Exists.intro; apply And.intro .empty (.intro .empty .empty)
+  case union ha hb =>
+    have ⟨R1, h1, h1', hr1⟩ := ha
+    have ⟨R2, h2, h2', hr2⟩ := hb
+    exists R1 ∪ R2
+    apply And.intro (.union_monotone h1 h2) (.intro (.union_monotone h1' h2') (.union hr1 hr2))
+  case ckind hb =>
+    apply Exists.intro
+    apply And.intro (.singleton_subkind Kind.Intersect.subkind_r) (.intro (.singleton_subkind drop_repeat_intersect_left) (cvar_creach $ ckind hb))
+  case label hb =>
+    apply Exists.intro
+    apply And.intro (.singleton_subkind Kind.Intersect.subkind_r) (.intro (.singleton_subkind drop_repeat_intersect_left) (label hb))
+  case absurd => apply Exists.intro; apply And.intro .empty (.intro .empty .empty)
 
 theorem ReachSet.subkind {C : CaptureSet n k}
-  (hk : K.Subkind L)
   (hr : ReachSet Γ (C.proj L) R2)
+  (hk : K.Subkind L)
   : ∃ R1, R1 ⊆ R2 ∧ ReachSet Γ (C.proj K) R1 := by
   generalize h : C.proj L = D at hr
   induction hr generalizing C L K
@@ -152,11 +206,26 @@ theorem ReachSet.subkind {C : CaptureSet n k}
     exists .empty; apply And.intro .empty
     apply absurd $ Kind.Subkind.empty_r_inv _ he
     apply Kind.Intersect.with_subkind hk
+  case var_reach hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars
+    rename_i x _ _ p
+    have ⟨R1, hs1, hr1⟩ := ih (C:={x=x|p}) hk (.refl _)
+    exists R1
+    apply And.intro hs1 hr1.var_reach
+  case cvar_creach hr ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars
+    rename_i c _ _ p
+    have ⟨R1, hs1, hr1⟩ := ih (C:={c=c|p}) hk (.refl _)
+    exists R1
+    apply And.intro hs1 hr1.cvar_creach
+
 
 
 theorem ReachSet.singleton_subkind
-  (hk : K.Subkind L)
   (hr : ReachSet Γ (.singleton s L) R2)
+  (hk : K.Subkind L)
   : ∃ R1, R1 ⊆ R2 ∧ ReachSet Γ (.singleton s K) R1 := by
   rw [← Kind.intersect.top_l (K:=L), ← CaptureSet.proj] at hr
   rw [← Kind.intersect.top_l (K:=K), ← CaptureSet.proj]
@@ -246,7 +315,7 @@ theorem ReachSet.proj_merge' {C : CaptureSet n k}
     case cbound hb2 hr2 => cases Context.cbound_injective hb hb2
     case ckind p _ hb2 =>
       cases Context.cbound_injective hb hb2
-      exists {c=c| K.intersect (p.intersect (L1 ++ L2))}
+      exists .singleton (.creach c) (K.intersect (p.intersect (L1 ++ L2)))
       apply And.intro
       . apply CaptureSet.Subset.trans (.singleton_subkind _) .proj_merge
         apply Kind.Subkind.trans (Kind.Intersect.with_subkind _) Kind.Intersect.union_r_subkind
@@ -254,7 +323,7 @@ theorem ReachSet.proj_merge' {C : CaptureSet n k}
       . apply! ckind
     case absurd he =>
       rename_i p
-      exists {c=c| K.intersect (p.intersect (L1 ++ L2))}
+      exists .singleton (.creach c) (K.intersect (p.intersect (L1 ++ L2)))
       apply And.intro
       . apply CaptureSet.Subset.union_rl (.singleton_subkind _)
         apply Kind.Intersect.with_subkind
@@ -294,6 +363,34 @@ theorem ReachSet.proj_merge' {C : CaptureSet n k}
     exists R
     apply And.intro (.union_rr hs)
     apply h
+  case var_reach hr1 ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    cases hr2
+    case var_reach hr2 =>
+      rename_i x _ _ p
+      have ⟨R0, hs0, hr0⟩ := ih (C:={x=x|p}) hr2 (.refl _)
+      exists R0
+      apply And.intro hs0 hr0.var_reach
+    case absurd he =>
+      rename_i x _ _ p
+      have ⟨R0, hs0, hr0⟩ := ih (C:={x=x|p}) (absurd he) (.refl _)
+      exists R0
+      apply And.intro hs0 hr0.var_reach
+  case cvar_creach hr1 ih =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all [-Kind.intersect]
+    cases hr2
+    case cvar_creach hr2 =>
+      rename_i c _ _ p
+      have ⟨R0, hs0, hr0⟩ := ih (C:={c=c|p}) hr2 (.refl _)
+      exists R0
+      apply And.intro hs0 hr0.cvar_creach
+    case absurd he =>
+      rename_i c _ _ p
+      have ⟨R0, hs0, hr0⟩ := ih (C:={c=c|p}) (absurd he) (.refl _)
+      exists R0
+      apply And.intro hs0 hr0.cvar_creach
 
 theorem ReachSet.proj_merge
   (hr1 : ReachSet Γ (.singleton s L1) R1)
@@ -335,9 +432,90 @@ theorem ReachSet.subset
     exists Ra; apply! And.intro (.trans hsa hsb)
   case singleton_subkind hs => apply! singleton_subkind
   case singleton_absurd he => exists .empty; apply And.intro .empty (.absurd he)
+  case var_reach =>
+    cases hr1
+    case var_reach => exists R2; apply! And.intro .rfl
+    case absurd he =>
+      exists .empty; apply And.intro .empty (.absurd he)
+  case cvar_creach =>
+    cases hr1
+    case cvar_creach => exists R2; apply! And.intro .rfl
+    case absurd he =>
+      exists .empty; apply And.intro .empty (.absurd he)
   case proj_merge =>
     cases hr1
     apply! proj_merge
+
+theorem ReachSet.with_reach
+  (hr : ReachSet Γ C R)
+  : ReachSet Γ C.with_reach R := by
+  induction hr
+  case empty => apply empty
+  case union ha hb =>
+    unfold CaptureSet.with_reach
+    apply! union
+  case var hb hr ih =>
+    unfold CaptureSet.with_reach
+    apply var_reach (var hb hr)
+  case cinstr hb hr ih =>
+    unfold CaptureSet.with_reach
+    apply cvar_creach (cinstr hb hr)
+  case cbound hb hr ih =>
+    unfold CaptureSet.with_reach
+    apply cvar_creach (cbound hb hr)
+  case ckind hb =>
+    unfold CaptureSet.with_reach
+    apply cvar_creach (ckind hb)
+  case label hb =>
+    unfold CaptureSet.with_reach
+    apply var_reach (label hb)
+  case var_reach hr ih =>
+    unfold CaptureSet.with_reach
+    apply var_reach hr
+  case cvar_creach hr ih =>
+    unfold CaptureSet.with_reach
+    apply cvar_creach hr
+  case absurd he =>
+    unfold CaptureSet.with_reach
+    apply absurd he
+
+theorem ReachSet.with_reach_inv
+  (hr : ReachSet Γ C.with_reach R)
+  : ReachSet Γ C R := by
+  generalize h : C.with_reach = D at hr
+  induction hr generalizing C
+  case empty =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    apply empty
+  case union ha hb =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    apply union (ha _) (hb _) <;> aesop
+  case var hb hr ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp at h1
+  case cinstr hb hr ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp at h1
+  case cbound hb hr ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp at h1
+  case ckind hb =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp at h1
+  case label =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp at h1
+  case var_reach hr ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp_all
+    apply var_reach hr
+  case cvar_creach hr ih =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> simp_all
+    apply cvar_creach hr
+  case absurd he =>
+    unfold CaptureSet.with_reach at h; split at h <;> simp_all [-Kind.intersect]
+    have ⟨h1, h2⟩ := h; split at h1 <;> (subst_vars; simp_all; apply! absurd)
 
 theorem ReachSet.capture_kind_absurd {Γ: Context n m k}
   (hk : CaptureKind Γ C K)
@@ -352,7 +530,7 @@ theorem ReachSet.capture_kind_absurd {Γ: Context n m k}
     apply And.intro (.singleton_absurd he)
     apply! label
   case cvar c K L hb =>
-    exists {c=c|K.intersect L}
+    exists .singleton (.creach c) (K.intersect L)
     apply And.intro (.singleton_absurd he)
     apply! ckind
   case cbound hb hk ih =>
@@ -372,6 +550,10 @@ theorem ReachSet.capture_kind_absurd {Γ: Context n m k}
     exists Ra ∪ Rb
     apply And.intro (.union_l hsa hsb)
     apply! union
+  case reach hk ih =>
+    have ⟨R0, hs0, hr0⟩ := ih he
+    exists R0
+    apply And.intro hs0 hr0.with_reach
 
 theorem ReachSet.proj_r
   (hk : CaptureKind Γ C K)
@@ -403,7 +585,7 @@ theorem ReachSet.proj_r
     case absurd he =>
       exact .singleton_absurd $ Kind.Intersect.is_empty_repeat he
   case cvar c C K hb =>
-    exists {c=c|C.intersect K}
+    exists .singleton (.creach c) (C.intersect K)
     apply And.intro _ (.ckind hb)
     cases hr2
     case ckind hb2 =>
@@ -443,7 +625,7 @@ theorem ReachSet.proj_r
       exists R; apply And.intro h1
       apply! cinstr
   case sub hsk hk ih =>
-    have ⟨R3, h3, hr3⟩ := subkind hsk hr2
+    have ⟨R3, h3, hr3⟩ := hr2.subkind hsk
     have ⟨R, h, ih⟩ := ih hr3
     exists R
     apply And.intro (.trans h h3) ih
@@ -457,6 +639,11 @@ theorem ReachSet.proj_r
     have ⟨R2, h2, ih2⟩ := ihb hb2
     exists R1 ∪ R2
     apply And.intro (.union_monotone h1 h2) (.union ih1 ih2)
+  case reach hr ih =>
+    rw [CaptureSet.reach_proj] at hr2
+    have ⟨R, h, ih⟩ := ih hr2.with_reach_inv
+    exists R
+    apply And.intro h ih.with_reach
 
 theorem ReachSet.subcapt
   (hr2 : ReachSet Γ C2 R2)
@@ -484,27 +671,20 @@ theorem ReachSet.subcapt
   case cinstr hb => exists R2; apply And.intro .rfl; apply! cinstr
   case cbound hb => exists R2; apply And.intro .rfl; apply! cbound
   case proj_r hk => apply! proj_r
+  case reachsetl hr =>
+    have ⟨R1, h1, _, hr1⟩ := hr.idempotent
+    exists R1
+    apply And.intro (.trans h1 (hr.inj hr2.with_reach_inv)) hr1
+  case reachsetr hr =>
+    have ⟨R1, _, h1, hr1⟩ := hr.idempotent
+    have h2 := hr1.inj hr2
+    apply Exists.intro
+    apply And.intro (h1.trans h2) hr.with_reach
+
 
 theorem ReachSet.is_subcapt
   (hr : ReachSet Γ C R)
   : Subcapt Γ C R := by
-  induction hr
-  case empty => apply Subcapt.subset .empty
-  case union ha hb => apply! Subcapt.join
-  case var hb hr ih => apply Subcapt.trans (.var hb) ih
-  case cinstr hb hr ih => apply Subcapt.trans (.cinstr hb) ih
-  case cbound hb hr ih => apply Subcapt.trans (.cbound hb) ih
-  case ckind L hb =>
-    apply Subcapt.trans _ (.subset $ .singleton_subkind Kind.Intersect.subkind_symm)
-    rw [← CaptureSet.proj]
-    apply Subcapt.proj_r
-    apply CaptureKind.sub Kind.Intersect.subkind_l (.cvar hb)
-  case label hb =>
-    apply Subcapt.trans _ (.subset $ .singleton_subkind Kind.Intersect.subkind_symm)
-    rw [← CaptureSet.proj]
-    apply Subcapt.proj_r
-    apply CaptureKind.sub Kind.Intersect.subkind_l (.label hb)
-  case absurd =>
-    apply! Subcapt.absurd (.singleton_absurd _)
+    apply Subcapt.trans .reach (.reachsetr hr)
 
 end Capless

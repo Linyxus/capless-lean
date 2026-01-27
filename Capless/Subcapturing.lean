@@ -49,13 +49,16 @@ inductive Subcapt : Context n m k -> CaptureSet n k -> CaptureSet n k -> Prop wh
   Context.CBound Γ c (CBinding.bound (CBound.upper C)) ->
   Subcapt Γ {c=c|L} (C.proj L)
 | proj_r : CaptureKind Γ C K -> Subcapt Γ C (C.proj K)
-| reach : Subcapt Γ C C.with_reach
-| reachset :
+| reachsetl :
   ReachSet Γ C R -> Subcapt Γ R C.with_reach
+| reachsetr :
+  ReachSet Γ C R -> Subcapt Γ C.with_reach R
 
 -- We don't need absurd here because...
 theorem Subcapt.absurd (hk : CaptureKind Γ C K) (he : K.IsEmpty) : Subcapt Γ C .empty := by
   apply trans (.proj_r hk) (.subset $ .absurd he)
+
+theorem Subcapt.reach : Subcapt Γ C C.with_reach := by apply subset .reach
 
 notation:50 Γ " ⊢ " C1 " <:c " C2 => Subcapt Γ C1 C2
 notation:50 Γ " ⊢ " C " :k " K => CaptureKind Γ C K

@@ -29,6 +29,10 @@ theorem WellScoped.subkind {C : CaptureSet n k}
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
     apply! ckind
+  case creach hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp at h
+    have ⟨_, _⟩ := h; subst_vars; simp_all
+    apply! creach
   case label hb hl =>
     unfold CaptureSet.proj at h; split at h <;> simp at h
     have ⟨_, _⟩ := h; subst_vars; simp_all
@@ -75,6 +79,10 @@ theorem WellScoped.proj_merge' {C : CaptureSet n k}
     unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
     have ⟨_, _⟩ := h; subst_vars
     apply! ckind
+  case creach hb =>
+    unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
+    have ⟨_, _⟩ := h; subst_vars
+    apply! creach
   case label hb hl =>
     unfold CaptureSet.proj at h; split at h <;> simp [-Kind.intersect] at h
     have ⟨_, _⟩ := h; subst_vars
@@ -129,6 +137,12 @@ theorem WellScoped.subset {C1 C2 : CaptureSet n k}
     apply! proj_merge
   case trans ha hb =>
     apply ha; apply! hb
+  case var_reach =>
+    cases hsc; apply! absurd
+  case cvar_creach =>
+    cases hsc
+    case creach => apply! ckind
+    case absurd => apply! absurd
 
 theorem WellScoped.cons
   (hsc : WellScoped Γ cont C) :
@@ -137,6 +151,7 @@ theorem WellScoped.cons
   case empty => apply empty
   case union => apply union <;> aesop
   case ckind ih => apply ckind <;> aesop
+  case creach ih => apply creach <;> aesop
   case label hb hl =>
     apply label hb
     constructor; assumption
@@ -151,6 +166,7 @@ theorem WellScoped.conse
   case empty => apply empty
   case union => apply union <;> aesop
   case ckind ih => apply ckind <;> aesop
+  case creach ih => apply creach <;> aesop
   case label hb hl =>
     apply label hb
     constructor; assumption
@@ -164,6 +180,7 @@ theorem WellScoped.scope
   case empty => apply empty
   case union => apply union <;> aesop
   case ckind ih => apply ckind <;> aesop
+  case creach ih => apply creach <;> aesop
   case label hb hl =>
     apply label hb
     constructor; assumption

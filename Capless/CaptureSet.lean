@@ -73,6 +73,8 @@ instance : EmptyCollection (CaptureSet n k) where
 
 notation:max "{x=" x " | " K "}" => CaptureSet.singleton (Singleton.var x) K
 notation:max "{c=" c " | " K "}" => CaptureSet.singleton (Singleton.cvar c) K
+notation:max "{x^=" x " | " K "}" => CaptureSet.singleton (Singleton.reach x) K
+notation:max "{c^=" c " | " K "}" => CaptureSet.singleton (Singleton.creach c) K
 
 @[simp]
 instance : Union (CaptureSet n k) where
@@ -98,6 +100,10 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | singleton_absurd :
   K.IsEmpty ->
   Subset (.singleton s K) .empty
+| var_reach :
+  Subset (.singleton (.var x) K) (.singleton (.reach x) K)
+| cvar_creach :
+  Subset (.singleton (.cvar c) K) (.singleton (.creach c) K)
 | proj_merge:
   Subset (.singleton s (L1 ++ L2)) (.union (.singleton s L1) (.singleton s L2))
 | trans : Subset A B -> Subset B C -> Subset A C
@@ -356,6 +362,10 @@ theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
     cases s <;> (simp; apply! Subset.singleton_subkind)
   case singleton_absurd s K he =>
     cases s <;> (simp; apply! Subset.singleton_absurd)
+  case var_reach x K =>
+    apply! Subset.var_reach
+  case cvar_creach c K =>
+    apply! Subset.cvar_creach
   case proj_merge s L1 L2 =>
     cases s <;> (simp; apply! Subset.proj_merge)
   case trans ha hb => apply! Subset.trans
@@ -376,6 +386,10 @@ theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
     cases s <;> (apply! Subset.singleton_subkind)
   case singleton_absurd s K he =>
     cases s <;> (apply! Subset.singleton_absurd)
+  case var_reach x K =>
+    apply! Subset.var_reach
+  case cvar_creach c K =>
+    apply! Subset.cvar_creach
   case proj_merge s L1 L2 =>
     cases s <;> (apply! Subset.proj_merge)
   case trans ha hb => apply! Subset.trans
@@ -400,6 +414,8 @@ theorem CaptureSet.Subset.proj (hsub : Subset C D) : Subset (C.proj K) (D.proj K
   case singleton_absurd he =>
     apply trans (.singleton_subkind _) (.singleton_absurd he)
     apply Kind.Intersect.subkind_l
+  case var_reach => apply! var_reach
+  case cvar_creach => apply! cvar_creach
   case proj_merge => apply proj_merge
   case trans ha hb => apply! trans
 
@@ -457,3 +473,26 @@ theorem CaptureSet.proj_reach_inv {C D : CaptureSet n k} (h1 : C.proj K = D.with
     have ⟨_, _⟩ := h1; subst_vars
     rename_i s
     exists .singleton s L
+
+theorem CaptureSet.Subset.reach : Subset C C.with_reach := by
+  induction C
+  case empty => apply empty
+  case union => apply! union_monotone
+  case singleton s K =>
+    cases s <;> (simp; try apply rfl)
+    . apply var_reach
+    . apply cvar_creach
+
+theorem CaptureSet.Subset.with_reach (hs : Subset C D) : Subset C.with_reach D.with_reach := by
+  induction hs
+  case empty => apply empty
+  case rfl => apply rfl
+  case union_l => apply! union_l
+  case union_rl => apply! union_rl
+  case union_rr => apply! union_rr
+  case singleton_subkind => apply! singleton_subkind
+  case singleton_absurd => apply! singleton_absurd
+  case var_reach => apply rfl
+  case cvar_creach => apply rfl
+  case proj_merge => apply! proj_merge
+  case trans => apply! trans

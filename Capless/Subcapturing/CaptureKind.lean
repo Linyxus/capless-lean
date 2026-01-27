@@ -386,6 +386,8 @@ theorem CaptureKind.subset
   case singleton_subkind hs =>
     apply! subkind_singleton
   case singleton_absurd L he => apply! singleton_absurd
+  case var_reach => apply hk.with_reach_inv
+  case cvar_creach => apply hk.with_reach_inv
   case proj_merge =>
     have ⟨_, _⟩ := hk.union_l_inv
     apply! proj_merge_singleton
@@ -485,7 +487,42 @@ theorem CaptureKind.reachset
       apply! Kind.Subkind.trans Kind.Intersect.subkind_r
     . apply singleton_absurd
       apply! Kind.intersect.is_empty_r
+  case var_reach hr ih =>
+    apply ih hk.with_reach_inv
+  case cvar_creach hr ih =>
+    apply ih hk.with_reach_inv
   case absurd he => apply empty
+
+theorem CaptureKind.reachset_inv
+  (hk : CaptureKind Γ R K)
+  (hr : ReachSet Γ C R)
+  : CaptureKind Γ C K := by
+  induction hr
+  case empty => apply empty
+  case union ha hb =>
+    have ⟨_, _⟩ := hk.union_l_inv
+    apply! union (ha _) (hb _)
+  case var hb hr ih => apply! var hb $ ih _
+  case cinstr hb hr ih => apply! cinstr hb $ ih _
+  case cbound hb hr ih => apply! cbound hb $ ih _
+  case ckind hb =>
+    have hk1 := hk.drop_reach; simp only [CaptureSet.drop_reach] at hk1
+    cases hk1.ckind_lookup_inv hb <;> rename_i h
+    . apply sub (.trans _ h) (cvar hb)
+      rw [← Kind.intersect.assoc]
+      apply Kind.Intersect.with_subkind_r
+      apply Kind.Intersect.subkind_self
+    . apply sub (.is_empty_l h) (cvar hb)
+  case label hb =>
+    cases hk.label_lookup_inv hb <;> rename_i h
+    . apply sub (.trans _ h) (label hb)
+      rw [← Kind.intersect.assoc]
+      apply Kind.Intersect.with_subkind_r
+      apply Kind.Intersect.subkind_self
+    . apply sub (.is_empty_l h) (label hb)
+  case var_reach ih => apply reach (ih hk)
+  case cvar_creach ih => apply reach (ih hk)
+  case absurd => apply! singleton_absurd
 
 theorem CaptureKind.subcapt
   (hk : CaptureKind Γ C2 K)
@@ -508,8 +545,9 @@ theorem CaptureKind.subcapt
   case cinstr => apply! cinstr
   case cbound => apply! cbound
   case proj_r hk1 => apply! proj_r
-  case reach => apply! with_reach_inv
-  case reachset hr => apply hk.with_reach_inv.reachset hr
+  case reachsetl hr => apply hk.with_reach_inv.reachset hr
+  case reachsetr hr =>
+    apply reach $ hk.reachset_inv hr
 
 theorem CaptureKind.apply_proj (hk : CaptureKind Γ C K) : CaptureKind Γ (C.proj L) (K.intersect L) := by
   induction hk generalizing L
