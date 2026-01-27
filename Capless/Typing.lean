@@ -75,14 +75,12 @@ inductive Typed : Context n m k -> Term n m k -> EType n m k -> CaptureSet n k -
     t
     (S.cweaken.weaken^{}) (C.cweaken.weaken ∪ {c=0|.top} ∪ {x=0|.top}) ->
   Typed Γ (boundary[c]: S in t) (S^CaptureSet.empty) C
-| intercept {Γ : Context n m k} {S : SType n m k} {C C1 Cr : CaptureSet n k}:
+| intercept {Γ : Context n m k} {S : SType n m k} {C C1 : CaptureSet n k}:
   Typed
-    (((Γ,X<:.top),x:(Label[.tvar 0]^(Cr.proj K))),x:(SType.tvar 0)^{})
+    (((Γ,X<:.top),x:(Label[.tvar 0]^(C.with_reach.proj K))),x:(SType.tvar 0)^{})
     h
     (S.tweaken.weaken.weaken^{}) (C1.weaken.weaken ∪ {x=0|.top} ∪ {x=1|.top}) ->
   Typed Γ t (S^{}) C ->
-  ReachSet Γ C Cr' ->
-  Cr' ⊆ Cr ->
   Typed Γ (intercept[K] with h in t) (S^{}) (C ∪ C1)
 -- | unwrap {Γ : Context n m k} {S : SType n m k} :
 --   Typed Γ (Term.var x) (EType.type (.maybe S)^C) {x=x|.top} ->

@@ -456,6 +456,12 @@ theorem CaptureSet.reach_reach {C : CaptureSet n k}: C.with_reach.with_reach = C
 theorem CaptureSet.reach_proj {C : CaptureSet n k} : C.with_reach.proj K = (C.proj K).with_reach := by
   induction C <;> aesop
 
+theorem CaptureSet.reach_rename {C : CaptureSet n k} : C.with_reach.rename f = (C.rename f).with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.reach_crename {C : CaptureSet n k} : C.with_reach.crename f = (C.crename f).with_reach := by
+  induction C <;> aesop
+
 theorem CaptureSet.proj_reach_inv {C D : CaptureSet n k} (h1 : C.proj K = D.with_reach)
   : ∃ C' : CaptureSet n k, C'.proj K = D ∧ C = C'.with_reach := by
   induction C generalizing D
