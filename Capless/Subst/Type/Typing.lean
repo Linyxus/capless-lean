@@ -1,5 +1,6 @@
 import Capless.Subst.Basic
 import Capless.Subst.Type.Subtyping
+import Capless.Subst.Type.CaptureBound
 import Capless.Typing
 
 /-
@@ -7,6 +8,35 @@ Substitution theorems for type variable substitution in typing judgments.
 -/
 
 namespace Capless
+
+
+theorem ReachSet.tsubst
+  {Γ : Context n m k} {Δ : Context n m' k}
+  (h : ReachSet Γ C R)
+  (σ : TVarSubst Γ f Δ) :
+  ReachSet Δ C R := by
+  induction h generalizing m'
+  case empty => constructor
+  case union ih1 ih2 => apply union (ih1 σ) (ih2 σ)
+  case var hb hr ih =>
+    have hb1 := σ.map _ _ hb
+    apply var hb1
+    exact ih σ
+  case cinstr hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    apply cinstr hb1
+    exact ih σ
+  case cbound hb hr ih =>
+    have hb1 := σ.cmap _ _ hb
+    apply cbound hb1
+    exact ih σ
+  case ckind hb =>
+    have hb1 := σ.cmap _ _ hb
+    apply ckind hb1
+  case label hb =>
+    have hb1 := σ.lmap _ _ _ hb
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem Typed.tsubst
   {Γ : Context n m k} {Δ : Context n m' k}
@@ -19,9 +49,9 @@ theorem Typed.tsubst
       have hb1 := σ.map _ _ hb
       simp [CType.trename] at hb1
       apply Typed.var; trivial
-    case pack ih =>
+    case pack hb _ ih =>
       simp [Term.trename, EType.trename]
-      apply pack
+      apply pack (hb.tsubst σ)
       have ih := ih σ.cext
       simp [EType.trename] at ih
       exact ih
@@ -103,7 +133,7 @@ theorem Typed.tsubst
       trivial
     case label hb =>
       simp [Term.trename, EType.trename, CType.trename, SType.trename]
-      have hb1 := σ.lmap _ _ hb
+      have hb1 := σ.lmap _ _ _ hb
       apply label; assumption
     case invoke ih1 ih2 =>
       simp [Term.trename]
@@ -114,13 +144,23 @@ theorem Typed.tsubst
     case boundary ih =>
       simp [Term.trename]
       simp [EType.trename, CType.trename, SType.trename]
-      apply boundary
+      apply boundary; assumption
       have ih := ih (σ.cext.ext _)
       simp [EType.trename, CType.trename, SType.trename] at ih
       rw [ <- SType.cweaken_trename
          , <- SType.weaken_trename
          , <- SType.cweaken_trename ] at ih
       aesop
+    case intercept hr hs ih ih2 =>
+      simp [Term.trename]
+      apply intercept
+      have ih := ih $ ((σ.text _).ext _).ext _
+      simp [TBinding.trename, EType.trename, CType.trename, SType.trename] at ih ih2
+      simp [← SType.weaken_trename, ← SType.tweaken_trename] at ih ih2
+      apply ih
+      apply! ih2
+      apply! ReachSet.tsubst
+      apply hs
 
 theorem Typed.topen
   (h : Typed (Γ,X<: (SType.tvar X)) t E Ct) :

@@ -1,4 +1,5 @@
 import Capless.Subtyping
+import Capless.Classifier
 import Capless.Subcapturing
 import Capless.Subcapturing.Basic
 
@@ -14,7 +15,9 @@ theorem Subbound.refl {B : CBound n k} :
   Subbound Γ B B := by
   cases B <;> constructor
   case upper =>
-    apply Subcapt.refl
+    apply Subcapt.rfl
+  case kind =>
+    apply Kind.Subkind.rfl
 
 theorem Subbound.trans
   (h1 : Subbound Γ B1 B2)
@@ -22,6 +25,13 @@ theorem Subbound.trans
   Subbound Γ B1 B3 := by
   cases h1 <;> cases h2 <;> constructor
   apply Subcapt.trans <;> easy
+  rename_i hsub K hk
+  apply hk.subcapt hsub
+  rename_i k1 k2 h1 k3 h2
+  apply Kind.Subkind.trans h1 h2
+  rename_i hk K2 hs
+  apply CaptureKind.sub hs hk
+
 
 theorem ESubtyp.type_inv_subcapt'
   (heq : E1 = EType.type (CType.capt C S))
@@ -42,8 +52,8 @@ theorem ESubtyp.type_inv_subcapt
   ESubtyp.type_inv_subcapt' rfl h
 
 theorem ESubtyp.ex_inv_subcapt
-  (h : ESubtyp Γ E (EType.ex (CType.capt C S))) :
-  ∃ C0 S0, E = EType.ex (CType.capt C0 S0) ∧ Subcapt (Γ.cvar (CBinding.bound CBound.star)) C0 C := by
+  (h : ESubtyp Γ E (EType.ex B (CType.capt C S))) :
+  ∃ C0 S0, E = EType.ex B (CType.capt C0 S0) ∧ Subcapt (Γ.cvar (CBinding.bound B)) C0 C := by
   cases h
   case exist hs =>
     cases hs
@@ -54,7 +64,7 @@ theorem ESubtyp.ex_inv_subcapt
 theorem CSubtyp.refl :
   CSubtyp Γ T T := by
   cases T; apply capt
-  { apply Subcapt.refl }
+  { apply Subcapt.rfl }
   { apply SSubtyp.refl }
 
 theorem ESubtyp.refl :

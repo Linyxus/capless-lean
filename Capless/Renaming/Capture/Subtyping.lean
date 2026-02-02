@@ -2,6 +2,7 @@ import Capless.Tactics
 import Capless.Subtyping
 import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subcapturing
+import Capless.Renaming.Capture.CaptureBound
 
 /-!
 # Capture Variable Renaming for Subtyping
@@ -21,9 +22,15 @@ theorem Subbound.crename
     simp [CBound.crename]
     apply Subbound.set
     apply Subcapt.crename <;> easy
-  case star =>
+  case kind =>
     simp [CBound.crename]
-    apply Subbound.star
+    apply Subbound.kind
+    trivial
+  case set_kind =>
+    simp [CBound.crename]
+    apply Subbound.set_kind
+    apply CaptureKind.crename _ ρ
+    trivial
 
 def SSubtyp.crename_motive1
   (Γ : Context n m k)

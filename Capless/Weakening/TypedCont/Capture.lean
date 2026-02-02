@@ -30,8 +30,8 @@ judgments. This is essential for soundness in the presence of capture-polymorphi
 namespace Capless
 
 theorem EType.cweaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).cweaken = EType.ex T.cweaken1 := by
-  simp [EType.cweaken, EType.crename, CType.cweaken1]
+  (EType.ex B T).cweaken = EType.ex B.cweaken T.cweaken1 := by
+  simp [EType.cweaken, EType.crename, CType.cweaken1, CBound.cweaken]
 
 -- theorem EType.cweaken_type (T : CType n m k) :
 --   (EType.type T).cweaken = EType.type T.cweaken := by
@@ -68,41 +68,48 @@ theorem Cont.HasLabel.cweaken
   case there_tval => simp [Cont.cweaken]; apply there_tval; aesop
   case there_cval => simp [Cont.cweaken]; apply there_cval; aesop
   case there_label => simp [Cont.cweaken]; apply there_label; aesop
+  case there_intercept => simp [Cont.cweaken]; apply there_intercept; aesop
+
+theorem ReachSet.cweaken
+  (hr : ReachSet Γ C R)
+  : ReachSet (Γ.cvar b) C.cweaken R.cweaken := by
+  induction hr
+  case empty => constructor
+  case union ha hb => apply! union
+  case var hb hr ih =>
+    have hb1 := hb.there_cvar (b:=b)
+    apply var hb1
+    rw [← CaptureSet.proj_crename]; exact ih
+  case cinstr hb hr ih =>
+    have hb1 := hb.there_cvar (b':=b)
+    apply cinstr hb1
+    rw [← CaptureSet.proj_crename]; exact ih
+  case cbound hb hr ih =>
+    have hb1 := hb.there_cvar (b':=b)
+    apply cbound hb1
+    rw [← CaptureSet.proj_crename]; exact ih
+  case ckind hb =>
+    have hb1 := hb.there_cvar (b':=b)
+    apply ckind hb1
+  case label hb =>
+    have hb1 := hb.there_cvar (b:=b)
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem WellScoped.cweaken
   (h : WellScoped Γ E Ct) :
   WellScoped (Γ.cvar b) E.cweaken Ct.cweaken := by
   induction h
-  case empty => constructor
-  case union ih1 ih2 => apply union <;> aesop
-  case singleton hb _ ih =>
-    apply singleton
-    { have hb1 := Context.Bound.there_cvar (b := b) hb
-      simp [CType.cweaken, CType.crename] at hb1
-      exact hb1 }
-    { exact ih }
-  case csingleton hb _ ih =>
-    apply csingleton
-    { have hb1 := Context.CBound.there_cvar (b' := b) hb
-      simp [CType.cweaken, CType.crename] at hb1
-      exact hb1 }
-    { exact ih }
-  case cbound hb _ ih =>
-    apply cbound
-    { have hb1 := Context.CBound.there_cvar (b' := b) hb
-      simp [CType.cweaken, CType.crename] at hb1
-      exact hb1 }
-    { exact ih }
-  case label hb hs =>
-    apply label
-    { have hb1 := Context.LBound.there_cvar (b := b) hb
-      simp [CType.cweaken, CType.crename] at hb1
-      exact hb1 }
-    { apply hs.cweaken }
+  case empty => apply! empty
+  case union ha hb => apply! union
+  case ckind hb => apply! ckind hb.there_cvar
+  case label hb hl => apply label hb.there_cvar hl.cweaken
+  case label_disj hb hd => apply! label_disj hb.there_cvar
+  case absurd => apply! absurd
 
 theorem TypedCont.cweaken
-  (h : TypedCont Γ E t E' Ct) :
-  TypedCont (Γ.cvar b) E.cweaken t.cweaken E'.cweaken Ct.cweaken := by
+  (h : TypedCont Γ Cin E t E' Ct) :
+  TypedCont (Γ.cvar b) Cin.cweaken E.cweaken t.cweaken E'.cweaken Ct.cweaken := by
   induction h
   case none =>
     simp [Cont.cweaken]
@@ -137,5 +144,18 @@ theorem TypedCont.cweaken
     apply ih
     have h := hs.cweaken (b:=b)
     aesop
+  case intercept ht hsc hs h ih =>
+    simp [Cont.cweaken]
+    apply intercept
+    { have ht1 := ht.cweaken_text_ext_ext (cb := b)
+      simp [TBinding.cweaken, TBinding.crename, CType.cweaken, CType.crename,
+            ← CaptureSet.proj_cweaken, CaptureSet.proj_crename,
+            SType.weaken, SType.crename_rename_comm, SType.tweaken, ← SType.crename_trename_comm, SType.crename,
+            CaptureSet.cweaken, ← CaptureSet.weaken_crename] at ht1
+      simp [CaptureSet.cweaken, SType.tweaken, SType.weaken]
+      exact ht1 }
+    apply hsc.cweaken
+    apply ih
+    apply h.cweaken
 
 end Capless

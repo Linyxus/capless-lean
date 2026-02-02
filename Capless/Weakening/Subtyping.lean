@@ -44,7 +44,7 @@ theorem Subbound.weaken
 
 theorem SSubtyp.lweaken
   (h : SSubtyp Γ S1 S2) :
-  ∀ S, SSubtyp (Γ.label S) S1.weaken S2.weaken := by
+  ∀ S, SSubtyp (Γ.label c S) S1.weaken S2.weaken := by
   intro b
   simp [SType.weaken]
   apply SSubtyp.rename
@@ -61,7 +61,7 @@ theorem CSubtyp.weaken
 
 theorem CSubtyp.lweaken
   (h : CSubtyp Γ E1 E2) :
-  CSubtyp (Γ.label S) E1.weaken E2.weaken := by
+  CSubtyp (Γ.label c S) E1.weaken E2.weaken := by
   simp [CType.weaken]
   apply CSubtyp.rename
   { apply h }
@@ -77,7 +77,7 @@ theorem ESubtyp.weaken
 
 theorem ESubtyp.lweaken
   (h : ESubtyp Γ E1 E2) :
-  ESubtyp (Γ.label S) E1.weaken E2.weaken := by
+  ESubtyp (Γ.label c S) E1.weaken E2.weaken := by
   simp [EType.weaken]
   apply ESubtyp.rename
   { apply h }

@@ -5,6 +5,8 @@ import Capless.Type.Basic
 import Capless.Typing
 import Capless.Typing.Basic
 import Capless.Weakening.Subtyping
+import Capless.Weakening.Subcapturing
+import Capless.Weakening.CaptureBound
 import Capless.Weakening.Typing
 import Capless.Inversion.Context
 
@@ -69,10 +71,10 @@ This handles the most complex case due to the interaction with capture sets:
 namespace Capless
 
 structure VarSubst (Γ : Context n m k) (f : FinFun n n') (Δ : Context n' m k) where
-  map : ∀ x E, Γ.Bound x E -> Typed Δ (Term.var (f x)) (EType.type (E.rename f)) {x=f x}
+  map : ∀ x E, Γ.Bound x E -> Typed Δ (Term.var (f x)) (EType.type (E.rename f)) {x=f x|.top}
   tmap : ∀ X b, Γ.TBound X b -> Δ.TBound X (b.rename f)
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c (b.rename f)
-  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound (f l) (S.rename f)
+  lmap : ∀ l c S, Γ.LBound l c S -> Δ.LBound (f l) c (S.rename f)
 
 structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k) where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.trename f)
@@ -81,7 +83,7 @@ structure TVarSubst (Γ : Context n m k) (f : FinFun m m') (Δ : Context n m' k)
   tmap_inst : ∀ X S, Γ.TBound X (TBinding.inst S) ->
     Δ.TBound (f X) (TBinding.inst (S.trename f))
   cmap : ∀ c b, Γ.CBound c b -> Δ.CBound c b
-  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.trename f)
+  lmap : ∀ l c S, Γ.LBound l c S -> Δ.LBound l c (S.trename f)
 
 structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k') where
   map : ∀ x E, Γ.Bound x E -> Δ.Bound x (E.crename f)
@@ -89,8 +91,8 @@ structure CVarSubst (Γ : Context n m k) (f : FinFun k k') (Δ : Context n m k')
   cmap : ∀ c C, Γ.CBound c (CBinding.inst C) ->
     Δ.CBound (f c) (CBinding.inst (C.crename f))
   cmap_bound : ∀ c B, Γ.CBound c (CBinding.bound B) ->
-    Subbound Δ (CBound.upper {c=f c}) (B.crename f)
-  lmap : ∀ l S, Γ.LBound l S -> Δ.LBound l (S.crename f)
+    Subbound Δ (.upper {c=f c|.top}) (B.crename f)
+  lmap : ∀ l c S, Γ.LBound l c S -> Δ.LBound l c (S.crename f)
 
 def VarSubst.ext {Γ : Context n m k}
   (σ : VarSubst Γ f Δ)
@@ -128,10 +130,10 @@ def VarSubst.ext {Γ : Context n m k}
       rw [<- CBinding.weaken_rename]
       constructor; trivial
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_var hb0 =>
-      have hb1 := σ.lmap _ _ hb0
+      have hb1 := σ.lmap _ _ _ hb0
       rw [<- SType.weaken_rename]
       constructor; trivial
 
@@ -166,10 +168,10 @@ def VarSubst.text {Γ : Context n m k}
       have hb1 := σ.cmap _ _ hb0
       constructor; trivial
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_tvar hb0 =>
-      have hb1 := σ.lmap _ _ hb0
+      have hb1 := σ.lmap _ _ _ hb0
       rw [SType.tweaken_rename]
       constructor; aesop
 
@@ -205,10 +207,10 @@ def VarSubst.cext {Γ : Context n m k}
       rw [CBinding.cweaken_rename_comm]
       constructor; trivial
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb
     case there_cvar hb0 =>
-      have hb1 := σ.lmap _ _ hb0
+      have hb1 := σ.lmap _ _ _ hb0
       rw [SType.cweaken_rename_comm]
       constructor; aesop
 
@@ -262,10 +264,10 @@ def TVarSubst.cext {Γ : Context n m k}
       constructor
       exact hb''
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_cvar hb0 =>
-      have hb' := σ.lmap _ _ hb0
+      have hb' := σ.lmap _ _ _ hb0
       rw [<- SType.cweaken_trename]
       constructor
       assumption
@@ -323,10 +325,10 @@ def TVarSubst.ext {Γ : Context n m k}
       constructor
       exact hb''
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_var hb0 =>
-      have hb' := σ.lmap _ _ hb0
+      have hb' := σ.lmap _ _ _ hb0
       rw [<- SType.weaken_trename]
       constructor
       assumption
@@ -355,12 +357,12 @@ def TVarSubst.text {Γ : Context n m k}
         simp [FinFun.ext]
         apply SSubtyp.tvar
         cases T
-        case bound T =>
+        case a.bound T =>
           simp at hbnd
           rw [hbnd]
           rw [<-SType.tweaken_trename]
           constructor
-        case inst T =>
+        case a.inst T =>
           simp at hbnd
       case inr hb' =>
         obtain ⟨T', X',  hb', heq, heq'⟩ := hb'
@@ -414,10 +416,10 @@ def TVarSubst.text {Γ : Context n m k}
         constructor
         exact hb''
     case lmap =>
-      intros l S hb
+      intros l c S hb
       cases hb
       case there_tvar hb0 =>
-        have hb' := σ.lmap _ _ hb0
+        have hb' := σ.lmap _ _ _ hb0
         rw [<- SType.tweaken_trename]
         constructor
         assumption
@@ -461,10 +463,10 @@ def CVarSubst.ext {Γ : Context n m k}
       constructor
       trivial
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_var hb0 =>
-      have hb' := σ.lmap _ _ hb0
+      have hb' := σ.lmap _ _ _ hb0
       rw [<- SType.weaken_crename]
       constructor
       assumption
@@ -474,9 +476,7 @@ def CVarSubst.ext {Γ : Context n m k}
     cases b0 <;> cases he0
     have h := σ.cmap_bound _ _ hb'
     rw [<- CBound.crename_rename_comm]
-    rw [<- CaptureSet.weaken_csingleton]
-    rw [<- CBound.weaken_upper]
-    apply Subbound.weaken; easy
+    apply h.weaken
 
 def CVarSubst.text {Γ : Context n m k}
   (σ : CVarSubst Γ f Δ) :
@@ -513,12 +513,12 @@ def CVarSubst.text {Γ : Context n m k}
       cases hb
       rename_i hb0
       have h0 := σ.cmap_bound _ _ hb0
-      apply Subbound.tweaken; easy
+      apply h0.tweaken
     case lmap =>
-      intros l S hb
+      intros l c S hb
       cases hb
       case there_tvar hb0 =>
-        have hb' := σ.lmap _ _ hb0
+        have hb' := σ.lmap _ _ _ hb0
         rw [<- SType.tweaken_crename]
         constructor
         assumption
@@ -574,10 +574,10 @@ def CVarSubst.cext {Γ : Context n m k}
         constructor
         trivial
   case lmap =>
-    intros l S hb
+    intros l c S hb
     cases hb
     case there_cvar hb0 =>
-      have hb' := σ.lmap _ _ hb0
+      have hb' := σ.lmap _ _ _ hb0
       rw [<- SType.cweaken_crename]
       constructor
       assumption
@@ -592,12 +592,13 @@ def CVarSubst.cext {Γ : Context n m k}
       simp [FinFun.ext_zero]
       rename_i cb
       cases cb
-      case star =>
-        simp [CBinding.crename, CBound.crename]
-        constructor
+      case kind k =>
+        simp only [CBinding.crename, CBound.crename]
+        apply Subbound.set_kind
+        apply CaptureKind.cvar_top .here
       case upper D0 =>
         constructor
-        apply Subcapt.cbound
+        apply Subcapt.cbound_top
         rw [<- CaptureSet.cweaken_def]
         rw [<- CaptureSet.cweaken_crename]
         constructor
@@ -644,7 +645,7 @@ def VarSubst.open
       simp [CBinding.rename_id]
       trivial
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb
     case there_var hb0 =>
       simp [SType.weaken, SType.rename_rename, FinFun.open_comp_weaken]
@@ -663,7 +664,7 @@ def VarSubst.narrow
       simp [CType.rename_id]
       apply Typed.sub
       apply Typed.bound_typing; constructor
-      apply Subcapt.refl
+      apply Subcapt.rfl
       apply ESubtyp.type
       apply hs.weaken
     case there_var hb0 =>
@@ -685,7 +686,7 @@ def VarSubst.narrow
       simp [CBinding.rename_id]
       constructor; trivial
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb
     case there_var hb0 =>
       simp [SType.rename_id]
@@ -720,26 +721,39 @@ def CVarSubst.narrow
     have h := Context.cvar_cbound_inv hb
     cases h
     case inl h =>
-      have ⟨he1, he2⟩ := h
-      cases he1; cases he2
+      have ⟨he1, he2⟩ := h; simp_all
       simp [CBound.crename_id]
       simp [FinFun.id]
-      apply Subbound.trans (B2:=B'.cweaken)
-      { cases B' <;> constructor
-        apply Subcapt.cbound
-        constructor }
-      { apply Subbound.cweaken; easy }
+      cases hs
+      case set hs =>
+        cases he2
+        constructor
+        apply Subcapt.trans (.cbound_top .here) hs.cweaken
+      case kind hsk =>
+        cases he2
+        constructor
+        apply CaptureKind.sub hsk (.cvar_top .here)
+      case set_kind hk =>
+        cases he2
+        constructor
+        apply CaptureKind.cbound_top .here hk.cweaken
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases b1 <;> cases he1
       cases he2
       simp [FinFun.id, CBound.crename_id]
       rename_i cb0
-      cases cb0 <;> constructor
-      apply Subcapt.cbound
-      have hb1' := Context.CBound.there_cvar (b':=CBinding.bound B') hb1
-      simp [CBinding.cweaken] at hb1'
-      exact hb1'
+      cases cb0
+      case upper =>
+        constructor
+        apply Subcapt.cbound_top hb1.there_cvar
+      case kind =>
+        constructor
+        apply CaptureKind.cvar_top hb1.there_cvar
+  case lmap =>
+    intro x cl S hb
+    simp [SType.crename_id]
+    cases hb; constructor; easy
 
 def TVarSubst.narrow
   (hs : SSubtyp Γ S' S) :
@@ -791,7 +805,7 @@ def TVarSubst.narrow
     constructor
     trivial
   case lmap =>
-    intro l S hb
+    intro l c S hb
     simp [SType.trename_id]
     cases hb
     constructor
@@ -838,15 +852,15 @@ def TVarSubst.open :
   , cmap := fun c b hb => by
       cases hb
       trivial
-  , lmap := fun l S hb => by
+  , lmap := fun l c S hb => by
       cases hb
-      simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id, FinFun.open]
+      simp [SType.tweaken, SType.trename_trename, FinFun.open_comp_weaken, SType.trename_id]
       assumption
   }
 
 def CVarSubst.open :
   CVarSubst
-    (Γ.cvar (CBinding.bound (CBound.upper {c=c})))
+    (Γ.cvar (CBinding.bound (CBound.upper {c=c|.top})))
     (FinFun.open c)
     Γ := by
   constructor
@@ -879,9 +893,9 @@ def CVarSubst.open :
       have ⟨he1, he2⟩ := h
       cases he1; cases b0 <;> cases he2
       simp [FinFun.open]
-      simp [CBound.crename, CaptureSet.crename_csingleton]
+      simp [CBound.crename]
       simp [FinFun.weaken, FinFun.open]
-      constructor; apply Subcapt.refl
+      constructor; apply Subcapt.rfl
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases b1 <;> cases he1
@@ -890,21 +904,24 @@ def CVarSubst.open :
       simp [CBound.crename_crename]
       simp [FinFun.open_comp_weaken, CBound.crename_id]
       rename_i cb; cases cb
-      case star => constructor
+      case kind K =>
+        constructor
+        apply! CaptureKind.cvar_top
       case upper D0 =>
         constructor
-        apply Subcapt.cbound
+        apply Subcapt.cbound_top
         easy
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb
     simp [SType.cweaken, SType.crename_crename, FinFun.open_comp_weaken]
     simp [SType.crename_id]
     trivial
 
-def CVarSubst.instantiate {Γ : Context n m k} :
+def CVarSubst.instantiate {Γ : Context n m k}
+  (hk : CaptureBound Γ C B) :
   CVarSubst
-    (Γ.cvar (CBinding.bound CBound.star))
+    (Γ.cvar (CBinding.bound B))
     FinFun.id
     (Γ.cvar (CBinding.inst C)) := by
   constructor
@@ -929,7 +946,7 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     constructor
     trivial
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb
     simp [SType.crename_id]
     constructor; trivial
@@ -940,8 +957,16 @@ def CVarSubst.instantiate {Γ : Context n m k} :
     case inl h =>
       have ⟨he1, he2⟩ := h
       subst he1
-      cases b0 <;> cases he2
+      cases hk <;> cases b0 <;> cases he2
       constructor
+      rename_i C2 hsub
+      apply Subcapt.trans
+      apply Subcapt.cinstr_top .here
+      simp [CaptureSet.crename_id]
+      exact hsub.cweaken (b:=CBinding.inst C)
+      constructor
+      rename_i hk
+      apply CaptureKind.cinstr_top .here hk.cweaken
     case inr h =>
       have ⟨b1, c1, hb1, he1, he2⟩ := h
       cases he2
@@ -949,13 +974,14 @@ def CVarSubst.instantiate {Γ : Context n m k} :
       rename_i cb
       simp [FinFun.id, CBound.crename_id]
       cases cb
-      case star => constructor
+      case kind K1 =>
+        constructor
+        apply CaptureKind.cvar_top hb1.there_cvar
       case upper D0 =>
         constructor
-        apply Subcapt.cbound
+        apply Subcapt.cbound_top
         rw [<- CaptureSet.cweaken_def]
         rw [<- CBound.cweaken_upper]
         rw [<- CBinding.cweaken_bound]
         constructor; easy
-
 end Capless

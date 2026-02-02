@@ -26,22 +26,27 @@ This module proves that the reduction of a well-typed term preserves its type. T
 
 namespace Capless
 
-inductive Preserve : Context n m k -> EType n m k -> State n' m' k' -> Prop where
+inductive Preserve : Context n m k -> EType n m k -> CaptureSet n k -> State n' m' k' -> Prop where
 | mk :
-  TypedState state Γ E ->
-  Preserve Γ E state
+  TypedState state Γ E R' ->
+  R' ⊆ R ->
+  Preserve Γ E R state
 | mk_weaken :
-  TypedState state (Γ.var P) E.weaken ->
-  Preserve Γ E state
+  TypedState state (Γ.var P) E.weaken R' ->
+  R' ⊆ (R.weaken ∪ {x=0|.top}) ->
+  Preserve Γ E R state
 | mk_tweaken :
-  TypedState state (Γ.tvar b) E.tweaken ->
-  Preserve Γ E state
+  TypedState state (Γ.tvar b) E.tweaken R' ->
+  R' ⊆ R ->
+  Preserve Γ E R state
 | mk_cweaken :
-  TypedState state (Γ.cvar b) E.cweaken ->
-  Preserve Γ E state
+  TypedState state (Γ.cvar b) E.cweaken R' ->
+  R' ⊆ (R.cweaken ∪ {c=0|.top}) ->
+  Preserve Γ E R state
 | mk_enter :
-  TypedState state ((Γ.label S).cvar b) E.weaken.cweaken ->
-  Preserve Γ E state
+  TypedState state ((Γ.label c S).cvar b) E.weaken.cweaken R' ->
+  R' ⊆ (R.weaken.cweaken ∪ {x=0|.top} ∪ {c=0|.top}) ->
+  Preserve Γ E R state
 
 theorem value_typing_widen
   (hv : Typed Γ v (EType.type (S^C)) Cv)
@@ -50,10 +55,10 @@ theorem value_typing_widen
     cases hs
     apply Typed.sub
     easy
-    apply Subcapt.refl
+    apply Subcapt.rfl
     constructor
     constructor
-    apply Subcapt.refl
+    apply Subcapt.rfl
     easy
 
 theorem EType.weaken_cweaken_helper {S : SType n m k} :
@@ -64,37 +69,45 @@ theorem EType.weaken_cweaken_helper {S : SType n m k} :
 
 theorem preservation
   (hr : Reduce state state')
-  (ht : TypedState state Γ E) :
-  Preserve Γ E state' := by
+  (ht : TypedState state Γ E R) :
+  Preserve Γ E R state' := by
   cases hr
-  case apply hl =>
+  case apply y _ hl =>
     cases ht
-    case mk hs hsc ht hc =>
+    case mk hs ht hc hr hsc =>
       have hg := TypedStore.is_tight hs
       have ⟨T0, Cf, F0, E0, hx, hy, he1, hs1⟩:= Typed.app_inv ht
       have ⟨Sv, Cv, Cv0, hv, hbx, hvs⟩ := Store.lookup_inv_typing hl hs hx
       have hv' := value_typing_widen hv hvs
       have ⟨hcfs, hcft⟩ := Typed.canonical_form_lam hg hv'
+      have ⟨R', hsub', hr'⟩ : ∃ R' ⊆ R, ReachSet Γ ((Cv.weaken ∪ {x=0|.top}).open y) R' := by {
+        have ht1 := Typed.app_inv_capt ht
+        have ⟨R1, hss1, h1⟩ := hr.subcapt ht1
+        simp [CaptureSet.open]
+        simp [FinFun.open, CaptureSet.weaken, CaptureSet.rename_rename]
+        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
+        cases h1; rename_i R2 R3 h2 h3
+        have ⟨hss1l, hss1r⟩ := CaptureSet.Subset.union_l_inv hss1
+        have ⟨RCv, hscv, hcv⟩ := h2.var_inv hbx
+        exists RCv ∪ R3
+        apply And.intro
+        . apply CaptureSet.Subset.union_l (.trans hscv hss1l) hss1r
+        . apply hcv.union h3
+      }
       constructor
       constructor
       { easy }
       { apply Typed.sub
         { apply Typed.open (h := hcft)
           exact hy }
-        { apply Subcapt.refl }
+        { apply Subcapt.rfl }
         { subst he1
           easy } }
-      { have h1 := Typed.app_inv_capt ht
-        have h2 := WellScoped.subcapt hsc h1
-        simp [CaptureSet.open]
-        simp [FinFun.open, CaptureSet.weaken, CaptureSet.rename_rename]
-        simp [FinFun.open_comp_weaken, CaptureSet.rename_id]
-        cases h2; rename_i h2 h3
-        apply WellScoped.union
-        { apply WellScoped.var_inv
-          exact h2; easy }
-        { easy } }
-      { easy }
+      { exact hr' }
+      { apply! hsc.subset }
+      { simp [CaptureSet.open, CaptureSet.rename, FinFun.open]
+        simp [CaptureSet.weaken, CaptureSet.rename_rename, FinFun.open_comp_weaken, CaptureSet.rename_id]
+        easy }
   case tapply hl =>
     cases ht
     case mk hs hsc ht hc =>
@@ -108,7 +121,7 @@ theorem preservation
       { easy }
       { apply Typed.sub
         { apply Typed.topen (h := hft) }
-        { apply Subcapt.refl }
+        { apply Subcapt.rfl }
         { subst he0
           easy } }
       { have h1 := Typed.tapp_inv_capt ht
@@ -130,7 +143,7 @@ theorem preservation
       { easy }
       { apply Typed.sub
         { apply Typed.copen hct }
-        { apply Subcapt.refl }
+        { apply Subcapt.rfl }
         { subst he1
           exact hs1 } }
       { have h1 := Typed.capp_inv_capt ht
@@ -152,21 +165,21 @@ theorem preservation
       { apply WellScoped.cons; easy }
       { constructor
         apply Typed.sub <;> try easy
-        apply Subcapt.refl
+        apply Subcapt.rfl
         apply ESubtyp.weaken; easy
         { easy }
         easy }
   case push_ex =>
     cases ht
     case mk hs hsc ht hc =>
-      have ⟨T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
+      have ⟨B, T, E0, htt, htu, hsub⟩ := Typed.letex_inv ht
       constructor
       constructor
       { exact hs }
       { exact htt }
       { apply WellScoped.conse; easy }
       { constructor
-        apply Typed.sub; exact htu; apply Subcapt.refl
+        apply Typed.sub; exact htu; apply Subcapt.rfl
         apply ESubtyp.weaken
         apply ESubtyp.cweaken; exact hsub
         { easy }
@@ -193,9 +206,9 @@ theorem preservation
       cases hc
       case conse hu hsc hc0 =>
         have hg := TypedStore.is_tight hs
-        have hx := Typed.canonical_form_pack hg ht
-        rename_i C _ _ _ _ _ _ _
-        have hu1 := hu.cinstantiate_extvar (C := C)
+        have ⟨hb, hx⟩ := Typed.canonical_form_pack hg ht
+        rename_i C _ _ _ _ _ _ _ _
+        have hu1 := hu.cinstantiate_extvar (C := C) hb
         have hu2 := hu1.open hx
         simp [EType.weaken, EType.open, EType.rename_rename] at hu2
         simp [FinFun.open_comp_weaken] at hu2
@@ -228,7 +241,7 @@ theorem preservation
       constructor
       { constructor; exact hs }
       { apply Typed.sub
-        exact ht; apply Subcapt.refl
+        exact ht; apply Subcapt.rfl
         apply ESubtyp.tweaken; exact hsub }
       { apply hsc.tweaken }
       { apply TypedCont.tweaken; exact hc }
@@ -240,18 +253,18 @@ theorem preservation
       constructor
       { constructor; exact hs }
       { apply Typed.sub
-        exact ht; apply Subcapt.refl
+        exact ht; apply Subcapt.rfl
         apply ESubtyp.cweaken; exact hsub }
       { apply hsc.cweaken }
       { apply TypedCont.cweaken; exact hc }
   case enter =>
     cases ht
     case mk hs hsc ht hc =>
-      have ⟨ht0, hsub0⟩ := Typed.boundary_inv ht
+      have ⟨hsc, ht0, hsub0⟩ := Typed.boundary_inv ht
       apply Preserve.mk_enter
       constructor
       { constructor; constructor; easy }
-      { apply Typed.boundary_body_typing ht0 }
+      { apply Typed.boundary_body_typing hsc ht0 }
       { repeat any_goals apply WellScoped.union
         { rw [CaptureSet.weaken_cweaken]
           apply WellScoped.scope
@@ -280,9 +293,9 @@ theorem preservation
       { easy }
       { apply Typed.sub
         { exact ht1 }
-        { apply Subcapt.refl }
+        { apply Subcapt.rfl }
         { constructor; easy } }
-      { have ht1 := Typed.sub ht Subcapt.refl (ESubtyp.type hsub)
+      { have ht1 := Typed.sub ht Subcapt.rfl (ESubtyp.type hsub)
         have hy := Typed.var_inv_cs ht1
         apply WellScoped.subcapt
         apply WellScoped.empty
@@ -294,14 +307,14 @@ theorem preservation
       rename_i hv _ _ _
       cases hc
       case scope hsub hbl hc0 =>
-        have ht1 := Typed.sub ht Subcapt.refl (ESubtyp.type hsub)
+        have ht1 := Typed.sub ht Subcapt.rfl (ESubtyp.type hsub)
         have ht2 := Typed.val_precise_cv ht1 hv
         apply Preserve.mk
         constructor
         { easy }
         { apply Typed.sub
           { exact ht2 }
-          { apply Subcapt.refl }
+          { apply Subcapt.rfl }
           { apply ESubtyp.refl } }
         { constructor }
         { easy }
@@ -311,7 +324,7 @@ theorem preservation
       have hg := TypedStore.is_tight hs
       have ⟨S0, C0, hx, hy⟩ := Typed.invoke_inv ht
       have h1 := Store.bound_label hl hs
-      have ⟨S0, hbx, hsub⟩ := Typed.label_inv_sub hx h1 hg
+      have ⟨c0, S0, hbx, hsub⟩ := Typed.label_inv_sub hx h1 hg
       have ⟨Ct1, hc1⟩ := Cont.has_label_tail_inv hc hbx hhl
       apply Preserve.mk
       constructor
@@ -323,6 +336,6 @@ theorem preservation
         easy }
       { apply hc1.narrow
         constructor; constructor
-        apply Subcapt.refl; easy }
+        apply Subcapt.rfl; easy }
 
 end Capless

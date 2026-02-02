@@ -14,12 +14,12 @@ This file defines the renaming operations for types.
 def CBound.rename (b : CBound n k) (f : FinFun n n') : CBound n' k :=
   match b with
   | upper C => upper (C.rename f)
-  | star => star
+  | kind k => kind k
 
 def CBound.crename (b : CBound n k) (f : FinFun k k') : CBound n k' :=
   match b with
   | upper C => upper (C.crename f)
-  | star => star
+  | kind k => kind k
 
 def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
   b.rename FinFun.weaken
@@ -27,10 +27,13 @@ def CBound.weaken (b : CBound n k) : CBound (n+1) k :=
 def CBound.cweaken (b : CBound n k) : CBound n (k+1) :=
   b.crename FinFun.weaken
 
+def CBound.cweaken1 (b : CBound n (k + 1)) : CBound n (k+2) :=
+  b.crename FinFun.weaken.ext
+
 mutual
 
 def EType.rename : EType n m k -> FinFun n n' -> EType n' m k
-| EType.ex T, f => EType.ex (T.rename f)
+| EType.ex B T, f => EType.ex (B.rename f) (T.rename f)
 | EType.type T, f => EType.type (T.rename f)
 
 def CType.rename : CType n m k -> FinFun n n' -> CType n' m k
@@ -44,13 +47,14 @@ def SType.rename : SType n m k -> FinFun n n' -> SType n' m k
 | SType.cforall B E, f => SType.cforall (B.rename f) (E.rename f)
 | SType.box T, f => SType.box (T.rename f)
 | SType.label S, f => SType.label (S.rename f)
+| SType.maybe T, f => SType.maybe (T.rename f)
 
 end
 
 mutual
 
 def EType.trename : EType n m k -> FinFun m m' -> EType n m' k
-| EType.ex T, f => EType.ex (T.trename f)
+| EType.ex B T, f => EType.ex B (T.trename f)
 | EType.type T, f => EType.type (T.trename f)
 
 def CType.trename : CType n m k -> FinFun m m' -> CType n m' k
@@ -64,13 +68,14 @@ def SType.trename : SType n m k -> FinFun m m' -> SType n m' k
 | SType.cforall B E, f => SType.cforall B (E.trename f)
 | SType.box T, f => SType.box (T.trename f)
 | SType.label S, f => SType.label (S.trename f)
+| SType.maybe T, f => SType.maybe (T.trename f)
 
 end
 
 mutual
 
 def EType.crename : EType n m k -> FinFun k k' -> EType n m k'
-| EType.ex T, f => EType.ex (T.crename f.ext)
+| EType.ex B T, f => EType.ex (B.crename f) (T.crename f.ext)
 | EType.type T, f => EType.type (T.crename f)
 
 def CType.crename : CType n m k -> FinFun k k' -> CType n m k'
@@ -84,6 +89,7 @@ def SType.crename : SType n m k -> FinFun k k' -> SType n m k'
 | SType.cforall B E, f => SType.cforall (B.crename f) (E.crename f.ext)
 | SType.box T, f => SType.box (T.crename f)
 | SType.label S, f => SType.label (S.crename f)
+| SType.maybe T, f => SType.maybe (T.crename f)
 
 end
 

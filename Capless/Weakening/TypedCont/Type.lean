@@ -30,7 +30,7 @@ This is crucial for maintaining soundness when type abstractions are introduced.
 namespace Capless
 
 theorem EType.tweaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).tweaken = EType.ex T.tweaken := by
+  (EType.ex B T).tweaken = EType.ex B T.tweaken := by
   simp [EType.tweaken, EType.trename, CType.tweaken]
 
 -- theorem EType.tweaken_type (T : CType n m k) :
@@ -54,41 +54,48 @@ theorem Cont.HasLabel.tweaken
   case there_tval => simp [Cont.tweaken]; apply there_tval; aesop
   case there_cval => simp [Cont.tweaken]; apply there_cval; aesop
   case there_label => simp [Cont.tweaken]; apply there_label; aesop
+  case there_intercept => apply! there_intercept
+
+theorem ReachSet.tweaken
+  (hr : ReachSet Γ C R)
+  : ReachSet (Γ.tvar b) C R := by
+  induction hr
+  case empty => constructor
+  case union ha hb => apply! union
+  case var hb hr ih =>
+    have hb1 := hb.there_tvar (b:=b)
+    apply var hb1
+    exact ih
+  case cinstr hb hr ih =>
+    have hb1 := hb.there_tvar (b':=b)
+    apply cinstr hb1
+    exact ih
+  case cbound hb hr ih =>
+    have hb1 := hb.there_tvar (b':=b)
+    apply cbound hb1
+    exact ih
+  case ckind hb =>
+    have hb1 := hb.there_tvar (b':=b)
+    apply ckind hb1
+  case label hb =>
+    have hb1 := hb.there_tvar (b:=b)
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem WellScoped.tweaken
   (h : WellScoped Γ cont Ct) :
   WellScoped (Γ.tvar b) cont.tweaken Ct := by
   induction h
-  case empty => constructor
-  case union ih1 ih2 => apply union <;> aesop
-  case singleton hb _ ih =>
-    apply singleton
-    { have hb1 := Context.Bound.there_tvar (b := b) hb
-      simp [CType.tweaken, CType.trename] at hb1
-      exact hb1 }
-    { exact ih }
-  case csingleton hb _ ih =>
-    apply csingleton
-    { have hb1 := Context.CBound.there_tvar (b' := b) hb
-      simp [CType.tweaken, CType.trename] at hb1
-      exact hb1 }
-    { exact ih }
-  case cbound hb _ ih =>
-    apply cbound
-    { have hb1 := Context.CBound.there_tvar (b' := b) hb
-      simp [CType.tweaken, CType.trename] at hb1
-      exact hb1 }
-    { exact ih }
-  case label hb hs =>
-    apply label
-    { have hb1 := Context.LBound.there_tvar (b := b) hb
-      simp [CType.tweaken, CType.trename] at hb1
-      exact hb1 }
-    { apply hs.tweaken }
+  case empty => apply! empty
+  case union ha hb => apply! union
+  case ckind hb => apply! ckind hb.there_tvar
+  case label hb hl => apply label hb.there_tvar hl.tweaken
+  case label_disj hb hd => apply! label_disj hb.there_tvar
+  case absurd => apply! absurd
 
 theorem TypedCont.tweaken
-  (h : TypedCont Γ E t E' C0) :
-  TypedCont (Γ.tvar S) E.tweaken t.tweaken E'.tweaken C0 := by
+  (h : TypedCont Γ E Cin t E' C0) :
+  TypedCont (Γ.tvar S) E.tweaken Cin t.tweaken E'.tweaken C0 := by
   induction h
   case none =>
     simp [Cont.tweaken]
@@ -122,5 +129,14 @@ theorem TypedCont.tweaken
     apply ih
     have h := hs.tweaken (b:=S)
     aesop
+  case intercept ht hsc h hs ih =>
+    apply intercept
+    { have ht1 := ht.tweaken_text_ext_ext (b2:=S)
+      rw [TBinding.trename, SType.trename, CType.trename, SType.trename, SType.trename, FinFun.ext_zero, CType.trename, SType.trename, FinFun.ext_zero] at ht1
+      rw [EType.trename, CType.trename, ← SType.weaken_trename, ← SType.weaken_trename, ← SType.tweaken_trename] at ht1
+      exact ht1 }
+    apply hsc.tweaken
+    apply ih
+    apply hs.tweaken
 
 end Capless

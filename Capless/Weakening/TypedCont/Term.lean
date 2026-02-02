@@ -40,8 +40,8 @@ theorem CaptureSet.weaken1_weaken (C : CaptureSet n k) :
   rw [<- FinFun.comp_weaken]
 
 theorem EType.weaken_ex (T : CType n m (k+1)) :
-  (EType.ex T).weaken = EType.ex T.weaken := by
-  simp [EType.weaken, EType.rename, CType.weaken]
+  (EType.ex B T).weaken = EType.ex B.weaken T.weaken := by
+  simp [EType.weaken, EType.rename, CType.weaken, CBound.weaken]
 
 theorem EType.weaken_cweaken (E : EType n m k) :
   E.cweaken.weaken = E.weaken.cweaken := by
@@ -70,41 +70,84 @@ theorem Cont.HasLabel.weaken
   case there_label ih =>
     simp [Cont.weaken]
     apply there_label; trivial
+  case there_intercept ih =>
+    apply there_intercept; trivial
+
+-- theorem WellScoped.weaken
+--   (h : WellScoped Γ cont Ct) :
+--   WellScoped (Γ.var T) cont.weaken Ct.weaken := by
+--   induction h
+--   case empty => simp [CaptureSet.weaken]; constructor
+--   case union ih1 ih2 =>
+--     simp [CaptureSet.weaken] at *
+--     apply union <;> aesop
+--   case singleton hb _ ih =>
+--     apply singleton
+--     { simp [FinFun.weaken]
+--       have hb1 := Context.Bound.there_var (E':=T) hb
+--       simp [CType.weaken, CType.rename] at hb1
+--       exact hb1 }
+--     { rw [← CaptureSet.proj_rename]; exact ih }
+--   case csingleton hb _ ih =>
+--     apply csingleton
+--     { have hb1 := Context.CBound.there_var (E:=T) hb
+--       exact hb1 }
+--     { rw [← CaptureSet.proj_rename]; exact ih }
+--   case cbound hb _ ih =>
+--     apply cbound
+--     { have hb1 := Context.CBound.there_var (E:=T) hb
+--       exact hb1 }
+--     { rw [← CaptureSet.proj_rename]; exact ih }
+--   case ckind hb => apply ckind hb.there_var
+--   case label hb hs =>
+--     apply label
+--     { have hb1 := Context.LBound.there_var (E:=T) hb
+--       exact hb1 }
+--     { apply hs.weaken }
+--   case label_disj hb hd => apply label_disj hb.there_var hd
+
+theorem ReachSet.weaken
+  (hr : ReachSet Γ C R)
+  : ReachSet (Γ.var T) C.weaken R.weaken := by
+  induction hr
+  case empty => constructor
+  case union ha hb => apply! union
+  case var hb hr ih =>
+    have hb1 := hb.there_var (E':=T)
+    simp [CType.weaken, CType.rename] at hb1
+    apply var hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case cinstr hb hr ih =>
+    have hb1 := hb.there_var (E:=T)
+    apply cinstr hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case cbound hb hr ih =>
+    have hb1 := hb.there_var (E:=T)
+    apply cbound hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case ckind hb =>
+    have hb1 := hb.there_var (E:=T)
+    apply ckind hb1
+  case label hb =>
+    have hb1 := hb.there_var (E:=T)
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem WellScoped.weaken
   (h : WellScoped Γ cont Ct) :
   WellScoped (Γ.var T) cont.weaken Ct.weaken := by
   induction h
-  case empty => simp [CaptureSet.weaken]; constructor
-  case union ih1 ih2 =>
-    simp [CaptureSet.weaken] at *
-    apply union <;> aesop
-  case singleton hb _ ih =>
-    apply singleton
-    { simp [FinFun.weaken]
-      have hb1 := Context.Bound.there_var (E':=T) hb
-      simp [CType.weaken, CType.rename] at hb1
-      exact hb1 }
-    { exact ih }
-  case csingleton hb _ ih =>
-    apply csingleton
-    { have hb1 := Context.CBound.there_var (E:=T) hb
-      exact hb1 }
-    { exact ih }
-  case cbound hb _ ih =>
-    apply cbound
-    { have hb1 := Context.CBound.there_var (E:=T) hb
-      exact hb1 }
-    { exact ih }
-  case label hb hs =>
-    apply label
-    { have hb1 := Context.LBound.there_var (E:=T) hb
-      exact hb1 }
-    { apply hs.weaken }
+  case empty => apply! empty
+  case union ha hb => apply! union
+  case ckind hb => apply! ckind hb.there_var
+  case label hb hl => apply label hb.there_var hl.weaken
+  case label_disj hb hd => apply! label_disj hb.there_var
+  case absurd => apply! absurd
+
 
 theorem TypedCont.weaken
-  (h : TypedCont Γ E t E' C0) :
-  TypedCont (Γ.var T) E.weaken t.weaken E'.weaken C0.weaken := by
+  (h : TypedCont Γ E Cin t E' C0) :
+  TypedCont (Γ.var T) E.weaken Cin.weaken t.weaken E'.weaken C0.weaken := by
   induction h
   case none =>
     simp [Cont.weaken]
@@ -143,6 +186,22 @@ theorem TypedCont.weaken
     { aesop }
     { have h1 := hs.weaken (T:=T)
       aesop }
+  case intercept ht hsc hs h ih =>
+    apply intercept
+    { have ht1 := ht.weaken_text_ext_ext (P:=T)
+      simp [CType.rename, TBinding.rename,
+            EType.weaken, EType.rename] at ht1
+      simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ht1
+      simp [FinFun.ext_zero, FinFun.ext_ext_one] at ht1
+      simp [CaptureSet.weaken, SType.rename] at ht1
+      simp [CaptureSet.weaken, Term.weaken]
+
+            -- SType.rename, SType.weaken, SType.tweaken,
+            -- CaptureSet.proj_rename] at ht1
+      exact ht1 }
+    apply hsc.weaken
+    apply ih
+    apply h.weaken
 
 theorem Cont.HasLabel.lweaken
   (h : Cont.HasLabel cont x tail) :
@@ -163,41 +222,48 @@ theorem Cont.HasLabel.lweaken
   case there_label ih =>
     simp [Cont.weaken]
     apply there_label; trivial
+  case there_intercept => apply! there_intercept
+
+theorem ReachSet.lweaken
+  (hr : ReachSet Γ C R)
+  : ReachSet (Γ.label c S) C.weaken R.weaken := by
+  induction hr
+  case empty => constructor
+  case union ha hb => apply! union
+  case var hb hr ih =>
+    have hb1 := hb.there_label (c:=c) (S:=S)
+    apply var hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case cinstr hb hr ih =>
+    have hb1 := hb.there_label (c:=c) (S:=S)
+    apply cinstr hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case cbound hb hr ih =>
+    have hb1 := hb.there_label (c:=c) (S:=S)
+    apply cbound hb1
+    rw [← CaptureSet.proj_rename]; exact ih
+  case ckind hb =>
+    have hb1 := hb.there_label (c:=c) (S:=S)
+    apply ckind hb1
+  case label hb =>
+    have hb1 := hb.there_label (c':=c) (S':=S)
+    apply label hb1
+  case absurd he => apply! absurd
 
 theorem WellScoped.lweaken
   (h : WellScoped Γ cont Ct) :
-  WellScoped (Γ.label S) cont.weaken Ct.weaken := by
+  WellScoped (Γ.label c S) cont.weaken Ct.weaken := by
   induction h
-  case empty => simp [CaptureSet.weaken]; constructor
-  case union ih1 ih2 =>
-    simp [CaptureSet.weaken] at *
-    apply union <;> aesop
-  case singleton hb _ ih =>
-    apply singleton
-    { simp [FinFun.weaken]
-      have hb1 := Context.Bound.there_label (S:=S) hb
-      simp [CaptureSet.weaken, CaptureSet.rename] at hb1
-      exact hb1 }
-    { exact ih }
-  case csingleton hb _ ih =>
-    apply csingleton
-    { have hb1 := Context.CBound.there_label (S:=S) hb
-      exact hb1 }
-    { exact ih }
-  case cbound hb _ ih =>
-    apply cbound
-    { have hb1 := Context.CBound.there_label (S:=S) hb
-      exact hb1 }
-    { exact ih }
-  case label hb hs =>
-    apply label
-    { have hb1 := Context.LBound.there_label (S':=S) hb
-      exact hb1 }
-    { apply hs.lweaken }
+  case empty => apply! empty
+  case union ha hb => apply! union
+  case ckind hb => apply! ckind hb.there_label
+  case label hb hl => apply label hb.there_label hl.lweaken
+  case label_disj hb hd => apply! label_disj hb.there_label
+  case absurd => apply! absurd
 
 theorem TypedCont.lweaken
-  (h : TypedCont Γ E cont E' Ct) :
-  TypedCont (Γ.label S) E.weaken cont.weaken E'.weaken Ct.weaken := by
+  (h : TypedCont Γ Cin E cont E' Ct) :
+  TypedCont (Γ.label c S) Cin.weaken E.weaken cont.weaken E'.weaken Ct.weaken := by
   induction h
   case none =>
     simp [Cont.weaken]
@@ -211,7 +277,7 @@ theorem TypedCont.lweaken
     -- rw [heq]
     apply cons
     { rename_i ht _ _
-      have ht1 := ht.lweaken_ext (P := S)
+      have ht1 := ht.lweaken_ext (c:=c) (P := S)
       rw [EType.weaken1_weaken] at ht1
       rw [CaptureSet.weaken1_weaken] at ht1
       exact ht1 }
@@ -221,7 +287,7 @@ theorem TypedCont.lweaken
     simp [Cont.weaken, EType.weaken_ex]
     apply conse
     { rename_i ht _ _
-      have ht1 := ht.lweaken_cext_ext (P := S)
+      have ht1 := ht.lweaken_cext_ext (c:=c) (P := S)
       rw [EType.weaken1_weaken] at ht1
       rw [EType.weaken_cweaken] at ht1
       rw [CaptureSet.weaken1_weaken] at ht1
@@ -234,7 +300,23 @@ theorem TypedCont.lweaken
     apply scope
     { constructor; aesop }
     { aesop }
-    { have h1 := hs.lweaken (S:=S)
+    { have h1 := hs.lweaken (c:=c) (S:=S)
       aesop }
+  case intercept ht hsc hs h ih =>
+    apply intercept
+    { have ht1 := ht.lweaken_text_ext_ext (c := c) (P:=S)
+      simp [CType.rename, TBinding.rename,
+            EType.weaken, EType.rename] at ht1
+      simp [← SType.weaken_rename, SType.tweaken_rename, ← CaptureSet.weaken_rename, CaptureSet.proj_rename] at ht1
+      simp [FinFun.ext_zero, FinFun.ext_ext_one] at ht1
+      simp [CaptureSet.weaken, SType.rename] at ht1
+      simp [CaptureSet.weaken, Term.weaken]
+
+            -- SType.rename, SType.weaken, SType.tweaken,
+            -- CaptureSet.proj_rename] at ht1
+      exact ht1 }
+    apply hsc.lweaken
+    apply ih
+    apply h.lweaken
 
 end Capless

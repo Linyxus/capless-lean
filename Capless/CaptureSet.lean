@@ -2,6 +2,8 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.PImage
 import Capless.Basic
+import Capless.Classifier
+import Capless.Classifier.Intersection
 import Capless.Tactics
 namespace Capless
 
@@ -10,6 +12,12 @@ namespace Capless
 
 This file contains the definition of capture sets.
 -/
+
+inductive Singleton : Nat -> Nat -> Type where
+| var : Fin n -> Singleton n k
+| cvar : Fin k -> Singleton n k
+| reach : Fin n -> Singleton n k
+| creach : Fin k -> Singleton n k
 
 /-- Capture sets in System Capless.
 
@@ -29,15 +37,44 @@ Since the capture sets are indexed with the number of available binders, and eac
 inductive CaptureSet : Nat -> Nat -> Type where
 | empty : CaptureSet n k
 | union : CaptureSet n k -> CaptureSet n k -> CaptureSet n k
-| singleton : Fin n -> CaptureSet n k
-| csingleton : Fin k -> CaptureSet n k
+| singleton : Singleton n k -> Kind -> CaptureSet n k
+
+@[simp]
+def CaptureSet.proj (c : CaptureSet n k) (K : Kind) :=
+  match c with
+  | empty => empty
+  | union c1 c2 => union (c1.proj K) (c2.proj K)
+  | singleton s p => singleton s (p.intersect K)
+
+theorem CaptureSet.proj_top {C : CaptureSet n k} : C.proj .top = C := by
+  induction C
+  case empty => aesop
+  case union ha hb => aesop
+  case singleton => unfold proj; simp only [Kind.intersect.top_r]
+
+@[simp]
+def Singleton.with_reach (s: Singleton n k) :=
+  match s with
+  | var n => reach n
+  | cvar k => creach k
+  | reach n => reach n
+  | creach k => creach k
+
+@[simp]
+def CaptureSet.with_reach (c: CaptureSet n k) :=
+  match c with
+  | empty => empty
+  | union a b => union a.with_reach b.with_reach
+  | singleton s k => singleton s.with_reach k
 
 @[simp]
 instance : EmptyCollection (CaptureSet n k) where
   emptyCollection := CaptureSet.empty
 
-notation:max "{x=" x "}" => CaptureSet.singleton x
-notation:max "{c=" c "}" => CaptureSet.csingleton c
+notation:max "{x=" x " | " K "}" => CaptureSet.singleton (Singleton.var x) K
+notation:max "{c=" c " | " K "}" => CaptureSet.singleton (Singleton.cvar c) K
+notation:max "{x^=" x " | " K "}" => CaptureSet.singleton (Singleton.reach x) K
+notation:max "{c^=" c " | " K "}" => CaptureSet.singleton (Singleton.creach c) K
 
 @[simp]
 instance : Union (CaptureSet n k) where
@@ -57,30 +94,150 @@ inductive CaptureSet.Subset : CaptureSet n k → CaptureSet n k → Prop where
 | union_rr :
   Subset C C2 ->
   Subset C (C1 ∪ C2)
+| singleton_subkind :
+  K.Subkind L ->
+  Subset (.singleton s K) (.singleton s L)
+| singleton_absurd :
+  K.IsEmpty ->
+  Subset (.singleton s K) .empty
+| var_reach :
+  Subset (.singleton (.var x) K) (.singleton (.reach x) K)
+| cvar_creach :
+  Subset (.singleton (.cvar c) K) (.singleton (.creach c) K)
+| proj_merge:
+  Subset (.singleton s (L1 ++ L2)) (.union (.singleton s L1) (.singleton s L2))
+| trans : Subset A B -> Subset B C -> Subset A C
 
 @[simp]
 instance : HasSubset (CaptureSet n k) where
   Subset := CaptureSet.Subset
+
+theorem CaptureSet.Subset.union_l_inv (hs : Subset (.union a1 a2) b) : Subset a1 b ∧ Subset a2 b := by
+  generalize h : (CaptureSet.union a1 a2) = C at hs
+  induction hs generalizing a1 a2 <;> cases h
+  case rfl =>
+    apply And.intro
+    apply union_rl .rfl
+    apply union_rr .rfl
+  case union_l => apply! And.intro
+  case union_rl ha =>
+    have ⟨_, _⟩ := ha (.refl _)
+    apply And.intro <;> apply! union_rl
+  case union_rr ha =>
+    have ⟨_, _⟩ := ha (.refl _)
+    apply And.intro <;> apply! union_rr
+  case trans ha iha hb ihb =>
+    have ⟨_, _⟩ := ihb (.refl _)
+    apply And.intro <;> apply! trans _ ha
+
+
+-- theorem CaptureSet.Subset.trans (hs1 : Subset a b) (hs2 : Subset b c) : Subset a c := by
+--   induction hs1
+--   case empty => constructor
+--   case rfl => assumption
+--   case union_l ha hb iha ihb =>
+--     apply! union_l (iha _) (ihb _)
+--   case union_rl ha iha =>
+--     have ⟨_, _⟩ := hs2.union_l_inv
+--     apply! iha
+--   case union_rr ha iha =>
+--     have ⟨_, _⟩ := hs2.union_l_inv
+--     apply! iha
+--   case singleton_subkind s K L hs =>
+--     generalize h : (singleton s L) = D at hs2
+--     induction hs2 <;> cases h
+--     case rfl => apply! singleton_subkind
+--     case union_rl ih => apply union_rl (ih (.refl _))
+--     case union_rr ih => apply union_rr (ih (.refl _))
+--     case singleton_subkind hs2 => apply singleton_subkind (hs.trans hs2)
+--     case proj_merge hs2 => apply proj_merge (hs.trans hs2)
+--   case proj_merge
+
+
+
+@[simp]
+instance : IsTrans (CaptureSet n k) (HasSubset.Subset) where
+  trans a b c := CaptureSet.Subset.trans
+
+theorem CaptureSet.Subset.union_monotone {C1 C2 D1 D2 : CaptureSet n k} (hc : Subset C1 C2) (hd : Subset D1 D2) : Subset (C1 ∪ D1) (C2 ∪ D2) := by
+  apply union_l
+  apply! union_rl
+  apply! union_rr
+
+theorem CaptureSet.Subset.subkind {C : CaptureSet n k}
+  (hk : K.Subkind L)
+  : Subset (C.proj K) (C.proj L) := by
+  induction C
+  case empty => simp; constructor
+  case union ha hb => apply! union_monotone
+  case singleton => simp; apply singleton_subkind (Kind.Intersect.with_subkind hk)
+
+theorem CaptureSet.Subset.absurd {C : CaptureSet n k} (he : K.IsEmpty) : Subset (C.proj K) .empty := by
+  induction C
+  case empty => simp; constructor
+  case union ha hb =>
+    apply trans (.union_monotone ha hb)
+    apply union_l .rfl .rfl
+  case singleton => unfold proj; apply singleton_absurd; apply Kind.intersect.is_empty_r he
 
 /-!
 ## Renaming operations
 -/
 
 @[simp]
+def Singleton.rename (s : Singleton n k) (f : FinFun n n') : Singleton n' k :=
+  match s with
+  | var n => var $ f n
+  | cvar k => cvar k
+  | reach n => reach $ f n
+  | creach k => creach $ k
+
+@[simp]
+def Singleton.crename (s : Singleton n k) (f : FinFun k k') : Singleton n k' :=
+  match s with
+  | var n => var n
+  | cvar k => cvar $ f k
+  | reach n => reach n
+  | creach k => creach $ f k
+
+@[simp]
+theorem Singleton.rename_id {s : Singleton n k} :
+  s.rename FinFun.id = s := by
+  induction s <;> simp_all [FinFun.id]
+
+@[simp]
+theorem Singleton.crename_id {s : Singleton n k} :
+  s.crename FinFun.id = s := by
+  induction s <;> simp_all [FinFun.id]
+
+@[simp]
+theorem Singleton.rename_rename {s : Singleton n k} :
+  (s.rename f).rename g = s.rename (g ∘ f) := by
+  induction s <;> simp_all
+
+@[simp]
+theorem Singleton.crename_crename {s : Singleton n k} :
+  (s.crename f).crename g = s.crename (g ∘ f) := by
+  induction s <;> simp_all
+
+@[simp]
+theorem Singleton.crename_rename_comm {s : Singleton n k} {f : FinFun n n'} {g : FinFun k k'} :
+  (s.rename f).crename g = (s.crename g).rename f := by
+  induction s <;> simp_all
+
+@[simp]
 def CaptureSet.rename (C : CaptureSet n k) (f : FinFun n n') : CaptureSet n' k :=
   match C with
   | empty => empty
   | union C1 C2 => (C1.rename f) ∪ (C2.rename f)
-  | singleton x => {x=f x}
-  | csingleton c => {c=c}
+  | singleton s p => singleton (s.rename f) p
 
 @[simp]
 def CaptureSet.crename (C : CaptureSet n k) (f : FinFun k k') : CaptureSet n k' :=
   match C with
   | empty => empty
   | union C1 C2 => (C1.crename f) ∪ (C2.crename f)
-  | singleton x => {x=x}
-  | csingleton c => {c=f c}
+  | singleton s p => singleton (s.crename f) p
 
 def CaptureSet.weaken (C : CaptureSet n k) : CaptureSet (n+1) k :=
   C.rename FinFun.weaken
@@ -115,26 +272,27 @@ theorem CaptureSet.cweaken_union {C1 C2 : CaptureSet n k} :
   simp [CaptureSet.cweaken, CaptureSet.crename_union]
 
 theorem CaptureSet.rename_singleton {x : Fin n} {f : FinFun n n'} :
-  ({x=x} : CaptureSet n k).rename f = {x=f x} := by simp
+  ({x=x | K} : CaptureSet n k).rename f = {x=f x | K} := by simp
 
 theorem CaptureSet.ext_rename_singleton_zero {f : FinFun n n'} :
-  ({x=0} : CaptureSet (n+1) k).rename f.ext = {x=0} := by
+  ({x=0 | K} : CaptureSet (n+1) k).rename f.ext = {x=0 | K} := by
   simp [FinFun.ext]
 
 theorem CaptureSet.rename_csingleton {x : Fin k} {f : FinFun n n'} :
-  {c=x}.rename f = {c=x} := by simp
+  {c=x | K}.rename f = {c=x | K} := by simp
 
 theorem CaptureSet.crename_singleton {x : Fin n} {f : FinFun k k'} :
-  {x=x}.crename f = {x=x} := by simp
+  {x=x | K}.crename f = {x=x | K} := by simp
 
 theorem CaptureSet.crename_csingleton {x : Fin k} {f : FinFun k k'} :
-  ({c=x} : CaptureSet n k).crename f = {c=f x} := by simp
+  ({c=x | K} : CaptureSet n k).crename f = {c=f x | K} := by simp
 
 theorem CaptureSet.rename_empty :
   ({} : CaptureSet n k).rename f = {} := by simp
 
 theorem CaptureSet.crename_empty :
   ({} : CaptureSet n k).crename f = {} := by simp
+
 
 theorem CaptureSet.crename_rename_comm {C : CaptureSet n k} {f : FinFun n n'} {g : FinFun k k'} :
   (C.rename f).crename g = (C.crename g).rename f := by
@@ -172,16 +330,13 @@ theorem CaptureSet.cweaken_crename {C : CaptureSet n k} :
   (C.crename f).cweaken = C.cweaken.crename f.ext := by
   simp [cweaken, crename_crename, FinFun.comp_weaken]
 
-theorem CaptureSet.subset_refl {C : CaptureSet n k} :
-  C ⊆ C := by constructor
-
 theorem CaptureSet.cweaken_csingleton {c : Fin k} :
-  (CaptureSet.csingleton c : CaptureSet n k).cweaken = CaptureSet.csingleton (c.succ) := by
-  simp [csingleton, cweaken, crename, FinFun.weaken]
+  ({c=c | K} : CaptureSet n k).cweaken = {c=c.succ | K} := by
+  simp [singleton, cweaken, crename, FinFun.weaken]
 
 theorem CaptureSet.weaken_csingleton :
-  ({c=c} : CaptureSet n k).weaken = {c=c} := by
-  simp [csingleton, weaken]
+  ({c=c | K} : CaptureSet n k).weaken = {c=c | K} := by
+  simp [singleton, weaken]
 
 theorem CaptureSet.rename_id {C : CaptureSet n k} :
   C.rename FinFun.id = C := by
@@ -194,21 +349,156 @@ theorem CaptureSet.crename_id {C : CaptureSet n k} :
 theorem CaptureSet.crename_monotone {C1 C2 : CaptureSet n k} {f : FinFun k k'}
   (h : C1 ⊆ C2) :
   C1.crename f ⊆ C2.crename f := by
-  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
-  case union_rr =>
-    simp
+  induction h <;> simp
+  case empty => constructor
+  case rfl => constructor
+  case union_l ha hb iha ihb =>
+    apply! Subset.union_l
+  case union_rl ha ih =>
+    apply! Subset.union_rl
+  case union_rr ha ih =>
     apply! Subset.union_rr
+  case singleton_subkind s K L hk =>
+    cases s <;> (simp; apply! Subset.singleton_subkind)
+  case singleton_absurd s K he =>
+    cases s <;> (simp; apply! Subset.singleton_absurd)
+  case var_reach x K =>
+    apply! Subset.var_reach
+  case cvar_creach c K =>
+    apply! Subset.cvar_creach
+  case proj_merge s L1 L2 =>
+    cases s <;> (simp; apply! Subset.proj_merge)
+  case trans ha hb => apply! Subset.trans
 
 theorem CaptureSet.cweaken_monotone {C1 C2 : CaptureSet n k}
   (h : C1 ⊆ C2) :
   C1.cweaken ⊆ C2.cweaken := by
-  induction h <;> try (solve | constructor | simp; constructor <;> trivial)
-  case union_rr =>
-    simp
+  induction h <;> simp
+  case empty => constructor
+  case rfl => constructor
+  case union_l ha hb iha ihb =>
+    apply! Subset.union_l
+  case union_rl ha ih =>
+    apply! Subset.union_rl
+  case union_rr ha ih =>
     apply! Subset.union_rr
+  case singleton_subkind s K L hk =>
+    cases s <;> (apply! Subset.singleton_subkind)
+  case singleton_absurd s K he =>
+    cases s <;> (apply! Subset.singleton_absurd)
+  case var_reach x K =>
+    apply! Subset.var_reach
+  case cvar_creach c K =>
+    apply! Subset.cvar_creach
+  case proj_merge s L1 L2 =>
+    cases s <;> (apply! Subset.proj_merge)
+  case trans ha hb => apply! Subset.trans
 
 theorem CaptureSet.cweaken_def {C : CaptureSet n k} :
   C.cweaken = C.crename FinFun.weaken := by
   induction C <;> aesop
 
-end Capless
+-- /-!
+-- ## Projections
+-- -/
+
+theorem CaptureSet.Subset.proj (hsub : Subset C D) : Subset (C.proj K) (D.proj K) := by
+  induction hsub <;> try simp
+  case empty => apply empty
+  case rfl => apply rfl
+  case union_l ha hb => apply! union_l
+  case union_rl ha => apply! union_rl
+  case union_rr hb => apply! union_rr
+  case singleton_subkind hs =>
+    apply singleton_subkind $ Kind.Intersect.with_subkind_r hs
+  case singleton_absurd he =>
+    apply trans (.singleton_subkind _) (.singleton_absurd he)
+    apply Kind.Intersect.subkind_l
+  case var_reach => apply! var_reach
+  case cvar_creach => apply! cvar_creach
+  case proj_merge => apply proj_merge
+  case trans ha hb => apply! trans
+
+theorem CaptureSet.proj_rename {C : CaptureSet n k} : (C.proj K).rename f = (C.rename f).proj K := by
+  induction C
+  case empty => simp
+  case singleton => simp
+  case union ha hb => simp; aesop
+
+theorem CaptureSet.proj_crename {C : CaptureSet n k} : (C.proj K).crename f = (C.crename f).proj K := by
+  induction C
+  case empty => simp
+  case singleton => simp
+  case union ha hb => simp; aesop
+
+theorem CaptureSet.proj_weaken {C : CaptureSet n k} : (C.proj K).weaken = (C.weaken).proj K := C.proj_rename
+theorem CaptureSet.proj_cweaken {C : CaptureSet n k} : (C.proj K).cweaken = (C.cweaken).proj K := C.proj_crename
+
+theorem CaptureSet.Subset.proj_l : Subset (C.proj K) C := by
+  induction C
+  case empty => constructor
+  case union ha hb => simp; apply! union_monotone
+  case singleton => apply singleton_subkind; apply Kind.Intersect.subkind_l
+
+theorem CaptureSet.proj_proj {C : CaptureSet n k}: ((C.proj K).proj L) = (C.proj (K.intersect L)) := by
+  induction C
+  case empty => simp
+  case union ha hb iha ihb =>
+    simp only [CaptureSet.proj]
+    rw [iha, ihb]
+  case singleton => simp only [CaptureSet.proj]; rw [Kind.intersect.assoc]
+
+-- Reach
+
+theorem CaptureSet.reach_reach {C : CaptureSet n k}: C.with_reach.with_reach = C.with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.reach_proj {C : CaptureSet n k} : C.with_reach.proj K = (C.proj K).with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.reach_rename {C : CaptureSet n k} : C.with_reach.rename f = (C.rename f).with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.reach_crename {C : CaptureSet n k} : C.with_reach.crename f = (C.crename f).with_reach := by
+  induction C <;> aesop
+
+theorem CaptureSet.proj_reach_inv {C D : CaptureSet n k} (h1 : C.proj K = D.with_reach)
+  : ∃ C' : CaptureSet n k, C'.proj K = D ∧ C = C'.with_reach := by
+  induction C generalizing D
+  case empty =>
+    exists empty
+    simp at h1; unfold with_reach at h1; split at h1 <;> simp_all
+  case union ha hb =>
+    simp at h1; unfold with_reach at h1; split at h1 <;> try simp_all
+    have ⟨Ra, ha1, ha2⟩ := ha (.refl _)
+    have ⟨Rb, hb1, hb2⟩ := hb (.refl _)
+    exists (Ra ∪ Rb)
+    apply And.intro <;> simp_all
+  case singleton s L =>
+    unfold with_reach at h1; split at h1 <;> simp [-Kind.intersect, -Singleton.with_reach] at h1
+    have ⟨_, _⟩ := h1; subst_vars
+    rename_i s
+    exists .singleton s L
+
+theorem CaptureSet.Subset.reach : Subset C C.with_reach := by
+  induction C
+  case empty => apply empty
+  case union => apply! union_monotone
+  case singleton s K =>
+    cases s <;> (simp; try apply rfl)
+    . apply var_reach
+    . apply cvar_creach
+
+theorem CaptureSet.Subset.with_reach (hs : Subset C D) : Subset C.with_reach D.with_reach := by
+  induction hs
+  case empty => apply empty
+  case rfl => apply rfl
+  case union_l => apply! union_l
+  case union_rl => apply! union_rl
+  case union_rr => apply! union_rr
+  case singleton_subkind => apply! singleton_subkind
+  case singleton_absurd => apply! singleton_absurd
+  case var_reach => apply rfl
+  case cvar_creach => apply rfl
+  case proj_merge => apply! proj_merge
+  case trans => apply! trans

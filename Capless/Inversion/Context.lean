@@ -163,19 +163,19 @@ theorem Context.cvar_tbound_inv_bound
     simp [TBinding.cweaken, TBinding.crename] at he0
 
 theorem Context.label_tbound_inv'
-  (he : Γ0 = Γ.label l)
+  (he : Γ0 = Γ.label c l)
   (hb : Context.TBound Γ0 X b) :
   ∃ b0, Context.TBound Γ X b0 ∧ b = b0.weaken := by
   cases hb <;> try (solve | cases he)
   case there_label b0 hb0 => aesop
 
 theorem Context.label_tbound_inv
-  (hb : Context.TBound (Γ.label l) X b) :
+  (hb : Context.TBound (Γ.label c l) X b) :
   ∃ b0, Context.TBound Γ X b0 ∧ b = b0.weaken :=
   Context.label_tbound_inv' rfl hb
 
 theorem Context.label_tbound_inv_bound
-  (hb : Context.TBound (Γ.label l) X (TBinding.bound S)) :
+  (hb : Context.TBound (Γ.label c l) X (TBinding.bound S)) :
   ∃ S0, Context.TBound Γ X (TBinding.bound S0) ∧ S = SType.weaken S0 := by
   have ⟨b0, hb0, he0⟩ := Context.label_tbound_inv hb
   cases b0
@@ -325,31 +325,31 @@ theorem Context.tbound_inj
 
 theorem Context.var_lbound_succ_inv'
   (he1 : Γ0 = Γ.var T) (he2 : x0 = x.succ)
-  (hb : Context.LBound Γ0 x0 S) :
-  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  (hb : Context.LBound Γ0 x0 c S) :
+  ∃ S0, Context.LBound Γ x c S0 ∧ S = S0.weaken := by
   cases hb <;> try (solve | cases he1 | cases he2)
   case there_var => aesop
 
 theorem Context.var_lbound_succ_inv
-  (hb : Context.LBound (Γ.var T) x.succ S) :
-  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  (hb : Context.LBound (Γ.var T) x.succ c S) :
+  ∃ S0, Context.LBound Γ x c S0 ∧ S = S0.weaken := by
   apply Context.var_lbound_succ_inv' rfl rfl hb
 
 theorem Context.label_lbound_succ_inv'
-  (he1 : Γ0 = Γ.label l) (he2 : x0 = x.succ)
-  (hb : Context.LBound Γ0 x0 S) :
-  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  (he1 : Γ0 = Γ.label c' l) (he2 : x0 = x.succ)
+  (hb : Context.LBound Γ0 x0 c S) :
+  ∃ S0, Context.LBound Γ x c S0 ∧ S = S0.weaken := by
   cases hb <;> try (solve | cases he1 | cases he2)
   case there_label => aesop
 
 theorem Context.label_lbound_succ_inv
-  (hb : Context.LBound (Γ.label l) x.succ S) :
-  ∃ S0, Context.LBound Γ x S0 ∧ S = S0.weaken := by
+  (hb : Context.LBound (Γ.label c' l) x.succ c S) :
+  ∃ S0, Context.LBound Γ x c S0 ∧ S = S0.weaken := by
   apply Context.label_lbound_succ_inv' rfl rfl hb
 
 theorem Context.bound_lbound_absurd
   (hb1 : Context.Bound Γ x T)
-  (hb2 : Context.LBound Γ x S) : False := by
+  (hb2 : Context.LBound Γ x c S) : False := by
   induction Γ
   case empty => cases hb1
   case var ih =>
@@ -372,14 +372,14 @@ theorem Context.bound_lbound_absurd
       apply ih <;> assumption
 
 theorem Context.label_bound_succ_inv'
-  (he1 : Γ0 = Γ.label l) (he2 : x0 = x.succ)
+  (he1 : Γ0 = Γ.label c' l) (he2 : x0 = x.succ)
   (hb : Context.Bound Γ0 x0 T) :
   ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
   cases hb <;> try (solve | cases he1 | cases he2)
   case there_label => aesop
 
 theorem Context.label_bound_succ_inv
-  (hb : Context.Bound (Γ.label l) x.succ T) :
+  (hb : Context.Bound (Γ.label c' l) x.succ T) :
   ∃ T0, Context.Bound Γ x T0 ∧ T = T0.weaken := by
   apply Context.label_bound_succ_inv' rfl rfl hb
 
@@ -429,10 +429,10 @@ theorem Context.bound_injective
     aesop
 
 theorem Context.lbound_inj
-  (hb1 : Context.LBound Γ x S1)
-  (hb2 : Context.LBound Γ x S2) : S1 = S2 := by
+  (hb1 : Context.LBound Γ x c1 S1)
+  (hb2 : Context.LBound Γ x c2 S2) : c1 = c2 ∧ S1 = S2 := by
   induction hb1
-  case here => cases hb2; rfl
+  case here => cases hb2; apply And.intro <;> rfl
   case there_var ih =>
     have ⟨S2, hb2, he2⟩ := Context.var_lbound_succ_inv hb2
     have ih := ih hb2
@@ -483,5 +483,52 @@ theorem Context.cvar_bound_cbound_inv_inst
     ∧ c = c0.succ
     ∧ C = C0.cweaken := by
   apply Context.cvar_bound_cbound_inv_inst' rfl hb
+
+theorem Context.bound_exists {Γ : Context n m k} :
+  (∃ C0, Context.Bound Γ x C0) ∨ (∃ c0 S0, Context.LBound Γ x c0 S0) := by
+    induction Γ
+    case empty => exact x.elim0
+    case var C0 ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; left; exists C0.weaken; apply Context.Bound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        cases ih (x:=j) <;> rename_i ih
+        . have ⟨C0, ih⟩ := ih; left; exists C0.weaken; apply Context.Bound.there_var ih
+        . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.weaken; apply Context.LBound.there_var ih
+    case tvar ih =>
+      cases ih (x:=x) <;> rename_i ih
+      . have ⟨C0, ih⟩ := ih; left; exists C0.tweaken; apply Context.Bound.there_tvar ih
+      . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.tweaken; apply Context.LBound.there_tvar ih
+    case cvar ih =>
+      cases ih (x:=x) <;> rename_i ih
+      . have ⟨C0, ih⟩ := ih; left; exists C0.cweaken; apply Context.Bound.there_cvar ih
+      . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.cweaken; apply Context.LBound.there_cvar ih
+    case label c S ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; right; exists c, S.weaken; apply Context.LBound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        cases ih (x:=j) <;> rename_i ih
+        . have ⟨C0, ih⟩ := ih; left; exists C0.weaken; apply Context.Bound.there_label ih
+        . have ⟨c0, S0, ih⟩ := ih; right; exists c0, S0.weaken; apply Context.LBound.there_label ih
+
+theorem Context.cbound_exists {Γ : Context n m k} :
+  ∃ B0, Context.CBound Γ x B0 := by
+    induction Γ
+    case empty => exact x.elim0
+    case var ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0.weaken; apply Context.CBound.there_var ih
+    case tvar ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0; apply Context.CBound.there_tvar ih
+    case cvar B ih =>
+      cases x.eq_zero_or_eq_succ <;> rename_i h
+      . subst_vars; exists B.cweaken; apply Context.CBound.here
+      . have ⟨j, _⟩ := h; subst_vars
+        have ⟨B0, ih⟩ := ih (x:=j)
+        exists B0.cweaken; apply Context.CBound.there_cvar ih
+    case label ih =>
+      have ⟨B0, ih⟩ := ih (x:=x)
+      exists B0.weaken; apply Context.CBound.there_label ih
 
 end Capless

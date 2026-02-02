@@ -1,6 +1,8 @@
 import Capless.Typing
 import Capless.Renaming.Basic
 import Capless.Renaming.Capture.Subtyping
+import Capless.Renaming.Capture.CaptureBound
+import Capless.Renaming.Capture.Subcapturing
 
 /-!
 # Capture Variable Renaming for Typing
@@ -27,6 +29,8 @@ theorem Typed.crename
   case pack ih =>
     simp [Term.crename, EType.crename]
     apply pack
+    apply CaptureBound.crename _ ρ
+    trivial
     have ih := ih (ρ.cext _)
     simp [Term.crename, EType.crename] at ih
     exact ih
@@ -121,7 +125,7 @@ theorem Typed.crename
     apply ih2; assumption
   case boundary ih =>
     simp [Term.crename, EType.crename, CType.crename, SType.crename]
-    apply boundary
+    apply boundary; assumption
     have ih := ih ((ρ.cext _).ext _)
     simp [CBinding.crename,
           TBinding.crename,
@@ -134,5 +138,12 @@ theorem Typed.crename
         <- CaptureSet.weaken_crename,
         <- CaptureSet.cweaken_crename] at ih
     exact ih
+  case intercept ih ih2 =>
+    apply intercept
+    have ih := ih $ ((ρ.text _).ext _).ext _
+    simp [TBinding.crename, EType.crename, CType.crename, SType.crename] at ih ih2
+    simp [← SType.weaken_crename, ← SType.tweaken_crename, ← CaptureSet.weaken_crename, CaptureSet.proj_crename, CaptureSet.reach_crename] at ih ih2
+    apply ih
+    apply ih2 ρ
 
 end Capless

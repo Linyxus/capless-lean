@@ -8,11 +8,12 @@ The following proves a substitution theorem specialised to the typing of boundar
 It is a prerequisite for the (ENTER) case in the preservation theorem.
 !-/
 
-def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
+def VarRename.boundary {Γ : Context n m k} {S : SType n m k}
+  (hs : Classifier.Subclass c .control) :
   VarMap
-    ((Γ,c<:*),x:(Label[S.cweaken])^{c=0})
+    ((Γ,c<:CBound.kind (.classifier c)),x:(Label[S.cweaken])^{c=0|.top})
     FinFun.weaken.ext
-    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0}) := by
+    (((Γ.label c S),c<:CBound.kind (.classifier c)),x:(Label[S.weaken.cweaken])^{c=0|.top}) := by
   constructor
   case map =>
     intro x E hb
@@ -55,7 +56,7 @@ def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
       constructor; constructor
       constructor; easy
   case lmap =>
-    intro x S hb
+    intro x c0 S hb
     cases hb; rename_i hb
     cases hb; rename_i hb
     simp [FinFun.weaken, FinFun.ext]
@@ -63,11 +64,12 @@ def VarRename.boundary {Γ : Context n m k} {S : SType n m k} :
     rw [SType.cweaken_rename_comm]
     constructor; constructor; constructor; easy
 
-def CVarRename.boundary {Γ : Context n m k} {S : SType n m k} :
+def CVarRename.boundary {Γ : Context n m k} {S : SType n m k}
+  (hs : Classifier.Subclass c .control) :
   CVarMap
-    (((Γ.label S),c<:*),x:(Label[S.weaken.cweaken])^{c=0})
+    (((Γ.label c S),c<:CBound.kind (.classifier c)),x:(Label[S.weaken.cweaken])^{c=0|.top})
     FinFun.weaken.ext
-    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0}) := by
+    ((((Γ.label c S),c:={x=0|.top}),c<:CBound.kind (.classifier c)),x:(Label[S.weaken.cweaken.cweaken])^{c=0|.top}) := by
   constructor
   case map =>
     intro x T hb
@@ -110,7 +112,7 @@ def CVarRename.boundary {Γ : Context n m k} {S : SType n m k} :
       repeat constructor
       easy
   case lmap =>
-    intro l S hb
+    intro l c0 S hb
     cases hb; rename_i hb
     cases hb; rename_i hb
     cases hb
@@ -139,11 +141,12 @@ theorem TBinding.cweaken_copen_id {b : TBinding n m k} :
   simp [TBinding.cweaken, TBinding.crename_crename]
   simp [FinFun.open_comp_weaken, TBinding.crename_id]
 
-def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
+def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k}
+  (hs : Classifier.Subclass c .control) :
   CVarSubst
-    ((((Γ.label S),c:={x=0}),c<:*),x:(Label[S.weaken.cweaken.cweaken])^{c=0})
+    ((((Γ.label c S),c:={x=0|.top}),c<:.kind (.classifier c)),x:(Label[S.weaken.cweaken.cweaken])^{c=0|.top})
     (FinFun.open 0)
-    (((Γ.label S),c:={x=0}),x:(Label[S.weaken.cweaken])^{c=0}) := by
+    (((Γ.label c S),c:={x=0|.top}),x:(Label[S.weaken.cweaken])^{c=0|.top}) := by
   constructor
   case map =>
     intro x T hb
@@ -193,8 +196,14 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     case inl h =>
       have ⟨he1, he2⟩ := h
       rename_i cb0
-      cases cb0; cases he2
+      cases cb0; repeat cases he2
       constructor
+      subst he1
+      simp [FinFun.open]
+      apply CaptureKind.subcapt
+      apply CaptureKind.label_top
+      apply Context.LBound.there_var (.there_cvar .here)
+      apply Subcapt.cinstr_top (.there_var .here)
     case inr h =>
       have ⟨b2, c2, hb2, he3, he4⟩ := h
       rename_i cb0
@@ -202,18 +211,22 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       cases he4
       rename_i cb0
       cases cb0
-      case star => constructor
+      case kind K =>
+        constructor
+        simp [FinFun.open]
+        apply CaptureKind.cvar_top
+        apply Context.CBound.there_var hb2
       case upper D0 =>
         constructor
         simp [FinFun.open]
-        apply Subcapt.cbound
+        apply Subcapt.cbound_top
         simp [CaptureSet.crename_rename_comm]
         simp [CaptureSet.crename_crename, FinFun.open_comp_weaken, CaptureSet.crename_id]
-        have hb3 := Context.CBound.there_var (E:=Label[S.weaken.cweaken]^{c=0}) hb2
+        have hb3 := Context.CBound.there_var (E:=Label[S.weaken.cweaken]^{c=0|.top}) hb2
         simp [CBinding.weaken] at hb3
         easy
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb; rename_i hb
     cases hb; rename_i hb
     cases hb; rename_i hb
@@ -228,11 +241,12 @@ def CVarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       repeat constructor
       easy
 
-def VarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
+def VarSubst.boundary {Γ : Context n m k} {S : SType n m k}
+  (hs : Classifier.Subclass c .control) :
   VarSubst
-    (((Γ.label S),c:={x=0}),x:(Label[S.weaken.cweaken])^{c=0})
+    (((Γ.label c S),c:={x=0|.top}),x:(Label[S.weaken.cweaken])^{c=0|.top})
     (FinFun.open 0)
-    ((Γ.label S),c:={x=0}) := by
+    ((Γ.label c S),c:={x=0|.top}) := by
   constructor
   case map =>
     intro x T hb
@@ -244,10 +258,10 @@ def VarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
       simp [FinFun.open_comp_weaken, SType.rename_id]
       apply Typed.sub
       { apply Typed.label; constructor; constructor }
-      { apply Subcapt.refl }
+      { apply Subcapt.rfl }
       { constructor
         constructor
-        { apply Subcapt.cinstl; constructor }
+        { apply Subcapt.cinstl_top; constructor }
         { apply SSubtyp.refl } }
     case there_var hb =>
       simp [FinFun.open]
@@ -267,7 +281,7 @@ def VarSubst.boundary {Γ : Context n m k} {S : SType n m k} :
     simp [FinFun.open_comp_weaken, CBinding.rename_id]
     easy
   case lmap =>
-    intro l S hb
+    intro l c S hb
     cases hb; rename_i hb
     simp [SType.weaken, SType.rename_rename]
     simp [FinFun.open_comp_weaken, SType.rename_id]
@@ -310,13 +324,14 @@ theorem CaptureSet.open_weaken_ext {C : CaptureSet (n+1) k} :
   simp [CaptureSet.rename_id]
 
 theorem Typed.boundary_body_typing {Γ : Context n m k} {S : SType n m k}
-  (ht : Typed ((Γ,c<:*),x:(Label[S.cweaken])^{c=0}) t E Ct) :
-  Typed ((Γ.label S),c:={x=0}) t E Ct := by
-  have h := ht.rename VarRename.boundary
-  have h := h.crename CVarRename.boundary
-  have h := h.csubst CVarSubst.boundary
+  (hs : Classifier.Subclass c .control)
+  (ht : Typed ((Γ,c<:(.kind (.classifier c))),x:(Label[S.cweaken])^{c=0|.top}) t E Ct) :
+  Typed ((Γ.label c S),c:={x=0|.top}) t E Ct := by
+  have h := ht.rename $ VarRename.boundary hs
+  have h := h.crename $ CVarRename.boundary hs
+  have h := h.csubst $ CVarSubst.boundary hs
   simp [Term.copen_cweaken_ext, EType.copen_cweaken_ext, CaptureSet.copen_cweaken_ext] at h
-  have h := h.subst VarSubst.boundary
+  have h := h.subst $ VarSubst.boundary hs
   simp [Term.open_weaken_ext, EType.open_weaken_ext, CaptureSet.open_weaken_ext] at h
   easy
 

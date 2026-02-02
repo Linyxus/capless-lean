@@ -55,13 +55,13 @@ def Store.lookup_inv_bound
     have ih := ih.cweaken (b := CBinding.inst C)
     simp [EType.cweaken, EType.crename, CType.cweaken] at *
     constructor; exact ih
-  case label S _ ih =>
+  case label c S _ ih =>
     cases hl
     have ⟨T1, hb1, heq⟩ := Context.label_bound_succ_inv hb
     subst heq
     rename_i hl
     have ⟨Cv0, ih⟩ := ih hl hb1
-    have ih := ih.lweaken (S := S)
+    have ih := ih.lweaken (S := S) (c := c)
     aesop
 
 theorem Store.bound_type
@@ -107,7 +107,7 @@ theorem Store.lookup_inv_typing
   ∃ S0 C0 Cv0,
     Typed Γ v (EType.type (S0^C0)) Cv0 ∧
     Γ.Bound x (S0^C0) ∧
-    (Γ ⊢ (S0^{x=x}) <: (S^C)) := by
+    (Γ ⊢ (S0^{x=x|.top}) <: (S^C)) := by
   have ⟨Tx, hbx⟩ := Store.bound_type hl ht
   have ⟨C0, S0, hb, hsub⟩ := Typed.var_inv hx hbx
   have ⟨Cv0, hv⟩ := Store.lookup_inv_bound hl ht hb
@@ -125,26 +125,38 @@ theorem Store.lookup_inv_typing_alt
   repeat apply Exists.intro
   apply Typed.sub
   { exact htv }
-  { apply Subcapt.refl }
-  { constructor; constructor; apply Subcapt.refl; easy }
+  { apply Subcapt.rfl }
+  { constructor; constructor; apply Subcapt.rfl; easy }
 
 theorem Store.bound_label
-  (hl : Store.LBound σ x S)
+  (hl : Store.LBound σ x c S)
   (ht : TypedStore σ Γ) :
-  Γ.LBound x S := by
+  Γ.LBound x c S := by
   induction ht <;> cases hl <;> try (solve | constructor; aesop)
   case label ih => constructor
 
 theorem Cont.has_label_tail_inv
-  (htc : TypedCont Γ E1 cont E2 Ct)
-  (hb : Γ.LBound x S0)
+  (htc : TypedCont Γ E1 Cin cont E2 Ct)
+  (hb : Γ.LBound x c S0)
   (hh : cont.HasLabel x tail) :
-  ∃ Ct1, TypedCont Γ (S0^{}) tail E2 Ct1 := by
+  ∃ Ct1, TypedCont Γ (S0^{}) Cin tail E2 Ct1 := by
   induction hh generalizing E1 E2 Ct <;> try (solve | cases htc; aesop)
   case here =>
     cases htc; rename_i hb0 htc0
     have he := Context.lbound_inj hb hb0
     cases he
     aesop
+  case there_val ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
+  case there_tval ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
+  case there_intercept ih =>
+    cases htc
+    rename_i htc
+    apply ih (htc.cin_narrow $ Subcapt.subset (.union_rl .rfl)) hb
 
 end Capless

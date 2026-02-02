@@ -1,6 +1,7 @@
 import Capless.Subst.Basic
 import Capless.Subtyping
 import Capless.Subst.Type.Subcapturing
+import Capless.Subst.Type.CaptureBound
 
 /-
 Substitution theorems for type variable substitution in subtyping judgments.
@@ -14,6 +15,8 @@ theorem Subbound.tsubst
   Subbound Δ B1 B2 := by
   cases h <;> constructor
   apply Subcapt.tsubst <;> easy
+  assumption
+  apply CaptureKind.tsubst <;> easy
 
 def SSubtyp.tsubst_motive1
   (Γ : Context n m k)

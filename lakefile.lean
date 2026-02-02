@@ -6,18 +6,19 @@ package «capless» where
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩,
     ⟨`autoImplicit, true⟩,
-    ⟨`linter.unusedVariables, false⟩
+    ⟨`linter.unusedVariables, false⟩,
+    ⟨`linter.unusedSimpArgs, false⟩,
   ]
   -- add any additional package configuration options here
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.25.1"
 
 require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4" @ "v4.21.0-rc3"
+  "https://github.com/leanprover/doc-gen4" @ "v4.25.1"
 
 require «importGraph» from git -- requires graphviz
-  "https://github.com/leanprover-community/import-graph" @ "v4.21.0-rc3"
+  "https://github.com/leanprover-community/import-graph" @ "v4.25.1"
 
 @[default_target]
 lean_lib «Capless» where

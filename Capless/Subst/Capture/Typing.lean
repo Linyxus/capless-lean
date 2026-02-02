@@ -1,6 +1,8 @@
 import Capless.Subst.Basic
 import Capless.Subst.Capture.Subtyping
+import Capless.Subst.Capture.CaptureBound
 import Capless.Typing
+import Capless.WellScoped.Basic
 
 /-
 Substitution theorems for capture variable substitution in typing judgments.
@@ -19,9 +21,9 @@ theorem Typed.csubst
       have hb1 := σ.map _ _ hb
       simp [CType.crename] at hb1
       apply Typed.var; trivial
-    case pack ih =>
+    case pack hb _ ih =>
       simp [Term.crename, EType.crename]
-      apply pack
+      apply pack (hb.csubst σ)
       have ih := ih σ.cext
       simp [EType.crename] at ih
       exact ih
@@ -55,7 +57,7 @@ theorem Typed.csubst
         simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih1
         exact ih1 }
       { have ih2 := ih2 σ
-        simp [Term.crename, EType.crename, CType.crename, SType.crename] at ih2
+        simp [Term.crename, EType.crename] at ih2
         exact ih2 }
     case tapp ih =>
       simp [Term.crename]
@@ -120,8 +122,8 @@ theorem Typed.csubst
       apply ih2; assumption
     case boundary ih =>
       simp [Term.crename]
-      simp [EType.crename, CType.crename, SType.crename]
-      apply boundary
+      simp [EType.crename, CType.crename]
+      apply boundary; assumption
       have ih := ih (σ.cext.ext _)
       simp [CBinding.crename, EType.crename, CType.crename, SType.crename, FinFun.ext] at ih
       rw [ <- SType.cweaken_crename
@@ -130,16 +132,27 @@ theorem Typed.csubst
          , <- CaptureSet.weaken_crename
          , <- CaptureSet.cweaken_crename ] at ih
       aesop
+    case intercept hr hs ih ih2 =>
+      simp [Term.crename]
+      have ⟨R1, hrs1, hr1⟩ := hr.csubst σ
+      apply intercept _ _ hr1 (CaptureSet.Subset.trans hrs1 hs.crename)
+      have ih := ih $ (σ.text.ext _).ext _
+      simp [TBinding.crename, EType.crename, CType.crename, SType.crename] at ih ih2
+      simp [← SType.weaken_crename, ← SType.tweaken_crename, ← CaptureSet.weaken_crename, CaptureSet.proj_crename] at ih ih2
+      apply ih
+      apply! ih2
+
 
 theorem Typed.copen
-  (h : Typed (Γ,c<:CBound.upper {c=c}) t E Ct) :
+  (h : Typed (Γ,c<:CBound.upper {c=c|.top}) t E Ct) :
   Typed Γ (t.copen c) (E.copen c) (Ct.copen c) := by
   simp [Term.copen, EType.copen]
   apply? Typed.csubst
   apply? CVarSubst.open
 
 theorem Typed.cinstantiate {Γ : Context n m k}
-  (h : Typed (Γ,c<:CBound.star) t E Ct) :
+  (h : Typed (Γ,c<:B) t E Ct)
+  (hb: CaptureBound Γ C B) :
   Typed (Γ,c:= C) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]
@@ -147,7 +160,8 @@ theorem Typed.cinstantiate {Γ : Context n m k}
   apply? CVarSubst.instantiate
 
 theorem Typed.cinstantiate_extvar {Γ : Context n m k}
-  (h : Typed ((Γ,c<:CBound.star).var P) t E Ct) :
+  (h : Typed ((Γ,c<:B).var P) t E Ct)
+  (hb: CaptureBound Γ C B) :
   Typed ((Γ,c:=C).var P) t E Ct := by
   rw [<- Term.crename_id (t := t), <- EType.crename_id (E := E)]
   rw [<- CaptureSet.crename_id (C := Ct)]
@@ -156,6 +170,6 @@ theorem Typed.cinstantiate_extvar {Γ : Context n m k}
     arg 3
     rw [<- CType.crename_id (T := P)]
   apply CVarSubst.ext
-  apply CVarSubst.instantiate
+  apply? CVarSubst.instantiate
 
 end Capless
